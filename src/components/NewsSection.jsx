@@ -1,10 +1,13 @@
 import { motion as Motion } from 'framer-motion'
-import { ArrowRight, Newspaper } from 'lucide-react'
-import { organizationNews } from '../data/news'
+import { ArrowRight, LoaderCircle, Newspaper } from 'lucide-react'
+import { useNews } from '../hooks/useMedia'
+import NewsCard from './NewsCard'
 import Reveal from './Reveal'
 import SectionHeader from './SectionHeader'
 
 function NewsSection() {
+  const { news: organizationNews, isLoading } = useNews(3)
+
   return (
     <section id="news" className="bg-slate-50/70 py-24 sm:py-28">
       <div className="section-shell">
@@ -18,7 +21,15 @@ function NewsSection() {
           />
         </Reveal>
 
-        {organizationNews.length === 0 && (
+        {isLoading ? (
+          <div className="grid min-h-48 place-items-center">
+            <LoaderCircle
+              size={30}
+              className="animate-spin text-brand-600"
+              aria-label="Loading organization news"
+            />
+          </div>
+        ) : organizationNews.length === 0 ? (
           <Reveal delay={0.08}>
             <Motion.div
               whileHover={{ y: -3 }}
@@ -43,6 +54,14 @@ function NewsSection() {
               </a>
             </Motion.div>
           </Reveal>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+            {organizationNews.map((article, index) => (
+              <Reveal key={article.id} delay={index * 0.08}>
+                <NewsCard article={article} compact />
+              </Reveal>
+            ))}
+          </div>
         )}
       </div>
     </section>

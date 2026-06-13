@@ -24,6 +24,7 @@ Run these files in the Supabase SQL Editor:
 1. `supabase/schema.sql`
 2. `supabase/announcements.sql`
 3. `supabase/events.sql`
+4. `supabase/media.sql`
 
 See `SUPABASE_SETUP.md` for administrator setup and backend details.
 

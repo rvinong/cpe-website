@@ -18,6 +18,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AdminAnnouncements from '../components/AdminAnnouncements'
 import AdminEvents from '../components/AdminEvents'
+import AdminMedia from '../components/AdminMedia'
 import Logo from '../components/Logo'
 import ThemeToggle from '../components/ThemeToggle'
 import useAuth from '../context/useAuth'
@@ -31,7 +32,12 @@ const adminSections = [
     enabled: true,
   },
   { key: 'events', label: 'Events', icon: CalendarDays, enabled: true },
-  { label: 'News & Gallery', icon: Images },
+  {
+    key: 'media',
+    label: 'News & Gallery',
+    icon: Images,
+    enabled: true,
+  },
   { label: 'About Content', icon: FileText },
   { label: 'Alumni', icon: GraduationCap },
   { label: 'Resources', icon: Newspaper },
@@ -58,7 +64,9 @@ const contentModules = [
     title: 'News & Gallery',
     description: 'Publish verified stories, albums, and approved photos.',
     icon: Images,
-    status: 'Schema pending',
+    status: 'Available',
+    section: 'media',
+    action: 'Manage news & gallery',
   },
   {
     title: 'Organization Profile',
@@ -202,6 +210,8 @@ function AdminDashboard() {
                   ? 'Manage Announcements'
                   : activeSection === 'events'
                     ? 'Manage Events'
+                    : activeSection === 'media'
+                      ? 'Manage News & Gallery'
                     : 'Dashboard Overview'}
               </h1>
             </div>
@@ -214,6 +224,8 @@ function AdminDashboard() {
             <AdminAnnouncements />
           ) : activeSection === 'events' ? (
             <AdminEvents />
+          ) : activeSection === 'media' ? (
+            <AdminMedia />
           ) : (
             <div className="mx-auto max-w-7xl">
               <section className="relative isolate overflow-hidden rounded-3xl bg-navy-950 px-6 py-9 text-white shadow-[0_30px_80px_-45px_rgba(7,21,47,0.75)] sm:px-9">
@@ -229,8 +241,8 @@ function AdminDashboard() {
                   </h2>
                   <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300">
                     Authentication, session persistence, and role-protected
-                    dashboard access are active. Announcements and events can
-                    now be managed from this control center.
+                    dashboard access are active. Announcements, events, news,
+                    and gallery media can now be managed here.
                   </p>
                 </div>
                 <span className="grid size-20 place-items-center rounded-3xl border border-white/10 bg-white/10 text-blue-200">

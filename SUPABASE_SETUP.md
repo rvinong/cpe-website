@@ -81,6 +81,19 @@ supabase/events.sql
 This creates the events table and its public/staff Row Level Security
 policies. Refresh `/admin`, then open **Events** in the dashboard sidebar.
 
+## 7. Enable news and gallery management
+
+Open the Supabase SQL Editor and run:
+
+```text
+supabase/media.sql
+```
+
+This creates the news and gallery tables, a public
+`organization-media` Storage bucket, an 8 MB image limit, and staff-only
+upload/update/delete policies. Refresh `/admin`, then open
+**News & Gallery**.
+
 ## Current backend scope
 
 Implemented:
@@ -97,7 +110,10 @@ Implemented:
 - Events database and management workflow
 - Admin event create/edit/publish/cancel/archive/delete workflow
 - Public upcoming, cancelled, and completed event views
+- News and gallery management workflow
+- Staff-managed JPG, PNG, and WebP uploads
+- Public organization news and approved gallery archive
 
 Next:
 
-- News and gallery management workflow
+- Organization profile and About content management

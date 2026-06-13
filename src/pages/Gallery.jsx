@@ -7,6 +7,7 @@ import {
   Image as ImageIcon,
   ImageOff,
   Images,
+  LoaderCircle,
   Maximize2,
   Newspaper,
   ShieldCheck,
@@ -16,8 +17,8 @@ import {
 import { useEffect, useMemo, useState } from 'react'
 import Footer from '../components/Footer'
 import Navbar from '../components/Navbar'
-import { galleryPhotos } from '../data/gallery'
-import { organizationNews } from '../data/news'
+import NewsCard from '../components/NewsCard'
+import { useGalleryPhotos, useNews } from '../hooks/useMedia'
 
 const archiveDetails = [
   {
@@ -41,6 +42,9 @@ const archiveDetails = [
 ]
 
 function Gallery() {
+  const { news: organizationNews, isLoading: isNewsLoading } = useNews()
+  const { photos: galleryPhotos, isLoading: isGalleryLoading } =
+    useGalleryPhotos()
   const [selectedCategory, setSelectedCategory] = useState('All categories')
   const [selectedYear, setSelectedYear] = useState('All years')
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(null)
@@ -50,7 +54,7 @@ function Gallery() {
       [...new Set(galleryPhotos.map((photo) => photo.category))].sort((a, b) =>
         a.localeCompare(b),
       ),
-    [],
+    [galleryPhotos],
   )
 
   const years = useMemo(
@@ -58,12 +62,12 @@ function Gallery() {
       [...new Set(galleryPhotos.map((photo) => String(photo.year)))].sort(
         (a, b) => b.localeCompare(a),
       ),
-    [],
+    [galleryPhotos],
   )
 
   const albums = useMemo(
     () => [...new Set(galleryPhotos.map((photo) => photo.album))],
-    [],
+    [galleryPhotos],
   )
 
   const filteredPhotos = useMemo(
@@ -77,7 +81,7 @@ function Gallery() {
 
         return matchesCategory && matchesYear
       }),
-    [selectedCategory, selectedYear],
+    [galleryPhotos, selectedCategory, selectedYear],
   )
 
   const selectedPhoto =
@@ -186,7 +190,15 @@ function Gallery() {
               </p>
             </Motion.div>
 
-            {organizationNews.length === 0 ? (
+            {isNewsLoading ? (
+              <div className="grid min-h-48 place-items-center">
+                <LoaderCircle
+                  size={30}
+                  className="animate-spin text-brand-600"
+                  aria-label="Loading organization news"
+                />
+              </div>
+            ) : organizationNews.length === 0 ? (
               <Motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -208,37 +220,16 @@ function Gallery() {
             ) : (
               <div className="mt-10 grid gap-6 lg:grid-cols-2">
                 {organizationNews.map((article, index) => (
-                  <Motion.article
+                  <Motion.div
                     key={article.id}
                     initial={{ opacity: 0, y: 18 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     whileHover={{ y: -5 }}
                     viewport={{ once: true, amount: 0.2 }}
                     transition={{ duration: 0.5, delay: index * 0.07 }}
-                    className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_20px_60px_-40px_rgba(15,23,42,0.4)]"
                   >
-                    {article.image && (
-                      <img
-                        src={article.image}
-                        alt={article.imageAlt || ''}
-                        className="h-60 w-full object-cover"
-                      />
-                    )}
-                    <div className="p-6 sm:p-7">
-                      <p className="text-xs font-extrabold tracking-wide text-brand-600 uppercase">
-                        {article.category}
-                      </p>
-                      <h3 className="mt-2 text-2xl font-extrabold text-navy-900">
-                        {article.title}
-                      </h3>
-                      <p className="mt-2 text-xs font-bold text-slate-400">
-                        {article.date}
-                      </p>
-                      <p className="mt-4 text-sm leading-6 text-slate-600">
-                        {article.summary}
-                      </p>
-                    </div>
-                  </Motion.article>
+                    <NewsCard article={article} compact />
+                  </Motion.div>
                 ))}
               </div>
             )}
@@ -309,7 +300,7 @@ function Gallery() {
                 },
                 {
                   label: 'Archive status',
-                  value: 'Collecting',
+                  value: galleryPhotos.length > 0 ? 'Published' : 'Collecting',
                   icon: Camera,
                 },
               ].map(({ label, value, icon: Icon }, index) => (
@@ -357,7 +348,15 @@ function Gallery() {
               </p>
             </Motion.div>
 
-            {filteredPhotos.length === 0 ? (
+            {isGalleryLoading ? (
+              <div className="grid min-h-56 place-items-center">
+                <LoaderCircle
+                  size={30}
+                  className="animate-spin text-brand-600"
+                  aria-label="Loading gallery photos"
+                />
+              </div>
+            ) : filteredPhotos.length === 0 ? (
               <Motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
