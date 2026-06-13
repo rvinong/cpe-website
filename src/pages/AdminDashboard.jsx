@@ -19,6 +19,7 @@ import { useNavigate } from 'react-router-dom'
 import AdminAnnouncements from '../components/AdminAnnouncements'
 import AdminEvents from '../components/AdminEvents'
 import AdminMedia from '../components/AdminMedia'
+import AdminOrganization from '../components/AdminOrganization'
 import Logo from '../components/Logo'
 import ThemeToggle from '../components/ThemeToggle'
 import useAuth from '../context/useAuth'
@@ -38,7 +39,12 @@ const adminSections = [
     icon: Images,
     enabled: true,
   },
-  { label: 'About Content', icon: FileText },
+  {
+    key: 'organization',
+    label: 'About Content',
+    icon: FileText,
+    enabled: true,
+  },
   { label: 'Alumni', icon: GraduationCap },
   { label: 'Resources', icon: Newspaper },
   { label: 'Users & Roles', icon: UsersRound },
@@ -72,7 +78,9 @@ const contentModules = [
     title: 'Organization Profile',
     description: 'Update officers, mission, vision, history, and contacts.',
     icon: Settings,
-    status: 'Schema pending',
+    status: 'Available',
+    section: 'organization',
+    action: 'Manage organization profile',
   },
 ]
 
@@ -212,7 +220,9 @@ function AdminDashboard() {
                     ? 'Manage Events'
                     : activeSection === 'media'
                       ? 'Manage News & Gallery'
-                    : 'Dashboard Overview'}
+                      : activeSection === 'organization'
+                        ? 'Manage About Content'
+                        : 'Dashboard Overview'}
               </h1>
             </div>
           </div>
@@ -226,68 +236,70 @@ function AdminDashboard() {
             <AdminEvents />
           ) : activeSection === 'media' ? (
             <AdminMedia />
+          ) : activeSection === 'organization' ? (
+            <AdminOrganization />
           ) : (
             <div className="mx-auto max-w-7xl">
               <section className="relative isolate overflow-hidden rounded-3xl bg-navy-950 px-6 py-9 text-white shadow-[0_30px_80px_-45px_rgba(7,21,47,0.75)] sm:px-9">
-              <div className="subtle-grid absolute inset-0 -z-20 opacity-10" />
-              <div className="absolute -right-20 -top-24 -z-10 size-72 rounded-full bg-brand-600/25 blur-3xl" />
-              <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
-                <div>
-                  <p className="text-xs font-extrabold tracking-[0.2em] text-blue-300 uppercase">
-                    Backend foundation connected
-                  </p>
-                  <h2 className="mt-3 text-3xl font-black sm:text-4xl">
-                    Welcome, {displayName}
-                  </h2>
-                  <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300">
-                    Authentication, session persistence, and role-protected
-                    dashboard access are active. Announcements, events, news,
-                    and gallery media can now be managed here.
-                  </p>
+                <div className="subtle-grid absolute inset-0 -z-20 opacity-10" />
+                <div className="absolute -right-20 -top-24 -z-10 size-72 rounded-full bg-brand-600/25 blur-3xl" />
+                <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
+                  <div>
+                    <p className="text-xs font-extrabold tracking-[0.2em] text-blue-300 uppercase">
+                      Backend foundation connected
+                    </p>
+                    <h2 className="mt-3 text-3xl font-black sm:text-4xl">
+                      Welcome, {displayName}
+                    </h2>
+                    <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300">
+                      Authentication, session persistence, and role-protected
+                      dashboard access are active. Public organization content
+                      can now be managed from this control center.
+                    </p>
+                  </div>
+                  <span className="grid size-20 place-items-center rounded-3xl border border-white/10 bg-white/10 text-blue-200">
+                    <ShieldCheck size={36} aria-hidden="true" />
+                  </span>
                 </div>
-                <span className="grid size-20 place-items-center rounded-3xl border border-white/10 bg-white/10 text-blue-200">
-                  <ShieldCheck size={36} aria-hidden="true" />
-                </span>
-              </div>
               </section>
 
               <section className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {[
-                ['Connection', 'Supabase', 'Configured'],
-                ['Session', user ? 'Active' : 'None', user?.email],
-                ['Role', profile?.role || 'Unknown', 'Verified by database'],
-                ['Profile', profile?.status || 'Pending', 'Account status'],
-              ].map(([label, value, detail]) => (
-                <article
-                  key={label}
-                  className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_18px_55px_-42px_rgba(15,23,42,0.28)]"
-                >
-                  <p className="text-xs font-extrabold tracking-wide text-slate-400 uppercase">
-                    {label}
-                  </p>
-                  <p className="mt-3 text-2xl font-black capitalize text-navy-900">
-                    {value}
-                  </p>
-                  <p className="mt-1 truncate text-xs text-slate-500">
-                    {detail}
-                  </p>
-                </article>
-              ))}
+                {[
+                  ['Connection', 'Supabase', 'Configured'],
+                  ['Session', user ? 'Active' : 'None', user?.email],
+                  ['Role', profile?.role || 'Unknown', 'Verified by database'],
+                  ['Profile', profile?.status || 'Pending', 'Account status'],
+                ].map(([label, value, detail]) => (
+                  <article
+                    key={label}
+                    className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_18px_55px_-42px_rgba(15,23,42,0.28)]"
+                  >
+                    <p className="text-xs font-extrabold tracking-wide text-slate-400 uppercase">
+                      {label}
+                    </p>
+                    <p className="mt-3 text-2xl font-black capitalize text-navy-900">
+                      {value}
+                    </p>
+                    <p className="mt-1 truncate text-xs text-slate-500">
+                      {detail}
+                    </p>
+                  </article>
+                ))}
               </section>
 
               <section className="mt-10">
-              <div className="max-w-2xl">
-                <p className="text-xs font-extrabold tracking-[0.18em] text-brand-600 uppercase">
-                  Management modules
-                </p>
-                <h2 className="mt-2 text-3xl font-black text-navy-900">
-                  Content control center
-                </h2>
-                <p className="mt-3 text-sm leading-6 text-slate-600">
-                  Each module will replace its current local mock-data file
-                  with approved database content.
-                </p>
-              </div>
+                <div className="max-w-2xl">
+                  <p className="text-xs font-extrabold tracking-[0.18em] text-brand-600 uppercase">
+                    Management modules
+                  </p>
+                  <h2 className="mt-2 text-3xl font-black text-navy-900">
+                    Content control center
+                  </h2>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">
+                    Each module replaces local mock data with approved database
+                    content.
+                  </p>
+                </div>
 
               <div className="mt-7 grid gap-5 md:grid-cols-2">
                 {contentModules.map(

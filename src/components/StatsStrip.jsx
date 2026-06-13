@@ -5,7 +5,7 @@ import {
   LibraryBig,
   UsersRound,
 } from 'lucide-react'
-import { stripStats } from '../data/stats'
+import useOrganization from '../context/useOrganization'
 import AnimatedCounter from './AnimatedCounter'
 import Reveal from './Reveal'
 
@@ -18,6 +18,19 @@ const iconMap = {
 }
 
 function StatsStrip() {
+  const { stats } = useOrganization()
+  const stripStats = [
+    { ...stats.years, label: 'Years', icon: 'award' },
+    { ...stats.events, label: 'Events', icon: 'calendar' },
+    { ...stats.members, label: 'Members', icon: 'users' },
+    {
+      ...stats.curriculumUnits,
+      label: 'Curriculum Units',
+      icon: 'library',
+    },
+    { ...stats.partners, label: 'Partners', icon: 'handshake' },
+  ]
+
   return (
     <section className="relative isolate overflow-hidden bg-brand-600 py-14">
       <div className="absolute inset-0 -z-10 bg-gradient-to-r from-brand-700 via-brand-600 to-blue-500" />

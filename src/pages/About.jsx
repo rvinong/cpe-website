@@ -19,12 +19,7 @@ import {
 } from 'lucide-react'
 import Footer from '../components/Footer'
 import Navbar from '../components/Navbar'
-import {
-  historyMilestones,
-  membershipDetails,
-  organizationOfficers,
-  organizationProfile,
-} from '../data/about'
+import useOrganization from '../context/useOrganization'
 
 const involvementAreas = [
   {
@@ -57,16 +52,16 @@ const officialRecords = [
   {
     icon: Flag,
     title: 'Official mission',
-    value: organizationProfile.mission,
+    key: 'mission',
     emptyMessage:
-      'The organization’s approved mission statement has not been provided yet.',
+      "The organization's approved mission statement has not been provided yet.",
   },
   {
     icon: Target,
     title: 'Official vision',
-    value: organizationProfile.vision,
+    key: 'vision',
     emptyMessage:
-      'The organization’s approved vision statement has not been provided yet.',
+      "The organization's approved vision statement has not been provided yet.",
   },
 ]
 
@@ -74,24 +69,39 @@ const membershipItems = [
   {
     icon: UserRoundCheck,
     title: 'Eligibility',
-    value: membershipDetails.eligibility,
+    key: 'eligibility',
     emptyMessage: 'Official member eligibility guidelines are being collected.',
   },
   {
     icon: FileCheck2,
     title: 'Application process',
-    value: membershipDetails.process,
+    key: 'process',
     emptyMessage: 'The confirmed registration process will be posted here.',
   },
   {
     icon: ShieldCheck,
     title: 'Requirements',
-    value: membershipDetails.requirements,
+    key: 'requirements',
     emptyMessage: 'Membership requirements and policies are awaiting approval.',
   },
 ]
 
 function About() {
+  const {
+    profile: organizationProfile,
+    membership: membershipDetails,
+    officers: organizationOfficers,
+    milestones: historyMilestones,
+  } = useOrganization()
+  const populatedOfficialRecords = officialRecords.map((record) => ({
+    ...record,
+    value: organizationProfile[record.key],
+  }))
+  const populatedMembershipItems = membershipItems.map((item) => ({
+    ...item,
+    value: membershipDetails[item.key],
+  }))
+
   return (
     <>
       <Navbar />
@@ -150,7 +160,7 @@ function About() {
                 <span className="size-32 overflow-hidden rounded-3xl border border-white/15 shadow-2xl">
                   <img
                     src="/images/nwssu-cpe-logo.png"
-                    alt="NwSSU Computer Engineering Organization logo"
+                    alt={`${organizationProfile.name} logo`}
                     className="h-full w-full object-cover"
                   />
                 </span>
@@ -158,7 +168,8 @@ function About() {
                   NwSSU
                 </p>
                 <p className="mt-2 max-w-xs text-2xl font-black tracking-tight text-white">
-                  Computer Engineering Organization
+                  {organizationProfile.name.replace(/^NwSSU\s*/i, '').trim() ||
+                    organizationProfile.name}
                 </p>
               </div>
             </Motion.div>
@@ -270,7 +281,7 @@ function About() {
             </Motion.div>
 
             <div className="mt-10 grid gap-6 md:grid-cols-2">
-              {officialRecords.map(
+              {populatedOfficialRecords.map(
                 ({ icon: Icon, title, value, emptyMessage }, index) => (
                   <Motion.article
                     key={title}
@@ -320,7 +331,7 @@ function About() {
               {historyMilestones.length === 0 ? (
                 <>
                   <p className="mt-4 text-sm leading-7 text-slate-600">
-                    The organization’s founding date, previous administrations,
+                    The organization's founding date, previous administrations,
                     milestones, and major achievements have not been added yet.
                   </p>
                   <p className="mt-5 text-xs font-extrabold tracking-[0.16em] text-slate-400 uppercase">
@@ -418,7 +429,7 @@ function About() {
             </Motion.div>
 
             <div className="mt-10 grid gap-5 md:grid-cols-3">
-              {membershipItems.map(
+              {populatedMembershipItems.map(
                 ({ icon: Icon, title, value, emptyMessage }, index) => (
                   <Motion.article
                     key={title}
@@ -465,9 +476,8 @@ function About() {
                     Contact the Organization
                   </h2>
                   <p className="mt-4 max-w-xl text-sm leading-7 text-slate-300">
-                    The official organization email, phone number, social media
-                    pages, and office schedule are being verified before
-                    publication.
+                    Use the verified organization channels below for
+                    inquiries, coordination, and campus visits.
                   </p>
                 </div>
 
@@ -480,7 +490,8 @@ function About() {
                     />
                     <h3 className="mt-4 font-extrabold">Campus</h3>
                     <p className="mt-2 text-sm leading-6 text-slate-300">
-                      Northwest Samar State University, Calbayog City, Samar
+                      {organizationProfile.campusAddress ||
+                        'Northwest Samar State University, Calbayog City, Samar'}
                     </p>
                   </div>
                   <div className="rounded-2xl border border-white/10 bg-white/[0.07] p-5">
@@ -490,9 +501,35 @@ function About() {
                       aria-hidden="true"
                     />
                     <h3 className="mt-4 font-extrabold">Direct contact</h3>
-                    <p className="mt-2 text-sm leading-6 text-slate-300">
-                      Official contact details will be posted once confirmed.
-                    </p>
+                    <div className="mt-2 grid gap-1 text-sm leading-6 text-slate-300">
+                      {organizationProfile.contactEmail && (
+                        <a
+                          href={`mailto:${organizationProfile.contactEmail}`}
+                          className="transition hover:text-white"
+                        >
+                          {organizationProfile.contactEmail}
+                        </a>
+                      )}
+                      {organizationProfile.contactPhone && (
+                        <a
+                          href={`tel:${organizationProfile.contactPhone}`}
+                          className="transition hover:text-white"
+                        >
+                          {organizationProfile.contactPhone}
+                        </a>
+                      )}
+                      {organizationProfile.officeHours && (
+                        <span>{organizationProfile.officeHours}</span>
+                      )}
+                      {!organizationProfile.contactEmail &&
+                        !organizationProfile.contactPhone &&
+                        !organizationProfile.officeHours && (
+                          <span>
+                            Official contact details will be posted once
+                            confirmed.
+                          </span>
+                        )}
+                    </div>
                   </div>
                 </div>
               </div>

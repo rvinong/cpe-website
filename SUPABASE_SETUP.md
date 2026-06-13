@@ -94,6 +94,18 @@ This creates the news and gallery tables, a public
 upload/update/delete policies. Refresh `/admin`, then open
 **News & Gallery**.
 
+## 8. Enable organization profile management
+
+Open the Supabase SQL Editor and run:
+
+```text
+supabase/organization.sql
+```
+
+This creates the organization profile, officer directory, and history
+milestone tables with public read access and staff-only management policies.
+Refresh `/admin`, then open **About Content**.
+
 ## Current backend scope
 
 Implemented:
@@ -113,7 +125,10 @@ Implemented:
 - News and gallery management workflow
 - Staff-managed JPG, PNG, and WebP uploads
 - Public organization news and approved gallery archive
+- Organization profile, contact, membership, and homepage statistics management
+- Officer directory and history milestone management
 
 Next:
 
-- Organization profile and About content management
+- Alumni yearbook and spotlight management
+- Student resource management

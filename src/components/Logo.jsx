@@ -1,4 +1,10 @@
+import useOrganization from '../context/useOrganization'
+
 function Logo({ compact = false, light = false }) {
+  const { profile } = useOrganization()
+  const shortName =
+    profile.name.replace(/^NwSSU\s*/i, '').trim() || profile.name
+
   return (
     <a href="/" className="group inline-flex items-center gap-3">
       <span
@@ -10,7 +16,7 @@ function Logo({ compact = false, light = false }) {
       >
         <img
           src="/images/nwssu-cpe-logo.png"
-          alt="NwSSU Computer Engineering Organization logo"
+          alt={`${profile.name} logo`}
           className="h-full w-full object-cover"
         />
       </span>
@@ -28,7 +34,7 @@ function Logo({ compact = false, light = false }) {
               light ? 'text-white' : 'text-navy-900'
             }`}
           >
-            Computer Engineering Organization
+            {shortName}
           </span>
         </span>
       )}

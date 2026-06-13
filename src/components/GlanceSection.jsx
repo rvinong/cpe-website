@@ -5,7 +5,7 @@ import {
   LibraryBig,
   UsersRound,
 } from 'lucide-react'
-import { glanceStats } from '../data/stats'
+import useOrganization from '../context/useOrganization'
 import AnimatedCounter from './AnimatedCounter'
 import Reveal from './Reveal'
 
@@ -17,6 +17,18 @@ const iconMap = {
 }
 
 function GlanceSection() {
+  const { profile, stats } = useOrganization()
+  const glanceStats = [
+    { ...stats.years, label: 'Years of Excellence', icon: 'award' },
+    { ...stats.events, label: 'Events & Activities', icon: 'calendar' },
+    { ...stats.members, label: 'Active Members', icon: 'users' },
+    {
+      ...stats.curriculumUnits,
+      label: 'Curriculum Units',
+      icon: 'library',
+    },
+  ]
+
   return (
     <section id="about" className="bg-white py-10 pb-24 sm:pb-28">
       <div className="section-shell">
@@ -35,12 +47,10 @@ function GlanceSection() {
                 Who we are
               </p>
               <h2 className="mt-4 text-3xl font-black tracking-[-0.04em] text-white sm:text-4xl lg:text-5xl">
-                NwSSU Computer Engineering Organization at a Glance
+                {profile.glanceHeading}
               </h2>
               <p className="mt-5 max-w-2xl text-base leading-7 text-blue-100/80 sm:text-lg">
-                A student-led organization committed to excellence,
-                innovation, collaboration, and the advancement of Computer
-                Engineering.
+                {profile.glanceDescription}
               </p>
               <a
                 href="/about"

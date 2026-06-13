@@ -1,7 +1,10 @@
 import { motion as Motion } from 'framer-motion'
 import { ArrowRight, CircuitBoard, UsersRound } from 'lucide-react'
+import useOrganization from '../context/useOrganization'
 
 function Hero() {
+  const { profile, stats } = useOrganization()
+
   return (
     <section
       id="home"
@@ -10,7 +13,7 @@ function Hero() {
       <div className="absolute inset-x-0 bottom-0 top-[72px] -z-30 overflow-hidden">
         <Motion.img
           src="/images/nwssu-cpe-hero.jpg"
-          alt="NwSSU Computer Engineering Organization students gathered at a chapter event"
+          alt={`${profile.name} students gathered at a chapter event`}
           width="1920"
           height="1080"
           fetchPriority="high"
@@ -33,7 +36,7 @@ function Hero() {
             className="mb-5 inline-flex max-w-full items-center gap-2 rounded-full border border-blue-200 bg-white/90 px-3 py-2 text-[10px] font-extrabold tracking-[0.12em] text-brand-600 uppercase shadow-sm backdrop-blur sm:px-4 sm:text-[11px] sm:tracking-[0.2em]"
           >
             <CircuitBoard size={15} aria-hidden="true" />
-            NwSSU Computer Engineering Organization
+            {profile.name}
           </Motion.div>
 
           <Motion.h1
@@ -106,7 +109,10 @@ function Hero() {
               ))}
             </span>
             <span>
-              <strong className="font-extrabold text-navy-900">300+</strong>{' '}
+              <strong className="font-extrabold text-navy-900">
+                {stats.members.value}
+                {stats.members.suffix}
+              </strong>{' '}
               student innovators
             </span>
           </Motion.div>

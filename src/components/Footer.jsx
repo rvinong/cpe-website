@@ -8,6 +8,7 @@ import {
   Play,
 } from 'lucide-react'
 import { useState } from 'react'
+import useOrganization from '../context/useOrganization'
 import Logo from './Logo'
 
 const quickLinks = [
@@ -30,13 +31,6 @@ const resources = [
   'FAQs',
 ]
 
-const socialLinks = [
-  { label: 'Facebook', icon: MessageCircle },
-  { label: 'Instagram', icon: Camera },
-  { label: 'YouTube', icon: Play },
-  { label: 'LinkedIn', icon: Briefcase },
-]
-
 const quickLinkHrefs = {
   Home: '/',
   Announcements: '/announcements',
@@ -49,8 +43,15 @@ const quickLinkHrefs = {
 }
 
 function Footer() {
+  const { profile } = useOrganization()
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState('')
+  const socialLinks = [
+    { label: 'Facebook', icon: MessageCircle, href: profile.facebookUrl },
+    { label: 'Instagram', icon: Camera, href: profile.instagramUrl },
+    { label: 'YouTube', icon: Play, href: profile.youtubeUrl },
+    { label: 'LinkedIn', icon: Briefcase, href: profile.linkedinUrl },
+  ].filter((link) => link.href)
 
   const handleSubmit = (event) => {
     event.preventDefault()
@@ -64,21 +65,24 @@ function Footer() {
         <div>
           <Logo light />
           <p className="mt-5 max-w-xs text-sm leading-6 text-slate-400">
-            Developing capable, ethical, and innovative computer engineers
-            through learning, service, and collaboration.
+            {profile.footerDescription}
           </p>
-          <div className="mt-6 flex gap-2">
-            {socialLinks.map(({ label, icon: Icon }) => (
-              <a
-                key={label}
-                href="#footer"
-                aria-label={label}
-                className="grid size-10 place-items-center rounded-lg border border-white/10 text-slate-300 transition hover:border-blue-400 hover:bg-brand-600 hover:text-white"
-              >
-                <Icon size={17} aria-hidden="true" />
-              </a>
-            ))}
-          </div>
+          {socialLinks.length > 0 && (
+            <div className="mt-6 flex gap-2">
+              {socialLinks.map(({ label, icon: Icon, href }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={label}
+                  className="grid size-10 place-items-center rounded-lg border border-white/10 text-slate-300 transition hover:border-blue-400 hover:bg-brand-600 hover:text-white"
+                >
+                  <Icon size={17} aria-hidden="true" />
+                </a>
+              ))}
+            </div>
+          )}
         </div>
 
         <div>
@@ -122,7 +126,7 @@ function Footer() {
                 className="mt-0.5 shrink-0 text-blue-300"
                 aria-hidden="true"
               />
-              CEA Building, NwSSU Main Campus Calbayog City, Samar
+              {profile.campusAddress}
             </li>
             <li className="flex gap-3">
               <Mail
@@ -130,7 +134,16 @@ function Footer() {
                 className="mt-0.5 shrink-0 text-blue-300"
                 aria-hidden="true"
               />
-              Official email and social channels pending verification
+              {profile.contactEmail ? (
+                <a
+                  href={`mailto:${profile.contactEmail}`}
+                  className="hover:text-white"
+                >
+                  {profile.contactEmail}
+                </a>
+              ) : (
+                'Official email pending verification'
+              )}
             </li>
             <li className="flex gap-3">
               <ArrowRight
@@ -189,8 +202,8 @@ function Footer() {
       <div className="border-t border-white/10">
         <div className="section-shell flex flex-col gap-3 py-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
           <p>
-            &copy; {new Date().getFullYear()} NwSSU Computer Engineering
-            Organization. All rights reserved.
+            &copy; {new Date().getFullYear()} {profile.name}. All rights
+            reserved.
           </p>
           <p>Built for innovation, knowledge, and excellence.</p>
         </div>
