@@ -1,0 +1,508 @@
+import { motion as Motion } from 'framer-motion'
+import {
+  BookOpenCheck,
+  BriefcaseBusiness,
+  Building2,
+  FileCheck2,
+  Flag,
+  GraduationCap,
+  Handshake,
+  History,
+  Lightbulb,
+  Mail,
+  MapPin,
+  Network,
+  ShieldCheck,
+  Target,
+  UserRoundCheck,
+  UsersRound,
+} from 'lucide-react'
+import Footer from '../components/Footer'
+import Navbar from '../components/Navbar'
+import {
+  historyMilestones,
+  membershipDetails,
+  organizationOfficers,
+  organizationProfile,
+} from '../data/about'
+
+const involvementAreas = [
+  {
+    icon: BookOpenCheck,
+    title: 'Academic support',
+    description:
+      'A shared space for curriculum information, learning resources, and student guidance.',
+  },
+  {
+    icon: Lightbulb,
+    title: 'Technical growth',
+    description:
+      'Activities can support practical learning across hardware, software, networks, and emerging technologies.',
+  },
+  {
+    icon: UsersRound,
+    title: 'Student community',
+    description:
+      'The organization brings Computer Engineering students together through participation and collaboration.',
+  },
+  {
+    icon: Handshake,
+    title: 'Professional connection',
+    description:
+      'Alumni, industry, and academic connections can help students prepare for opportunities beyond campus.',
+  },
+]
+
+const officialRecords = [
+  {
+    icon: Flag,
+    title: 'Official mission',
+    value: organizationProfile.mission,
+    emptyMessage:
+      'The organization’s approved mission statement has not been provided yet.',
+  },
+  {
+    icon: Target,
+    title: 'Official vision',
+    value: organizationProfile.vision,
+    emptyMessage:
+      'The organization’s approved vision statement has not been provided yet.',
+  },
+]
+
+const membershipItems = [
+  {
+    icon: UserRoundCheck,
+    title: 'Eligibility',
+    value: membershipDetails.eligibility,
+    emptyMessage: 'Official member eligibility guidelines are being collected.',
+  },
+  {
+    icon: FileCheck2,
+    title: 'Application process',
+    value: membershipDetails.process,
+    emptyMessage: 'The confirmed registration process will be posted here.',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Requirements',
+    value: membershipDetails.requirements,
+    emptyMessage: 'Membership requirements and policies are awaiting approval.',
+  },
+]
+
+function About() {
+  return (
+    <>
+      <Navbar />
+      <main className="pt-[72px]">
+        <section className="relative isolate overflow-hidden border-b border-blue-100 bg-gradient-to-br from-white via-brand-50/70 to-blue-100/60 py-20 sm:py-24 lg:py-28">
+          <div className="subtle-grid absolute inset-0 -z-20 opacity-60" />
+          <div className="absolute -right-24 -top-24 -z-10 size-80 rounded-full bg-brand-100/70 blur-3xl" />
+
+          <div className="section-shell grid items-center gap-12 lg:grid-cols-[1fr_auto]">
+            <Motion.div
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <p className="text-xs font-extrabold tracking-[0.22em] text-brand-600 uppercase">
+                Who we are
+              </p>
+              <h1 className="mt-4 max-w-4xl text-5xl font-black tracking-[-0.055em] text-navy-900 sm:text-6xl">
+                About the Organization
+              </h1>
+              <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-600">
+                Learn about the community, purpose, leadership, membership, and
+                official records of the {organizationProfile.name}.
+              </p>
+            </Motion.div>
+
+            <Motion.div
+              initial={{ opacity: 0, scale: 0.9, rotate: 5 }}
+              animate={{ opacity: 1, scale: 1, rotate: 0 }}
+              transition={{ duration: 0.65, delay: 0.12 }}
+              className="relative hidden size-48 place-items-center rounded-[2.25rem] border border-white/80 bg-white/75 text-brand-600 shadow-[0_28px_70px_-36px_rgba(21,94,239,0.55)] backdrop-blur lg:grid"
+              aria-hidden="true"
+            >
+              <span className="absolute inset-5 rounded-[1.7rem] border border-dashed border-blue-200" />
+              <Building2 size={66} strokeWidth={1.35} />
+              <Network
+                size={25}
+                className="absolute right-8 top-8 text-blue-300"
+              />
+            </Motion.div>
+          </div>
+        </section>
+
+        <section className="bg-white py-20 sm:py-24">
+          <div className="section-shell grid items-center gap-12 lg:grid-cols-[0.85fr_1.15fr]">
+            <Motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.25 }}
+              transition={{ duration: 0.55 }}
+              className="relative mx-auto aspect-square w-full max-w-md overflow-hidden rounded-[2rem] bg-navy-950 p-8 shadow-[0_30px_80px_-45px_rgba(7,21,47,0.75)]"
+            >
+              <div className="subtle-grid absolute inset-0 opacity-10" />
+              <div className="absolute -right-20 -top-20 size-64 rounded-full bg-brand-600/30 blur-3xl" />
+              <div className="relative flex h-full flex-col items-center justify-center text-center">
+                <span className="size-32 overflow-hidden rounded-3xl border border-white/15 shadow-2xl">
+                  <img
+                    src="/images/nwssu-cpe-logo.png"
+                    alt="NwSSU Computer Engineering Organization logo"
+                    className="h-full w-full object-cover"
+                  />
+                </span>
+                <p className="mt-7 text-xs font-extrabold tracking-[0.22em] text-blue-300 uppercase">
+                  NwSSU
+                </p>
+                <p className="mt-2 max-w-xs text-2xl font-black tracking-tight text-white">
+                  Computer Engineering Organization
+                </p>
+              </div>
+            </Motion.div>
+
+            <Motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.25 }}
+              transition={{ duration: 0.55 }}
+            >
+              <p className="text-xs font-extrabold tracking-[0.2em] text-brand-600 uppercase">
+                Organization overview
+              </p>
+              <h2 className="mt-3 text-3xl font-black tracking-tight text-navy-900 sm:text-4xl">
+                A community for Computer Engineering students
+              </h2>
+              <p className="mt-5 text-base leading-8 text-slate-600">
+                {organizationProfile.overview}
+              </p>
+              <div className="mt-8 rounded-2xl border border-blue-100 bg-brand-50/55 p-5">
+                <div className="flex items-start gap-4">
+                  <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-white text-brand-600 shadow-sm ring-1 ring-blue-100">
+                    <GraduationCap size={22} aria-hidden="true" />
+                  </span>
+                  <div>
+                    <h3 className="font-extrabold text-navy-900">
+                      Student-centered portal
+                    </h3>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                      This website brings organization updates, academic
+                      resources, events, alumni records, and media archives
+                      into one accessible place.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Motion.div>
+          </div>
+        </section>
+
+        <section className="bg-slate-50/70 py-20 sm:py-24">
+          <div className="section-shell">
+            <Motion.div
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.25 }}
+              transition={{ duration: 0.5 }}
+              className="mx-auto max-w-2xl text-center"
+            >
+              <p className="text-xs font-extrabold tracking-[0.2em] text-brand-600 uppercase">
+                Areas of involvement
+              </p>
+              <h2 className="mt-3 text-3xl font-black tracking-tight text-navy-900 sm:text-4xl">
+                Supporting the student journey
+              </h2>
+              <p className="mt-4 text-base leading-7 text-slate-600">
+                The portal is organized around the academic, technical,
+                community, and professional needs of students.
+              </p>
+            </Motion.div>
+
+            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {involvementAreas.map(
+                ({ icon: Icon, title, description }, index) => (
+                  <Motion.article
+                    key={title}
+                    initial={{ opacity: 0, y: 18 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    whileHover={{ y: -5 }}
+                    viewport={{ once: true, amount: 0.25 }}
+                    transition={{ duration: 0.5, delay: index * 0.06 }}
+                    className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_18px_55px_-42px_rgba(15,23,42,0.32)]"
+                  >
+                    <span className="grid size-12 place-items-center rounded-xl bg-brand-50 text-brand-600">
+                      <Icon size={22} strokeWidth={1.7} aria-hidden="true" />
+                    </span>
+                    <h3 className="mt-5 text-lg font-extrabold text-navy-900">
+                      {title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                      {description}
+                    </p>
+                  </Motion.article>
+                ),
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-navy-950 py-20 text-white sm:py-24">
+          <div className="section-shell">
+            <Motion.div
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.25 }}
+              transition={{ duration: 0.5 }}
+              className="max-w-2xl"
+            >
+              <p className="text-xs font-extrabold tracking-[0.2em] text-blue-300 uppercase">
+                Official direction
+              </p>
+              <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">
+                Mission & Vision
+              </h2>
+              <p className="mt-4 text-base leading-7 text-slate-300">
+                Approved statements will be published exactly as provided by
+                the organization.
+              </p>
+            </Motion.div>
+
+            <div className="mt-10 grid gap-6 md:grid-cols-2">
+              {officialRecords.map(
+                ({ icon: Icon, title, value, emptyMessage }, index) => (
+                  <Motion.article
+                    key={title}
+                    initial={{ opacity: 0, y: 18 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.25 }}
+                    transition={{ duration: 0.5, delay: index * 0.08 }}
+                    className="rounded-3xl border border-white/10 bg-white/[0.07] p-7 backdrop-blur-sm sm:p-8"
+                  >
+                    <span className="grid size-12 place-items-center rounded-xl bg-white/10 text-blue-200">
+                      <Icon size={23} aria-hidden="true" />
+                    </span>
+                    <h3 className="mt-5 text-2xl font-black">{title}</h3>
+                    <p className="mt-3 text-sm leading-7 text-slate-300">
+                      {value || emptyMessage}
+                    </p>
+                    {!value && (
+                      <p className="mt-5 text-xs font-extrabold tracking-[0.16em] text-blue-300 uppercase">
+                        Awaiting verified statement
+                      </p>
+                    )}
+                  </Motion.article>
+                ),
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-white py-20 sm:py-24">
+          <div className="section-shell grid gap-8 lg:grid-cols-2">
+            <Motion.article
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.5 }}
+              className="rounded-3xl border border-slate-200 bg-white p-7 shadow-[0_24px_70px_-48px_rgba(15,23,42,0.38)] sm:p-9"
+            >
+              <span className="grid size-14 place-items-center rounded-2xl bg-brand-50 text-brand-600">
+                <History size={25} aria-hidden="true" />
+              </span>
+              <p className="mt-6 text-xs font-extrabold tracking-[0.18em] text-brand-600 uppercase">
+                Organization record
+              </p>
+              <h2 className="mt-2 text-3xl font-black text-navy-900">
+                History
+              </h2>
+              {historyMilestones.length === 0 ? (
+                <>
+                  <p className="mt-4 text-sm leading-7 text-slate-600">
+                    The organization’s founding date, previous administrations,
+                    milestones, and major achievements have not been added yet.
+                  </p>
+                  <p className="mt-5 text-xs font-extrabold tracking-[0.16em] text-slate-400 uppercase">
+                    Historical records being collected
+                  </p>
+                </>
+              ) : (
+                <div className="mt-6 space-y-5">
+                  {historyMilestones.map((milestone) => (
+                    <div
+                      key={`${milestone.year}-${milestone.title}`}
+                      className="border-l-2 border-blue-200 pl-5"
+                    >
+                      <p className="text-xs font-extrabold text-brand-600">
+                        {milestone.year}
+                      </p>
+                      <h3 className="mt-1 font-extrabold text-navy-900">
+                        {milestone.title}
+                      </h3>
+                      <p className="mt-1 text-sm leading-6 text-slate-600">
+                        {milestone.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Motion.article>
+
+            <Motion.article
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.5, delay: 0.08 }}
+              className="rounded-3xl border border-slate-200 bg-white p-7 shadow-[0_24px_70px_-48px_rgba(15,23,42,0.38)] sm:p-9"
+            >
+              <span className="grid size-14 place-items-center rounded-2xl bg-brand-50 text-brand-600">
+                <BriefcaseBusiness size={25} aria-hidden="true" />
+              </span>
+              <p className="mt-6 text-xs font-extrabold tracking-[0.18em] text-brand-600 uppercase">
+                Current administration
+              </p>
+              <h2 className="mt-2 text-3xl font-black text-navy-900">
+                Officers & Adviser
+              </h2>
+              {organizationOfficers.length === 0 ? (
+                <>
+                  <p className="mt-4 text-sm leading-7 text-slate-600">
+                    No verified officer or faculty adviser directory has been
+                    provided for the current academic year.
+                  </p>
+                  <p className="mt-5 text-xs font-extrabold tracking-[0.16em] text-slate-400 uppercase">
+                    Leadership records awaiting confirmation
+                  </p>
+                </>
+              ) : (
+                <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                  {organizationOfficers.map((officer) => (
+                    <div
+                      key={`${officer.position}-${officer.name}`}
+                      className="rounded-2xl border border-slate-200 p-5"
+                    >
+                      <p className="font-extrabold text-navy-900">
+                        {officer.name}
+                      </p>
+                      <p className="mt-1 text-sm font-bold text-brand-600">
+                        {officer.position}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Motion.article>
+          </div>
+        </section>
+
+        <section className="bg-slate-50/70 py-20 sm:py-24">
+          <div className="section-shell">
+            <Motion.div
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.25 }}
+              transition={{ duration: 0.5 }}
+              className="mx-auto max-w-2xl text-center"
+            >
+              <p className="text-xs font-extrabold tracking-[0.2em] text-brand-600 uppercase">
+                Join the community
+              </p>
+              <h2 className="mt-3 text-3xl font-black tracking-tight text-navy-900 sm:text-4xl">
+                Membership
+              </h2>
+              <p className="mt-4 text-base leading-7 text-slate-600">
+                Official membership guidelines will be posted after they are
+                confirmed by the organization.
+              </p>
+            </Motion.div>
+
+            <div className="mt-10 grid gap-5 md:grid-cols-3">
+              {membershipItems.map(
+                ({ icon: Icon, title, value, emptyMessage }, index) => (
+                  <Motion.article
+                    key={title}
+                    initial={{ opacity: 0, y: 18 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.25 }}
+                    transition={{ duration: 0.5, delay: index * 0.07 }}
+                    className="rounded-2xl border border-slate-200 bg-white p-6"
+                  >
+                    <span className="grid size-12 place-items-center rounded-xl bg-brand-50 text-brand-600">
+                      <Icon size={22} aria-hidden="true" />
+                    </span>
+                    <h3 className="mt-5 text-lg font-extrabold text-navy-900">
+                      {title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                      {value || emptyMessage}
+                    </p>
+                  </Motion.article>
+                ),
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section id="contact" className="bg-white py-20 sm:py-24">
+          <div className="section-shell">
+            <Motion.div
+              initial={{ opacity: 0, y: 18 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.25 }}
+              transition={{ duration: 0.5 }}
+              className="relative isolate overflow-hidden rounded-3xl bg-navy-950 px-6 py-12 text-white shadow-[0_30px_80px_-44px_rgba(7,21,47,0.8)] sm:px-10 lg:px-14"
+            >
+              <div className="subtle-grid absolute inset-0 -z-20 opacity-10" />
+              <div className="absolute -right-20 -top-24 -z-10 size-72 rounded-full bg-brand-600/25 blur-3xl" />
+
+              <div className="grid gap-10 lg:grid-cols-[1fr_0.9fr] lg:items-center">
+                <div>
+                  <p className="text-xs font-extrabold tracking-[0.2em] text-blue-300 uppercase">
+                    Official channels
+                  </p>
+                  <h2 className="mt-3 text-3xl font-black sm:text-4xl">
+                    Contact the Organization
+                  </h2>
+                  <p className="mt-4 max-w-xl text-sm leading-7 text-slate-300">
+                    The official organization email, phone number, social media
+                    pages, and office schedule are being verified before
+                    publication.
+                  </p>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.07] p-5">
+                    <MapPin
+                      size={23}
+                      className="text-blue-200"
+                      aria-hidden="true"
+                    />
+                    <h3 className="mt-4 font-extrabold">Campus</h3>
+                    <p className="mt-2 text-sm leading-6 text-slate-300">
+                      Northwest Samar State University, Calbayog City, Samar
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.07] p-5">
+                    <Mail
+                      size={23}
+                      className="text-blue-200"
+                      aria-hidden="true"
+                    />
+                    <h3 className="mt-4 font-extrabold">Direct contact</h3>
+                    <p className="mt-2 text-sm leading-6 text-slate-300">
+                      Official contact details will be posted once confirmed.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Motion.div>
+          </div>
+        </section>
+      </main>
+      <Footer />
+    </>
+  )
+}
+
+export default About
