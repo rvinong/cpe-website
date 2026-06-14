@@ -75,7 +75,9 @@ function AdminRoute({ children }) {
         description={
           profileError
             ? `Your account is signed in, but the profile role could not be verified: ${profileError}`
-            : `This account is assigned the ${profile?.role || 'student'} role. An existing administrator must grant an editor or admin role before this dashboard can be opened.`
+            : profile?.status !== 'approved'
+              ? `This account is currently ${profile?.status || 'pending'}. An administrator must approve it before dashboard access is available.`
+              : `This account is assigned the ${profile?.role || 'student'} role. An existing administrator must grant an editor or admin role before this dashboard can be opened.`
         }
         action={
           <a

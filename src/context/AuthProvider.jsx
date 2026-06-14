@@ -3,6 +3,12 @@ import { isSupabaseConfigured, supabase } from '../lib/supabase'
 import AuthContext from './auth-context'
 
 const dashboardRoles = new Set(['admin', 'editor'])
+const configuredSiteUrl = import.meta.env.VITE_SITE_URL?.replace(/\/+$/, '')
+
+function getAuthRedirectUrl() {
+  const siteUrl = configuredSiteUrl || window.location.origin
+  return `${siteUrl}/account`
+}
 
 function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
@@ -105,7 +111,7 @@ function AuthProvider({ children }) {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/account`,
+        emailRedirectTo: getAuthRedirectUrl(),
         data: {
           full_name: fullName,
           student_number: studentNumber,
@@ -127,7 +133,9 @@ function AuthProvider({ children }) {
       profileError,
       isLoading,
       isConfigured: isSupabaseConfigured,
-      canAccessAdmin: dashboardRoles.has(profile?.role),
+      isApprovedMember: profile?.status === 'approved',
+      canAccessAdmin:
+        profile?.status === 'approved' && dashboardRoles.has(profile?.role),
       signIn,
       signUp,
       signOut,

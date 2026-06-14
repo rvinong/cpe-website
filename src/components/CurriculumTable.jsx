@@ -35,6 +35,11 @@ function CurriculumTable({ term }) {
                 <h4 className="mt-1 font-extrabold text-navy-900 lg:mt-0">
                   {course.title}
                 </h4>
+                {course.description && (
+                  <p className="mt-2 text-xs leading-5 text-slate-500">
+                    {course.description}
+                  </p>
+                )}
               </div>
 
               <div>

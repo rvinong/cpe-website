@@ -1,0 +1,417 @@
+import {
+  CheckCircle2,
+  Clock3,
+  Edit3,
+  LoaderCircle,
+  Save,
+  Search,
+  ShieldCheck,
+  UserRound,
+  UsersRound,
+  X,
+} from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import useAuth from '../context/useAuth'
+import {
+  getAdminProfiles,
+  isProfilesRpcMissing,
+  updateAdminProfile,
+} from '../lib/profiles'
+
+const inputClassName =
+  'mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-navy-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-100'
+
+const statusStyles = {
+  pending: 'bg-amber-50 text-amber-700 ring-amber-200',
+  approved: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
+  suspended: 'bg-red-50 text-red-700 ring-red-200',
+}
+
+function AdminUsers() {
+  const { user, refreshProfile } = useAuth()
+  const [items, setItems] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+  const [editingItem, setEditingItem] = useState(null)
+  const [form, setForm] = useState(null)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+  const [needsSchema, setNeedsSchema] = useState(false)
+
+  const loadProfiles = useCallback(async () => {
+    setIsLoading(true)
+    const { data, error: loadError } = await getAdminProfiles()
+
+    if (loadError) {
+      setError(loadError.message)
+      setNeedsSchema(isProfilesRpcMissing(loadError))
+    } else {
+      setItems(data)
+      setError('')
+      setNeedsSchema(false)
+    }
+    setIsLoading(false)
+  }, [])
+
+  useEffect(() => {
+    let isMounted = true
+
+    getAdminProfiles().then(({ data, error: loadError }) => {
+      if (!isMounted) return
+      if (loadError) {
+        setError(loadError.message)
+        setNeedsSchema(isProfilesRpcMissing(loadError))
+      } else {
+        setItems(data)
+        setError('')
+        setNeedsSchema(false)
+      }
+      setIsLoading(false)
+    })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  const counts = useMemo(
+    () => ({
+      all: items.length,
+      approved: items.filter((item) => item.status === 'approved').length,
+      staff: items.filter(
+        (item) => item.role === 'admin' || item.role === 'editor',
+      ).length,
+      pending: items.filter((item) => item.status === 'pending').length,
+    }),
+    [items],
+  )
+
+  const filteredItems = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase()
+    if (!query) return items
+
+    return items.filter((item) =>
+      [
+        item.full_name,
+        item.email,
+        item.student_number,
+        item.role,
+        item.status,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase()
+        .includes(query),
+    )
+  }, [items, searchTerm])
+
+  const openEditor = (item) => {
+    setEditingItem(item)
+    setForm({
+      fullName: item.full_name,
+      studentNumber: item.student_number || '',
+      role: item.role,
+      status: item.status,
+    })
+    setError('')
+    setSuccess('')
+  }
+
+  const closeEditor = () => {
+    if (isSaving) return
+    setEditingItem(null)
+    setForm(null)
+  }
+
+  const updateField = (event) => {
+    const { name, value } = event.target
+    setForm((current) => ({ ...current, [name]: value }))
+  }
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+    setError('')
+
+    if (!form.fullName.trim()) {
+      setError('Full name is required.')
+      return
+    }
+
+    setIsSaving(true)
+    const { error: updateError } = await updateAdminProfile(
+      editingItem.id,
+      form,
+    )
+
+    if (updateError) {
+      setError(updateError.message)
+      setIsSaving(false)
+      return
+    }
+
+    if (editingItem.id === user.id) await refreshProfile()
+    setIsSaving(false)
+    closeEditor()
+    setSuccess('Account profile updated.')
+    await loadProfiles()
+  }
+
+  return (
+    <div className="mx-auto max-w-7xl">
+      <div>
+        <p className="text-xs font-extrabold tracking-[0.18em] text-brand-600 uppercase">
+          Access administration
+        </p>
+        <h2 className="mt-2 text-3xl font-black text-navy-900">
+          Users & Roles
+        </h2>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+          Approve member accounts, suspend access, and assign student, editor,
+          or administrator roles. Only administrators can open this module.
+        </p>
+      </div>
+
+      {needsSchema && (
+        <div className="mt-7 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-800">
+          Run <code className="font-bold">supabase/users.sql</code> in the
+          Supabase SQL Editor, then refresh this page.
+        </div>
+      )}
+
+      {(error || success) && !needsSchema && !editingItem && (
+        <div
+          className={`mt-7 rounded-xl border px-4 py-3 text-sm font-bold ${
+            error
+              ? 'border-red-200 bg-red-50 text-red-700'
+              : 'border-emerald-200 bg-emerald-50 text-emerald-700'
+          }`}
+          role="status"
+        >
+          {error || success}
+        </div>
+      )}
+
+      <section className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {[
+          ['All accounts', counts.all, UsersRound],
+          ['Approved', counts.approved, CheckCircle2],
+          ['Staff roles', counts.staff, ShieldCheck],
+          ['Pending', counts.pending, Clock3],
+        ].map(([label, value, Icon]) => (
+          <article
+            key={label}
+            className="rounded-2xl border border-slate-200 bg-white p-5"
+          >
+            <div className="flex items-center justify-between">
+              <span className="grid size-10 place-items-center rounded-xl bg-brand-50 text-brand-600">
+                <Icon size={19} />
+              </span>
+              <span className="text-3xl font-black text-navy-900">{value}</span>
+            </div>
+            <p className="mt-4 text-xs font-extrabold tracking-wide text-slate-500 uppercase">
+              {label}
+            </p>
+          </article>
+        ))}
+      </section>
+
+      <label className="relative mt-7 block max-w-xl">
+        <span className="sr-only">Search users</span>
+        <Search
+          size={19}
+          className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+        />
+        <input
+          type="search"
+          value={searchTerm}
+          onChange={(event) => setSearchTerm(event.target.value)}
+          placeholder="Search by name, email, student number, role, or status"
+          className="h-13 w-full rounded-xl border border-slate-200 bg-white pl-12 pr-4 text-sm text-navy-900 outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100"
+        />
+      </label>
+
+      <section className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+        {isLoading ? (
+          <div className="grid min-h-64 place-items-center">
+            <LoaderCircle
+              size={28}
+              className="animate-spin text-brand-600"
+              aria-label="Loading users"
+            />
+          </div>
+        ) : filteredItems.length === 0 ? (
+          <div className="px-6 py-16 text-center">
+            <UserRound size={30} className="mx-auto text-brand-600" />
+            <h3 className="mt-4 text-lg font-black text-navy-900">
+              No matching accounts
+            </h3>
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-200">
+            {filteredItems.map((item) => (
+              <article
+                key={item.id}
+                className="grid gap-4 px-5 py-5 sm:grid-cols-[1fr_auto] sm:items-center sm:px-6"
+              >
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase ring-1 ring-inset ${
+                        statusStyles[item.status]
+                      }`}
+                    >
+                      {item.status}
+                    </span>
+                    <span className="rounded-full bg-brand-50 px-2.5 py-1 text-[10px] font-extrabold text-brand-600 uppercase">
+                      {item.role}
+                    </span>
+                    {item.id === user.id && (
+                      <span className="text-xs font-extrabold text-slate-400">
+                        Your account
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="mt-2 truncate text-lg font-black text-navy-900">
+                    {item.full_name || 'Unnamed account'}
+                  </h3>
+                  <p className="mt-1 truncate text-sm text-slate-600">
+                    {item.email}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-400">
+                    {item.student_number || 'No student number'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => openEditor(item)}
+                  className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3.5 py-2 text-xs font-extrabold text-slate-600"
+                >
+                  <Edit3 size={15} />
+                  Manage
+                </button>
+              </article>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {editingItem && form && (
+        <div className="fixed inset-0 z-[70] overflow-y-auto bg-navy-950/70 p-4 backdrop-blur-sm sm:p-6">
+          <div className="mx-auto my-8 max-w-xl rounded-3xl border border-slate-200 bg-white shadow-2xl">
+            <div className="flex items-start justify-between border-b border-slate-200 px-5 py-5 sm:px-7">
+              <div>
+                <p className="text-xs font-extrabold tracking-[0.16em] text-brand-600 uppercase">
+                  Account administration
+                </p>
+                <h3 className="mt-1 text-2xl font-black text-navy-900">
+                  Manage user
+                </h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  {editingItem.email}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={closeEditor}
+                className="grid size-10 place-items-center rounded-xl border border-slate-200 text-slate-500"
+                aria-label="Close user editor"
+              >
+                <X size={19} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="px-5 py-6 sm:px-7">
+              <div className="grid gap-5">
+                <label className="text-sm font-extrabold text-navy-900">
+                  Full name
+                  <input
+                    name="fullName"
+                    value={form.fullName}
+                    onChange={updateField}
+                    className={inputClassName}
+                    required
+                  />
+                </label>
+                <label className="text-sm font-extrabold text-navy-900">
+                  Student number
+                  <input
+                    name="studentNumber"
+                    value={form.studentNumber}
+                    onChange={updateField}
+                    className={inputClassName}
+                  />
+                </label>
+                <label className="text-sm font-extrabold text-navy-900">
+                  Role
+                  <select
+                    name="role"
+                    value={form.role}
+                    onChange={updateField}
+                    disabled={editingItem.id === user.id}
+                    className={inputClassName}
+                  >
+                    <option value="student">Student</option>
+                    <option value="editor">Editor</option>
+                    <option value="admin">Administrator</option>
+                  </select>
+                </label>
+                <label className="text-sm font-extrabold text-navy-900">
+                  Account status
+                  <select
+                    name="status"
+                    value={form.status}
+                    onChange={updateField}
+                    disabled={editingItem.id === user.id}
+                    className={inputClassName}
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="suspended">Suspended</option>
+                  </select>
+                </label>
+              </div>
+
+              {editingItem.id === user.id && (
+                <p className="mt-5 rounded-xl border border-blue-100 bg-brand-50/45 px-4 py-3 text-sm leading-6 text-slate-600">
+                  Your own role and status are locked to prevent accidental
+                  loss of administrator access.
+                </p>
+              )}
+
+              {error && (
+                <p className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
+                  {error}
+                </p>
+              )}
+
+              <div className="mt-7 flex justify-end gap-3 border-t border-slate-200 pt-6">
+                <button
+                  type="button"
+                  onClick={closeEditor}
+                  className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-extrabold text-slate-600"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-3 text-sm font-extrabold text-white disabled:opacity-60"
+                >
+                  {isSaving ? (
+                    <LoaderCircle size={17} className="animate-spin" />
+                  ) : (
+                    <Save size={17} />
+                  )}
+                  {isSaving ? 'Saving...' : 'Save account'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default AdminUsers

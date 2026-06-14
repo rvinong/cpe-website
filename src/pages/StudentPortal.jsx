@@ -1,24 +1,39 @@
 import { motion as Motion } from 'framer-motion'
 import {
   BookOpen,
+  Clock3,
+  Download,
   Files,
   FlaskConical,
   GraduationCap,
+  Landmark,
   LibraryBig,
+  LoaderCircle,
+  LockKeyhole,
   NotebookText,
   PlayCircle,
+  ScrollText,
   ShieldCheck,
+  Target,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import CurriculumTable from '../components/CurriculumTable'
 import Footer from '../components/Footer'
 import Navbar from '../components/Navbar'
+import useAuth from '../context/useAuth'
 import {
   curriculumMeta,
   curriculumYears,
   electiveTracks,
+  programBackground,
+  programOutcomes,
 } from '../data/curriculum'
 import { resourceCategories } from '../data/resources'
+import {
+  createResourceDownload,
+  formatFileSize,
+  getPublishedResources,
+} from '../lib/resources'
 
 const resourceIconMap = {
   files: Files,
@@ -28,6 +43,10 @@ const resourceIconMap = {
 }
 
 function StudentPortal() {
+  const { user, profile, isApprovedMember } = useAuth()
+  const [resources, setResources] = useState([])
+  const [resourceOwnerId, setResourceOwnerId] = useState('')
+  const [resourceError, setResourceError] = useState('')
   const [selectedYearId, setSelectedYearId] = useState(curriculumYears[0].id)
   const [selectedTermId, setSelectedTermId] = useState(
     curriculumYears[0].terms[0].id,
@@ -43,6 +62,47 @@ function StudentPortal() {
   const selectYear = (year) => {
     setSelectedYearId(year.id)
     setSelectedTermId(year.terms[0].id)
+  }
+
+  useEffect(() => {
+    if (!isApprovedMember) return undefined
+
+    let isMounted = true
+    getPublishedResources().then(({ data, error }) => {
+      if (!isMounted) return
+      if (error) {
+        setResourceError(error.message)
+      } else {
+        setResources(data)
+        setResourceError('')
+      }
+      setResourceOwnerId(user.id)
+    })
+
+    return () => {
+      isMounted = false
+    }
+  }, [isApprovedMember, user])
+
+  const isLoadingResources =
+    isApprovedMember && resourceOwnerId !== user?.id
+
+  const openResource = async (resource) => {
+    setResourceError('')
+    const resourceWindow = window.open('about:blank', '_blank')
+    if (resourceWindow) resourceWindow.opener = null
+
+    const { data, error } = await createResourceDownload(resource)
+    if (error) {
+      resourceWindow?.close()
+      setResourceError(error.message)
+      return
+    }
+    if (resourceWindow) {
+      resourceWindow.location.replace(data.signedUrl)
+    } else {
+      window.location.assign(data.signedUrl)
+    }
   }
 
   return (
@@ -119,8 +179,9 @@ function StudentPortal() {
                 Resources
               </h2>
               <p className="mt-4 text-base leading-7 text-slate-600">
-                Resource categories are ready. Verified files can be added
-                here once they are provided by the organization.
+                Approved organization members can open published reviewers,
+                notes, laboratory manuals, and tutorials from this private
+                library.
               </p>
             </Motion.div>
 
@@ -147,11 +208,189 @@ function StudentPortal() {
                       {resource.description}
                     </p>
                     <p className="mt-5 border-t border-slate-100 pt-4 text-xs font-bold text-slate-400">
-                      No files uploaded yet
+                      {
+                        resources.filter(
+                          (item) => item.category === resource.id,
+                        ).length
+                      }{' '}
+                      published
                     </p>
                   </Motion.article>
                 )
               })}
+            </div>
+
+            {!user ? (
+              <div className="mt-10 rounded-3xl border border-blue-100 bg-brand-50/45 px-6 py-10 text-center sm:px-10">
+                <LockKeyhole
+                  size={30}
+                  className="mx-auto text-brand-600"
+                  aria-hidden="true"
+                />
+                <h3 className="mt-4 text-2xl font-black text-navy-900">
+                  Member sign-in required
+                </h3>
+                <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-slate-600">
+                  Sign in with your organization account to view and download
+                  approved learning resources.
+                </p>
+                <a
+                  href="/account?redirect=%2Fstudent-portal%23resources"
+                  className="mt-6 inline-flex rounded-xl bg-brand-600 px-5 py-3 text-sm font-extrabold text-white"
+                >
+                  Sign in to access resources
+                </a>
+              </div>
+            ) : !isApprovedMember ? (
+              <div className="mt-10 rounded-3xl border border-amber-200 bg-amber-50 px-6 py-10 text-center sm:px-10">
+                <Clock3
+                  size={30}
+                  className="mx-auto text-amber-700"
+                  aria-hidden="true"
+                />
+                <h3 className="mt-4 text-2xl font-black text-navy-900">
+                  Account approval required
+                </h3>
+                <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-slate-600">
+                  Your account is currently {profile?.status || 'pending'}.
+                  An administrator must approve it before private resources
+                  become available.
+                </p>
+              </div>
+            ) : isLoadingResources ? (
+              <div className="grid min-h-56 place-items-center">
+                <LoaderCircle
+                  size={30}
+                  className="animate-spin text-brand-600"
+                  aria-label="Loading student resources"
+                />
+              </div>
+            ) : resources.length === 0 ? (
+              <div className="mt-10 rounded-3xl border border-dashed border-blue-200 px-6 py-12 text-center">
+                <Files
+                  size={30}
+                  className="mx-auto text-brand-600"
+                  aria-hidden="true"
+                />
+                <h3 className="mt-4 text-xl font-black text-navy-900">
+                  No resources published yet
+                </h3>
+                <p className="mt-2 text-sm text-slate-600">
+                  Approved learning files will appear here when they are ready.
+                </p>
+              </div>
+            ) : (
+              <div className="mt-10 grid gap-5 md:grid-cols-2">
+                {resources.map((resource) => {
+                  const category = resourceCategories.find(
+                    (item) => item.id === resource.category,
+                  )
+
+                  return (
+                    <article
+                      key={resource.id}
+                      className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_18px_55px_-42px_rgba(15,23,42,0.28)]"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <span className="rounded-full bg-brand-50 px-3 py-1.5 text-xs font-extrabold text-brand-600">
+                          {category?.title || resource.category}
+                        </span>
+                        {resource.course_code && (
+                          <span className="text-xs font-extrabold text-slate-400">
+                            {resource.course_code}
+                          </span>
+                        )}
+                      </div>
+                      <h3 className="mt-4 text-xl font-black text-navy-900">
+                        {resource.title}
+                      </h3>
+                      <p className="mt-2 text-sm leading-6 text-slate-600">
+                        {resource.description || category?.description}
+                      </p>
+                      <div className="mt-5 flex items-center justify-between gap-4 border-t border-slate-100 pt-4">
+                        <span className="text-xs font-bold text-slate-400">
+                          {resource.external_url
+                            ? 'External resource'
+                            : [
+                                resource.file_name,
+                                formatFileSize(resource.file_size),
+                              ]
+                                .filter(Boolean)
+                                .join(' · ')}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => openResource(resource)}
+                          className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-xs font-extrabold text-white"
+                        >
+                          <Download size={15} />
+                          Open
+                        </button>
+                      </div>
+                    </article>
+                  )
+                })}
+              </div>
+            )}
+
+            {resourceError && (
+              <p className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
+                {resourceError}
+              </p>
+            )}
+          </div>
+        </section>
+
+        <section
+          id="program-foundation"
+          className="scroll-mt-22 bg-navy-950 py-20 text-white sm:py-24"
+        >
+          <div className="section-shell">
+            <Motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end"
+            >
+              <div className="max-w-3xl">
+                <p className="text-xs font-extrabold tracking-[0.2em] text-blue-300 uppercase">
+                  Academic record
+                </p>
+                <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">
+                  Program Foundation
+                </h2>
+                <p className="mt-4 text-base leading-7 text-slate-300">
+                  Key approvals and curriculum milestones of the Bachelor of
+                  Science in Computer Engineering program.
+                </p>
+              </div>
+              <span className="grid size-14 place-items-center rounded-2xl bg-white/10 text-blue-200">
+                <Landmark size={26} aria-hidden="true" />
+              </span>
+            </Motion.div>
+
+            <div className="mt-10 grid gap-5 lg:grid-cols-3">
+              {programBackground.map((record, index) => (
+                <Motion.article
+                  key={record.title}
+                  initial={{ opacity: 0, y: 18 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.5, delay: index * 0.07 }}
+                  className="rounded-2xl border border-white/10 bg-white/[0.07] p-6"
+                >
+                  <span className="grid size-11 place-items-center rounded-xl bg-white/10 text-blue-200">
+                    <ScrollText size={21} aria-hidden="true" />
+                  </span>
+                  <p className="mt-5 text-xs font-extrabold tracking-wide text-blue-300 uppercase">
+                    {record.date}
+                  </p>
+                  <h3 className="mt-2 text-xl font-black">{record.title}</h3>
+                  <p className="mt-3 text-sm leading-7 text-slate-300">
+                    {record.description}
+                  </p>
+                </Motion.article>
+              ))}
             </div>
           </div>
         </section>
@@ -361,6 +600,55 @@ function StudentPortal() {
               should confirm enrollment requirements and curriculum updates
               with the College of Engineering and Technology.
             </p>
+          </div>
+        </section>
+
+        <section
+          id="program-outcomes"
+          className="scroll-mt-22 bg-white py-20 sm:py-24"
+        >
+          <div className="section-shell">
+            <Motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              className="max-w-3xl"
+            >
+              <span className="grid size-14 place-items-center rounded-2xl bg-brand-50 text-brand-600">
+                <Target size={26} aria-hidden="true" />
+              </span>
+              <p className="mt-6 text-xs font-extrabold tracking-[0.2em] text-brand-600 uppercase">
+                Graduate competencies
+              </p>
+              <h2 className="mt-3 text-3xl font-black tracking-tight text-navy-900 sm:text-4xl">
+                Program Outcomes
+              </h2>
+              <p className="mt-4 text-base leading-7 text-slate-600">
+                By graduation, students are expected to demonstrate the
+                following engineering knowledge, skills, and professional
+                capabilities.
+              </p>
+            </Motion.div>
+
+            <ol className="mt-10 grid gap-4 md:grid-cols-2">
+              {programOutcomes.map((outcome, index) => (
+                <Motion.li
+                  key={outcome}
+                  initial={{ opacity: 0, y: 14 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.2 }}
+                  transition={{ duration: 0.4, delay: (index % 2) * 0.04 }}
+                  className="flex gap-4 rounded-2xl border border-slate-200 bg-white p-5"
+                >
+                  <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-brand-600 text-xs font-black text-white">
+                    {index + 1}
+                  </span>
+                  <p className="pt-1 text-sm leading-7 text-slate-600">
+                    {outcome}
+                  </p>
+                </Motion.li>
+              ))}
+            </ol>
           </div>
         </section>
       </main>

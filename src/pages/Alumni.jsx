@@ -7,6 +7,7 @@ import {
   GraduationCap,
   Image,
   Inbox,
+  LoaderCircle,
   Search,
   ShieldCheck,
   UserRound,
@@ -15,7 +16,7 @@ import {
 import { useMemo, useState } from 'react'
 import Footer from '../components/Footer'
 import Navbar from '../components/Navbar'
-import { alumniProfiles } from '../data/alumni'
+import useAlumni from '../hooks/useAlumni'
 
 const profileDetails = [
   {
@@ -51,21 +52,22 @@ const profileDetails = [
 ]
 
 function Alumni() {
+  const { profiles, isLoading } = useAlumni()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedBatch, setSelectedBatch] = useState('All batches')
 
   const batches = useMemo(
     () =>
-      [...new Set(alumniProfiles.map((profile) => profile.batch))].sort(
+      [...new Set(profiles.map((profile) => profile.batch))].sort(
         (first, second) => second.localeCompare(first),
       ),
-    [],
+    [profiles],
   )
 
   const filteredProfiles = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase()
 
-    return alumniProfiles.filter((profile) => {
+    return profiles.filter((profile) => {
       const matchesBatch =
         selectedBatch === 'All batches' || profile.batch === selectedBatch
       const matchesSearch =
@@ -78,11 +80,11 @@ function Alumni() {
 
       return matchesBatch && matchesSearch
     })
-  }, [searchTerm, selectedBatch])
+  }, [profiles, searchTerm, selectedBatch])
 
   const featuredProfiles = useMemo(
-    () => alumniProfiles.filter((profile) => profile.featured),
-    [],
+    () => profiles.filter((profile) => profile.featured),
+    [profiles],
   )
 
   return (
@@ -174,7 +176,7 @@ function Alumni() {
               {[
                 {
                   label: 'Verified profiles',
-                  value: alumniProfiles.length,
+                  value: profiles.length,
                   icon: UsersRound,
                 },
                 {
@@ -232,7 +234,15 @@ function Alumni() {
               </p>
             </Motion.div>
 
-            {featuredProfiles.length === 0 ? (
+            {isLoading ? (
+              <div className="grid min-h-56 place-items-center">
+                <LoaderCircle
+                  size={30}
+                  className="animate-spin text-blue-200"
+                  aria-label="Loading alumni spotlights"
+                />
+              </div>
+            ) : featuredProfiles.length === 0 ? (
               <Motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -325,7 +335,15 @@ function Alumni() {
               </p>
             </Motion.div>
 
-            {filteredProfiles.length === 0 && (
+            {isLoading ? (
+              <div className="grid min-h-56 place-items-center">
+                <LoaderCircle
+                  size={30}
+                  className="animate-spin text-brand-600"
+                  aria-label="Loading alumni directory"
+                />
+              </div>
+            ) : filteredProfiles.length === 0 ? (
               <Motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -345,6 +363,55 @@ function Alumni() {
                   organization completes its archive.
                 </p>
               </Motion.div>
+            ) : (
+              <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {filteredProfiles.map((profile, index) => (
+                  <Motion.article
+                    key={profile.id}
+                    initial={{ opacity: 0, y: 18 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    whileHover={{ y: -4 }}
+                    viewport={{ once: true, amount: 0.2 }}
+                    transition={{ duration: 0.45, delay: index * 0.04 }}
+                    className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_18px_55px_-42px_rgba(15,23,42,0.32)]"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      {profile.photo ? (
+                        <img
+                          src={profile.photo}
+                          alt=""
+                          className="size-16 rounded-2xl object-cover"
+                        />
+                      ) : (
+                        <span className="grid size-16 place-items-center rounded-2xl bg-brand-600 text-lg font-black text-white">
+                          {profile.initials}
+                        </span>
+                      )}
+                      <span className="rounded-full bg-brand-50 px-3 py-1.5 text-xs font-extrabold text-brand-600">
+                        Batch {profile.batch}
+                      </span>
+                    </div>
+                    <h3 className="mt-5 text-xl font-black text-navy-900">
+                      {profile.name}
+                    </h3>
+                    {profile.role && (
+                      <p className="mt-2 text-sm font-extrabold text-brand-600">
+                        {profile.role}
+                      </p>
+                    )}
+                    {profile.organization && (
+                      <p className="mt-1 text-sm text-slate-500">
+                        {profile.organization}
+                      </p>
+                    )}
+                    {profile.history && (
+                      <p className="mt-4 border-t border-slate-100 pt-4 text-sm leading-6 text-slate-600">
+                        {profile.history}
+                      </p>
+                    )}
+                  </Motion.article>
+                ))}
+              </div>
             )}
           </div>
         </section>

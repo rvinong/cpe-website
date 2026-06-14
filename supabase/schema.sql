@@ -24,7 +24,8 @@ set search_path = public
 as $$
   select role
   from public.profiles
-  where id = auth.uid();
+  where id = auth.uid()
+    and status = 'approved';
 $$;
 
 create or replace function public.handle_new_user()
@@ -48,24 +49,14 @@ create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
 
-create policy "Users can read their own profile"
+create policy "Users can read permitted profiles"
 on public.profiles
 for select
 to authenticated
-using (id = auth.uid());
-
-create policy "Admins and editors can read profiles"
-on public.profiles
-for select
-to authenticated
-using (public.current_user_role() in ('admin', 'editor'));
-
-create policy "Admins can update profiles and roles"
-on public.profiles
-for update
-to authenticated
-using (public.current_user_role() = 'admin')
-with check (public.current_user_role() = 'admin');
+using (
+  id = (select auth.uid())
+  or public.current_user_role() = 'admin'
+);
 
 create table public.announcements (
   id uuid primary key default gen_random_uuid(),

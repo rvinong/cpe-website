@@ -17,9 +17,12 @@ import {
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import AdminAnnouncements from '../components/AdminAnnouncements'
+import AdminAlumni from '../components/AdminAlumni'
 import AdminEvents from '../components/AdminEvents'
 import AdminMedia from '../components/AdminMedia'
 import AdminOrganization from '../components/AdminOrganization'
+import AdminResources from '../components/AdminResources'
+import AdminUsers from '../components/AdminUsers'
 import Logo from '../components/Logo'
 import ThemeToggle from '../components/ThemeToggle'
 import useAuth from '../context/useAuth'
@@ -45,9 +48,15 @@ const adminSections = [
     icon: FileText,
     enabled: true,
   },
-  { label: 'Alumni', icon: GraduationCap },
-  { label: 'Resources', icon: Newspaper },
-  { label: 'Users & Roles', icon: UsersRound },
+  { key: 'alumni', label: 'Alumni', icon: GraduationCap, enabled: true },
+  { key: 'resources', label: 'Resources', icon: Newspaper, enabled: true },
+  {
+    key: 'users',
+    label: 'Users & Roles',
+    icon: UsersRound,
+    enabled: true,
+    requiredRole: 'admin',
+  },
 ]
 
 const contentModules = [
@@ -82,7 +91,42 @@ const contentModules = [
     section: 'organization',
     action: 'Manage organization profile',
   },
+  {
+    title: 'Alumni',
+    description: 'Maintain yearbook profiles and graduate spotlights.',
+    icon: GraduationCap,
+    status: 'Available',
+    section: 'alumni',
+    action: 'Manage alumni',
+  },
+  {
+    title: 'Student Resources',
+    description: 'Publish approved files and links for verified members.',
+    icon: Newspaper,
+    status: 'Available',
+    section: 'resources',
+    action: 'Manage resources',
+  },
+  {
+    title: 'Users & Roles',
+    description: 'Approve accounts and assign student, editor, or admin roles.',
+    icon: UsersRound,
+    status: 'Admin only',
+    section: 'users',
+    action: 'Manage users',
+    requiredRole: 'admin',
+  },
 ]
+
+const sectionTitles = {
+  announcements: 'Manage Announcements',
+  events: 'Manage Events',
+  media: 'Manage News & Gallery',
+  organization: 'Manage About Content',
+  alumni: 'Manage Alumni',
+  resources: 'Manage Resources',
+  users: 'Manage Users & Roles',
+}
 
 function AdminDashboard() {
   const navigate = useNavigate()
@@ -147,15 +191,23 @@ function AdminDashboard() {
             </p>
             <ul className="mt-2 grid gap-1">
               {adminSections.map(
-                ({ key, label, icon: Icon, enabled = false }) => {
+                ({
+                  key,
+                  label,
+                  icon: Icon,
+                  enabled = false,
+                  requiredRole,
+                }) => {
                   const sectionKey = key || label
                   const isActive = activeSection === sectionKey
+                  const canOpen =
+                    enabled && (!requiredRole || profile?.role === requiredRole)
 
                   return (
                     <li key={label}>
                       <button
                         type="button"
-                        disabled={!enabled}
+                        disabled={!canOpen}
                         onClick={() => {
                           setActiveSection(sectionKey)
                           setIsSidebarOpen(false)
@@ -163,7 +215,7 @@ function AdminDashboard() {
                         className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-bold transition ${
                           isActive
                             ? 'bg-brand-600 text-white shadow-md shadow-blue-600/15'
-                            : enabled
+                            : canOpen
                               ? 'text-slate-600 hover:bg-brand-50 hover:text-brand-600'
                               : 'cursor-not-allowed text-slate-500 opacity-65'
                         }`}
@@ -214,15 +266,7 @@ function AdminDashboard() {
                 Administration
               </p>
               <h1 className="text-lg font-black text-navy-900">
-                {activeSection === 'announcements'
-                  ? 'Manage Announcements'
-                  : activeSection === 'events'
-                    ? 'Manage Events'
-                    : activeSection === 'media'
-                      ? 'Manage News & Gallery'
-                      : activeSection === 'organization'
-                        ? 'Manage About Content'
-                        : 'Dashboard Overview'}
+                {sectionTitles[activeSection] || 'Dashboard Overview'}
               </h1>
             </div>
           </div>
@@ -238,6 +282,12 @@ function AdminDashboard() {
             <AdminMedia />
           ) : activeSection === 'organization' ? (
             <AdminOrganization />
+          ) : activeSection === 'alumni' ? (
+            <AdminAlumni />
+          ) : activeSection === 'resources' ? (
+            <AdminResources />
+          ) : activeSection === 'users' && profile?.role === 'admin' ? (
+            <AdminUsers />
           ) : (
             <div className="mx-auto max-w-7xl">
               <section className="relative isolate overflow-hidden rounded-3xl bg-navy-950 px-6 py-9 text-white shadow-[0_30px_80px_-45px_rgba(7,21,47,0.75)] sm:px-9">
@@ -310,6 +360,7 @@ function AdminDashboard() {
                     status,
                     section,
                     action,
+                    requiredRole,
                   }) => (
                     <article
                       key={title}
@@ -333,9 +384,15 @@ function AdminDashboard() {
                         <button
                           type="button"
                           onClick={() => setActiveSection(section)}
-                          className="mt-5 inline-flex items-center justify-center rounded-xl bg-brand-600 px-4 py-2.5 text-xs font-extrabold text-white transition hover:bg-brand-700"
+                          disabled={
+                            Boolean(requiredRole) &&
+                            profile?.role !== requiredRole
+                          }
+                          className="mt-5 inline-flex items-center justify-center rounded-xl bg-brand-600 px-4 py-2.5 text-xs font-extrabold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300"
                         >
-                          {action || 'Manage announcements'}
+                          {requiredRole && profile?.role !== requiredRole
+                            ? 'Administrator required'
+                            : action || 'Manage announcements'}
                         </button>
                       )}
                     </article>

@@ -5,6 +5,42 @@ export const curriculumMeta = {
   totalUnits: 179,
 }
 
+export const programBackground = [
+  {
+    date: 'December 18, 1996',
+    title: 'BS Computer Engineering authorized',
+    description:
+      'Board Resolution No. 62, series of 1996 approved the opening of the program during the 82nd Regular Meeting of the Board of Trustees of Tiburcio Tancinco Memorial Institute of Science and Technology, the former name of NwSSU.',
+  },
+  {
+    date: 'March 2, 2018',
+    title: 'Revised curriculum certified',
+    description:
+      'The revised curriculum was presented to and certified by the University Curriculum Revision Committee through the Office of the Vice President for Academic Affairs. CHED noted the curriculum on October 29, 2018.',
+  },
+  {
+    date: 'SY 2018-2019',
+    title: 'OBE-aligned curriculum implemented',
+    description:
+      'The revised curriculum was first implemented under Board Resolution No. 21, series of 2018 and aligned with CHED Memorandum Order No. 87, series of 2017. It also incorporated the general education and PATHFit requirements of CMO Nos. 20 and 39, series of 2013.',
+  },
+]
+
+export const programOutcomes = [
+  'Apply knowledge of mathematics and science to solve complex engineering problems.',
+  'Design and conduct experiments, then analyze and interpret the resulting data.',
+  'Design systems, components, or processes that meet desired needs within realistic constraints and applicable standards.',
+  'Function effectively on multidisciplinary teams.',
+  'Identify, formulate, and solve complex engineering problems.',
+  'Understand professional and ethical responsibilities.',
+  'Communicate effectively.',
+  'Understand the global, economic, environmental, and societal impact of engineering solutions.',
+  'Recognize the need for and engage in lifelong learning.',
+  'Demonstrate knowledge of contemporary issues.',
+  'Use the techniques, skills, and modern engineering tools needed for engineering practice.',
+  'Apply engineering and management principles as a team member or leader and manage projects in multidisciplinary environments.',
+]
+
 export const curriculumYears = [
   {
     id: 'first-year',
@@ -27,6 +63,8 @@ export const curriculumYears = [
             lecture: 1,
             laboratory: 0,
             units: 1,
+            description:
+              'Introduces the Computer Engineering curriculum and prepares students for engineering design, ethical decision-making, teamwork, and effective communication.',
           },
           {
             code: 'CpE 2',
@@ -34,6 +72,8 @@ export const curriculumYears = [
             lecture: 0,
             laboratory: 6,
             units: 2,
+            description:
+              'Introduces programming logic, algorithms, data types, arrays, control structures, modular programming, functions, and computer memory concepts using flowcharts and pseudocode.',
           },
           {
             code: 'Chem E',
@@ -192,6 +232,8 @@ export const curriculumYears = [
             laboratory: 6,
             units: 2,
             prerequisites: ['CpE 3'],
+            description:
+              'Covers data abstractions, data structures, and algorithms used to manipulate collections of data and build efficient programs.',
           },
           {
             code: 'BES 4',
@@ -262,6 +304,8 @@ export const curriculumYears = [
             laboratory: 3,
             units: 4,
             prerequisites: ['CpE 5'],
+            description:
+              'Covers programming paradigms, data structures, library functions, object-oriented design, modeling languages, testing, software quality, and design tradeoffs.',
           },
           {
             code: 'CpE 4',
@@ -330,6 +374,8 @@ export const curriculumYears = [
             laboratory: 3,
             units: 4,
             prerequisites: ['ECE 284'],
+            description:
+              'Introduces the design and analysis of combinational and sequential digital circuits, from basic logic structures to medium- and large-scale integration.',
           },
           {
             code: 'CpE 9',
@@ -338,6 +384,8 @@ export const curriculumYears = [
             laboratory: 0,
             units: 3,
             prerequisites: ['CpE 5'],
+            description:
+              'Examines operating system structures, process management, storage management, file management, and distributed systems.',
           },
           {
             code: 'ECE 313',
@@ -378,6 +426,8 @@ export const curriculumYears = [
             laboratory: 3,
             units: 1,
             prerequisites: ['ECE 284'],
+            description:
+              'Covers electrical and electronics layout, logic drawings, modern block-diagram representation, wiring and assembly drawings, printed circuit board layouts, and technical etching.',
           },
           {
             code: 'TE 1',
@@ -471,6 +521,8 @@ export const curriculumYears = [
             laboratory: 240,
             units: 3,
             prerequisites: ['4th Year Standing'],
+            description:
+              'Provides 240 hours of industry-based training that connects student competencies with workplace requirements, research, ethics, environmental concerns, and equipment and materials practices.',
           },
         ],
       },
