@@ -9,6 +9,7 @@ create table public.profiles (
   student_number text unique,
   role public.app_role not null default 'student',
   status public.profile_status not null default 'pending',
+  email_notifications boolean not null default true,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -35,11 +36,22 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.profiles (id, full_name, student_number)
+  insert into public.profiles (
+    id,
+    full_name,
+    student_number,
+    email_notifications
+  )
   values (
     new.id,
     coalesce(new.raw_user_meta_data ->> 'full_name', ''),
-    nullif(new.raw_user_meta_data ->> 'student_number', '')
+    nullif(new.raw_user_meta_data ->> 'student_number', ''),
+    case
+      when lower(
+        coalesce(new.raw_user_meta_data ->> 'email_notifications', 'true')
+      ) = 'false' then false
+      else true
+    end
   );
   return new;
 end;
@@ -48,6 +60,30 @@ $$;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+create or replace function public.set_email_notifications(enabled boolean)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if auth.uid() is null then
+    raise exception 'Authentication required';
+  end if;
+
+  update public.profiles
+  set email_notifications = enabled
+  where id = auth.uid();
+
+  return enabled;
+end;
+$$;
+
+revoke all on function public.set_email_notifications(boolean)
+  from public, anon;
+grant execute on function public.set_email_notifications(boolean)
+  to authenticated;
 
 create policy "Users can read permitted profiles"
 on public.profiles

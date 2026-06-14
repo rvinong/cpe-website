@@ -22,6 +22,10 @@ import {
   isAnnouncementsTableMissing,
   updateAnnouncement,
 } from '../lib/announcements'
+import {
+  describeNotificationResult,
+  notifyPublishedContent,
+} from '../lib/notifications'
 
 const emptyForm = {
   title: '',
@@ -178,11 +182,24 @@ function AdminAnnouncements() {
       return
     }
 
-    setSuccess(
+    let successMessage =
       editingItem
         ? 'Announcement updated successfully.'
-        : 'Announcement created successfully.',
-    )
+        : 'Announcement created successfully.'
+
+    const shouldNotify =
+      result.data.status === 'published' &&
+      editingItem?.status !== 'published'
+
+    if (shouldNotify) {
+      const notificationResult = await notifyPublishedContent(
+        'announcement',
+        result.data.id,
+      )
+      successMessage += describeNotificationResult(notificationResult)
+    }
+
+    setSuccess(successMessage)
     setIsSaving(false)
     setIsEditorOpen(false)
     setEditingItem(null)

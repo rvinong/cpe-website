@@ -1,0 +1,75 @@
+-- Run this file after supabase/users.sql.
+
+alter table public.profiles
+  add column if not exists email_notifications boolean not null default true;
+
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.profiles (
+    id,
+    full_name,
+    student_number,
+    email_notifications
+  )
+  values (
+    new.id,
+    coalesce(new.raw_user_meta_data ->> 'full_name', ''),
+    nullif(new.raw_user_meta_data ->> 'student_number', ''),
+    case
+      when lower(
+        coalesce(new.raw_user_meta_data ->> 'email_notifications', 'true')
+      ) = 'false' then false
+      else true
+    end
+  );
+  return new;
+end;
+$$;
+
+create or replace function public.set_email_notifications(enabled boolean)
+returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if auth.uid() is null then
+    raise exception 'Authentication required';
+  end if;
+
+  update public.profiles
+  set email_notifications = enabled
+  where id = auth.uid();
+
+  return enabled;
+end;
+$$;
+
+revoke all on function public.set_email_notifications(boolean)
+  from public, anon;
+grant execute on function public.set_email_notifications(boolean)
+  to authenticated;
+
+create table if not exists public.email_notification_log (
+  id bigint generated always as identity primary key,
+  content_type text not null
+    check (content_type in ('announcement', 'news')),
+  content_id uuid not null,
+  recipient_count integer not null default 0
+    check (recipient_count >= 0),
+  sent_at timestamptz not null default now(),
+  sent_by uuid references public.profiles(id) on delete set null,
+  unique (content_type, content_id)
+);
+
+create index if not exists email_notification_log_sent_by_idx
+  on public.email_notification_log (sent_by);
+
+alter table public.email_notification_log enable row level security;
+
+revoke all on table public.email_notification_log from anon, authenticated;

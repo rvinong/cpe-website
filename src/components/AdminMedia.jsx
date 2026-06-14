@@ -30,6 +30,10 @@ import {
   uploadMedia,
   validateMediaFile,
 } from '../lib/media'
+import {
+  describeNotificationResult,
+  notifyPublishedContent,
+} from '../lib/notifications'
 import { supabase } from '../lib/supabase'
 
 const emptyNewsForm = {
@@ -287,8 +291,24 @@ function AdminMedia() {
       await removeMedia(editingItem.image_path)
     }
 
+    let successMessage = editingItem
+      ? 'News story updated.'
+      : 'News story created.'
+
+    const shouldNotify =
+      result.data.status === 'published' &&
+      editingItem?.status !== 'published'
+
+    if (shouldNotify) {
+      const notificationResult = await notifyPublishedContent(
+        'news',
+        result.data.id,
+      )
+      successMessage += describeNotificationResult(notificationResult)
+    }
+
     setIsSaving(false)
-    setSuccess(editingItem ? 'News story updated.' : 'News story created.')
+    setSuccess(successMessage)
     resetEditor()
     await loadMedia()
   }

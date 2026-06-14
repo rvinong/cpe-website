@@ -79,6 +79,7 @@ function Account() {
     signIn,
     signUp,
     signOut,
+    updateEmailNotifications,
   } = useAuth()
   const requestedMode = searchParams.get('mode')
   const activeMode = requestedMode === 'signup' ? 'signup' : 'login'
@@ -89,6 +90,7 @@ function Account() {
     email: '',
     password: '',
     confirmPassword: '',
+    emailNotifications: true,
   })
   const [message, setMessage] = useState({ type: '', text: '' })
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -134,6 +136,7 @@ function Account() {
         password: formData.password,
         fullName: formData.fullName,
         studentNumber: formData.studentNumber,
+        emailNotifications: formData.emailNotifications,
       })
 
       setIsSubmitting(false)
@@ -179,6 +182,26 @@ function Account() {
     }
 
     setMessage({ type: 'success', text: 'You have been signed out.' })
+  }
+
+  const handleEmailNotifications = async (event) => {
+    const enabled = event.target.checked
+    setIsSubmitting(true)
+    setMessage({ type: '', text: '' })
+
+    const { error } = await updateEmailNotifications(enabled)
+    setIsSubmitting(false)
+
+    setMessage(
+      error
+        ? { type: 'error', text: error.message }
+        : {
+            type: 'success',
+            text: enabled
+              ? 'Email notifications are enabled.'
+              : 'Email notifications are disabled.',
+          },
+    )
   }
 
   return (
@@ -333,6 +356,27 @@ function Account() {
                     </p>
                   )}
 
+                  {profile && (
+                    <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-blue-100 bg-brand-50/45 p-5">
+                      <input
+                        type="checkbox"
+                        checked={profile.email_notifications ?? true}
+                        onChange={handleEmailNotifications}
+                        disabled={isSubmitting}
+                        className="mt-1 size-4 accent-blue-600"
+                      />
+                      <span>
+                        <span className="block text-sm font-extrabold text-navy-900">
+                          News and announcement emails
+                        </span>
+                        <span className="mt-1 block text-xs leading-5 text-slate-600">
+                          Receive an email when the organization publishes a
+                          new story or announcement.
+                        </span>
+                      </span>
+                    </label>
+                  )}
+
                   {canAccessAdmin && (
                     <a
                       href="/admin"
@@ -450,6 +494,31 @@ function Account() {
                     placeholder="Repeat your password"
                     autoComplete="new-password"
                   />
+                )}
+
+                {activeMode === 'signup' && (
+                  <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-blue-100 bg-brand-50/45 p-4">
+                    <input
+                      type="checkbox"
+                      checked={formData.emailNotifications}
+                      onChange={(event) =>
+                        setFormData((current) => ({
+                          ...current,
+                          emailNotifications: event.target.checked,
+                        }))
+                      }
+                      className="mt-0.5 size-4 accent-blue-600"
+                    />
+                    <span>
+                      <span className="block text-sm font-extrabold text-navy-900">
+                        Email me organization updates
+                      </span>
+                      <span className="mt-1 block text-xs leading-5 text-slate-600">
+                        Receive new news and announcements. You can change this
+                        setting from your account at any time.
+                      </span>
+                    </span>
+                  </label>
                 )}
 
                 <button

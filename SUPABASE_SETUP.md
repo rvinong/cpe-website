@@ -152,6 +152,30 @@ This creates the student resource table and a private 20 MB Storage bucket.
 Only approved accounts can read published resources and create short-lived
 download links. Refresh `/admin`, then open **Resources**.
 
+## 12. Enable email notifications
+
+Run:
+
+```text
+supabase/email_notifications.sql
+```
+
+Deploy the `send-content-notification` Edge Function with JWT verification
+enabled. Then create a Resend account, verify a sender domain, and add these
+secrets in **Supabase > Edge Functions > Secrets**:
+
+```env
+RESEND_API_KEY=re_your_api_key
+EMAIL_FROM=NwSSU CPE <updates@your-verified-domain.example>
+SITE_URL=https://cpe-website-two.vercel.app
+```
+
+New accounts opt in to email notifications by default and can change the
+preference from `/account`. When staff publish a new announcement or news
+story, the Edge Function verifies the staff session, privately emails each
+confirmed non-suspended user who remains opted in, and records the delivery so
+later edits do not resend the same notice.
+
 ## Current backend scope
 
 Implemented:
@@ -176,3 +200,4 @@ Implemented:
 - Alumni yearbook, consent confirmation, and spotlight management
 - Approved-member student resource library
 - Administrator-only account approval, suspension, and role management
+- Opt-in email notifications for newly published news and announcements

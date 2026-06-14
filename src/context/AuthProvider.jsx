@@ -25,7 +25,9 @@ function AuthProvider({ children }) {
 
     const { data, error } = await supabase
       .from('profiles')
-      .select('id, full_name, student_number, role, status')
+      .select(
+        'id, full_name, student_number, role, status, email_notifications',
+      )
       .eq('id', user.id)
       .maybeSingle()
 
@@ -99,6 +101,7 @@ function AuthProvider({ children }) {
     password,
     fullName,
     studentNumber,
+    emailNotifications,
   }) => {
     if (!supabase) {
       return {
@@ -115,10 +118,33 @@ function AuthProvider({ children }) {
         data: {
           full_name: fullName,
           student_number: studentNumber,
+          email_notifications: emailNotifications,
         },
       },
     })
   }
+
+  const updateEmailNotifications = useCallback(
+    async (enabled) => {
+      if (!supabase || !session?.user) {
+        return {
+          data: null,
+          error: new Error('Sign in to update this setting.'),
+        }
+      }
+
+      const result = await supabase.rpc('set_email_notifications', {
+        enabled,
+      })
+
+      if (!result.error) {
+        await loadProfile(session.user)
+      }
+
+      return result
+    },
+    [loadProfile, session],
+  )
 
   const signOut = async () => {
     if (!supabase) return { error: null }
@@ -139,9 +165,17 @@ function AuthProvider({ children }) {
       signIn,
       signUp,
       signOut,
+      updateEmailNotifications,
       refreshProfile: () => loadProfile(session?.user),
     }),
-    [isLoading, loadProfile, profile, profileError, session],
+    [
+      isLoading,
+      loadProfile,
+      profile,
+      profileError,
+      session,
+      updateEmailNotifications,
+    ],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
