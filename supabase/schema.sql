@@ -10,6 +10,7 @@ create table public.profiles (
   role public.app_role not null default 'student',
   status public.profile_status not null default 'pending',
   email_notifications boolean not null default true,
+  avatar_path text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

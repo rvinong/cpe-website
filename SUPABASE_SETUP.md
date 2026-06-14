@@ -152,7 +152,20 @@ This creates the student resource table and a private 20 MB Storage bucket.
 Only approved accounts can read published resources and create short-lived
 download links. Refresh `/admin`, then open **Resources**.
 
-## 12. Enable email notifications
+## 12. Enable team management
+
+Run:
+
+```text
+supabase/team.sql
+```
+
+This adds the shared staff directory, private profile photos, and task
+assignment workflow. Administrators can assign and manage editor tasks, while
+editors can update the status of work assigned to them. Refresh `/admin`, then
+open **Team**.
+
+## 13. Enable email notifications
 
 Run:
 
@@ -200,4 +213,6 @@ Implemented:
 - Alumni yearbook, consent confirmation, and spotlight management
 - Approved-member student resource library
 - Administrator-only account approval, suspension, and role management
+- Staff directory with private profile photos
+- Administrator task assignment and editor task status updates
 - Opt-in email notifications for newly published news and announcements

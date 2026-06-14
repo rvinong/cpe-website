@@ -30,7 +30,8 @@ Run these files in the Supabase SQL Editor:
 6. `supabase/users.sql`
 7. `supabase/alumni.sql`
 8. `supabase/resources.sql`
-9. `supabase/email_notifications.sql`
+9. `supabase/team.sql`
+10. `supabase/email_notifications.sql`
 
 See `SUPABASE_SETUP.md` for administrator setup and backend details.
 

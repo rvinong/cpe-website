@@ -5,12 +5,12 @@ import {
   GraduationCap,
   Images,
   LayoutDashboard,
+  ListChecks,
   LogOut,
   Menu,
   Newspaper,
   Settings,
   ShieldCheck,
-  UserRoundCog,
   UsersRound,
   X,
 } from 'lucide-react'
@@ -22,8 +22,10 @@ import AdminEvents from '../components/AdminEvents'
 import AdminMedia from '../components/AdminMedia'
 import AdminOrganization from '../components/AdminOrganization'
 import AdminResources from '../components/AdminResources'
+import AdminTeam from '../components/AdminTeam'
 import AdminUsers from '../components/AdminUsers'
 import Logo from '../components/Logo'
+import StaffAvatar from '../components/StaffAvatar'
 import ThemeToggle from '../components/ThemeToggle'
 import useAuth from '../context/useAuth'
 
@@ -50,6 +52,7 @@ const adminSections = [
   },
   { key: 'alumni', label: 'Alumni', icon: GraduationCap, enabled: true },
   { key: 'resources', label: 'Resources', icon: Newspaper, enabled: true },
+  { key: 'team', label: 'Team', icon: ListChecks, enabled: true },
   {
     key: 'users',
     label: 'Users & Roles',
@@ -108,6 +111,14 @@ const contentModules = [
     action: 'Manage resources',
   },
   {
+    title: 'Team Management',
+    description: 'Assign editor tasks and keep staff profiles familiar.',
+    icon: ListChecks,
+    status: 'Available',
+    section: 'team',
+    action: 'Manage team',
+  },
+  {
     title: 'Users & Roles',
     description: 'Approve accounts and assign student, editor, or admin roles.',
     icon: UsersRound,
@@ -125,6 +136,7 @@ const sectionTitles = {
   organization: 'Manage About Content',
   alumni: 'Manage Alumni',
   resources: 'Manage Resources',
+  team: 'Manage Team',
   users: 'Manage Users & Roles',
 }
 
@@ -171,9 +183,12 @@ function AdminDashboard() {
         <div className="flex h-[calc(100vh-72px)] flex-col p-4">
           <div className="rounded-2xl bg-brand-50 p-4">
             <div className="flex items-center gap-3">
-              <span className="grid size-11 place-items-center rounded-xl bg-brand-600 text-white">
-                <UserRoundCog size={21} aria-hidden="true" />
-              </span>
+              <StaffAvatar
+                path={profile?.avatar_path}
+                name={displayName}
+                className="size-11 rounded-xl"
+                textClassName="text-xs"
+              />
               <div className="min-w-0">
                 <p className="truncate text-sm font-extrabold text-navy-900">
                   {displayName}
@@ -286,6 +301,8 @@ function AdminDashboard() {
             <AdminAlumni />
           ) : activeSection === 'resources' ? (
             <AdminResources />
+          ) : activeSection === 'team' ? (
+            <AdminTeam />
           ) : activeSection === 'users' && profile?.role === 'admin' ? (
             <AdminUsers />
           ) : (
