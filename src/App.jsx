@@ -68,7 +68,7 @@ function App() {
       ) : (
         <>
           <Navbar />
-          <AnimatePresence mode="wait" initial={false}>
+          <AnimatePresence mode="wait">
             <Motion.div
               key={location.pathname}
               initial={
