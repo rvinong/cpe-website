@@ -1,4 +1,8 @@
-import { AnimatePresence, motion as Motion } from 'framer-motion'
+import {
+  AnimatePresence,
+  motion as Motion,
+  useReducedMotion,
+} from 'framer-motion'
 import {
   CalendarDays,
   Camera,
@@ -44,9 +48,11 @@ function Gallery() {
   const { news: organizationNews, isLoading: isNewsLoading } = useNews()
   const { photos: galleryPhotos, isLoading: isGalleryLoading } =
     useGalleryPhotos()
+  const shouldReduceMotion = useReducedMotion()
   const [selectedCategory, setSelectedCategory] = useState('All categories')
   const [selectedYear, setSelectedYear] = useState('All years')
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(null)
+  const [navigationDirection, setNavigationDirection] = useState(1)
 
   const categories = useMemo(
     () =>
@@ -93,11 +99,13 @@ function Gallery() {
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') setSelectedPhotoIndex(null)
       if (event.key === 'ArrowLeft') {
+        setNavigationDirection(-1)
         setSelectedPhotoIndex((current) =>
           current === 0 ? filteredPhotos.length - 1 : current - 1,
         )
       }
       if (event.key === 'ArrowRight') {
+        setNavigationDirection(1)
         setSelectedPhotoIndex((current) =>
           current === filteredPhotos.length - 1 ? 0 : current + 1,
         )
@@ -113,13 +121,33 @@ function Gallery() {
     }
   }, [filteredPhotos.length, selectedPhotoIndex])
 
+  useEffect(() => {
+    if (selectedPhotoIndex === null || filteredPhotos.length < 2) return
+
+    const adjacentIndexes = [
+      selectedPhotoIndex === 0
+        ? filteredPhotos.length - 1
+        : selectedPhotoIndex - 1,
+      selectedPhotoIndex === filteredPhotos.length - 1
+        ? 0
+        : selectedPhotoIndex + 1,
+    ]
+
+    adjacentIndexes.forEach((index) => {
+      const image = new Image()
+      image.src = filteredPhotos[index].image
+    })
+  }, [filteredPhotos, selectedPhotoIndex])
+
   const showPreviousPhoto = () => {
+    setNavigationDirection(-1)
     setSelectedPhotoIndex((current) =>
       current === 0 ? filteredPhotos.length - 1 : current - 1,
     )
   }
 
   const showNextPhoto = () => {
+    setNavigationDirection(1)
     setSelectedPhotoIndex((current) =>
       current === filteredPhotos.length - 1 ? 0 : current + 1,
     )
@@ -354,7 +382,10 @@ function Gallery() {
                     whileHover={{ y: -5 }}
                     viewport={{ once: true, amount: 0.2 }}
                     transition={{ duration: 0.45, delay: index * 0.04 }}
-                    onClick={() => setSelectedPhotoIndex(index)}
+                    onClick={() => {
+                      setNavigationDirection(1)
+                      setSelectedPhotoIndex(index)
+                    }}
                     className="group overflow-hidden rounded-2xl border border-slate-200 bg-white text-left shadow-[0_20px_60px_-40px_rgba(15,23,42,0.4)]"
                   >
                     <span className="relative block aspect-[4/3] overflow-hidden">
@@ -463,11 +494,19 @@ function Gallery() {
             role="dialog"
             aria-modal="true"
             aria-label={`${selectedPhoto.album} photo viewer`}
-            onClick={() => setSelectedPhotoIndex(null)}
+            onPointerDown={(event) => {
+              if (event.target === event.currentTarget) {
+                setSelectedPhotoIndex(null)
+              }
+            }}
           >
+            <span className="absolute left-4 top-4 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-extrabold text-white backdrop-blur sm:left-8 sm:top-8">
+              {selectedPhotoIndex + 1} / {filteredPhotos.length}
+            </span>
             <button
               type="button"
               onClick={() => setSelectedPhotoIndex(null)}
+              autoFocus
               className="absolute right-4 top-4 grid size-11 place-items-center rounded-xl border border-white/15 bg-white/10 text-white transition hover:bg-white/20 sm:right-8 sm:top-8"
               aria-label="Close photo viewer"
             >
@@ -482,6 +521,7 @@ function Gallery() {
                     event.stopPropagation()
                     showPreviousPhoto()
                   }}
+                  onPointerDown={(event) => event.stopPropagation()}
                   className="absolute left-3 top-1/2 grid size-11 -translate-y-1/2 place-items-center rounded-xl border border-white/15 bg-white/10 text-white transition hover:bg-white/20 sm:left-8"
                   aria-label="Previous photo"
                 >
@@ -493,6 +533,7 @@ function Gallery() {
                     event.stopPropagation()
                     showNextPhoto()
                   }}
+                  onPointerDown={(event) => event.stopPropagation()}
                   className="absolute right-3 top-1/2 grid size-11 -translate-y-1/2 place-items-center rounded-xl border border-white/15 bg-white/10 text-white transition hover:bg-white/20 sm:right-8"
                   aria-label="Next photo"
                 >
@@ -505,16 +546,58 @@ function Gallery() {
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.96 }}
-              transition={{ duration: 0.25 }}
+              transition={{ duration: shouldReduceMotion ? 0.01 : 0.25 }}
+              drag={filteredPhotos.length > 1 ? 'x' : false}
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={shouldReduceMotion ? 0 : 0.16}
+              onDragEnd={(_, info) => {
+                if (
+                  Math.abs(info.offset.x) < 70 &&
+                  Math.abs(info.velocity.x) < 500
+                ) {
+                  return
+                }
+
+                if (info.offset.x > 0) showPreviousPhoto()
+                else showNextPhoto()
+              }}
               onClick={(event) => event.stopPropagation()}
-              className="max-w-5xl"
+              className="w-full max-w-5xl cursor-grab touch-pan-y active:cursor-grabbing"
             >
-              <img
-                src={selectedPhoto.image}
-                alt={selectedPhoto.alt}
-                decoding="async"
-                className="max-h-[72vh] w-auto max-w-full rounded-2xl object-contain shadow-2xl"
-              />
+              <AnimatePresence
+                mode="wait"
+                initial={false}
+                custom={navigationDirection}
+              >
+                <Motion.div
+                  key={selectedPhoto.id}
+                  custom={navigationDirection}
+                  initial={(direction) =>
+                    shouldReduceMotion
+                      ? { opacity: 1 }
+                      : { opacity: 0, x: direction * 44, scale: 0.985 }
+                  }
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={(direction) =>
+                    shouldReduceMotion
+                      ? { opacity: 1 }
+                      : { opacity: 0, x: direction * -44, scale: 0.985 }
+                  }
+                  transition={{
+                    duration: shouldReduceMotion ? 0.01 : 0.24,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                  className="grid place-items-center"
+                >
+                  <img
+                    src={selectedPhoto.image}
+                    alt={selectedPhoto.alt}
+                    decoding="async"
+                    draggable="false"
+                    className="max-h-[72vh] w-auto max-w-full select-none rounded-2xl object-contain shadow-2xl"
+                  />
+                </Motion.div>
+              </AnimatePresence>
               <figcaption className="mx-auto max-w-3xl px-2 pt-5 text-center">
                 <p className="text-lg font-extrabold text-white">
                   {selectedPhoto.album}
@@ -525,6 +608,11 @@ function Gallery() {
                     ? ` - ${selectedPhoto.description}`
                     : ''}
                 </p>
+                {filteredPhotos.length > 1 && (
+                  <p className="mt-2 text-xs font-bold tracking-wide text-blue-200/70 uppercase">
+                    Swipe or use the arrow keys to browse
+                  </p>
+                )}
               </figcaption>
             </Motion.figure>
           </Motion.div>

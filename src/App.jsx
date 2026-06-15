@@ -140,13 +140,13 @@ function App() {
               initial={
                 shouldReduceMotion
                   ? { opacity: 1 }
-                  : { opacity: 0, y: 10, filter: 'blur(3px)' }
+                  : { opacity: 0, y: 10 }
               }
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              animate={{ opacity: 1, y: 0 }}
               exit={
                 shouldReduceMotion
                   ? { opacity: 1 }
-                  : { opacity: 0, y: -5, filter: 'blur(2px)' }
+                  : { opacity: 0, y: -5 }
               }
               transition={{
                 duration: shouldReduceMotion ? 0.01 : 0.24,
