@@ -115,7 +115,7 @@ function Navbar() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-2 pt-2 sm:px-4">
       <div
-        className={`section-shell flex h-[68px] items-center justify-between gap-5 rounded-2xl border px-3 transition-all duration-300 sm:px-4 ${
+        className={`section-shell flex h-[68px] items-center justify-between gap-3 rounded-2xl border px-3 transition-all duration-300 sm:gap-5 sm:px-4 ${
           isScrolled
             ? 'border-slate-200/90 bg-white/95 shadow-[0_16px_42px_-24px_rgba(15,23,42,0.45)] backdrop-blur-xl'
             : 'border-white/70 bg-white/85 shadow-[0_12px_34px_-28px_rgba(15,23,42,0.45)] backdrop-blur-xl'
