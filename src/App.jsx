@@ -53,22 +53,57 @@ function ScrollToRoute() {
   const { pathname, hash } = useLocation()
 
   useEffect(() => {
-    let secondFrame
-    const firstFrame = window.requestAnimationFrame(() => {
-      secondFrame = window.requestAnimationFrame(() => {
-        if (hash) {
-          document
-            .getElementById(hash.slice(1))
-            ?.scrollIntoView({ block: 'start' })
-        } else {
-          window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+    let animationFrame
+    let attempts = 0
+    let stableFrames = 0
+
+    const scrollToRoute = () => {
+      if (!hash) {
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+        return
+      }
+
+      const target = document.getElementById(hash.slice(1))
+      attempts += 1
+
+      if (!target) {
+        if (attempts < 120) {
+          animationFrame = window.requestAnimationFrame(scrollToRoute)
         }
-      })
-    })
+        return
+      }
+
+      const scrollPadding =
+        Number.parseFloat(
+          window.getComputedStyle(document.documentElement).scrollPaddingTop,
+        ) || 0
+      const distanceFromTarget =
+        target.getBoundingClientRect().top - scrollPadding
+
+      if (Math.abs(distanceFromTarget) > 1) {
+        const root = document.documentElement
+        const previousScrollBehavior = root.style.scrollBehavior
+        root.style.scrollBehavior = 'auto'
+        window.scrollTo({
+          top: window.scrollY + distanceFromTarget,
+          left: 0,
+          behavior: 'auto',
+        })
+        root.style.scrollBehavior = previousScrollBehavior
+        stableFrames = 0
+      } else {
+        stableFrames += 1
+      }
+
+      if (attempts < 120 && stableFrames < 12) {
+        animationFrame = window.requestAnimationFrame(scrollToRoute)
+      }
+    }
+
+    animationFrame = window.requestAnimationFrame(scrollToRoute)
 
     return () => {
-      window.cancelAnimationFrame(firstFrame)
-      if (secondFrame) window.cancelAnimationFrame(secondFrame)
+      window.cancelAnimationFrame(animationFrame)
     }
   }, [pathname, hash])
 

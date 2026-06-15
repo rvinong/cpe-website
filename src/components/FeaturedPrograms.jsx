@@ -57,7 +57,11 @@ function FeaturedPrograms() {
             const Icon = program.icon
 
             return (
-              <Reveal key={program.title} delay={index * 0.07}>
+              <Reveal
+                key={program.title}
+                delay={index * 0.07}
+                direction={index % 2 === 0 ? 'left' : 'right'}
+              >
                 <Motion.article
                   whileHover={{ y: -6 }}
                   className="surface-card h-full p-7 transition hover:border-brand-500 hover:shadow-[0_26px_65px_-36px_rgba(21,94,239,0.3)]"

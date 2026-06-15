@@ -39,7 +39,11 @@ function UpcomingEvents() {
         ) : homepageEvents.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {homepageEvents.map((event, index) => (
-              <Reveal key={event.id} delay={index * 0.08}>
+              <Reveal
+                key={event.id}
+                delay={index * 0.08}
+                direction={index % 2 === 0 ? 'left' : 'right'}
+              >
                 <EventCard event={event} compact />
               </Reveal>
             ))}

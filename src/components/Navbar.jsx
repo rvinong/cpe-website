@@ -33,7 +33,8 @@ function Navbar() {
   const isHomePage = pathname === '/'
   const [isScrolled, setIsScrolled] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
-  const displayedActiveKey =
+  const [activeSectionKey, setActiveSectionKey] = useState('home')
+  const routeActiveKey =
     pathname === '/account'
       ? null
       : pathname.startsWith('/announcements')
@@ -49,6 +50,7 @@ function Navbar() {
       : pathname === '/student-portal'
           ? 'portal'
           : 'home'
+  const displayedActiveKey = isHomePage ? activeSectionKey : routeActiveKey
 
   const getLinkHref = (link) => {
     if (link.key === 'announcements') return '/announcements'
@@ -61,11 +63,42 @@ function Navbar() {
   }
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 12)
-    handleScroll()
+    let animationFrame
+
+    const updateNavigationState = () => {
+      setIsScrolled(window.scrollY > 12)
+
+      if (!isHomePage) return
+
+      const marker = window.scrollY + Math.min(window.innerHeight * 0.3, 240)
+      let nextActiveKey = 'home'
+
+      links.forEach((link) => {
+        const section = document.getElementById(link.sectionId)
+        if (!section) return
+
+        const sectionTop = section.getBoundingClientRect().top + window.scrollY
+        if (sectionTop <= marker) nextActiveKey = link.key
+      })
+
+      setActiveSectionKey(nextActiveKey)
+    }
+
+    const handleScroll = () => {
+      window.cancelAnimationFrame(animationFrame)
+      animationFrame = window.requestAnimationFrame(updateNavigationState)
+    }
+
+    updateNavigationState()
     window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+    window.addEventListener('resize', handleScroll)
+
+    return () => {
+      window.cancelAnimationFrame(animationFrame)
+      window.removeEventListener('scroll', handleScroll)
+      window.removeEventListener('resize', handleScroll)
+    }
+  }, [isHomePage])
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : ''
@@ -115,7 +148,9 @@ function Navbar() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-2 pt-2 sm:px-4">
       <div
-        className={`section-shell flex h-[68px] items-center justify-between gap-3 rounded-2xl border px-3 transition-all duration-300 sm:gap-5 sm:px-4 ${
+        className={`section-shell flex items-center justify-between gap-3 border px-3 transition-all duration-300 sm:gap-5 sm:px-4 ${
+          isScrolled ? 'h-[60px] rounded-xl' : 'h-[68px] rounded-2xl'
+        } ${
           isScrolled
             ? 'border-slate-200/90 bg-white/95 shadow-[0_16px_42px_-24px_rgba(15,23,42,0.45)] backdrop-blur-xl'
             : 'border-white/70 bg-white/85 shadow-[0_12px_34px_-28px_rgba(15,23,42,0.45)] backdrop-blur-xl'
@@ -214,7 +249,11 @@ function Navbar() {
             initial="closed"
             animate="open"
             exit="closed"
-            className="mobile-navigation-panel section-shell mt-2 h-[calc(100vh-86px)] origin-top overflow-hidden rounded-2xl border border-slate-200 shadow-2xl xl:hidden"
+            className={`mobile-navigation-panel section-shell mt-2 origin-top overflow-hidden rounded-2xl border border-slate-200 shadow-2xl xl:hidden ${
+              isScrolled
+                ? 'h-[calc(100vh-78px)]'
+                : 'h-[calc(100vh-86px)]'
+            }`}
           >
             <nav
               className="nav-scroll h-full overflow-y-auto p-4"

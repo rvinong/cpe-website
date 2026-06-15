@@ -57,7 +57,11 @@ function NewsSection() {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {organizationNews.map((article, index) => (
-              <Reveal key={article.id} delay={index * 0.08}>
+              <Reveal
+                key={article.id}
+                delay={index * 0.08}
+                direction={index % 2 === 0 ? 'left' : 'right'}
+              >
                 <NewsCard article={article} compact />
               </Reveal>
             ))}

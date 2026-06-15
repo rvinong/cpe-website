@@ -30,7 +30,7 @@ function AlumniSection() {
           />
         </Reveal>
 
-        <Reveal delay={0.08}>
+        <Reveal delay={0.08} direction="right">
           <div className="relative isolate overflow-hidden rounded-3xl border border-white/10 bg-white/[0.07] p-6 shadow-[0_30px_90px_-55px_rgba(59,130,246,0.75)] backdrop-blur-sm sm:p-9 lg:p-12">
             <div className="subtle-grid absolute inset-0 -z-20 opacity-10" />
             <div className="absolute -right-20 -top-24 -z-10 size-72 rounded-full bg-brand-600/20 blur-3xl" />
