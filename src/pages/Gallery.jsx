@@ -361,6 +361,8 @@ function Gallery() {
                       <img
                         src={photo.image}
                         alt={photo.alt}
+                        loading="lazy"
+                        decoding="async"
                         className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
                       />
                       <span className="absolute inset-0 bg-gradient-to-t from-navy-950/65 via-transparent to-transparent" />
@@ -510,6 +512,7 @@ function Gallery() {
               <img
                 src={selectedPhoto.image}
                 alt={selectedPhoto.alt}
+                decoding="async"
                 className="max-h-[72vh] w-auto max-w-full rounded-2xl object-contain shadow-2xl"
               />
               <figcaption className="mx-auto max-w-3xl px-2 pt-5 text-center">

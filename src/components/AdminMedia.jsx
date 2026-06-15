@@ -534,6 +534,8 @@ function AdminMedia() {
                   <img
                     src={getImageUrl(item.image_path)}
                     alt=""
+                    loading="lazy"
+                    decoding="async"
                     className="aspect-[4/3] w-24 rounded-xl bg-slate-100 object-cover"
                   />
                 ) : (

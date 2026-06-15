@@ -35,8 +35,10 @@ function GlanceSection() {
         <Reveal>
           <div className="relative isolate overflow-hidden rounded-[2.5rem] bg-navy-950 px-6 py-14 shadow-[0_34px_80px_-40px_rgba(7,21,47,0.85)] sm:px-10 lg:px-14 lg:py-18">
             <img
-              src="/images/ce-campus-hero.png"
+              src="/images/ce-campus-hero.jpg"
               alt=""
+              loading="lazy"
+              decoding="async"
               className="absolute inset-0 -z-20 h-full w-full object-cover opacity-25"
             />
             <div className="absolute inset-0 -z-10 bg-gradient-to-br from-navy-950 via-navy-900/95 to-brand-700/85" />

@@ -345,6 +345,8 @@ function AdminAlumni() {
                   <img
                     src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/organization-media/${item.photo_path}`}
                     alt=""
+                    loading="lazy"
+                    decoding="async"
                     className="size-16 rounded-2xl object-cover"
                   />
                 ) : (

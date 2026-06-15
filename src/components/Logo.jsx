@@ -17,6 +17,9 @@ function Logo({ compact = false, light = false }) {
         <img
           src="/images/nwssu-cpe-logo.png"
           alt={`${profile.name} logo`}
+          width="40"
+          height="40"
+          decoding="async"
           className="h-full w-full object-cover"
         />
       </span>

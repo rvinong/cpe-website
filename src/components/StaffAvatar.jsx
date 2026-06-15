@@ -45,6 +45,8 @@ function StaffAvatar({
       <img
         src={imageUrl}
         alt={`${name || 'Staff member'} profile`}
+        loading="lazy"
+        decoding="async"
         className={`${className} shrink-0 object-cover`}
       />
     )

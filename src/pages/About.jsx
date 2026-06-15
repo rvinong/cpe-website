@@ -128,6 +128,10 @@ function About() {
                   <img
                     src="/images/nwssu-cpe-logo.png"
                     alt={`${organizationProfile.name} logo`}
+                    width="128"
+                    height="128"
+                    loading="lazy"
+                    decoding="async"
                     className="h-full w-full object-cover"
                   />
                 </span>

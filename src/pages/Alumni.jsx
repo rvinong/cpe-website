@@ -245,6 +245,8 @@ function Alumni() {
                         <img
                           src={profile.photo}
                           alt=""
+                          loading="lazy"
+                          decoding="async"
                           className="size-16 rounded-2xl object-cover"
                         />
                       ) : (
@@ -347,6 +349,8 @@ function Alumni() {
                         <img
                           src={profile.photo}
                           alt=""
+                          loading="lazy"
+                          decoding="async"
                           className="size-16 rounded-2xl object-cover"
                         />
                       ) : (
