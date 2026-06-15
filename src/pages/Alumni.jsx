@@ -14,8 +14,6 @@ import {
   UsersRound,
 } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import Footer from '../components/Footer'
-import Navbar from '../components/Navbar'
 import PageHero from '../components/PageHero'
 import useAlumni from '../hooks/useAlumni'
 
@@ -90,7 +88,6 @@ function Alumni() {
 
   return (
     <>
-      <Navbar />
       <main className="pt-[84px]">
         <PageHero
           eyebrow="Digital graduate archive"
@@ -456,7 +453,6 @@ function Alumni() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   )
 }

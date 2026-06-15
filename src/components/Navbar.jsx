@@ -1,7 +1,11 @@
-import { AnimatePresence, motion as Motion } from 'framer-motion'
+import {
+  AnimatePresence,
+  motion as Motion,
+  useReducedMotion,
+} from 'framer-motion'
 import { ArrowUpRight, LogIn, Menu, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import useAuth from '../context/useAuth'
 import Logo from './Logo'
 import ThemeToggle from './ThemeToggle'
@@ -20,25 +24,15 @@ const links = [
   { key: 'gallery', label: 'News & Gallery', sectionId: 'news' },
 ]
 
+const MotionLink = Motion.create(Link)
+
 function Navbar() {
   const { pathname } = useLocation()
   const { user, canAccessAdmin } = useAuth()
+  const shouldReduceMotion = useReducedMotion()
   const isHomePage = pathname === '/'
   const [isScrolled, setIsScrolled] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
-  const [activeKey, setActiveKey] = useState(
-    pathname.startsWith('/announcements')
-      ? 'announcements'
-      : pathname === '/alumni'
-        ? 'alumni'
-      : pathname === '/about'
-        ? 'about'
-      : pathname === '/gallery'
-        ? 'gallery'
-      : pathname === '/events'
-        ? 'events'
-        : 'home',
-  )
   const displayedActiveKey =
     pathname === '/account'
       ? null
@@ -54,7 +48,7 @@ function Navbar() {
         ? 'events'
       : pathname === '/student-portal'
           ? 'portal'
-          : activeKey
+          : 'home'
 
   const getLinkHref = (link) => {
     if (link.key === 'announcements') return '/announcements'
@@ -80,9 +74,42 @@ function Navbar() {
     }
   }, [isOpen])
 
-  const handleLinkClick = (key) => {
-    setActiveKey(key)
+  const handleLinkClick = () => {
     setIsOpen(false)
+  }
+
+  const mobileMenuVariants = {
+    closed: {
+      opacity: 0,
+      y: shouldReduceMotion ? 0 : -12,
+      scale: shouldReduceMotion ? 1 : 0.985,
+    },
+    open: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        duration: shouldReduceMotion ? 0.01 : 0.24,
+        ease: [0.22, 1, 0.36, 1],
+        staggerChildren: shouldReduceMotion ? 0 : 0.045,
+        delayChildren: shouldReduceMotion ? 0 : 0.04,
+      },
+    },
+  }
+
+  const mobileItemVariants = {
+    closed: {
+      opacity: 0,
+      x: shouldReduceMotion ? 0 : 18,
+    },
+    open: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        duration: shouldReduceMotion ? 0.01 : 0.24,
+        ease: [0.22, 1, 0.36, 1],
+      },
+    },
   }
 
   return (
@@ -97,25 +124,50 @@ function Navbar() {
         <Logo />
 
         <nav aria-label="Primary navigation" className="hidden xl:block">
-          <ul className="flex items-center gap-1 rounded-xl border border-slate-200/70 bg-slate-50/70 p-1">
-            {links.map((link) => (
-              <li key={link.label}>
-                <a
-                  href={getLinkHref(link)}
-                  onClick={() => handleLinkClick(link.key)}
-                  aria-current={
-                    displayedActiveKey === link.key ? 'location' : undefined
-                  }
-                  className={`relative rounded-lg px-3 py-2 text-[12px] font-extrabold transition-colors ${
-                    displayedActiveKey === link.key
-                      ? 'bg-white text-brand-600 shadow-sm'
+          <ul className="flex items-stretch overflow-hidden rounded-xl border border-slate-200/70 bg-slate-50/70">
+            {links.map((link, index) => {
+              const isActive = displayedActiveKey === link.key
+              const edgeRadius =
+                index === 0
+                  ? 'rounded-l-[11px]'
+                  : index === links.length - 1
+                    ? 'rounded-r-[11px]'
+                    : 'rounded-lg'
+
+              return (
+              <li key={link.label} className="relative flex">
+                <MotionLink
+                  to={getLinkHref(link)}
+                  onClick={handleLinkClick}
+                  aria-current={isActive ? 'location' : undefined}
+                  whileTap={shouldReduceMotion ? undefined : { scale: 0.96 }}
+                  className={`relative isolate flex items-center px-3.5 py-2.5 text-[12px] font-extrabold transition-colors ${
+                    isActive
+                      ? 'text-brand-600'
                       : 'text-slate-600 hover:text-brand-600'
                   }`}
                 >
-                  {link.label}
-                </a>
+                  {isActive && (
+                    <Motion.span
+                      layoutId="primary-navigation-active"
+                      className={`absolute inset-0 -z-10 bg-white shadow-[0_4px_14px_-8px_rgba(15,23,42,0.45)] ${edgeRadius}`}
+                      transition={
+                        shouldReduceMotion
+                          ? { duration: 0.01 }
+                          : {
+                              type: 'spring',
+                              stiffness: 430,
+                              damping: 34,
+                              mass: 0.75,
+                            }
+                      }
+                    />
+                  )}
+                  <span className="relative z-10">{link.label}</span>
+                </MotionLink>
               </li>
-            ))}
+              )
+            })}
           </ul>
         </nav>
 
@@ -158,27 +210,38 @@ function Navbar() {
       <AnimatePresence>
         {isOpen && (
           <Motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'calc(100vh - 86px)' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.25 }}
-            className="mobile-navigation-panel section-shell mt-2 overflow-hidden rounded-2xl border border-slate-200 shadow-2xl xl:hidden"
+            variants={mobileMenuVariants}
+            initial="closed"
+            animate="open"
+            exit="closed"
+            className="mobile-navigation-panel section-shell mt-2 h-[calc(100vh-86px)] origin-top overflow-hidden rounded-2xl border border-slate-200 shadow-2xl xl:hidden"
           >
             <nav
               className="nav-scroll h-full overflow-y-auto p-4"
               aria-label="Mobile navigation"
             >
-              <ul className="grid gap-1">
-                {links.map((link, index) => (
+              <Motion.ul
+                variants={{
+                  closed: {},
+                  open: {
+                    transition: {
+                      staggerChildren: shouldReduceMotion ? 0 : 0.045,
+                    },
+                  },
+                }}
+                className="grid gap-1"
+              >
+                {links.map((link) => (
                   <Motion.li
                     key={link.label}
-                    initial={{ opacity: 0, x: 18 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.035 }}
+                    variants={mobileItemVariants}
                   >
-                    <a
-                      href={getLinkHref(link)}
-                      onClick={() => handleLinkClick(link.key)}
+                    <MotionLink
+                      to={getLinkHref(link)}
+                      onClick={handleLinkClick}
+                      whileTap={
+                        shouldReduceMotion ? undefined : { scale: 0.985, x: 3 }
+                      }
                       aria-current={
                         displayedActiveKey === link.key
                           ? 'location'
@@ -191,13 +254,15 @@ function Navbar() {
                       }`}
                     >
                       {link.label}
-                    </a>
+                    </MotionLink>
                   </Motion.li>
                 ))}
-              </ul>
-              <a
-                href={canAccessAdmin ? '/admin' : '/account'}
+              </Motion.ul>
+              <MotionLink
+                to={canAccessAdmin ? '/admin' : '/account'}
                 onClick={() => setIsOpen(false)}
+                variants={mobileItemVariants}
+                whileTap={shouldReduceMotion ? undefined : { scale: 0.985 }}
                 aria-current={pathname === '/account' ? 'page' : undefined}
                 className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-blue-600/20"
               >
@@ -207,13 +272,16 @@ function Navbar() {
                   : user
                     ? 'View Account'
                     : 'Log In / Sign Up'}
-              </a>
-              <div className="mt-3 flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3 sm:hidden">
+              </MotionLink>
+              <Motion.div
+                variants={mobileItemVariants}
+                className="mt-3 flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3 sm:hidden"
+              >
                 <span className="text-sm font-extrabold text-navy-900">
                   Appearance
                 </span>
                 <ThemeToggle />
-              </div>
+              </Motion.div>
             </nav>
           </Motion.div>
         )}

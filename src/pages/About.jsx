@@ -17,8 +17,6 @@ import {
   UserRoundCheck,
   UsersRound,
 } from 'lucide-react'
-import Footer from '../components/Footer'
-import Navbar from '../components/Navbar'
 import PageHero from '../components/PageHero'
 import useOrganization from '../context/useOrganization'
 
@@ -105,7 +103,6 @@ function About() {
 
   return (
     <>
-      <Navbar />
       <main className="pt-[84px]">
         <PageHero
           eyebrow="Who we are"
@@ -507,7 +504,6 @@ function About() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   )
 }

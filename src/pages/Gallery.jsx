@@ -15,8 +15,6 @@ import {
   X,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
-import Footer from '../components/Footer'
-import Navbar from '../components/Navbar'
 import NewsCard from '../components/NewsCard'
 import PageHero from '../components/PageHero'
 import { useGalleryPhotos, useNews } from '../hooks/useMedia'
@@ -129,7 +127,6 @@ function Gallery() {
 
   return (
     <>
-      <Navbar />
       <main className="pt-[84px]">
         <PageHero
           eyebrow="Stories and organization moments"
@@ -453,7 +450,6 @@ function Gallery() {
           </div>
         </section>
       </main>
-      <Footer />
 
       <AnimatePresence>
         {selectedPhoto && (

@@ -10,8 +10,6 @@ import {
   Sun,
 } from 'lucide-react'
 import EventCard from '../components/EventCard'
-import Footer from '../components/Footer'
-import Navbar from '../components/Navbar'
 import PageHero from '../components/PageHero'
 import { useEvents } from '../hooks/useEvents'
 
@@ -41,7 +39,6 @@ function Events() {
 
   return (
     <>
-      <Navbar />
       <main className="pt-[84px]">
         <PageHero
           eyebrow="Connect and participate"
@@ -243,7 +240,6 @@ function Events() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   )
 }

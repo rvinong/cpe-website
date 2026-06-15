@@ -2,8 +2,6 @@ import { motion as Motion } from 'framer-motion'
 import { Bell, Inbox, Megaphone, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import AnnouncementCard from '../components/AnnouncementCard'
-import Footer from '../components/Footer'
-import Navbar from '../components/Navbar'
 import PageHero from '../components/PageHero'
 import { announcementCategories } from '../data/announcements'
 import { useAnnouncements } from '../hooks/useAnnouncements'
@@ -46,7 +44,6 @@ function Announcements() {
 
   return (
     <>
-      <Navbar />
       <main className="pt-[84px]">
         <PageHero
           eyebrow="Stay informed"
@@ -174,7 +171,6 @@ function Announcements() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   )
 }

@@ -18,8 +18,6 @@ import {
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import CurriculumTable from '../components/CurriculumTable'
-import Footer from '../components/Footer'
-import Navbar from '../components/Navbar'
 import PageHero from '../components/PageHero'
 import useAuth from '../context/useAuth'
 import {
@@ -108,7 +106,6 @@ function StudentPortal() {
 
   return (
     <>
-      <Navbar />
       <main className="pt-[84px]">
         <PageHero
           eyebrow="Academic access"
@@ -624,7 +621,6 @@ function StudentPortal() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   )
 }

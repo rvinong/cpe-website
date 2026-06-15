@@ -12,8 +12,6 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import Footer from '../components/Footer'
-import Navbar from '../components/Navbar'
 import useAuth from '../context/useAuth'
 
 const modes = [
@@ -206,7 +204,6 @@ function Account() {
 
   return (
     <>
-      <Navbar />
       <main className="min-h-screen bg-slate-50 pt-[84px]">
         <section className="relative isolate overflow-hidden py-12 sm:py-16 lg:py-20">
           <div className="subtle-grid absolute inset-0 -z-20 opacity-60" />
@@ -556,7 +553,6 @@ function Account() {
           </div>
         </section>
       </main>
-      <Footer />
     </>
   )
 }
