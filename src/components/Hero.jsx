@@ -34,7 +34,7 @@ function Hero() {
       <div className="absolute inset-x-0 bottom-0 top-[84px] -z-10 bg-gradient-to-t from-white/75 via-transparent to-white/15" />
       <div className="subtle-grid absolute inset-x-0 bottom-0 top-[84px] -z-10 opacity-35" />
 
-      <div className="section-shell grid min-h-[720px] items-center gap-12 py-14 sm:min-h-[760px] lg:grid-cols-[1fr_20rem] lg:py-18">
+      <div className="section-shell grid min-h-[720px] items-start gap-12 pt-4 pb-14 sm:min-h-[760px] sm:pt-5 lg:grid-cols-[1fr_20rem] lg:pt-5 lg:pb-18">
         <div className="max-w-3xl">
           <Motion.div
             initial={{ opacity: 0, x: -28 }}
