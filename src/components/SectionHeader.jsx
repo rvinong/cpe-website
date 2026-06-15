@@ -11,7 +11,7 @@ function SectionHeader({
 }) {
   return (
     <div
-      className={`mb-10 flex gap-6 ${
+      className={`mb-12 flex gap-6 ${
         centered
           ? 'mx-auto max-w-2xl flex-col items-center text-center'
           : 'items-end justify-between'
@@ -20,7 +20,7 @@ function SectionHeader({
       <div className={centered ? '' : 'max-w-2xl'}>
         {eyebrow && (
           <p
-            className={`mb-3 text-xs font-extrabold tracking-[0.22em] uppercase ${
+            className={`mb-4 text-[11px] font-extrabold tracking-[0.22em] uppercase ${
               light ? 'text-blue-200' : 'text-brand-600'
             }`}
           >
@@ -28,7 +28,7 @@ function SectionHeader({
           </p>
         )}
         <h2
-          className={`text-3xl font-black tracking-[-0.035em] sm:text-4xl ${
+          className={`text-4xl font-black tracking-[-0.055em] sm:text-5xl ${
             light ? 'text-white' : 'text-navy-900'
           }`}
         >
@@ -36,7 +36,7 @@ function SectionHeader({
         </h2>
         {description && (
           <p
-            className={`mt-4 text-base leading-7 ${
+            className={`mt-5 text-base leading-7 ${
               light ? 'text-blue-100/80' : 'text-slate-600'
             }`}
           >
@@ -47,10 +47,10 @@ function SectionHeader({
       {actionLabel && (
         <a
           href={actionHref}
-          className={`hidden shrink-0 items-center gap-2 text-sm font-bold transition-colors sm:flex ${
+          className={`hidden shrink-0 items-center gap-2 rounded-xl px-4 py-3 text-sm font-extrabold transition sm:flex ${
             light
-              ? 'text-white hover:text-blue-200'
-              : 'text-brand-600 hover:text-brand-700'
+              ? 'border border-white/15 bg-white/10 text-white hover:bg-white/15'
+              : 'border border-blue-100 bg-brand-50 text-brand-600 hover:border-brand-500 hover:bg-brand-600 hover:text-white'
           }`}
         >
           {actionLabel}

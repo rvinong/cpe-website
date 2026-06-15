@@ -9,7 +9,7 @@ function NewsSection() {
   const { news: organizationNews, isLoading } = useNews(3)
 
   return (
-    <section id="news" className="bg-slate-50/70 py-24 sm:py-28">
+    <section id="news" className="bg-slate-50/70 py-24 sm:py-32">
       <div className="section-shell">
         <Reveal>
           <SectionHeader
@@ -33,7 +33,7 @@ function NewsSection() {
           <Reveal delay={0.08}>
             <Motion.div
               whileHover={{ y: -3 }}
-              className="rounded-3xl border border-dashed border-blue-200 bg-white px-6 py-12 text-center shadow-[0_24px_70px_-50px_rgba(15,23,42,0.38)] sm:px-10"
+              className="surface-card border-dashed px-6 py-12 text-center sm:px-10"
             >
               <span className="mx-auto grid size-16 place-items-center rounded-2xl bg-brand-50 text-brand-600">
                 <Newspaper size={28} strokeWidth={1.7} aria-hidden="true" />

@@ -207,18 +207,18 @@ function Account() {
   return (
     <>
       <Navbar />
-      <main className="min-h-screen bg-slate-50 pt-[72px]">
-        <section className="relative isolate overflow-hidden py-14 sm:py-18 lg:py-22">
+      <main className="min-h-screen bg-slate-50 pt-[84px]">
+        <section className="relative isolate overflow-hidden py-12 sm:py-16 lg:py-20">
           <div className="subtle-grid absolute inset-0 -z-20 opacity-60" />
           <div className="absolute -right-24 -top-24 -z-10 size-80 rounded-full bg-brand-100/70 blur-3xl" />
           <div className="absolute -bottom-28 -left-24 -z-10 size-80 rounded-full bg-blue-100/60 blur-3xl" />
 
-          <div className="section-shell grid items-stretch gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="section-shell grid items-stretch gap-6 lg:grid-cols-[0.88fr_1.12fr]">
             <Motion.div
               initial={{ opacity: 0, x: -24 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              className="relative isolate overflow-hidden rounded-3xl bg-navy-950 p-7 text-white shadow-[0_34px_90px_-48px_rgba(7,21,47,0.85)] sm:p-10 lg:p-12"
+              className="relative isolate overflow-hidden rounded-[2.25rem] bg-navy-950 p-7 text-white shadow-[0_34px_90px_-48px_rgba(7,21,47,0.85)] sm:p-10 lg:p-12"
             >
               <div className="subtle-grid absolute inset-0 -z-20 opacity-10" />
               <div className="absolute -right-20 -top-20 -z-10 size-64 rounded-full bg-brand-600/30 blur-3xl" />
@@ -270,7 +270,7 @@ function Account() {
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.08 }}
-              className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_30px_80px_-50px_rgba(15,23,42,0.42)] sm:p-9 lg:p-10"
+              className="surface-card rounded-[2.25rem] p-6 sm:p-9 lg:p-10"
             >
               {!user && (
                 <div

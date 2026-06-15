@@ -1,5 +1,5 @@
 import { AnimatePresence, motion as Motion } from 'framer-motion'
-import { LogIn, Menu, X } from 'lucide-react'
+import { ArrowUpRight, LogIn, Menu, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import useAuth from '../context/useAuth'
@@ -86,18 +86,18 @@ function Navbar() {
   }
 
   return (
-    <header
-      className={`fixed inset-x-0 top-0 z-50 border-b transition-all duration-300 ${
-        isScrolled
-          ? 'border-slate-200/90 bg-white/95 shadow-[0_10px_30px_-18px_rgba(15,23,42,0.35)] backdrop-blur-xl'
-          : 'border-slate-200/70 bg-white/90 backdrop-blur-lg'
-      }`}
-    >
-      <div className="section-shell flex h-[72px] items-center justify-between gap-5">
+    <header className="fixed inset-x-0 top-0 z-50 px-2 pt-2 sm:px-4">
+      <div
+        className={`section-shell flex h-[68px] items-center justify-between gap-5 rounded-2xl border px-3 transition-all duration-300 sm:px-4 ${
+          isScrolled
+            ? 'border-slate-200/90 bg-white/95 shadow-[0_16px_42px_-24px_rgba(15,23,42,0.45)] backdrop-blur-xl'
+            : 'border-white/70 bg-white/85 shadow-[0_12px_34px_-28px_rgba(15,23,42,0.45)] backdrop-blur-xl'
+        }`}
+      >
         <Logo />
 
         <nav aria-label="Primary navigation" className="hidden xl:block">
-          <ul className="flex items-center gap-6">
+          <ul className="flex items-center gap-1 rounded-xl border border-slate-200/70 bg-slate-50/70 p-1">
             {links.map((link) => (
               <li key={link.label}>
                 <a
@@ -106,19 +106,13 @@ function Navbar() {
                   aria-current={
                     displayedActiveKey === link.key ? 'location' : undefined
                   }
-                  className={`relative py-6 text-[13px] font-bold transition-colors ${
+                  className={`relative rounded-lg px-3 py-2 text-[12px] font-extrabold transition-colors ${
                     displayedActiveKey === link.key
-                      ? 'text-brand-600'
+                      ? 'bg-white text-brand-600 shadow-sm'
                       : 'text-slate-600 hover:text-brand-600'
                   }`}
                 >
                   {link.label}
-                  {displayedActiveKey === link.key && (
-                    <Motion.span
-                      layoutId="active-nav"
-                      className="absolute inset-x-0 bottom-0 h-0.5 rounded-full bg-brand-600"
-                    />
-                  )}
                 </a>
               </li>
             ))}
@@ -126,7 +120,9 @@ function Navbar() {
         </nav>
 
         <div className="flex shrink-0 items-center gap-2">
-          <ThemeToggle />
+          <div className="hidden sm:block">
+            <ThemeToggle />
+          </div>
           <a
             href={canAccessAdmin ? '/admin' : '/account'}
             aria-current={
@@ -134,7 +130,7 @@ function Navbar() {
                 ? 'page'
                 : undefined
             }
-            className={`hidden shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-[11px] font-extrabold shadow-sm transition xl:inline-flex ${
+            className={`hidden min-h-11 shrink-0 items-center gap-1.5 rounded-xl px-4 py-2 text-[11px] font-extrabold shadow-sm transition hover:-translate-y-0.5 xl:inline-flex ${
               pathname === '/account'
                 ? 'bg-navy-900 text-white'
                 : 'bg-brand-600 text-white hover:bg-brand-700'
@@ -142,6 +138,7 @@ function Navbar() {
           >
             <LogIn size={14} aria-hidden="true" />
             {canAccessAdmin ? 'Dashboard' : user ? 'Account' : 'Sign In'}
+            <ArrowUpRight size={13} aria-hidden="true" />
           </a>
 
           <button
@@ -162,13 +159,13 @@ function Navbar() {
         {isOpen && (
           <Motion.div
             initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'calc(100vh - 72px)' }}
+            animate={{ opacity: 1, height: 'calc(100vh - 86px)' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.25 }}
-            className="overflow-hidden border-t border-slate-100 bg-white xl:hidden"
+            className="mobile-navigation-panel section-shell mt-2 overflow-hidden rounded-2xl border border-slate-200 shadow-2xl xl:hidden"
           >
             <nav
-              className="nav-scroll section-shell h-full overflow-y-auto py-6"
+              className="nav-scroll h-full overflow-y-auto p-4"
               aria-label="Mobile navigation"
             >
               <ul className="grid gap-1">
@@ -211,6 +208,12 @@ function Navbar() {
                     ? 'View Account'
                     : 'Log In / Sign Up'}
               </a>
+              <div className="mt-3 flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3 sm:hidden">
+                <span className="text-sm font-extrabold text-navy-900">
+                  Appearance
+                </span>
+                <ThemeToggle />
+              </div>
             </nav>
           </Motion.div>
         )}

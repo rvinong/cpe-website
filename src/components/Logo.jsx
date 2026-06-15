@@ -6,9 +6,9 @@ function Logo({ compact = false, light = false }) {
     profile.name.replace(/^NwSSU\s*/i, '').trim() || profile.name
 
   return (
-    <a href="/" className="group inline-flex items-center gap-3">
+    <a href="/" className="group inline-flex min-w-0 items-center gap-3">
       <span
-        className={`size-11 shrink-0 overflow-hidden rounded-xl border transition-transform duration-300 group-hover:-translate-y-0.5 ${
+        className={`size-10 shrink-0 overflow-hidden rounded-xl border transition-transform duration-300 group-hover:-translate-y-0.5 ${
           light
             ? 'border-white/20 shadow-lg shadow-black/20'
             : 'border-blue-200 shadow-lg shadow-blue-600/20'
@@ -21,7 +21,7 @@ function Logo({ compact = false, light = false }) {
         />
       </span>
       {!compact && (
-        <span className="leading-tight">
+        <span className="hidden min-w-0 leading-tight sm:block">
           <span
             className={`block text-[11px] font-bold tracking-[0.22em] uppercase ${
               light ? 'text-blue-200' : 'text-brand-600'
@@ -30,7 +30,7 @@ function Logo({ compact = false, light = false }) {
             NwSSU
           </span>
           <span
-            className={`block max-w-52 text-[13px] font-extrabold tracking-tight sm:text-sm ${
+            className={`block max-w-44 truncate text-[12px] font-extrabold tracking-tight sm:max-w-52 sm:text-[13px] ${
               light ? 'text-white' : 'text-navy-900'
             }`}
           >

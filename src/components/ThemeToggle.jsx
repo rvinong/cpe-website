@@ -14,7 +14,7 @@ function ThemeToggle() {
       aria-label={label}
       aria-pressed={isDark}
       title={label}
-      className="theme-toggle grid size-10 shrink-0 place-items-center rounded-lg border border-slate-200 bg-white/75 text-navy-900 shadow-sm backdrop-blur transition hover:border-brand-500 hover:text-brand-600"
+      className="theme-toggle grid size-11 shrink-0 place-items-center rounded-xl border border-slate-200 bg-white/75 text-navy-900 shadow-sm backdrop-blur transition hover:-translate-y-0.5 hover:border-brand-500 hover:text-brand-600"
     >
       <AnimatePresence mode="wait" initial={false}>
         <Motion.span

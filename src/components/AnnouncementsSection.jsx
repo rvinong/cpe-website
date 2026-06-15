@@ -7,7 +7,7 @@ function AnnouncementsSection() {
   const { announcements } = useAnnouncements(3)
 
   return (
-    <section id="announcements" className="bg-slate-50/70 py-24 sm:py-28">
+    <section id="announcements" className="bg-slate-50/70 py-24 sm:py-32">
       <div className="section-shell">
         <Reveal>
           <SectionHeader

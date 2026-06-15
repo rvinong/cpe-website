@@ -22,7 +22,7 @@ const iconMap = {
 
 function QuickAccess() {
   return (
-    <section id="quick-access" className="bg-white py-24 sm:py-28">
+    <section id="quick-access" className="bg-white py-24 sm:py-32">
       <div className="section-shell">
         <Reveal>
           <SectionHeader
@@ -43,15 +43,16 @@ function QuickAccess() {
                   href={item.href}
                   whileHover={{ y: -5 }}
                   transition={{ type: 'spring', stiffness: 320, damping: 23 }}
-                  className="group flex h-full min-h-48 flex-col rounded-2xl border border-slate-200 bg-white p-5 transition-colors duration-300 hover:border-brand-500 hover:bg-brand-50/40"
+                  className="surface-card group relative flex h-full min-h-52 flex-col overflow-hidden p-6 transition duration-300 hover:border-brand-500"
                 >
+                  <span className="absolute -right-6 -top-6 size-24 rounded-full bg-brand-50 transition duration-500 group-hover:scale-125" />
                   <span className="grid size-12 place-items-center rounded-xl bg-brand-50 text-brand-600 transition-transform duration-300 group-hover:-translate-y-1 group-hover:bg-brand-600 group-hover:text-white">
                     <Icon size={23} strokeWidth={1.7} aria-hidden="true" />
                   </span>
-                  <h3 className="mt-5 text-base font-extrabold text-navy-900">
+                  <h3 className="relative mt-6 text-base font-extrabold text-navy-900">
                     {item.title}
                   </h3>
-                  <p className="mt-2 text-sm leading-5 text-slate-500">
+                  <p className="relative mt-2 text-sm leading-6 text-slate-500">
                     {item.description}
                   </p>
                 </Motion.a>

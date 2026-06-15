@@ -7,15 +7,12 @@
       name="description"
       content="NwSSU Computer Engineering Organization student portal for announcements, events, resources, and academic opportunities."
     />
-    <meta name="theme-color" content="#0b1f46" />
+    <meta name="theme-color" content="#f7f9fc" />
     <script>
       ;(() => {
         try {
           const savedTheme = localStorage.getItem('nwssu-theme')
-          const prefersDark = window.matchMedia(
-            '(prefers-color-scheme: dark)',
-          ).matches
-          const isDark = savedTheme ? savedTheme === 'dark' : prefersDark
+          const isDark = savedTheme === 'dark'
 
           document.documentElement.classList.toggle('dark', isDark)
           document.documentElement.style.colorScheme = isDark

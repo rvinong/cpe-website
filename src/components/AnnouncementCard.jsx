@@ -27,10 +27,10 @@ function AnnouncementCard({ announcement, featured = false }) {
       onKeyDown={handleKeyDown}
       whileHover={{ y: featured ? -5 : -7 }}
       transition={{ type: 'spring', stiffness: 300, damping: 22 }}
-      className={`group cursor-pointer rounded-2xl border border-slate-200 bg-white outline-none transition-[border-color,box-shadow] duration-300 hover:border-brand-500 focus-visible:border-brand-500 focus-visible:ring-4 focus-visible:ring-brand-100 ${
+      className={`surface-card group cursor-pointer outline-none transition-[border-color,box-shadow] duration-300 hover:border-brand-500 focus-visible:border-brand-500 focus-visible:ring-4 focus-visible:ring-brand-100 ${
         featured
-          ? 'p-7 shadow-[0_24px_70px_-42px_rgba(15,23,42,0.5)] hover:shadow-[0_30px_75px_-35px_rgba(21,94,239,0.28)] sm:p-9 lg:p-10'
-          : 'flex h-full flex-col p-7 shadow-[0_18px_55px_-35px_rgba(15,23,42,0.38)] hover:shadow-[0_26px_65px_-30px_rgba(15,23,42,0.28)]'
+          ? 'p-7 hover:shadow-[0_30px_75px_-35px_rgba(21,94,239,0.28)] sm:p-9 lg:p-10'
+          : 'flex h-full flex-col p-7 hover:shadow-[0_26px_65px_-30px_rgba(21,94,239,0.22)]'
       }`}
     >
       <div
@@ -85,7 +85,7 @@ function AnnouncementCard({ announcement, featured = false }) {
           to={detailsPath}
           className={
             featured
-              ? 'inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-blue-600/20 transition hover:bg-brand-700'
+              ? 'primary-button shrink-0 px-5 py-3.5'
               : 'mt-6 inline-flex self-start items-center justify-center gap-2 rounded-xl border border-blue-200 bg-brand-50 px-4 py-3 text-sm font-extrabold text-brand-700 shadow-sm transition hover:border-brand-500 hover:bg-brand-600 hover:text-white'
           }
         >

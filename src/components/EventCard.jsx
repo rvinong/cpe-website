@@ -13,7 +13,8 @@ const timingStyles = {
 
 function EventCard({ event, compact = false }) {
   return (
-    <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_18px_55px_-38px_rgba(15,23,42,0.35)]">
+    <article className="surface-card group flex h-full flex-col overflow-hidden transition duration-300 hover:-translate-y-1 hover:border-brand-500">
+      <div className="h-1 bg-gradient-to-r from-brand-600 via-blue-400 to-orange-400" />
       <div className="flex flex-1 flex-col p-6 sm:p-7">
         <div className="flex flex-wrap items-center gap-2">
           <span

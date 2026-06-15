@@ -20,6 +20,7 @@ import { useEffect, useState } from 'react'
 import CurriculumTable from '../components/CurriculumTable'
 import Footer from '../components/Footer'
 import Navbar from '../components/Navbar'
+import PageHero from '../components/PageHero'
 import useAuth from '../context/useAuth'
 import {
   curriculumMeta,
@@ -108,61 +109,32 @@ function StudentPortal() {
   return (
     <>
       <Navbar />
-      <main className="pt-[72px]">
-        <section className="relative isolate overflow-hidden border-b border-blue-100 bg-gradient-to-br from-white via-brand-50/70 to-blue-100/60 py-20 sm:py-24 lg:py-28">
-          <div className="subtle-grid absolute inset-0 -z-20 opacity-60" />
-          <div className="absolute -right-24 -top-24 -z-10 size-80 rounded-full bg-brand-100/70 blur-3xl" />
-          <div className="section-shell grid items-center gap-12 lg:grid-cols-[1fr_auto]">
-            <Motion.div
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <p className="text-xs font-extrabold tracking-[0.22em] text-brand-600 uppercase">
-                Academic access
-              </p>
-              <h1 className="mt-4 text-5xl font-black tracking-[-0.055em] text-navy-900 sm:text-6xl">
-                Student Portal
-              </h1>
-              <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600">
-                Access organization learning resources and explore the
-                Computer Engineering curriculum by year and semester.
-              </p>
-
-              <div className="mt-8 flex flex-wrap gap-3">
+      <main className="pt-[84px]">
+        <PageHero
+          eyebrow="Academic access"
+          title="Student Portal"
+          description="Access organization learning resources and explore the Computer Engineering curriculum by year and semester."
+          icon={BookOpen}
+          accentIcon={ShieldCheck}
+          actions={
+            <>
                 <a
                   href="#resources"
-                  className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-blue-600/20 transition hover:bg-brand-700"
+                  className="primary-button"
                 >
                   <LibraryBig size={18} aria-hidden="true" />
                   Resources
                 </a>
                 <a
                   href="#curriculum"
-                  className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-white/85 px-5 py-3.5 text-sm font-extrabold text-navy-900 transition hover:border-brand-500 hover:text-brand-600"
+                  className="secondary-button"
                 >
                   <GraduationCap size={18} aria-hidden="true" />
                   Curriculum
                 </a>
-              </div>
-            </Motion.div>
-
-            <Motion.div
-              initial={{ opacity: 0, scale: 0.9, rotate: -4 }}
-              animate={{ opacity: 1, scale: 1, rotate: 0 }}
-              transition={{ duration: 0.65, delay: 0.12 }}
-              className="relative hidden size-48 place-items-center rounded-[2.25rem] border border-white/80 bg-white/75 text-brand-600 shadow-[0_28px_70px_-36px_rgba(21,94,239,0.55)] backdrop-blur lg:grid"
-              aria-hidden="true"
-            >
-              <span className="absolute inset-5 rounded-[1.7rem] border border-dashed border-blue-200" />
-              <BookOpen size={68} strokeWidth={1.35} />
-              <ShieldCheck
-                size={25}
-                className="absolute right-8 top-8 text-emerald-500"
-              />
-            </Motion.div>
-          </div>
-        </section>
+            </>
+          }
+        />
 
         <section id="resources" className="scroll-mt-22 bg-white py-20 sm:py-24">
           <div className="section-shell">

@@ -41,7 +41,7 @@ const programs = [
 
 function FeaturedPrograms() {
   return (
-    <section id="programs" className="bg-white py-24 sm:py-28">
+    <section id="programs" className="bg-white py-24 sm:py-32">
       <div className="section-shell">
         <Reveal>
           <SectionHeader
@@ -60,7 +60,7 @@ function FeaturedPrograms() {
               <Reveal key={program.title} delay={index * 0.07}>
                 <Motion.article
                   whileHover={{ y: -6 }}
-                  className="h-full rounded-2xl border border-slate-200 bg-white p-7 transition hover:border-slate-300 hover:shadow-[0_22px_55px_-34px_rgba(15,23,42,0.35)]"
+                  className="surface-card h-full p-7 transition hover:border-brand-500 hover:shadow-[0_26px_65px_-36px_rgba(21,94,239,0.3)]"
                 >
                   <span
                     className={`grid size-13 place-items-center rounded-2xl ring-1 ${program.accent}`}

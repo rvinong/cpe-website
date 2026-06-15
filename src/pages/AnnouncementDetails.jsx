@@ -18,7 +18,7 @@ function AnnouncementDetails() {
     return (
       <>
         <Navbar />
-        <main className="grid min-h-[70vh] place-items-center bg-slate-50 pt-[72px]">
+        <main className="grid min-h-[70vh] place-items-center bg-slate-50 pt-[84px]">
           <LoaderCircle
             size={32}
             className="animate-spin text-brand-600"

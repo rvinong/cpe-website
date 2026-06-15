@@ -30,10 +30,10 @@ function GlanceSection() {
   ]
 
   return (
-    <section id="about" className="bg-white py-10 pb-24 sm:pb-28">
+    <section id="about" className="bg-white py-12 pb-24 sm:pb-32">
       <div className="section-shell">
         <Reveal>
-          <div className="relative isolate overflow-hidden rounded-[2rem] bg-navy-950 px-6 py-14 shadow-[0_34px_80px_-40px_rgba(7,21,47,0.85)] sm:px-10 lg:px-14 lg:py-16">
+          <div className="relative isolate overflow-hidden rounded-[2.5rem] bg-navy-950 px-6 py-14 shadow-[0_34px_80px_-40px_rgba(7,21,47,0.85)] sm:px-10 lg:px-14 lg:py-18">
             <img
               src="/images/ce-campus-hero.png"
               alt=""

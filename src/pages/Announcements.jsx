@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import AnnouncementCard from '../components/AnnouncementCard'
 import Footer from '../components/Footer'
 import Navbar from '../components/Navbar'
+import PageHero from '../components/PageHero'
 import { announcementCategories } from '../data/announcements'
 import { useAnnouncements } from '../hooks/useAnnouncements'
 
@@ -46,44 +47,14 @@ function Announcements() {
   return (
     <>
       <Navbar />
-      <main className="pt-[72px]">
-        <section className="relative isolate overflow-hidden border-b border-blue-100 bg-gradient-to-br from-white via-brand-50/70 to-blue-100/60 py-20 sm:py-24 lg:py-28">
-          <div className="subtle-grid absolute inset-0 -z-20 opacity-60" />
-          <div className="absolute -right-24 -top-24 -z-10 size-80 rounded-full bg-brand-100/70 blur-3xl" />
-          <div className="section-shell grid items-center gap-12 lg:grid-cols-[1fr_auto]">
-            <Motion.div
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <p className="text-xs font-extrabold tracking-[0.22em] text-brand-600 uppercase">
-                Stay informed
-              </p>
-              <h1 className="mt-4 text-5xl font-black tracking-[-0.055em] text-navy-900 sm:text-6xl">
-                Announcements
-              </h1>
-              <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600">
-                Stay updated with the latest news, events, opportunities, and
-                important notices from the organization.
-              </p>
-            </Motion.div>
-
-            <Motion.div
-              initial={{ opacity: 0, scale: 0.9, rotate: -5 }}
-              animate={{ opacity: 1, scale: 1, rotate: 0 }}
-              transition={{ duration: 0.65, delay: 0.12 }}
-              className="relative hidden size-48 place-items-center rounded-[2.25rem] border border-white/80 bg-white/75 text-brand-600 shadow-[0_28px_70px_-36px_rgba(21,94,239,0.55)] backdrop-blur lg:grid"
-              aria-hidden="true"
-            >
-              <span className="absolute inset-5 rounded-[1.7rem] border border-dashed border-blue-200" />
-              <Megaphone size={68} strokeWidth={1.4} />
-              <Bell
-                size={24}
-                className="absolute right-8 top-8 text-blue-300"
-              />
-            </Motion.div>
-          </div>
-        </section>
+      <main className="pt-[84px]">
+        <PageHero
+          eyebrow="Stay informed"
+          title="Announcements"
+          description="Stay updated with the latest news, events, opportunities, and important notices from the organization."
+          icon={Megaphone}
+          accentIcon={Bell}
+        />
 
         <section className="bg-white py-14 sm:py-16">
           <div className="section-shell">

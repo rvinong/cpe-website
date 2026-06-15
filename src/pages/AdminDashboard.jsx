@@ -164,24 +164,24 @@ function AdminDashboard() {
   return (
     <div className="min-h-screen bg-slate-50">
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 border-r border-slate-200 bg-white transition-transform duration-300 lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-72 border-r border-white/10 bg-navy-950 text-white shadow-2xl transition-transform duration-300 lg:translate-x-0 ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="flex h-[72px] items-center justify-between border-b border-slate-200 px-5">
-          <Logo />
+        <div className="flex h-[76px] items-center justify-between border-b border-white/10 px-5">
+          <Logo light />
           <button
             type="button"
             onClick={() => setIsSidebarOpen(false)}
-            className="grid size-10 place-items-center rounded-lg border border-slate-200 text-navy-900 lg:hidden"
+            className="grid size-10 place-items-center rounded-xl border border-white/15 bg-white/5 text-white lg:hidden"
             aria-label="Close admin navigation"
           >
             <X size={20} />
           </button>
         </div>
 
-        <div className="flex h-[calc(100vh-72px)] flex-col p-4">
-          <div className="rounded-2xl bg-brand-50 p-4">
+        <div className="flex h-[calc(100vh-76px)] flex-col p-4">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.07] p-4">
             <div className="flex items-center gap-3">
               <StaffAvatar
                 path={profile?.avatar_path}
@@ -190,10 +190,10 @@ function AdminDashboard() {
                 textClassName="text-xs"
               />
               <div className="min-w-0">
-                <p className="truncate text-sm font-extrabold text-navy-900">
+                <p className="truncate text-sm font-extrabold text-white">
                   {displayName}
                 </p>
-                <p className="mt-0.5 text-xs font-bold text-brand-600 capitalize">
+                <p className="mt-0.5 text-xs font-bold text-blue-300 capitalize">
                   {profile?.role} access
                 </p>
               </div>
@@ -201,7 +201,7 @@ function AdminDashboard() {
           </div>
 
           <nav className="nav-scroll mt-5 flex-1 overflow-y-auto">
-            <p className="px-3 text-[10px] font-extrabold tracking-[0.18em] text-slate-400 uppercase">
+            <p className="px-3 text-[10px] font-extrabold tracking-[0.18em] text-slate-500 uppercase">
               Content management
             </p>
             <ul className="mt-2 grid gap-1">
@@ -229,10 +229,10 @@ function AdminDashboard() {
                         }}
                         className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-bold transition ${
                           isActive
-                            ? 'bg-brand-600 text-white shadow-md shadow-blue-600/15'
+                            ? 'bg-brand-600 text-white shadow-lg shadow-blue-950/35'
                             : canOpen
-                              ? 'text-slate-600 hover:bg-brand-50 hover:text-brand-600'
-                              : 'cursor-not-allowed text-slate-500 opacity-65'
+                              ? 'text-slate-300 hover:bg-white/10 hover:text-white'
+                              : 'cursor-not-allowed text-slate-600 opacity-65'
                         }`}
                       >
                         <Icon size={18} aria-hidden="true" />
@@ -248,7 +248,7 @@ function AdminDashboard() {
           <button
             type="button"
             onClick={handleSignOut}
-            className="mt-4 flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-extrabold text-slate-600 transition hover:border-brand-500 hover:text-brand-600"
+            className="mt-4 flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-extrabold text-slate-300 transition hover:border-red-400/40 hover:bg-red-500/10 hover:text-red-200"
           >
             <LogOut size={17} aria-hidden="true" />
             Sign out
@@ -266,12 +266,12 @@ function AdminDashboard() {
       )}
 
       <div className="lg:pl-72">
-        <header className="sticky top-0 z-30 flex h-[72px] items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
+        <header className="sticky top-0 z-30 flex h-[76px] items-center justify-between border-b border-slate-200 bg-white/90 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => setIsSidebarOpen(true)}
-              className="grid size-10 place-items-center rounded-lg border border-slate-200 text-navy-900 lg:hidden"
+              className="grid size-10 place-items-center rounded-xl border border-slate-200 bg-white text-navy-900 lg:hidden"
               aria-label="Open admin navigation"
             >
               <Menu size={20} />
@@ -288,7 +288,7 @@ function AdminDashboard() {
           <ThemeToggle />
         </header>
 
-        <main className="px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+        <main className="px-4 py-7 sm:px-6 lg:px-8 lg:py-9">
           {activeSection === 'announcements' ? (
             <AdminAnnouncements />
           ) : activeSection === 'events' ? (
@@ -307,7 +307,7 @@ function AdminDashboard() {
             <AdminUsers />
           ) : (
             <div className="mx-auto max-w-7xl">
-              <section className="relative isolate overflow-hidden rounded-3xl bg-navy-950 px-6 py-9 text-white shadow-[0_30px_80px_-45px_rgba(7,21,47,0.75)] sm:px-9">
+              <section className="relative isolate overflow-hidden rounded-[2rem] bg-navy-950 px-6 py-9 text-white shadow-[0_30px_80px_-45px_rgba(7,21,47,0.75)] sm:px-9 lg:py-11">
                 <div className="subtle-grid absolute inset-0 -z-20 opacity-10" />
                 <div className="absolute -right-20 -top-24 -z-10 size-72 rounded-full bg-brand-600/25 blur-3xl" />
                 <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
@@ -339,7 +339,7 @@ function AdminDashboard() {
                 ].map(([label, value, detail]) => (
                   <article
                     key={label}
-                    className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_18px_55px_-42px_rgba(15,23,42,0.28)]"
+                    className="surface-card p-5"
                   >
                     <p className="text-xs font-extrabold tracking-wide text-slate-400 uppercase">
                       {label}
@@ -381,10 +381,10 @@ function AdminDashboard() {
                   }) => (
                     <article
                       key={title}
-                      className="rounded-2xl border border-slate-200 bg-white p-6"
+                      className="surface-card group p-6 transition hover:-translate-y-1 hover:border-brand-500"
                     >
                       <div className="flex items-start justify-between gap-4">
-                        <span className="grid size-12 place-items-center rounded-xl bg-brand-50 text-brand-600">
+                        <span className="grid size-12 place-items-center rounded-xl bg-brand-50 text-brand-600 transition group-hover:bg-brand-600 group-hover:text-white">
                           <Icon size={22} aria-hidden="true" />
                         </span>
                         <span className="rounded-full bg-brand-50 px-3 py-1.5 text-[10px] font-extrabold tracking-wide text-brand-600 uppercase">

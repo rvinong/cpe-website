@@ -16,7 +16,7 @@ function UpcomingEvents() {
   const homepageEvents = upcoming.slice(0, 3)
 
   return (
-    <section id="events" className="bg-slate-50/70 py-24 sm:py-28">
+    <section id="events" className="bg-slate-50/70 py-24 sm:py-32">
       <div className="section-shell">
         <Reveal>
           <SectionHeader
@@ -48,7 +48,7 @@ function UpcomingEvents() {
           <Reveal delay={0.08}>
             <Motion.div
               whileHover={{ y: -3 }}
-              className="relative isolate overflow-hidden rounded-3xl border border-blue-100 bg-white px-6 py-12 text-center shadow-[0_24px_70px_-45px_rgba(15,23,42,0.4)] sm:px-10 sm:py-14"
+              className="surface-card relative isolate overflow-hidden px-6 py-12 text-center sm:px-10 sm:py-14"
             >
               <div className="subtle-grid absolute inset-0 -z-20 opacity-45" />
               <div className="absolute -right-16 -top-20 -z-10 size-56 rounded-full bg-amber-100/70 blur-3xl" />

@@ -15,7 +15,7 @@ function ThemeProvider({ children }) {
     localStorage.setItem('nwssu-theme', theme)
 
     const themeColor = document.querySelector('meta[name="theme-color"]')
-    themeColor?.setAttribute('content', isDark ? '#07111f' : '#0b1f46')
+    themeColor?.setAttribute('content', isDark ? '#07111f' : '#f7f9fc')
   }, [theme])
 
   const toggleTheme = () => {

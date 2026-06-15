@@ -6,8 +6,8 @@ import {
   MapPin,
   MessageCircle,
   Play,
+  Sparkles,
 } from 'lucide-react'
-import { useState } from 'react'
 import useOrganization from '../context/useOrganization'
 import Logo from './Logo'
 
@@ -44,8 +44,6 @@ const quickLinkHrefs = {
 
 function Footer() {
   const { profile } = useOrganization()
-  const [email, setEmail] = useState('')
-  const [message, setMessage] = useState('')
   const socialLinks = [
     { label: 'Facebook', icon: MessageCircle, href: profile.facebookUrl },
     { label: 'Instagram', icon: Camera, href: profile.instagramUrl },
@@ -53,15 +51,49 @@ function Footer() {
     { label: 'LinkedIn', icon: Briefcase, href: profile.linkedinUrl },
   ].filter((link) => link.href)
 
-  const handleSubmit = (event) => {
-    event.preventDefault()
-    setMessage('Thanks for joining our newsletter.')
-    setEmail('')
-  }
-
   return (
-    <footer id="footer" className="bg-navy-950 text-white">
-      <div className="section-shell grid gap-10 py-16 sm:grid-cols-2 lg:grid-cols-[1.35fr_0.8fr_0.8fr_1.15fr_1.2fr] lg:gap-8 lg:py-20">
+    <footer
+      id="footer"
+      className="relative isolate overflow-hidden bg-navy-950 text-white"
+    >
+      <div className="subtle-grid absolute inset-0 -z-20 opacity-10" />
+      <div className="absolute -right-28 top-20 -z-10 size-96 rounded-full bg-brand-600/15 blur-3xl" />
+
+      <div className="section-shell pt-14 sm:pt-18">
+        <div className="relative isolate overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.07] px-6 py-8 backdrop-blur-sm sm:px-9 lg:flex lg:items-center lg:justify-between lg:gap-10">
+          <div className="absolute -right-16 -top-24 -z-10 size-72 rounded-full bg-orange-500/15 blur-3xl" />
+          <div className="flex items-start gap-4">
+            <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-white/10 text-orange-400">
+              <Sparkles size={22} aria-hidden="true" />
+            </span>
+            <div>
+              <p className="text-xs font-extrabold tracking-[0.18em] text-blue-300 uppercase">
+                Built for the CPE community
+              </p>
+              <h2 className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">
+                Everything students need, in one connected portal.
+              </h2>
+            </div>
+          </div>
+          <div className="mt-6 flex flex-wrap gap-3 lg:mt-0">
+            <a
+              href="/student-portal"
+              className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-extrabold text-navy-900 transition hover:-translate-y-0.5 hover:bg-blue-50"
+            >
+              Student portal
+              <ArrowRight size={17} aria-hidden="true" />
+            </a>
+            <a
+              href="/account?mode=signup"
+              className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-extrabold text-white transition hover:-translate-y-0.5 hover:bg-white/15"
+            >
+              Create account
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div className="section-shell grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-[1.45fr_0.8fr_0.8fr_1.15fr] lg:gap-10 lg:py-16">
         <div>
           <Logo light />
           <p className="mt-5 max-w-xs text-sm leading-6 text-slate-400">
@@ -158,45 +190,6 @@ function Footer() {
           </ul>
         </div>
 
-        <div id="newsletter">
-          <h3 className="text-sm font-extrabold">Newsletter</h3>
-          <p className="mt-5 text-sm leading-6 text-slate-400">
-            Get organization updates and opportunities delivered to your
-            inbox.
-          </p>
-          <form className="mt-5" onSubmit={handleSubmit}>
-            <label htmlFor="newsletter-email" className="sr-only">
-              Email address
-            </label>
-            <div className="flex rounded-xl border border-white/10 bg-white/[0.06] p-1.5 focus-within:border-blue-400">
-              <input
-                id="newsletter-email"
-                type="email"
-                required
-                value={email}
-                onChange={(event) => {
-                  setEmail(event.target.value)
-                  setMessage('')
-                }}
-                placeholder="Email address"
-                className="min-w-0 flex-1 bg-transparent px-3 text-sm text-white outline-none placeholder:text-slate-500"
-              />
-              <button
-                type="submit"
-                aria-label="Subscribe to newsletter"
-                className="grid size-10 shrink-0 place-items-center rounded-lg bg-brand-600 text-white transition hover:bg-brand-500"
-              >
-                <ArrowRight size={17} aria-hidden="true" />
-              </button>
-            </div>
-            <p
-              className="mt-2 min-h-5 text-xs text-blue-200"
-              aria-live="polite"
-            >
-              {message}
-            </p>
-          </form>
-        </div>
       </div>
 
       <div className="border-t border-white/10">
