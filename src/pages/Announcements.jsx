@@ -39,8 +39,14 @@ function Announcements() {
     })
   }, [announcements, searchTerm, selectedCategory])
 
-  const featuredAnnouncement = filteredAnnouncements[0]
-  const remainingAnnouncements = filteredAnnouncements.slice(1)
+  const featuredAnnouncement = filteredAnnouncements.find(
+    (announcement) => announcement.isFeatured,
+  )
+  const remainingAnnouncements = featuredAnnouncement
+    ? filteredAnnouncements.filter(
+        (announcement) => announcement.id !== featuredAnnouncement.id,
+      )
+    : filteredAnnouncements
 
   return (
     <>

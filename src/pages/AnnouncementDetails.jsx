@@ -43,7 +43,7 @@ function AnnouncementDetails() {
           </p>
           <Link
             to="/announcements"
-            className="mt-7 inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-3.5 text-sm font-extrabold text-white transition hover:bg-brand-700"
+            className="primary-button mt-7"
           >
             <ArrowLeft size={17} aria-hidden="true" />
             Back to Announcements
@@ -64,7 +64,7 @@ function AnnouncementDetails() {
         >
           <Link
             to="/announcements"
-            className="inline-flex items-center gap-2 text-sm font-extrabold text-brand-600 transition hover:text-brand-700"
+            className="secondary-button"
           >
             <ArrowLeft size={17} aria-hidden="true" />
             Back to Announcements
@@ -103,7 +103,7 @@ function AnnouncementDetails() {
               <div className="mt-10 border-t border-slate-100 pt-8">
                 <Link
                   to="/announcements"
-                  className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-blue-600/20 transition hover:bg-brand-700"
+                  className="primary-button"
                 >
                   <ArrowLeft size={17} aria-hidden="true" />
                   Back to Announcements

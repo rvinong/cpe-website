@@ -86,7 +86,7 @@ function AnnouncementCard({ announcement, featured = false }) {
           className={
             featured
               ? 'primary-button shrink-0 px-5 py-3.5'
-              : 'mt-6 inline-flex self-start items-center justify-center gap-2 rounded-xl border border-blue-200 bg-brand-50 px-4 py-3 text-sm font-extrabold text-brand-700 shadow-sm transition hover:border-brand-500 hover:bg-brand-600 hover:text-white'
+              : 'secondary-button mt-6 self-start border-blue-200 bg-brand-50 text-brand-700 shadow-sm hover:border-brand-500 hover:bg-brand-600 hover:text-white'
           }
         >
           {featured ? 'Read Full Details' : 'Read more'}

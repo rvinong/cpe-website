@@ -13,6 +13,7 @@ export const announcements = [
     id: 'website-coming-soon',
     title: 'Website Coming Soon',
     category: 'Website Update',
+    isFeatured: true,
     date: 'June 2026',
     summary:
       'Our Computer Engineering Organization website is currently under development.',
