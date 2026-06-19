@@ -33,8 +33,7 @@ function Navbar() {
   const isHomePage = pathname === '/'
   const [isScrolled, setIsScrolled] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
-  const [activeSectionKey, setActiveSectionKey] = useState('home')
-  const routeActiveKey =
+  const displayedActiveKey =
     pathname === '/account'
       ? null
       : pathname.startsWith('/announcements')
@@ -50,7 +49,6 @@ function Navbar() {
       : pathname === '/student-portal'
           ? 'portal'
           : 'home'
-  const displayedActiveKey = isHomePage ? activeSectionKey : routeActiveKey
 
   const getLinkHref = (link) => {
     if (link.key === 'announcements') return '/announcements'
@@ -63,42 +61,17 @@ function Navbar() {
   }
 
   useEffect(() => {
-    let animationFrame
-
-    const updateNavigationState = () => {
-      setIsScrolled(window.scrollY > 12)
-
-      if (!isHomePage) return
-
-      const marker = window.scrollY + Math.min(window.innerHeight * 0.3, 240)
-      let nextActiveKey = 'home'
-
-      links.forEach((link) => {
-        const section = document.getElementById(link.sectionId)
-        if (!section) return
-
-        const sectionTop = section.getBoundingClientRect().top + window.scrollY
-        if (sectionTop <= marker) nextActiveKey = link.key
-      })
-
-      setActiveSectionKey(nextActiveKey)
-    }
-
     const handleScroll = () => {
-      window.cancelAnimationFrame(animationFrame)
-      animationFrame = window.requestAnimationFrame(updateNavigationState)
+      setIsScrolled(window.scrollY > 12)
     }
 
-    updateNavigationState()
+    handleScroll()
     window.addEventListener('scroll', handleScroll, { passive: true })
-    window.addEventListener('resize', handleScroll)
 
     return () => {
-      window.cancelAnimationFrame(animationFrame)
       window.removeEventListener('scroll', handleScroll)
-      window.removeEventListener('resize', handleScroll)
     }
-  }, [isHomePage])
+  }, [])
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? 'hidden' : ''
