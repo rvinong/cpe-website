@@ -2,10 +2,12 @@ import {
   ArrowRight,
   Briefcase,
   Camera,
+  CheckCircle2,
   Mail,
   MapPin,
   MessageCircle,
   Play,
+  ShieldCheck,
   Sparkles,
 } from 'lucide-react'
 import useOrganization from '../context/useOrganization'
@@ -50,6 +52,23 @@ function Footer() {
     { label: 'YouTube', icon: Play, href: profile.youtubeUrl },
     { label: 'LinkedIn', icon: Briefcase, href: profile.linkedinUrl },
   ].filter((link) => link.href)
+  const officialSignals = [
+    {
+      label: 'Official student portal',
+      detail: `Managed for the ${profile.name}.`,
+      icon: ShieldCheck,
+    },
+    {
+      label: 'Verified information',
+      detail: 'Announcements, resources, and records are approved before posting.',
+      icon: CheckCircle2,
+    },
+    {
+      label: 'Campus-based community',
+      detail: profile.campusAddress || 'Northwest Samar State University',
+      icon: MapPin,
+    },
+  ]
 
   return (
     <footer
@@ -90,6 +109,23 @@ function Footer() {
               Create account
             </a>
           </div>
+        </div>
+
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
+          {officialSignals.map(({ label, detail, icon: Icon }) => (
+            <div
+              key={label}
+              className="group rounded-2xl border border-white/10 bg-white/[0.055] p-4 backdrop-blur-sm transition duration-300 hover:-translate-y-1 hover:border-blue-300/35 hover:bg-white/[0.085]"
+            >
+              <span className="grid size-10 place-items-center rounded-xl bg-white/10 text-blue-200 transition group-hover:bg-brand-600 group-hover:text-white">
+                <Icon size={18} aria-hidden="true" />
+              </span>
+              <p className="mt-3 text-sm font-extrabold text-white">{label}</p>
+              <p className="mt-1 text-xs leading-5 text-slate-400">
+                {detail}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
 

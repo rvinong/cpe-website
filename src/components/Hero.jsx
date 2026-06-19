@@ -2,8 +2,10 @@ import { motion as Motion } from 'framer-motion'
 import {
   ArrowRight,
   CalendarDays,
+  CheckCircle2,
   CircuitBoard,
   Megaphone,
+  ShieldCheck,
   Sparkles,
   UsersRound,
 } from 'lucide-react'
@@ -34,6 +36,15 @@ function Hero() {
   const latestAnnouncementPath = latestAnnouncement
     ? `/announcements/${latestAnnouncement.id}`
     : '/announcements'
+  const trustSignals = [
+    [ShieldCheck, 'Official portal', 'Managed for CpE students'],
+    [CheckCircle2, 'Verified updates', 'Approved notices and records'],
+    [
+      UsersRound,
+      'Student-led',
+      `${stats.members.value}${stats.members.suffix} student innovators`,
+    ],
+  ]
 
   return (
     <section
@@ -149,6 +160,32 @@ function Hero() {
               </strong>{' '}
               student innovators
             </span>
+          </Motion.div>
+
+          <Motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.78, duration: 0.55 }}
+            className="mt-6 grid max-w-2xl gap-3 sm:grid-cols-3"
+          >
+            {trustSignals.map(([Icon, title, detail]) => (
+              <Motion.div
+                key={title}
+                whileHover={{ y: -4, scale: 1.015 }}
+                transition={{ type: 'spring', stiffness: 330, damping: 24 }}
+                className="group rounded-2xl border border-white/70 bg-white/75 p-3 shadow-sm backdrop-blur transition hover:border-brand-200 hover:bg-white/90 hover:shadow-[0_18px_45px_-32px_rgba(21,94,239,0.45)]"
+              >
+                <span className="grid size-9 place-items-center rounded-xl bg-brand-50 text-brand-600 transition group-hover:-translate-y-0.5 group-hover:bg-brand-600 group-hover:text-white">
+                  <Icon size={17} aria-hidden="true" />
+                </span>
+                <p className="mt-3 text-xs font-extrabold text-navy-900">
+                  {title}
+                </p>
+                <p className="mt-1 text-[11px] leading-5 text-slate-500">
+                  {detail}
+                </p>
+              </Motion.div>
+            ))}
           </Motion.div>
         </div>
 
