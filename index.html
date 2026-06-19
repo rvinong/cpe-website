@@ -18,6 +18,9 @@
           document.documentElement.style.colorScheme = isDark
             ? 'dark'
             : 'light'
+          document
+            .querySelector('meta[name="theme-color"]')
+            ?.setAttribute('content', isDark ? '#060d19' : '#f7f9fc')
         } catch {
           document.documentElement.classList.remove('dark')
         }
