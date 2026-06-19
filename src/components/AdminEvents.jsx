@@ -1,14 +1,17 @@
 import {
   CalendarCheck2,
   CalendarDays,
+  CalendarOff,
   CirclePlus,
   Clock3,
   Edit3,
   ExternalLink,
+  Filter,
   FileText,
   LoaderCircle,
   MapPin,
   Save,
+  Search,
   Star,
   Trash2,
   X,
@@ -45,6 +48,27 @@ const statusStyles = {
   archived: 'bg-slate-100 text-slate-600 ring-slate-200',
 }
 
+const timingStyles = {
+  upcoming: 'bg-blue-50 text-blue-700 ring-blue-200',
+  completed: 'bg-slate-100 text-slate-600 ring-slate-200',
+  cancelled: 'bg-red-50 text-red-700 ring-red-200',
+}
+
+const statusFilters = [
+  ['all', 'All statuses'],
+  ['draft', 'Drafts'],
+  ['published', 'Published'],
+  ['cancelled', 'Cancelled'],
+  ['archived', 'Archived'],
+]
+
+const timingFilters = [
+  ['all', 'All timing'],
+  ['upcoming', 'Upcoming'],
+  ['completed', 'Completed'],
+  ['featured', 'Featured'],
+]
+
 const inputClassName =
   'mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-navy-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-100'
 
@@ -79,6 +103,14 @@ function formatAdminDate(value) {
   }).format(new Date(value))
 }
 
+function getTimingLabel(item) {
+  const timing = getEventTiming(item)
+
+  if (timing === 'completed') return 'Completed'
+  if (timing === 'cancelled') return 'Changed'
+  return 'Upcoming'
+}
+
 function AdminEvents() {
   const [items, setItems] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -86,6 +118,9 @@ function AdminEvents() {
   const [isEditorOpen, setIsEditorOpen] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
   const [form, setForm] = useState(emptyForm)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedStatus, setSelectedStatus] = useState('all')
+  const [selectedTiming, setSelectedTiming] = useState('all')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [needsSchema, setNeedsSchema] = useState(false)
@@ -139,9 +174,41 @@ function AdminEvents() {
       ).length,
       published: items.filter((item) => item.status === 'published').length,
       drafts: items.filter((item) => item.status === 'draft').length,
+      featured: items.filter((item) => item.is_featured).length,
     }),
     [items],
   )
+
+  const filteredItems = useMemo(() => {
+    const normalizedSearch = searchTerm.trim().toLowerCase()
+
+    return items.filter((item) => {
+      const timing = getEventTiming(item)
+      const matchesStatus =
+        selectedStatus === 'all' || item.status === selectedStatus
+      const matchesTiming =
+        selectedTiming === 'all' ||
+        (selectedTiming === 'featured'
+          ? item.is_featured
+          : timing === selectedTiming)
+      const matchesSearch =
+        !normalizedSearch ||
+        [
+          item.title,
+          item.summary,
+          item.description,
+          item.venue,
+          item.category,
+          item.status,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase()
+          .includes(normalizedSearch)
+
+      return matchesStatus && matchesTiming && matchesSearch
+    })
+  }, [items, searchTerm, selectedStatus, selectedTiming])
 
   const openCreateEditor = () => {
     setEditingItem(null)
@@ -304,12 +371,13 @@ function AdminEvents() {
         </div>
       )}
 
-      <section className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="mt-7 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         {[
           ['All events', counts.all, FileText],
           ['Upcoming', counts.upcoming, CalendarCheck2],
           ['Published', counts.published, CalendarDays],
           ['Drafts', counts.drafts, Clock3],
+          ['Featured', counts.featured, Star],
         ].map(([label, value, Icon]) => (
           <article
             key={label}
@@ -333,7 +401,7 @@ function AdminEvents() {
           <div>
             <h3 className="font-black text-navy-900">Event schedule</h3>
             <p className="mt-1 text-xs text-slate-500">
-              Ordered by event date
+              Ordered by event date. Use filters to review what needs action.
             </p>
           </div>
           <CalendarDays
@@ -342,6 +410,88 @@ function AdminEvents() {
             aria-hidden="true"
           />
         </div>
+
+        {!isLoading && items.length > 0 && (
+          <div className="border-b border-slate-200 bg-slate-50/70 px-5 py-5 sm:px-6">
+            <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
+              <label className="relative block">
+                <span className="sr-only">Search events</span>
+                <Search
+                  size={19}
+                  className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                  aria-hidden="true"
+                />
+                <input
+                  type="search"
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                  placeholder="Search title, venue, category, status, or description"
+                  className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-12 pr-4 text-sm text-navy-900 outline-none transition focus:border-brand-500 focus:ring-4 focus:ring-brand-100"
+                />
+              </label>
+              <p className="rounded-full bg-white px-4 py-2 text-xs font-extrabold text-slate-500 shadow-sm ring-1 ring-slate-200">
+                Showing {filteredItems.length} of {items.length}
+              </p>
+            </div>
+
+            <div className="mt-4 grid gap-3 xl:grid-cols-[1fr_auto]">
+              <div>
+                <div className="mb-2 inline-flex items-center gap-2 text-[10px] font-extrabold tracking-[0.16em] text-brand-600 uppercase">
+                  <Filter size={14} aria-hidden="true" />
+                  Status
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {statusFilters.map(([value, label]) => {
+                    const isActive = selectedStatus === value
+
+                    return (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setSelectedStatus(value)}
+                        aria-pressed={isActive}
+                        className={`rounded-full px-3.5 py-2 text-xs font-extrabold transition ${
+                          isActive
+                            ? 'bg-brand-600 text-white shadow-md shadow-blue-600/20'
+                            : 'border border-slate-200 bg-white text-slate-600 hover:border-brand-300 hover:text-brand-600'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <div className="mb-2 text-[10px] font-extrabold tracking-[0.16em] text-slate-500 uppercase xl:text-right">
+                  Timing
+                </div>
+                <div className="flex flex-wrap gap-2 xl:justify-end">
+                  {timingFilters.map(([value, label]) => {
+                    const isActive = selectedTiming === value
+
+                    return (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setSelectedTiming(value)}
+                        aria-pressed={isActive}
+                        className={`rounded-full px-3.5 py-2 text-xs font-extrabold transition ${
+                          isActive
+                            ? 'bg-navy-900 text-white shadow-md shadow-navy-950/15'
+                            : 'border border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-navy-900'
+                        }`}
+                      >
+                        {label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {isLoading ? (
           <div className="grid min-h-56 place-items-center">
@@ -363,77 +513,103 @@ function AdminEvents() {
               Create an event when the next activity is confirmed.
             </p>
           </div>
+        ) : filteredItems.length === 0 ? (
+          <div className="px-6 py-16 text-center">
+            <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-brand-50 text-brand-600">
+              <CalendarOff size={24} aria-hidden="true" />
+            </span>
+            <h3 className="mt-5 text-lg font-black text-navy-900">
+              No matching events
+            </h3>
+            <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-600">
+              Try another search term, status, or timing filter.
+            </p>
+          </div>
         ) : (
           <div className="divide-y divide-slate-200">
-            {items.map((item) => (
-              <article
-                key={item.id}
-                className="grid gap-4 px-5 py-5 sm:px-6 lg:grid-cols-[1fr_auto] lg:items-center"
-              >
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span
-                      className={`rounded-full px-2.5 py-1 text-[10px] font-extrabold tracking-wide uppercase ring-1 ring-inset ${
-                        statusStyles[item.status]
-                      }`}
-                    >
-                      {item.status}
-                    </span>
-                    <span className="text-xs font-bold text-slate-500">
-                      {item.category}
-                    </span>
-                    {item.is_featured && (
-                      <span className="inline-flex items-center gap-1 text-xs font-extrabold text-amber-600">
-                        <Star size={13} fill="currentColor" />
-                        Featured
-                      </span>
-                    )}
-                  </div>
-                  <h4 className="mt-3 truncate text-lg font-black text-navy-900">
-                    {item.title}
-                  </h4>
-                  <div className="mt-2 flex flex-wrap gap-x-5 gap-y-2 text-xs font-bold text-slate-500">
-                    <span className="inline-flex items-center gap-1.5">
-                      <CalendarDays size={14} className="text-brand-600" />
-                      {formatAdminDate(item.starts_at)}
-                    </span>
-                    <span className="inline-flex items-center gap-1.5">
-                      <MapPin size={14} className="text-brand-600" />
-                      {item.venue}
-                    </span>
-                  </div>
-                </div>
+            {filteredItems.map((item) => {
+              const timing = getEventTiming(item)
 
-                <div className="flex flex-wrap gap-2">
-                  {['published', 'cancelled'].includes(item.status) && (
-                    <Link
-                      to="/events"
-                      target="_blank"
-                      className="grid size-10 place-items-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-brand-500 hover:text-brand-600"
-                      aria-label={`View ${item.title} on the events page`}
+              return (
+                <article
+                  key={item.id}
+                  className="grid gap-4 px-5 py-5 transition hover:bg-slate-50/70 sm:px-6 lg:grid-cols-[1fr_auto] lg:items-center"
+                >
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-[10px] font-extrabold tracking-wide uppercase ring-1 ring-inset ${
+                          statusStyles[item.status]
+                        }`}
+                      >
+                        {item.status}
+                      </span>
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-[10px] font-extrabold tracking-wide uppercase ring-1 ring-inset ${
+                          timingStyles[timing]
+                        }`}
+                      >
+                        {getTimingLabel(item)}
+                      </span>
+                      <span className="text-xs font-bold text-slate-500">
+                        {item.category}
+                      </span>
+                      {item.is_featured && (
+                        <span className="inline-flex items-center gap-1 text-xs font-extrabold text-amber-600">
+                          <Star size={13} fill="currentColor" />
+                          Featured
+                        </span>
+                      )}
+                    </div>
+                    <h4 className="mt-3 truncate text-lg font-black text-navy-900">
+                      {item.title}
+                    </h4>
+                    <p className="mt-1 line-clamp-2 text-sm leading-6 text-slate-600">
+                      {item.summary}
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-x-5 gap-y-2 text-xs font-bold text-slate-500">
+                      <span className="inline-flex items-center gap-1.5">
+                        <CalendarDays size={14} className="text-brand-600" />
+                        {formatAdminDate(item.starts_at)}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <MapPin size={14} className="text-brand-600" />
+                        {item.venue}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {['published', 'cancelled'].includes(item.status) && (
+                      <Link
+                        to="/events"
+                        target="_blank"
+                        className="grid size-10 place-items-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-brand-500 hover:text-brand-600"
+                        aria-label={`View ${item.title} on the events page`}
+                      >
+                        <ExternalLink size={17} />
+                      </Link>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => openEditEditor(item)}
+                      className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3.5 py-2 text-xs font-extrabold text-slate-600 transition hover:border-brand-500 hover:text-brand-600"
                     >
-                      <ExternalLink size={17} />
-                    </Link>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => openEditEditor(item)}
-                    className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3.5 py-2 text-xs font-extrabold text-slate-600 transition hover:border-brand-500 hover:text-brand-600"
-                  >
-                    <Edit3 size={15} aria-hidden="true" />
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(item)}
-                    className="grid size-10 place-items-center rounded-lg border border-red-200 text-red-600 transition hover:bg-red-50"
-                    aria-label={`Delete ${item.title}`}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </article>
-            ))}
+                      <Edit3 size={15} aria-hidden="true" />
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(item)}
+                      className="grid size-10 place-items-center rounded-lg border border-red-200 text-red-600 transition hover:bg-red-50"
+                      aria-label={`Delete ${item.title}`}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </article>
+              )
+            })}
           </div>
         )}
       </section>
