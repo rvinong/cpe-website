@@ -11,11 +11,12 @@ import {
   Newspaper,
   Settings,
   ShieldCheck,
+  UserRound,
   UsersRound,
   X,
 } from 'lucide-react'
 import { useMemo, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import AdminAnnouncements from '../components/AdminAnnouncements'
 import AdminAlumni from '../components/AdminAlumni'
 import AdminEvents from '../components/AdminEvents'
@@ -229,6 +230,14 @@ function AdminDashboard() {
                 </p>
               </div>
             </div>
+            <Link
+              to="/account"
+              onClick={() => setIsSidebarOpen(false)}
+              className="mt-4 flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-4 py-2.5 text-xs font-extrabold text-blue-100 transition hover:border-blue-300/40 hover:bg-white/10 hover:text-white"
+            >
+              <UserRound size={15} aria-hidden="true" />
+              My Account
+            </Link>
           </div>
 
           <nav className="nav-scroll mt-5 flex-1 overflow-y-auto">
