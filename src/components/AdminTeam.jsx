@@ -9,6 +9,7 @@ import {
   ListChecks,
   LoaderCircle,
   Save,
+  Search,
   ShieldCheck,
   Trash2,
   UsersRound,
@@ -92,6 +93,8 @@ function AdminTeam() {
   const [isTaskEditorOpen, setIsTaskEditorOpen] = useState(false)
   const [editingTask, setEditingTask] = useState(null)
   const [taskForm, setTaskForm] = useState(emptyTaskForm)
+  const [taskSearchTerm, setTaskSearchTerm] = useState('')
+  const [selectedTaskStatus, setSelectedTaskStatus] = useState('all')
   const [avatarFile, setAvatarFile] = useState(null)
   const [avatarPreview, setAvatarPreview] = useState('')
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false)
@@ -164,14 +167,46 @@ function AdminTeam() {
     [members, user?.id],
   )
 
+  const scopedTasks = useMemo(
+    () =>
+      isAdmin
+        ? tasks
+        : tasks.filter((task) => task.assigned_to === user?.id),
+    [isAdmin, tasks, user?.id],
+  )
+
+  const filteredTasks = useMemo(() => {
+    const query = taskSearchTerm.trim().toLowerCase()
+
+    return scopedTasks.filter((task) => {
+      const matchesStatus =
+        selectedTaskStatus === 'all' || task.status === selectedTaskStatus
+      const matchesSearch =
+        !query ||
+        [
+          task.title,
+          task.description,
+          task.priority,
+          task.assignee_name,
+          task.assigner_name,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase()
+          .includes(query)
+
+      return matchesStatus && matchesSearch
+    })
+  }, [scopedTasks, selectedTaskStatus, taskSearchTerm])
+
   const counts = useMemo(
     () => ({
       editors: editors.length,
-      open: tasks.filter((task) => task.status !== 'done').length,
-      blocked: tasks.filter((task) => task.status === 'blocked').length,
-      done: tasks.filter((task) => task.status === 'done').length,
+      open: scopedTasks.filter((task) => task.status !== 'done').length,
+      blocked: scopedTasks.filter((task) => task.status === 'blocked').length,
+      done: scopedTasks.filter((task) => task.status === 'done').length,
     }),
-    [editors.length, tasks],
+    [editors.length, scopedTasks],
   )
 
   const openTaskEditor = (task = null) => {
@@ -586,7 +621,59 @@ function AdminTeam() {
           )}
         </div>
 
-        {!isLoading && tasks.length === 0 ? (
+        {!isLoading && scopedTasks.length > 0 && (
+          <div className="mt-5 grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
+            <label className="relative block">
+              <span className="sr-only">Search tasks</span>
+              <Search
+                size={18}
+                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                aria-hidden="true"
+              />
+              <input
+                type="search"
+                value={taskSearchTerm}
+                onChange={(event) => setTaskSearchTerm(event.target.value)}
+                placeholder="Search by task, priority, assignee, or assigner"
+                className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-sm text-navy-900 outline-none transition focus:border-brand-500 focus:ring-4 focus:ring-brand-100"
+              />
+            </label>
+            <div
+              className="flex flex-wrap gap-2"
+              aria-label="Filter team tasks by status"
+            >
+              {[['all', 'All'], ...statusOptions].map(([value, label]) => {
+                const isActive = selectedTaskStatus === value
+
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setSelectedTaskStatus(value)}
+                    aria-pressed={isActive}
+                    className={`rounded-full px-3.5 py-2 text-xs font-extrabold transition ${
+                      isActive
+                        ? 'bg-brand-600 text-white shadow-md shadow-blue-600/20'
+                        : 'border border-slate-200 bg-white text-slate-600 hover:border-brand-300 hover:text-brand-600'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {isLoading ? (
+          <div className="mt-5 grid min-h-48 place-items-center rounded-2xl border border-slate-200 bg-white">
+            <LoaderCircle
+              size={28}
+              className="animate-spin text-brand-600"
+              aria-label="Loading team tasks"
+            />
+          </div>
+        ) : scopedTasks.length === 0 ? (
           <div className="mt-5 rounded-2xl border border-dashed border-blue-200 bg-brand-50/35 px-6 py-14 text-center">
             <ListChecks size={32} className="mx-auto text-brand-600" />
             <h4 className="mt-4 text-lg font-black text-navy-900">
@@ -598,9 +685,19 @@ function AdminTeam() {
                 : 'Your assigned tasks will appear here.'}
             </p>
           </div>
+        ) : filteredTasks.length === 0 ? (
+          <div className="mt-5 rounded-2xl border border-slate-200 bg-white px-6 py-12 text-center">
+            <Search size={30} className="mx-auto text-brand-600" />
+            <h4 className="mt-4 text-lg font-black text-navy-900">
+              No matching tasks
+            </h4>
+            <p className="mt-2 text-sm text-slate-500">
+              Try another search term or choose a different status.
+            </p>
+          </div>
         ) : (
           <div className="mt-5 grid gap-4">
-            {tasks.map((task) => (
+            {filteredTasks.map((task) => (
               <article
                 key={task.id}
                 className={`rounded-2xl border bg-white p-5 sm:p-6 ${

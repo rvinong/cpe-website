@@ -27,6 +27,20 @@ const statusStyles = {
   suspended: 'bg-red-50 text-red-700 ring-red-200',
 }
 
+const statusFilters = [
+  ['all', 'All statuses'],
+  ['pending', 'Pending'],
+  ['approved', 'Approved'],
+  ['suspended', 'Suspended'],
+]
+
+const roleFilters = [
+  ['all', 'All roles'],
+  ['student', 'Students'],
+  ['editor', 'Editors'],
+  ['admin', 'Admins'],
+]
+
 function AdminUsers() {
   const { user, refreshProfile } = useAuth()
   const [items, setItems] = useState([])
@@ -35,6 +49,8 @@ function AdminUsers() {
   const [editingItem, setEditingItem] = useState(null)
   const [form, setForm] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [selectedStatus, setSelectedStatus] = useState('all')
+  const [selectedRole, setSelectedRole] = useState('all')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [needsSchema, setNeedsSchema] = useState(false)
@@ -89,22 +105,28 @@ function AdminUsers() {
 
   const filteredItems = useMemo(() => {
     const query = searchTerm.trim().toLowerCase()
-    if (!query) return items
 
-    return items.filter((item) =>
-      [
-        item.full_name,
-        item.email,
-        item.student_number,
-        item.role,
-        item.status,
-      ]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase()
-        .includes(query),
-    )
-  }, [items, searchTerm])
+    return items.filter((item) => {
+      const matchesStatus =
+        selectedStatus === 'all' || item.status === selectedStatus
+      const matchesRole = selectedRole === 'all' || item.role === selectedRole
+      const matchesSearch =
+        !query ||
+        [
+          item.full_name,
+          item.email,
+          item.student_number,
+          item.role,
+          item.status,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase()
+          .includes(query)
+
+      return matchesStatus && matchesRole && matchesSearch
+    })
+  }, [items, searchTerm, selectedRole, selectedStatus])
 
   const openEditor = (item) => {
     setEditingItem(item)
@@ -216,20 +238,76 @@ function AdminUsers() {
         ))}
       </section>
 
-      <label className="relative mt-7 block max-w-xl">
-        <span className="sr-only">Search users</span>
-        <Search
-          size={19}
-          className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
-        />
-        <input
-          type="search"
-          value={searchTerm}
-          onChange={(event) => setSearchTerm(event.target.value)}
-          placeholder="Search by name, email, student number, role, or status"
-          className="h-13 w-full rounded-xl border border-slate-200 bg-white pl-12 pr-4 text-sm text-navy-900 outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100"
-        />
-      </label>
+      <section className="mt-7 rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+        <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
+          <label className="relative block">
+            <span className="sr-only">Search users</span>
+            <Search
+              size={19}
+              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+              aria-hidden="true"
+            />
+            <input
+              type="search"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="Search by name, email, student number, role, or status"
+              className="h-13 w-full rounded-xl border border-slate-200 bg-white pl-12 pr-4 text-sm text-navy-900 outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100"
+            />
+          </label>
+          <p className="rounded-full bg-slate-50 px-4 py-2 text-xs font-extrabold text-slate-500">
+            Showing {filteredItems.length} of {items.length}
+          </p>
+        </div>
+
+        <div className="mt-4 grid gap-3 lg:grid-cols-2">
+          <div className="flex flex-wrap gap-2" aria-label="Filter by status">
+            {statusFilters.map(([value, label]) => {
+              const isActive = selectedStatus === value
+
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setSelectedStatus(value)}
+                  aria-pressed={isActive}
+                  className={`rounded-full px-3.5 py-2 text-xs font-extrabold transition ${
+                    isActive
+                      ? 'bg-brand-600 text-white shadow-md shadow-blue-600/20'
+                      : 'border border-slate-200 bg-white text-slate-600 hover:border-brand-300 hover:text-brand-600'
+                  }`}
+                >
+                  {label}
+                </button>
+              )
+            })}
+          </div>
+          <div
+            className="flex flex-wrap gap-2 lg:justify-end"
+            aria-label="Filter by role"
+          >
+            {roleFilters.map(([value, label]) => {
+              const isActive = selectedRole === value
+
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setSelectedRole(value)}
+                  aria-pressed={isActive}
+                  className={`rounded-full px-3.5 py-2 text-xs font-extrabold transition ${
+                    isActive
+                      ? 'bg-navy-900 text-white shadow-md shadow-navy-950/15'
+                      : 'border border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-navy-900'
+                  }`}
+                >
+                  {label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      </section>
 
       <section className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white">
         {isLoading ? (
