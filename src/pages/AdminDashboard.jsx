@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import AdminActivityCenter from '../components/AdminActivityCenter'
 import AdminAnnouncements from '../components/AdminAnnouncements'
 import AdminAlumni from '../components/AdminAlumni'
 import AdminEvents from '../components/AdminEvents'
@@ -399,6 +400,11 @@ function AdminDashboard() {
                   </span>
                 </div>
               </section>
+
+              <AdminActivityCenter
+                onSelectSection={selectSection}
+                role={profile?.role}
+              />
 
               <section className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 {[
