@@ -12,9 +12,22 @@ const timingStyles = {
 }
 
 function EventCard({ event, compact = false }) {
+  const timingLabel = {
+    upcoming: 'Upcoming',
+    completed: 'Completed',
+    cancelled: 'Cancelled',
+  }[event.timing]
+
   return (
-    <article className="surface-card group flex h-full flex-col overflow-hidden transition duration-300 hover:-translate-y-1 hover:border-brand-500">
-      <div className="h-1 bg-gradient-to-r from-brand-600 via-blue-400 to-orange-400" />
+    <article className="surface-card group relative isolate flex h-full flex-col overflow-hidden transition duration-300 hover:-translate-y-1.5 hover:border-brand-500 hover:shadow-[0_28px_75px_-42px_rgba(21,94,239,0.45)]">
+      <span className="absolute -right-12 -top-12 -z-10 size-32 rounded-full bg-brand-50/70 transition duration-500 group-hover:scale-125 group-hover:bg-brand-100/70" />
+      <div
+        className={`h-1 ${
+          event.timing === 'cancelled'
+            ? 'bg-gradient-to-r from-red-500 via-rose-400 to-orange-400'
+            : 'bg-gradient-to-r from-brand-600 via-blue-400 to-orange-400'
+        }`}
+      />
       <div className="flex flex-1 flex-col p-6 sm:p-7">
         <div className="flex flex-wrap items-center gap-2">
           <span
@@ -22,14 +35,19 @@ function EventCard({ event, compact = false }) {
               timingStyles[event.timing]
             }`}
           >
-            {event.timing}
+            {timingLabel}
           </span>
           <span className="text-xs font-bold text-slate-500">
             {event.category}
           </span>
+          {event.isFeatured && (
+            <span className="rounded-full bg-orange-50 px-3 py-1.5 text-[10px] font-extrabold tracking-wide text-orange-500 uppercase ring-1 ring-orange-100">
+              Featured
+            </span>
+          )}
         </div>
 
-        <h3 className="mt-4 text-xl font-black tracking-tight text-navy-900">
+        <h3 className="mt-4 text-xl font-black tracking-tight text-navy-900 transition group-hover:text-brand-600">
           {event.title}
         </h3>
         <p
@@ -68,7 +86,7 @@ function EventCard({ event, compact = false }) {
               href={event.registration_url}
               target="_blank"
               rel="noreferrer"
-              className="mt-6 inline-flex items-center justify-center gap-2 self-start rounded-xl bg-brand-600 px-4 py-3 text-sm font-extrabold text-white transition hover:bg-brand-700"
+              className="primary-button mt-6 self-start"
             >
               Registration details
               <ExternalLink size={16} aria-hidden="true" />
