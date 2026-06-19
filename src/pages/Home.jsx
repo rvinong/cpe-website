@@ -1,5 +1,4 @@
 import AlumniSection from '../components/AlumniSection'
-import AnnouncementsSection from '../components/AnnouncementsSection'
 import FeaturedPrograms from '../components/FeaturedPrograms'
 import GlanceSection from '../components/GlanceSection'
 import Hero from '../components/Hero'
@@ -12,7 +11,6 @@ function Home() {
   return (
     <main>
       <Hero />
-      <AnnouncementsSection />
       <QuickAccess />
       <GlanceSection />
       <UpcomingEvents />

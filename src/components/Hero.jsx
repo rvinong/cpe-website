@@ -1,15 +1,39 @@
 import { motion as Motion } from 'framer-motion'
 import {
   ArrowRight,
-  BookOpenCheck,
+  CalendarDays,
   CircuitBoard,
+  Megaphone,
   Sparkles,
   UsersRound,
 } from 'lucide-react'
+import { useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import useOrganization from '../context/useOrganization'
+import { useAnnouncements } from '../hooks/useAnnouncements'
+
+function getAnnouncementTime(announcement) {
+  const value =
+    announcement?.published_at || announcement?.created_at || announcement?.date
+  const timestamp = value ? new Date(value).getTime() : 0
+
+  return Number.isNaN(timestamp) ? 0 : timestamp
+}
 
 function Hero() {
   const { profile, stats } = useOrganization()
+  const { announcements } = useAnnouncements()
+  const latestAnnouncement = useMemo(
+    () =>
+      [...announcements].sort(
+        (first, second) =>
+          getAnnouncementTime(second) - getAnnouncementTime(first),
+      )[0] ?? null,
+    [announcements],
+  )
+  const latestAnnouncementPath = latestAnnouncement
+    ? `/announcements/${latestAnnouncement.id}`
+    : '/announcements'
 
   return (
     <section
@@ -132,39 +156,43 @@ function Hero() {
           initial={{ opacity: 0, x: 28 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.7, delay: 0.28 }}
-          className="surface-card hidden overflow-hidden p-5 lg:block"
+          className="surface-card w-full max-w-sm justify-self-center overflow-hidden p-5 sm:max-w-md lg:max-w-none lg:justify-self-auto"
         >
           <div className="rounded-2xl bg-navy-950 p-5 text-white">
             <span className="grid size-11 place-items-center rounded-xl bg-white/10 text-orange-400">
               <Sparkles size={21} aria-hidden="true" />
             </span>
             <p className="mt-5 text-[10px] font-extrabold tracking-[0.2em] text-blue-300 uppercase">
-              One connected portal
+              Latest announcement
             </p>
-            <h2 className="mt-2 text-xl font-black leading-tight">
-              Learn, participate, and stay connected.
+            <h2 className="mt-2 line-clamp-3 text-xl font-black leading-tight">
+              {latestAnnouncement?.title || 'Announcements will appear here.'}
             </h2>
-          </div>
-          <div className="mt-3 grid gap-2">
-            {[
-              [BookOpenCheck, 'Academic resources', 'Curriculum and materials'],
-              [UsersRound, 'Student community', 'Events and opportunities'],
-            ].map(([Icon, title, detail]) => (
-              <div
-                key={title}
-                className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white/75 p-3"
-              >
-                <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-600">
-                  <Icon size={18} aria-hidden="true" />
+            {latestAnnouncement && (
+              <div className="mt-4 flex flex-wrap items-center gap-2 text-[11px] font-bold text-blue-100">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1">
+                  <Megaphone size={13} aria-hidden="true" />
+                  {latestAnnouncement.category}
                 </span>
-                <span>
-                  <strong className="block text-xs text-navy-900">
-                    {title}
-                  </strong>
-                  <span className="text-[11px] text-slate-500">{detail}</span>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1">
+                  <CalendarDays size={13} aria-hidden="true" />
+                  {latestAnnouncement.date}
                 </span>
               </div>
-            ))}
+            )}
+          </div>
+          <div className="mt-3 rounded-xl border border-slate-200 bg-white/75 p-4">
+            <p className="line-clamp-4 text-sm leading-6 text-slate-600">
+              {latestAnnouncement?.summary ||
+                'Published organization updates will be highlighted here for quick access.'}
+            </p>
+            <Link
+              to={latestAnnouncementPath}
+              className="primary-button mt-4 w-full px-4 py-3 text-xs"
+            >
+              {latestAnnouncement ? 'Read announcement' : 'View announcements'}
+              <ArrowRight size={16} aria-hidden="true" />
+            </Link>
           </div>
         </Motion.aside>
       </div>
