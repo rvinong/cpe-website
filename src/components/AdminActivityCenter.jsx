@@ -13,23 +13,9 @@ import {
   Radio,
   Sparkles,
 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
-import { getAdminAlumni } from '../lib/alumni'
-import { getAdminAnnouncements } from '../lib/announcements'
-import { getAdminEvents, getEventTiming } from '../lib/events'
-import { getAdminGalleryPhotos, getAdminNews } from '../lib/media'
-import { getAdminResources } from '../lib/resources'
-import { getTeamTasks } from '../lib/team'
-
-const emptyActivityData = {
-  announcements: [],
-  events: [],
-  resources: [],
-  news: [],
-  gallery: [],
-  alumni: [],
-  tasks: [],
-}
+import { useMemo } from 'react'
+import { emptyDashboardSignals } from '../hooks/useAdminDashboardSignals'
+import { getEventTiming } from '../lib/events'
 
 const sourceLabels = {
   announcements: 'Announcements',
@@ -382,66 +368,14 @@ function getToneClass(tone) {
   return tones[tone] || 'bg-brand-50 text-brand-700 ring-blue-200'
 }
 
-function AdminActivityCenter({ onSelectSection, role }) {
-  const [activityData, setActivityData] = useState(emptyActivityData)
-  const [isLoading, setIsLoading] = useState(true)
-  const [sourceError, setSourceError] = useState('')
-
-  useEffect(() => {
-    let isMounted = true
-
-    Promise.allSettled([
-      getAdminAnnouncements(),
-      getAdminEvents(),
-      getAdminResources(),
-      getAdminNews(),
-      getAdminGalleryPhotos(),
-      getAdminAlumni(),
-      getTeamTasks(),
-    ]).then((results) => {
-      if (!isMounted) return
-
-      const keys = [
-        'announcements',
-        'events',
-        'resources',
-        'news',
-        'gallery',
-        'alumni',
-        'tasks',
-      ]
-      const nextData = { ...emptyActivityData }
-      const errors = []
-
-      results.forEach((result, index) => {
-        const key = keys[index]
-
-        if (result.status === 'rejected') {
-          errors.push(result.reason?.message || `${sourceLabels[key]} failed`)
-          return
-        }
-
-        if (result.value.error) {
-          errors.push(result.value.error.message)
-          return
-        }
-
-        nextData[key] = result.value.data || []
-      })
-
-      setActivityData(nextData)
-      setSourceError(
-        errors.length > 0
-          ? 'Some dashboard activity sources could not be loaded yet.'
-          : '',
-      )
-      setIsLoading(false)
-    })
-
-    return () => {
-      isMounted = false
-    }
-  }, [])
+function AdminActivityCenter({
+  dashboardSignals = emptyDashboardSignals,
+  isLoading,
+  onSelectSection,
+  role,
+  sourceError,
+}) {
+  const activityData = dashboardSignals
 
   const activities = useMemo(
     () => buildActivities(activityData),

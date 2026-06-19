@@ -18,6 +18,7 @@ import {
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import AdminActivityCenter from '../components/AdminActivityCenter'
+import AdminAnalyticsPanel from '../components/AdminAnalyticsPanel'
 import AdminAnnouncements from '../components/AdminAnnouncements'
 import AdminAlumni from '../components/AdminAlumni'
 import AdminEvents from '../components/AdminEvents'
@@ -30,6 +31,7 @@ import Logo from '../components/Logo'
 import StaffAvatar from '../components/StaffAvatar'
 import ThemeToggle from '../components/ThemeToggle'
 import useAuth from '../context/useAuth'
+import { useAdminDashboardSignals } from '../hooks/useAdminDashboardSignals'
 
 const adminSections = [
   { key: 'overview', label: 'Overview', icon: LayoutDashboard, enabled: true },
@@ -164,6 +166,12 @@ function AdminDashboard() {
   )
     ? requestedSection
     : 'overview'
+  const {
+    dashboardSignals,
+    isLoading: isLoadingDashboardSignals,
+    loadedAt: dashboardSignalsLoadedAt,
+    sourceError: dashboardSignalsError,
+  } = useAdminDashboardSignals(activeSection === 'overview')
 
   const selectSection = (sectionKey) => {
     const targetSection = adminSections.find(
@@ -402,6 +410,17 @@ function AdminDashboard() {
               </section>
 
               <AdminActivityCenter
+                dashboardSignals={dashboardSignals}
+                isLoading={isLoadingDashboardSignals}
+                onSelectSection={selectSection}
+                role={profile?.role}
+                sourceError={dashboardSignalsError}
+              />
+
+              <AdminAnalyticsPanel
+                dashboardSignals={dashboardSignals}
+                isLoading={isLoadingDashboardSignals}
+                referenceTime={dashboardSignalsLoadedAt}
                 onSelectSection={selectSection}
                 role={profile?.role}
               />
