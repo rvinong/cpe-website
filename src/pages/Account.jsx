@@ -296,64 +296,12 @@ function Account() {
           <div className="absolute -right-24 -top-24 -z-10 size-80 rounded-full bg-brand-100/70 blur-3xl" />
           <div className="absolute -bottom-28 -left-24 -z-10 size-80 rounded-full bg-blue-100/60 blur-3xl" />
 
-          <div className="section-shell grid items-stretch gap-6 lg:grid-cols-[0.88fr_1.12fr]">
-            <Motion.div
-              initial={{ opacity: 0, x: -24 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              className="relative isolate overflow-hidden rounded-[2.25rem] bg-navy-950 p-7 text-white shadow-[0_34px_90px_-48px_rgba(7,21,47,0.85)] sm:p-10 lg:p-12"
-            >
-              <div className="subtle-grid absolute inset-0 -z-20 opacity-10" />
-              <div className="absolute -right-20 -top-20 -z-10 size-64 rounded-full bg-brand-600/30 blur-3xl" />
-
-              <span className="grid size-14 place-items-center rounded-2xl bg-white/10 text-blue-200">
-                <ShieldCheck size={27} aria-hidden="true" />
-              </span>
-              <p className="mt-8 text-xs font-extrabold tracking-[0.22em] text-blue-300 uppercase">
-                Member access
-              </p>
-              <h1 className="mt-3 text-4xl font-black tracking-[-0.045em] sm:text-5xl">
-                Your organization portal
-              </h1>
-              <p className="mt-5 max-w-lg text-base leading-8 text-slate-300">
-                A secure student space for organization updates, learning
-                resources, events, and role-based shortcuts.
-              </p>
-
-              <div className="mt-10 space-y-4">
-                {[
-                  'See the latest notices and upcoming activities',
-                  'Open approved student resources from one place',
-                  'Use verified student account information',
-                ].map((item) => (
-                  <div key={item} className="flex items-start gap-3">
-                    <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-blue-400/15 text-blue-200">
-                      <ArrowRight size={14} aria-hidden="true" />
-                    </span>
-                    <p className="text-sm leading-6 text-slate-300">{item}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-10 rounded-2xl border border-white/10 bg-white/[0.07] p-5">
-                <p className="text-sm font-extrabold text-white">
-                  {isConfigured
-                    ? 'Secure authentication'
-                    : 'Backend setup required'}
-                </p>
-                <p className="mt-2 text-sm leading-6 text-slate-300">
-                  {isConfigured
-                    ? 'Supabase manages account sessions securely. Organization roles are verified from the protected profiles table.'
-                    : 'Authentication is ready in the codebase, but remains inactive until the Supabase project values are added to .env.local.'}
-                </p>
-              </div>
-            </Motion.div>
-
+          <div className="section-shell">
             <Motion.div
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.08 }}
-              className="surface-card rounded-[2.25rem] p-6 sm:p-9 lg:p-10"
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              className="surface-card mx-auto max-w-5xl rounded-[2.25rem] p-6 sm:p-9 lg:p-10"
             >
               {!user && (
                 <div
