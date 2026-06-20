@@ -47,7 +47,7 @@ function EventCard({ event, compact = false }) {
           )}
         </div>
 
-        <h3 className="mt-4 text-xl font-black tracking-tight text-navy-900 transition group-hover:text-brand-600">
+        <h3 className="mt-4 text-xl font-black tracking-tight text-navy-900 transition-colors duration-200 group-hover:text-brand-600">
           {event.title}
         </h3>
         <p

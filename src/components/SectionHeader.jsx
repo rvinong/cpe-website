@@ -11,7 +11,7 @@ function SectionHeader({
 }) {
   return (
     <div
-      className={`mb-12 flex gap-6 ${
+      className={`mb-9 flex gap-6 sm:mb-12 ${
         centered
           ? 'mx-auto max-w-2xl flex-col items-center text-center'
           : 'items-end justify-between'
@@ -28,7 +28,7 @@ function SectionHeader({
           </p>
         )}
         <h2
-          className={`text-4xl font-black tracking-[-0.055em] sm:text-5xl ${
+          className={`text-3xl font-black tracking-[-0.05em] sm:text-5xl sm:tracking-[-0.055em] ${
             light ? 'text-white' : 'text-navy-900'
           }`}
         >

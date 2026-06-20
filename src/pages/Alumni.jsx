@@ -7,13 +7,14 @@ import {
   GraduationCap,
   Image,
   Inbox,
-  LoaderCircle,
   Search,
   ShieldCheck,
   UserRound,
   UsersRound,
 } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import ContentSkeleton from '../components/ContentSkeleton'
+import EmptyState from '../components/EmptyState'
 import PageHero from '../components/PageHero'
 import useAlumni from '../hooks/useAlumni'
 
@@ -104,7 +105,7 @@ function Alumni() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.25 }}
               transition={{ duration: 0.55 }}
-              className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_18px_55px_-40px_rgba(15,23,42,0.35)] sm:p-6 md:grid-cols-[1fr_15rem]"
+              className="filter-panel grid gap-4 md:grid-cols-[1fr_15rem]"
             >
               <label className="relative block" htmlFor="alumni-search">
                 <span className="sr-only">Search alumni</span>
@@ -119,7 +120,7 @@ function Alumni() {
                   value={searchTerm}
                   onChange={(event) => setSearchTerm(event.target.value)}
                   placeholder="Search alumni by name..."
-                  className="h-13 w-full rounded-xl border border-slate-200 bg-slate-50/70 pl-12 pr-4 text-sm text-navy-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-100"
+                  className="field-control pl-12 pr-4 placeholder:text-slate-400"
                 />
               </label>
 
@@ -129,7 +130,7 @@ function Alumni() {
                   id="batch-filter"
                   value={selectedBatch}
                   onChange={(event) => setSelectedBatch(event.target.value)}
-                  className="h-13 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-sm font-bold text-navy-900 outline-none transition focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-100"
+                  className="field-control px-4 font-bold"
                 >
                   <option>All batches</option>
                   {batches.map((batch) => (
@@ -202,32 +203,20 @@ function Alumni() {
             </Motion.div>
 
             {isLoading ? (
-              <div className="grid min-h-56 place-items-center">
-                <LoaderCircle
-                  size={30}
-                  className="animate-spin text-blue-200"
-                  aria-label="Loading alumni spotlights"
-                />
-              </div>
+              <ContentSkeleton
+                count={3}
+                tone="dark"
+                className="mt-10"
+                label="Loading alumni spotlights"
+              />
             ) : featuredProfiles.length === 0 ? (
-              <Motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.55, delay: 0.08 }}
-                className="mx-auto mt-10 max-w-3xl rounded-3xl border border-white/10 bg-white/[0.07] px-6 py-12 text-center backdrop-blur-sm sm:px-10"
-              >
-                <span className="mx-auto grid size-16 place-items-center rounded-2xl bg-white/10 text-blue-200">
-                  <Award size={29} strokeWidth={1.7} aria-hidden="true" />
-                </span>
-                <h3 className="mt-5 text-2xl font-black text-white">
-                  Spotlight nominations are being collected
-                </h3>
-                <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-slate-300">
-                  Featured graduates will appear here after their information
-                  has been verified and approved for publication.
-                </p>
-              </Motion.div>
+              <EmptyState
+                icon={Award}
+                tone="dark"
+                className="mt-10"
+                title="Spotlight nominations are being collected"
+                description="Featured graduates will appear here after their information has been verified and approved for publication."
+              />
             ) : (
               <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {featuredProfiles.map((profile, index) => (
@@ -238,7 +227,7 @@ function Alumni() {
                     whileHover={{ y: -5 }}
                     viewport={{ once: true, amount: 0.2 }}
                     transition={{ duration: 0.5, delay: index * 0.07 }}
-                    className="rounded-2xl border border-white/10 bg-white/[0.07] p-6 backdrop-blur-sm"
+                    className="interactive-card rounded-2xl border border-white/10 bg-white/[0.07] p-6 backdrop-blur-sm"
                   >
                     <div className="flex items-start justify-between gap-4">
                       {profile.photo ? (
@@ -247,7 +236,7 @@ function Alumni() {
                           alt=""
                           loading="lazy"
                           decoding="async"
-                          className="size-16 rounded-2xl object-cover"
+                          className="profile-image size-16 rounded-2xl object-cover"
                         />
                       ) : (
                         <span className="grid size-16 place-items-center rounded-2xl bg-brand-600 text-lg font-black text-white">
@@ -305,33 +294,18 @@ function Alumni() {
             </Motion.div>
 
             {isLoading ? (
-              <div className="grid min-h-56 place-items-center">
-                <LoaderCircle
-                  size={30}
-                  className="animate-spin text-brand-600"
-                  aria-label="Loading alumni directory"
-                />
-              </div>
+              <ContentSkeleton
+                count={3}
+                className="mt-10"
+                label="Loading alumni directory"
+              />
             ) : filteredProfiles.length === 0 ? (
-              <Motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.55, delay: 0.08 }}
-                className="mx-auto mt-10 max-w-3xl rounded-3xl border border-dashed border-blue-200 bg-white px-6 py-14 text-center shadow-[0_24px_70px_-50px_rgba(15,23,42,0.38)] sm:px-10"
-              >
-                <span className="mx-auto grid size-16 place-items-center rounded-2xl bg-brand-50 text-brand-600">
-                  <Inbox size={28} strokeWidth={1.7} aria-hidden="true" />
-                </span>
-                <h3 className="mt-5 text-2xl font-black text-navy-900">
-                  Yearbook records are being collected
-                </h3>
-                <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-slate-600">
-                  No verified alumni profiles have been published yet.
-                  Graduate records and batch photos will be added as the
-                  organization completes its archive.
-                </p>
-              </Motion.div>
+              <EmptyState
+                icon={Inbox}
+                className="mt-10"
+                title="Yearbook records are being collected"
+                description="No verified alumni profiles have been published yet. Graduate records and batch photos will be added as the organization completes its archive."
+              />
             ) : (
               <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {filteredProfiles.map((profile, index) => (
@@ -342,7 +316,7 @@ function Alumni() {
                     whileHover={{ y: -4 }}
                     viewport={{ once: true, amount: 0.2 }}
                     transition={{ duration: 0.45, delay: index * 0.04 }}
-                    className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_18px_55px_-42px_rgba(15,23,42,0.32)]"
+                    className="surface-card interactive-card p-6"
                   >
                     <div className="flex items-start justify-between gap-4">
                       {profile.photo ? (
@@ -351,7 +325,7 @@ function Alumni() {
                           alt=""
                           loading="lazy"
                           decoding="async"
-                          className="size-16 rounded-2xl object-cover"
+                          className="profile-image size-16 rounded-2xl object-cover"
                         />
                       ) : (
                         <span className="grid size-16 place-items-center rounded-2xl bg-brand-600 text-lg font-black text-white">
@@ -417,7 +391,7 @@ function Alumni() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, amount: 0.25 }}
                     transition={{ duration: 0.5, delay: index * 0.055 }}
-                    className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_18px_55px_-42px_rgba(15,23,42,0.32)]"
+                    className="surface-card interactive-card p-6"
                   >
                     <span className="grid size-12 place-items-center rounded-xl bg-brand-50 text-brand-600">
                       <Icon size={22} strokeWidth={1.7} aria-hidden="true" />

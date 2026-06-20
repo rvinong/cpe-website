@@ -9,9 +9,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Image as ImageIcon,
-  ImageOff,
   Images,
-  LoaderCircle,
   Maximize2,
   Newspaper,
   ShieldCheck,
@@ -19,6 +17,8 @@ import {
   X,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
+import ContentSkeleton from '../components/ContentSkeleton'
+import EmptyState from '../components/EmptyState'
 import NewsCard from '../components/NewsCard'
 import PageHero from '../components/PageHero'
 import { useGalleryPhotos, useNews } from '../hooks/useMedia'
@@ -186,32 +186,20 @@ function Gallery() {
             </Motion.div>
 
             {isNewsLoading ? (
-              <div className="grid min-h-48 place-items-center">
-                <LoaderCircle
-                  size={30}
-                  className="animate-spin text-brand-600"
-                  aria-label="Loading organization news"
-                />
-              </div>
+              <ContentSkeleton
+                count={2}
+                columns={2}
+                media
+                className="mt-10"
+                label="Loading organization news"
+              />
             ) : organizationNews.length === 0 ? (
-              <Motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.55, delay: 0.08 }}
-                className="mx-auto mt-10 max-w-3xl rounded-3xl border border-dashed border-blue-200 bg-brand-50/35 px-6 py-14 text-center sm:px-10"
-              >
-                <span className="mx-auto grid size-16 place-items-center rounded-2xl bg-white text-brand-600 shadow-sm ring-1 ring-blue-100">
-                  <Newspaper size={28} strokeWidth={1.7} aria-hidden="true" />
-                </span>
-                <h3 className="mt-5 text-2xl font-black text-navy-900">
-                  No organization news yet
-                </h3>
-                <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-slate-600">
-                  No verified news stories have been published. Official
-                  updates will appear here after their details are confirmed.
-                </p>
-              </Motion.div>
+              <EmptyState
+                icon={Newspaper}
+                className="mt-10"
+                title="No organization news yet"
+                description="No verified news stories have been published. Official updates will appear here after their details are confirmed."
+              />
             ) : (
               <div className="mt-10 grid gap-6 lg:grid-cols-2">
                 {organizationNews.map((article, index) => (
@@ -238,7 +226,7 @@ function Gallery() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.25 }}
               transition={{ duration: 0.55 }}
-              className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_18px_55px_-40px_rgba(15,23,42,0.35)] sm:p-6 md:grid-cols-2"
+              className="filter-panel grid gap-4 md:grid-cols-2"
             >
               <label htmlFor="gallery-category">
                 <span className="mb-2 block text-xs font-extrabold tracking-wide text-slate-500 uppercase">
@@ -251,7 +239,7 @@ function Gallery() {
                     setSelectedCategory(event.target.value)
                     setSelectedPhotoIndex(null)
                   }}
-                  className="h-13 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-sm font-bold text-navy-900 outline-none transition focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-100"
+                  className="field-control px-4 font-bold"
                 >
                   <option>All categories</option>
                   {categories.map((category) => (
@@ -271,7 +259,7 @@ function Gallery() {
                     setSelectedYear(event.target.value)
                     setSelectedPhotoIndex(null)
                   }}
-                  className="h-13 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-sm font-bold text-navy-900 outline-none transition focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-100"
+                  className="field-control px-4 font-bold"
                 >
                   <option>All years</option>
                   {years.map((year) => (
@@ -344,33 +332,19 @@ function Gallery() {
             </Motion.div>
 
             {isGalleryLoading ? (
-              <div className="grid min-h-56 place-items-center">
-                <LoaderCircle
-                  size={30}
-                  className="animate-spin text-brand-600"
-                  aria-label="Loading gallery photos"
-                />
-              </div>
+              <ContentSkeleton
+                count={3}
+                media
+                className="mt-10"
+                label="Loading gallery photos"
+              />
             ) : filteredPhotos.length === 0 ? (
-              <Motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.55, delay: 0.08 }}
-                className="mx-auto mt-10 max-w-3xl rounded-3xl border border-dashed border-blue-200 bg-white px-6 py-14 text-center shadow-[0_24px_70px_-50px_rgba(15,23,42,0.38)] sm:px-10"
-              >
-                <span className="mx-auto grid size-16 place-items-center rounded-2xl bg-brand-50 text-brand-600">
-                  <ImageOff size={28} strokeWidth={1.7} aria-hidden="true" />
-                </span>
-                <h3 className="mt-5 text-2xl font-black text-navy-900">
-                  The photo archive is being prepared
-                </h3>
-                <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-slate-600">
-                  No official gallery albums have been published yet. Approved
-                  event photos, dates, and descriptions will appear here once
-                  the organization archive is ready.
-                </p>
-              </Motion.div>
+              <EmptyState
+                icon={Images}
+                className="mt-10"
+                title="The photo archive is being prepared"
+                description="No official gallery albums have been published yet. Approved event photos, dates, and descriptions will appear here once the organization archive is ready."
+              />
             ) : (
               <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {filteredPhotos.map((photo, index) => (
@@ -386,15 +360,15 @@ function Gallery() {
                       setNavigationDirection(1)
                       setSelectedPhotoIndex(index)
                     }}
-                    className="group overflow-hidden rounded-2xl border border-slate-200 bg-white text-left shadow-[0_20px_60px_-40px_rgba(15,23,42,0.4)]"
+                    className="surface-card interactive-card group overflow-hidden text-left"
                   >
-                    <span className="relative block aspect-[4/3] overflow-hidden">
+                    <span className="media-frame aspect-[4/3]">
                       <img
                         src={photo.image}
                         alt={photo.alt}
                         loading="lazy"
                         decoding="async"
-                        className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                        className="media-image"
                       />
                       <span className="absolute inset-0 bg-gradient-to-t from-navy-950/65 via-transparent to-transparent" />
                       <span className="absolute right-4 top-4 grid size-10 place-items-center rounded-xl bg-white/90 text-brand-600 opacity-0 shadow-sm transition group-hover:opacity-100">
@@ -445,7 +419,7 @@ function Gallery() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.25 }}
                   transition={{ duration: 0.5, delay: index * 0.07 }}
-                  className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_18px_55px_-42px_rgba(15,23,42,0.32)]"
+                  className="surface-card interactive-card p-6"
                 >
                   <span className="grid size-12 place-items-center rounded-xl bg-brand-50 text-brand-600">
                     <Icon size={22} strokeWidth={1.7} aria-hidden="true" />

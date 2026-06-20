@@ -8,7 +8,6 @@ import {
   GraduationCap,
   Landmark,
   LibraryBig,
-  LoaderCircle,
   LockKeyhole,
   NotebookText,
   PlayCircle,
@@ -17,7 +16,9 @@ import {
   Target,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import ContentSkeleton from '../components/ContentSkeleton'
 import CurriculumTable from '../components/CurriculumTable'
+import EmptyState from '../components/EmptyState'
 import PageHero from '../components/PageHero'
 import useAuth from '../context/useAuth'
 import {
@@ -227,27 +228,20 @@ function StudentPortal() {
                 </p>
               </div>
             ) : isLoadingResources ? (
-              <div className="grid min-h-56 place-items-center">
-                <LoaderCircle
-                  size={30}
-                  className="animate-spin text-brand-600"
-                  aria-label="Loading student resources"
-                />
-              </div>
+              <ContentSkeleton
+                count={2}
+                columns={2}
+                className="mt-10"
+                label="Loading student resources"
+              />
             ) : resources.length === 0 ? (
-              <div className="mt-10 rounded-3xl border border-dashed border-blue-200 px-6 py-12 text-center">
-                <Files
-                  size={30}
-                  className="mx-auto text-brand-600"
-                  aria-hidden="true"
-                />
-                <h3 className="mt-4 text-xl font-black text-navy-900">
-                  No resources published yet
-                </h3>
-                <p className="mt-2 text-sm text-slate-600">
-                  Approved learning files will appear here when they are ready.
-                </p>
-              </div>
+              <EmptyState
+                icon={Files}
+                compact
+                className="mt-10"
+                title="No resources published yet"
+                description="Approved learning files will appear here when they are ready."
+              />
             ) : (
               <div className="mt-10 grid gap-5 md:grid-cols-2">
                 {resources.map((resource) => {
@@ -258,7 +252,7 @@ function StudentPortal() {
                   return (
                     <article
                       key={resource.id}
-                      className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_18px_55px_-42px_rgba(15,23,42,0.28)]"
+                      className="surface-card interactive-card p-6"
                     >
                       <div className="flex items-start justify-between gap-4">
                         <span className="rounded-full bg-brand-50 px-3 py-1.5 text-xs font-extrabold text-brand-600">
@@ -290,7 +284,7 @@ function StudentPortal() {
                         <button
                           type="button"
                           onClick={() => openResource(resource)}
-                          className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-xs font-extrabold text-white"
+                          className="primary-button motion-button min-h-0 shrink-0 px-4 py-2.5 text-xs"
                         >
                           <Download size={15} />
                           Open

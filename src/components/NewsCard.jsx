@@ -4,13 +4,15 @@ function NewsCard({ article, compact = false }) {
   return (
     <article className="surface-card interactive-card group h-full overflow-hidden">
       {article.image && (
-        <img
-          src={article.image}
-          alt={article.imageAlt || ''}
-          loading="lazy"
-          decoding="async"
-          className={`${compact ? 'h-52' : 'h-60'} w-full object-cover transition duration-700 group-hover:scale-[1.035]`}
-        />
+        <div className={`media-frame ${compact ? 'h-52' : 'h-60'}`}>
+          <img
+            src={article.image}
+            alt={article.imageAlt || ''}
+            loading="lazy"
+            decoding="async"
+            className="media-image"
+          />
+        </div>
       )}
       <div className="p-6 sm:p-7">
         <div className="flex flex-wrap items-center gap-2">
@@ -24,7 +26,7 @@ function NewsCard({ article, compact = false }) {
             </span>
           )}
         </div>
-        <h3 className="mt-2 text-2xl font-extrabold text-navy-900">
+        <h3 className="mt-2 text-2xl font-extrabold text-navy-900 transition-colors duration-200 group-hover:text-brand-600">
           {article.title}
         </h3>
         <p className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-slate-400">

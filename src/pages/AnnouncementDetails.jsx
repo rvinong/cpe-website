@@ -1,11 +1,7 @@
 import { motion as Motion } from 'framer-motion'
-import {
-  ArrowLeft,
-  CalendarDays,
-  LoaderCircle,
-  Megaphone,
-} from 'lucide-react'
+import { ArrowLeft, CalendarDays, Megaphone } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
+import ContentSkeleton from '../components/ContentSkeleton'
 import { useAnnouncement } from '../hooks/useAnnouncements'
 
 function AnnouncementDetails() {
@@ -14,12 +10,14 @@ function AnnouncementDetails() {
 
   if (isLoading && !announcement) {
     return (
-      <main className="grid min-h-[70vh] place-items-center bg-slate-50 pt-[84px]">
-        <LoaderCircle
-          size={32}
-          className="animate-spin text-brand-600"
-          aria-label="Loading announcement"
-        />
+      <main className="min-h-[70vh] bg-slate-50 pb-24 pt-[124px] sm:pt-[140px]">
+        <div className="section-shell">
+          <ContentSkeleton
+            variant="detail"
+            className="mx-auto max-w-4xl"
+            label="Loading announcement"
+          />
+        </div>
       </main>
     )
   }
@@ -85,7 +83,7 @@ function AnnouncementDetails() {
                   Date posted: {announcement.date}
                 </span>
               </div>
-              <h1 className="mt-5 text-4xl font-black tracking-[-0.045em] text-navy-900 sm:text-5xl">
+              <h1 className="mt-5 text-3xl font-black tracking-[-0.04em] text-navy-900 sm:text-5xl sm:tracking-[-0.045em]">
                 {announcement.title}
               </h1>
               <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600">
