@@ -2,7 +2,7 @@ import { CalendarDays, Star } from 'lucide-react'
 
 function NewsCard({ article, compact = false }) {
   return (
-    <article className="surface-card group h-full overflow-hidden transition duration-300 hover:-translate-y-1 hover:border-brand-500">
+    <article className="surface-card interactive-card group h-full overflow-hidden">
       {article.image && (
         <img
           src={article.image}

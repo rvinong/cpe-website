@@ -1,6 +1,7 @@
 import { motion as Motion } from 'framer-motion'
 import { ArrowRight, CalendarDays, Megaphone } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
+import { springTransition } from '../lib/motion'
 
 function AnnouncementCard({ announcement, featured = false }) {
   const navigate = useNavigate()
@@ -26,7 +27,8 @@ function AnnouncementCard({ announcement, featured = false }) {
       onClick={openAnnouncement}
       onKeyDown={handleKeyDown}
       whileHover={{ y: featured ? -5 : -7 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+      whileTap={{ scale: 0.992 }}
+      transition={springTransition}
       className={`surface-card group cursor-pointer outline-none transition-[border-color,box-shadow] duration-300 hover:border-brand-500 focus-visible:border-brand-500 focus-visible:ring-4 focus-visible:ring-brand-100 ${
         featured
           ? 'p-7 hover:shadow-[0_30px_75px_-35px_rgba(21,94,239,0.28)] sm:p-9 lg:p-10'
@@ -85,8 +87,8 @@ function AnnouncementCard({ announcement, featured = false }) {
           to={detailsPath}
           className={
             featured
-              ? 'primary-button shrink-0 px-5 py-3.5'
-              : 'secondary-button mt-6 self-start border-blue-200 bg-brand-50 text-brand-700 shadow-sm hover:border-brand-500 hover:bg-brand-600 hover:text-white'
+              ? 'primary-button motion-button shrink-0 px-5 py-3.5'
+              : 'secondary-button motion-button mt-6 self-start border-blue-200 bg-brand-50 text-brand-700 shadow-sm hover:border-brand-500 hover:bg-brand-600 hover:text-white'
           }
         >
           {featured ? 'Read Full Details' : 'Read more'}

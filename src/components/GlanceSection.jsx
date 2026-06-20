@@ -56,7 +56,7 @@ function GlanceSection() {
               </p>
               <a
                 href="/about"
-                className="mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-extrabold text-navy-900 transition hover:bg-blue-50"
+                className="motion-button mt-7 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-extrabold text-navy-900 transition hover:bg-blue-50"
               >
                 Learn more about us
                 <ArrowRight size={17} aria-hidden="true" />

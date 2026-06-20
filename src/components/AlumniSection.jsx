@@ -52,7 +52,8 @@ function AlumniSection() {
                 <Motion.a
                   href="/alumni"
                   whileHover={{ x: 4 }}
-                  className="mt-7 inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-3 text-sm font-extrabold text-white shadow-lg shadow-blue-950/30 transition-colors hover:bg-brand-500"
+                  whileTap={{ scale: 0.985 }}
+                  className="motion-button mt-7 inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-3 text-sm font-extrabold text-white shadow-lg shadow-blue-950/30 transition-colors hover:bg-brand-500"
                 >
                   Open alumni yearbook
                   <ArrowRight size={17} aria-hidden="true" />

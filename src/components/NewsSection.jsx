@@ -47,7 +47,7 @@ function NewsSection() {
               </p>
               <a
                 href="/gallery"
-                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-3 text-sm font-extrabold text-white transition hover:bg-brand-500"
+                className="motion-button mt-6 inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-3 text-sm font-extrabold text-white transition hover:bg-brand-500"
               >
                 Open news and gallery
                 <ArrowRight size={17} aria-hidden="true" />

@@ -1,12 +1,15 @@
 import useOrganization from '../context/useOrganization'
 
-function Logo({ compact = false, light = false }) {
+function Logo({ className = '', compact = false, light = false }) {
   const { profile } = useOrganization()
   const shortName =
     profile.name.replace(/^NwSSU\s*/i, '').trim() || profile.name
 
   return (
-    <a href="/" className="group inline-flex min-w-0 items-center gap-2 sm:gap-3">
+    <a
+      href="/"
+      className={`group inline-flex min-w-0 items-center gap-2 sm:gap-3 ${className}`}
+    >
       <span
         className={`size-10 shrink-0 overflow-hidden rounded-xl border transition-transform duration-300 group-hover:-translate-y-0.5 ${
           light

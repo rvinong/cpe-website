@@ -5,6 +5,7 @@ import {
   Network,
 } from 'lucide-react'
 import { motion as Motion } from 'framer-motion'
+import { springTransition } from '../lib/motion'
 import Reveal from './Reveal'
 import SectionHeader from './SectionHeader'
 
@@ -64,6 +65,8 @@ function FeaturedPrograms() {
               >
                 <Motion.article
                   whileHover={{ y: -6 }}
+                  whileTap={{ scale: 0.988 }}
+                  transition={springTransition}
                   className="surface-card h-full p-7 transition hover:border-brand-500 hover:shadow-[0_26px_65px_-36px_rgba(21,94,239,0.3)]"
                 >
                   <span

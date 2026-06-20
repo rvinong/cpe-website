@@ -13,6 +13,8 @@ import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import useOrganization from '../context/useOrganization'
 import { useAnnouncements } from '../hooks/useAnnouncements'
+import { useMotionPreferences } from '../hooks/useMotionPreferences'
+import { motionEase, springTransition } from '../lib/motion'
 
 function getAnnouncementTime(announcement) {
   const value =
@@ -25,6 +27,14 @@ function getAnnouncementTime(announcement) {
 function Hero() {
   const { profile, stats } = useOrganization()
   const { announcements } = useAnnouncements()
+  const { isCompactMotion, shouldReduceMotion } = useMotionPreferences()
+  const enterX = shouldReduceMotion ? 0 : isCompactMotion ? -16 : -28
+  const enterY = shouldReduceMotion ? 0 : isCompactMotion ? 12 : 22
+  const introDuration = shouldReduceMotion
+    ? 0.01
+    : isCompactMotion
+      ? 0.46
+      : 0.65
   const latestAnnouncement = useMemo(
     () =>
       [...announcements].sort(
@@ -59,9 +69,16 @@ function Hero() {
           height="1080"
           fetchPriority="high"
           className="h-full w-full scale-[1.02] object-cover object-[62%_center] sm:object-center"
-          initial={{ opacity: 0, scale: 1.035 }}
+          initial={
+            shouldReduceMotion
+              ? { opacity: 1, scale: 1 }
+              : { opacity: 0, scale: isCompactMotion ? 1.018 : 1.035 }
+          }
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+          transition={{
+            duration: shouldReduceMotion ? 0.01 : isCompactMotion ? 0.8 : 1.2,
+            ease: motionEase,
+          }}
         />
       </div>
       <div className="absolute inset-x-0 bottom-0 top-[84px] -z-20 bg-white/30 lg:bg-transparent" />
@@ -72,9 +89,9 @@ function Hero() {
       <div className="section-shell grid min-h-[720px] items-start gap-12 pt-4 pb-14 sm:min-h-[760px] sm:pt-5 lg:grid-cols-[1fr_20rem] lg:pt-5 lg:pb-18">
         <div className="max-w-3xl">
           <Motion.div
-            initial={{ opacity: 0, x: -28 }}
+            initial={{ opacity: shouldReduceMotion ? 1 : 0, x: enterX }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: introDuration, ease: motionEase }}
             className="mb-6 inline-flex max-w-full items-center gap-2 rounded-full border border-blue-200 bg-white/90 px-4 py-2 text-[10px] font-extrabold tracking-[0.16em] text-brand-600 uppercase shadow-sm backdrop-blur sm:text-[11px] sm:tracking-[0.2em]"
           >
             <CircuitBoard size={15} aria-hidden="true" />
@@ -82,12 +99,15 @@ function Hero() {
           </Motion.div>
 
           <Motion.h1
-            initial={{ opacity: 0, x: -35 }}
+            initial={{
+              opacity: shouldReduceMotion ? 1 : 0,
+              x: shouldReduceMotion ? 0 : isCompactMotion ? -18 : -35,
+            }}
             animate={{ opacity: 1, x: 0 }}
             transition={{
-              duration: 0.75,
-              delay: 0.08,
-              ease: [0.22, 1, 0.36, 1],
+              duration: shouldReduceMotion ? 0.01 : isCompactMotion ? 0.52 : 0.75,
+              delay: shouldReduceMotion ? 0 : isCompactMotion ? 0.04 : 0.08,
+              ease: motionEase,
             }}
             className="text-[clamp(3.4rem,7.4vw,6.6rem)] font-black leading-[0.86] tracking-[-0.072em] text-navy-900"
           >
@@ -100,9 +120,16 @@ function Hero() {
           </Motion.h1>
 
           <Motion.p
-            initial={{ opacity: 0, x: -25 }}
+            initial={{
+              opacity: shouldReduceMotion ? 1 : 0,
+              x: shouldReduceMotion ? 0 : isCompactMotion ? -12 : -25,
+            }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.65, delay: 0.2 }}
+            transition={{
+              duration: introDuration,
+              delay: shouldReduceMotion ? 0 : isCompactMotion ? 0.1 : 0.2,
+              ease: motionEase,
+            }}
             className="mt-7 max-w-xl text-base leading-8 text-slate-700 sm:text-lg"
           >
             Empowering students through innovation, leadership,
@@ -110,16 +137,20 @@ function Hero() {
           </Motion.p>
 
           <Motion.div
-            initial={{ opacity: 0, y: 22 }}
+            initial={{ opacity: shouldReduceMotion ? 1 : 0, y: enterY }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.34 }}
+            transition={{
+              duration: shouldReduceMotion ? 0.01 : isCompactMotion ? 0.44 : 0.6,
+              delay: shouldReduceMotion ? 0 : isCompactMotion ? 0.16 : 0.34,
+              ease: motionEase,
+            }}
             className="mt-7 flex flex-col gap-3 sm:flex-row"
           >
             <Motion.a
               href="/about"
               whileHover={{ y: -2, scale: 1.01 }}
               whileTap={{ scale: 0.98 }}
-              className="primary-button px-6 py-4"
+              className="primary-button motion-button px-6 py-4"
             >
               Explore Our Organization
               <ArrowRight size={18} aria-hidden="true" />
@@ -128,7 +159,7 @@ function Hero() {
               href="/account?mode=signup"
               whileHover={{ y: -2, scale: 1.01 }}
               whileTap={{ scale: 0.98 }}
-              className="secondary-button px-6 py-4 backdrop-blur"
+              className="secondary-button motion-button px-6 py-4 backdrop-blur"
             >
               <UsersRound size={18} aria-hidden="true" />
               Join Now
@@ -136,9 +167,12 @@ function Hero() {
           </Motion.div>
 
           <Motion.div
-            initial={{ opacity: 0 }}
+            initial={{ opacity: shouldReduceMotion ? 1 : 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.65, duration: 0.7 }}
+            transition={{
+              delay: shouldReduceMotion ? 0 : isCompactMotion ? 0.24 : 0.65,
+              duration: shouldReduceMotion ? 0.01 : isCompactMotion ? 0.4 : 0.7,
+            }}
             className="mt-7 flex items-center gap-4 text-sm text-slate-600"
           >
             <span className="flex -space-x-2" aria-hidden="true">
@@ -163,16 +197,24 @@ function Hero() {
           </Motion.div>
 
           <Motion.div
-            initial={{ opacity: 0, y: 18 }}
+            initial={{
+              opacity: shouldReduceMotion ? 1 : 0,
+              y: shouldReduceMotion ? 0 : isCompactMotion ? 10 : 18,
+            }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.78, duration: 0.55 }}
+            transition={{
+              delay: shouldReduceMotion ? 0 : isCompactMotion ? 0.28 : 0.78,
+              duration: shouldReduceMotion ? 0.01 : isCompactMotion ? 0.4 : 0.55,
+              ease: motionEase,
+            }}
             className="mt-6 grid max-w-2xl gap-3 sm:grid-cols-3"
           >
             {trustSignals.map(([Icon, title, detail]) => (
               <Motion.div
                 key={title}
                 whileHover={{ y: -4, scale: 1.015 }}
-                transition={{ type: 'spring', stiffness: 330, damping: 24 }}
+                whileTap={{ scale: 0.985 }}
+                transition={springTransition}
                 className="group rounded-2xl border border-white/70 bg-white/75 p-3 shadow-sm backdrop-blur transition hover:border-brand-200 hover:bg-white/90 hover:shadow-[0_18px_45px_-32px_rgba(21,94,239,0.45)]"
               >
                 <span className="grid size-9 place-items-center rounded-xl bg-brand-50 text-brand-600 transition group-hover:-translate-y-0.5 group-hover:bg-brand-600 group-hover:text-white">
@@ -190,9 +232,19 @@ function Hero() {
         </div>
 
         <Motion.aside
-          initial={{ opacity: 0, x: 28 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.7, delay: 0.28 }}
+          initial={
+            shouldReduceMotion
+              ? { opacity: 1, x: 0, y: 0 }
+              : isCompactMotion
+                ? { opacity: 0, x: 0, y: 16 }
+                : { opacity: 0, x: 28, y: 0 }
+          }
+          animate={{ opacity: 1, x: 0, y: 0 }}
+          transition={{
+            duration: shouldReduceMotion ? 0.01 : isCompactMotion ? 0.48 : 0.7,
+            delay: shouldReduceMotion ? 0 : isCompactMotion ? 0.18 : 0.28,
+            ease: motionEase,
+          }}
           className="surface-card w-full max-w-sm justify-self-center overflow-hidden p-5 sm:max-w-md lg:max-w-none lg:justify-self-auto"
         >
           <div className="rounded-2xl bg-navy-950 p-5 text-white">
@@ -225,7 +277,7 @@ function Hero() {
             </p>
             <Link
               to={latestAnnouncementPath}
-              className="primary-button mt-4 w-full px-4 py-3 text-xs"
+              className="primary-button motion-button mt-4 w-full px-4 py-3 text-xs"
             >
               {latestAnnouncement ? 'Read announcement' : 'View announcements'}
               <ArrowRight size={16} aria-hidden="true" />

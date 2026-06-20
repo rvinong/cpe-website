@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { motion as Motion } from 'framer-motion'
 import { quickAccessItems } from '../data/quickAccess'
+import { springTransition } from '../lib/motion'
 import Reveal from './Reveal'
 import SectionHeader from './SectionHeader'
 
@@ -45,7 +46,7 @@ function QuickAccess() {
                   aria-label={`Open ${item.title}`}
                   whileHover={{ y: -7, scale: 1.015 }}
                   whileTap={{ scale: 0.985 }}
-                  transition={{ type: 'spring', stiffness: 320, damping: 23 }}
+                  transition={springTransition}
                   className="surface-card group relative flex h-full min-h-52 flex-col overflow-hidden p-6 transition duration-300 hover:border-brand-500 hover:shadow-[0_28px_70px_-38px_rgba(21,94,239,0.5)] focus-visible:border-brand-500 focus-visible:ring-4 focus-visible:ring-brand-100"
                 >
                   <span className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-brand-500 to-transparent opacity-0 transition duration-500 group-hover:opacity-100" />

@@ -77,7 +77,7 @@ function UpcomingEvents() {
               </p>
               <Link
                 to="/events"
-                className="mt-7 inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-blue-600/20 transition hover:bg-brand-700"
+                className="motion-button mt-7 inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-blue-600/20 transition hover:bg-brand-700"
               >
                 Open Events Page
                 <ArrowRight size={17} aria-hidden="true" />

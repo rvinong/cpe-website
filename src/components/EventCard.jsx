@@ -19,7 +19,7 @@ function EventCard({ event, compact = false }) {
   }[event.timing]
 
   return (
-    <article className="surface-card group relative isolate flex h-full flex-col overflow-hidden transition duration-300 hover:-translate-y-1.5 hover:border-brand-500 hover:shadow-[0_28px_75px_-42px_rgba(21,94,239,0.45)]">
+    <article className="surface-card interactive-card group relative isolate flex h-full flex-col overflow-hidden">
       <span className="absolute -right-12 -top-12 -z-10 size-32 rounded-full bg-brand-50/70 transition duration-500 group-hover:scale-125 group-hover:bg-brand-100/70" />
       <div
         className={`h-1 ${
@@ -86,7 +86,7 @@ function EventCard({ event, compact = false }) {
               href={event.registration_url}
               target="_blank"
               rel="noreferrer"
-              className="primary-button mt-6 self-start"
+              className="primary-button motion-button mt-6 self-start"
             >
               Registration details
               <ExternalLink size={16} aria-hidden="true" />

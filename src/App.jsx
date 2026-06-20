@@ -1,7 +1,6 @@
 import {
   AnimatePresence,
   motion as Motion,
-  useReducedMotion,
 } from 'framer-motion'
 import { lazy, Suspense, useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
@@ -9,6 +8,8 @@ import { useLocation } from 'react-router-dom'
 import AdminRoute from './components/AdminRoute'
 import Footer from './components/Footer'
 import Navbar from './components/Navbar'
+import { useMotionPreferences } from './hooks/useMotionPreferences'
+import { getRouteMotion } from './lib/motion'
 
 const About = lazy(() => import('./pages/About'))
 const Account = lazy(() => import('./pages/Account'))
@@ -112,7 +113,8 @@ function ScrollToRoute() {
 
 function App() {
   const location = useLocation()
-  const shouldReduceMotion = useReducedMotion()
+  const { isCompactMotion, shouldReduceMotion } = useMotionPreferences()
+  const routeMotion = getRouteMotion(isCompactMotion, shouldReduceMotion)
   const isAdminRoute = location.pathname === '/admin'
 
   return (
@@ -137,21 +139,10 @@ function App() {
           <AnimatePresence mode="wait">
             <Motion.div
               key={location.pathname}
-              initial={
-                shouldReduceMotion
-                  ? { opacity: 1 }
-                  : { opacity: 0, y: 10 }
-              }
-              animate={{ opacity: 1, y: 0 }}
-              exit={
-                shouldReduceMotion
-                  ? { opacity: 1 }
-                  : { opacity: 0, y: -5 }
-              }
-              transition={{
-                duration: shouldReduceMotion ? 0.01 : 0.24,
-                ease: [0.22, 1, 0.36, 1],
-              }}
+              initial={routeMotion.initial}
+              animate={routeMotion.animate}
+              exit={routeMotion.exit}
+              transition={routeMotion.transition}
             >
               <Suspense fallback={<RouteLoading />}>
                 <Routes location={location}>
