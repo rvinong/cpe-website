@@ -18,6 +18,8 @@ import {
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
+import AdminListSkeleton from './AdminListSkeleton'
 import {
   createEvent,
   deleteEvent,
@@ -70,7 +72,7 @@ const timingFilters = [
 ]
 
 const inputClassName =
-  'mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-navy-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-100'
+  'admin-field mt-2 placeholder:text-slate-400'
 
 function toDateTimeInput(value) {
   if (!value) return ''
@@ -124,6 +126,8 @@ function AdminEvents() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [needsSchema, setNeedsSchema] = useState(false)
+
+  useBodyScrollLock(isEditorOpen)
 
   const loadEvents = useCallback(async () => {
     setIsLoading(true)
@@ -320,7 +324,7 @@ function AdminEvents() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl">
+    <div className="admin-page mx-auto max-w-7xl">
       <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-extrabold tracking-[0.18em] text-brand-600 uppercase">
@@ -426,7 +430,7 @@ function AdminEvents() {
                   value={searchTerm}
                   onChange={(event) => setSearchTerm(event.target.value)}
                   placeholder="Search title, venue, category, status, or description"
-                  className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-12 pr-4 text-sm text-navy-900 outline-none transition focus:border-brand-500 focus:ring-4 focus:ring-brand-100"
+                  className="admin-search-field"
                 />
               </label>
               <p className="rounded-full bg-white px-4 py-2 text-xs font-extrabold text-slate-500 shadow-sm ring-1 ring-slate-200">
@@ -440,7 +444,7 @@ function AdminEvents() {
                   <Filter size={14} aria-hidden="true" />
                   Status
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap justify-center gap-2 sm:justify-start">
                   {statusFilters.map(([value, label]) => {
                     const isActive = selectedStatus === value
 
@@ -450,10 +454,8 @@ function AdminEvents() {
                         type="button"
                         onClick={() => setSelectedStatus(value)}
                         aria-pressed={isActive}
-                        className={`rounded-full px-3.5 py-2 text-xs font-extrabold transition ${
-                          isActive
-                            ? 'bg-brand-600 text-white shadow-md shadow-blue-600/20'
-                            : 'border border-slate-200 bg-white text-slate-600 hover:border-brand-300 hover:text-brand-600'
+                        className={`filter-chip ${
+                          isActive ? 'filter-chip-active' : ''
                         }`}
                       >
                         {label}
@@ -467,7 +469,7 @@ function AdminEvents() {
                 <div className="mb-2 text-[10px] font-extrabold tracking-[0.16em] text-slate-500 uppercase xl:text-right">
                   Timing
                 </div>
-                <div className="flex flex-wrap gap-2 xl:justify-end">
+                <div className="flex flex-wrap justify-center gap-2 sm:justify-start xl:justify-end">
                   {timingFilters.map(([value, label]) => {
                     const isActive = selectedTiming === value
 
@@ -477,10 +479,8 @@ function AdminEvents() {
                         type="button"
                         onClick={() => setSelectedTiming(value)}
                         aria-pressed={isActive}
-                        className={`rounded-full px-3.5 py-2 text-xs font-extrabold transition ${
-                          isActive
-                            ? 'bg-navy-900 text-white shadow-md shadow-navy-950/15'
-                            : 'border border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-navy-900'
+                        className={`filter-chip ${
+                          isActive ? 'filter-chip-active' : ''
                         }`}
                       >
                         {label}
@@ -494,13 +494,7 @@ function AdminEvents() {
         )}
 
         {isLoading ? (
-          <div className="grid min-h-56 place-items-center">
-            <LoaderCircle
-              size={28}
-              className="animate-spin text-brand-600"
-              aria-label="Loading events"
-            />
-          </div>
+          <AdminListSkeleton label="Loading events" />
         ) : items.length === 0 ? (
           <div className="px-6 py-16 text-center">
             <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-brand-50 text-brand-600">
@@ -615,7 +609,12 @@ function AdminEvents() {
       </section>
 
       {isEditorOpen && (
-        <div className="fixed inset-0 z-[70] overflow-y-auto bg-navy-950/70 p-4 backdrop-blur-sm sm:p-6">
+        <div
+          className="admin-modal-backdrop fixed inset-0 z-[70] overflow-y-auto bg-navy-950/70 p-4 backdrop-blur-sm sm:p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Event editor"
+        >
           <div className="mx-auto my-4 max-w-3xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl sm:my-8">
             <div className="flex items-start justify-between border-b border-slate-200 px-5 py-5 sm:px-7">
               <div>

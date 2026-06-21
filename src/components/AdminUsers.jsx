@@ -11,7 +11,9 @@ import {
   X,
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import AdminListSkeleton from './AdminListSkeleton'
 import useAuth from '../context/useAuth'
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import {
   getAdminProfiles,
   isProfilesRpcMissing,
@@ -19,7 +21,7 @@ import {
 } from '../lib/profiles'
 
 const inputClassName =
-  'mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-navy-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-100'
+  'admin-field mt-2 placeholder:text-slate-400'
 
 const statusStyles = {
   pending: 'bg-amber-50 text-amber-700 ring-amber-200',
@@ -54,6 +56,8 @@ function AdminUsers() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [needsSchema, setNeedsSchema] = useState(false)
+
+  useBodyScrollLock(Boolean(editingItem))
 
   const loadProfiles = useCallback(async () => {
     setIsLoading(true)
@@ -180,7 +184,7 @@ function AdminUsers() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl">
+    <div className="admin-page mx-auto max-w-7xl">
       <div>
         <p className="text-xs font-extrabold tracking-[0.18em] text-brand-600 uppercase">
           Access administration
@@ -252,7 +256,7 @@ function AdminUsers() {
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
               placeholder="Search by name, email, student number, role, or status"
-              className="h-13 w-full rounded-xl border border-slate-200 bg-white pl-12 pr-4 text-sm text-navy-900 outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-100"
+              className="admin-search-field"
             />
           </label>
           <p className="rounded-full bg-slate-50 px-4 py-2 text-xs font-extrabold text-slate-500">
@@ -261,7 +265,10 @@ function AdminUsers() {
         </div>
 
         <div className="mt-4 grid gap-3 lg:grid-cols-2">
-          <div className="flex flex-wrap gap-2" aria-label="Filter by status">
+          <div
+            className="flex flex-wrap justify-center gap-2 sm:justify-start"
+            aria-label="Filter by status"
+          >
             {statusFilters.map(([value, label]) => {
               const isActive = selectedStatus === value
 
@@ -271,10 +278,8 @@ function AdminUsers() {
                   type="button"
                   onClick={() => setSelectedStatus(value)}
                   aria-pressed={isActive}
-                  className={`rounded-full px-3.5 py-2 text-xs font-extrabold transition ${
-                    isActive
-                      ? 'bg-brand-600 text-white shadow-md shadow-blue-600/20'
-                      : 'border border-slate-200 bg-white text-slate-600 hover:border-brand-300 hover:text-brand-600'
+                  className={`filter-chip ${
+                    isActive ? 'filter-chip-active' : ''
                   }`}
                 >
                   {label}
@@ -283,7 +288,7 @@ function AdminUsers() {
             })}
           </div>
           <div
-            className="flex flex-wrap gap-2 lg:justify-end"
+            className="flex flex-wrap justify-center gap-2 sm:justify-start lg:justify-end"
             aria-label="Filter by role"
           >
             {roleFilters.map(([value, label]) => {
@@ -295,10 +300,8 @@ function AdminUsers() {
                   type="button"
                   onClick={() => setSelectedRole(value)}
                   aria-pressed={isActive}
-                  className={`rounded-full px-3.5 py-2 text-xs font-extrabold transition ${
-                    isActive
-                      ? 'bg-navy-900 text-white shadow-md shadow-navy-950/15'
-                      : 'border border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:text-navy-900'
+                  className={`filter-chip ${
+                    isActive ? 'filter-chip-active' : ''
                   }`}
                 >
                   {label}
@@ -311,13 +314,7 @@ function AdminUsers() {
 
       <section className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white">
         {isLoading ? (
-          <div className="grid min-h-64 place-items-center">
-            <LoaderCircle
-              size={28}
-              className="animate-spin text-brand-600"
-              aria-label="Loading users"
-            />
-          </div>
+          <AdminListSkeleton label="Loading users" />
         ) : filteredItems.length === 0 ? (
           <div className="px-6 py-16 text-center">
             <UserRound size={30} className="mx-auto text-brand-600" />
@@ -375,7 +372,12 @@ function AdminUsers() {
       </section>
 
       {editingItem && form && (
-        <div className="fixed inset-0 z-[70] overflow-y-auto bg-navy-950/70 p-4 backdrop-blur-sm sm:p-6">
+        <div
+          className="admin-modal-backdrop fixed inset-0 z-[70] overflow-y-auto bg-navy-950/70 p-4 backdrop-blur-sm sm:p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-label="User account editor"
+        >
           <div className="mx-auto my-8 max-w-xl rounded-3xl border border-slate-200 bg-white shadow-2xl">
             <div className="flex items-start justify-between border-b border-slate-200 px-5 py-5 sm:px-7">
               <div>

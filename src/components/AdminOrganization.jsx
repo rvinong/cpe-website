@@ -10,6 +10,7 @@ import {
   X,
 } from 'lucide-react'
 import { useState } from 'react'
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import useOrganization from '../context/useOrganization'
 import {
   createMilestone,
@@ -23,7 +24,7 @@ import {
 } from '../lib/organization'
 
 const inputClassName =
-  'mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-navy-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-100'
+  'admin-field mt-2 placeholder:text-slate-400'
 
 const emptyOfficer = {
   name: '',
@@ -53,6 +54,8 @@ function AdminOrganization() {
   const [activeTab, setActiveTab] = useState('profile')
   const [isSaving, setIsSaving] = useState(false)
   const [editorType, setEditorType] = useState(null)
+
+  useBodyScrollLock(Boolean(editorType))
   const [editingItem, setEditingItem] = useState(null)
   const [officerForm, setOfficerForm] = useState(emptyOfficer)
   const [milestoneForm, setMilestoneForm] = useState(emptyMilestone)
@@ -210,7 +213,7 @@ function AdminOrganization() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl">
+    <div className="admin-page mx-auto max-w-7xl">
       <div>
         <p className="text-xs font-extrabold tracking-[0.18em] text-brand-600 uppercase">
           Organization records
@@ -605,7 +608,12 @@ function AdminOrganization() {
       )}
 
       {editorType && (
-        <div className="fixed inset-0 z-[70] overflow-y-auto bg-navy-950/70 p-4 backdrop-blur-sm sm:p-6">
+        <div
+          className="admin-modal-backdrop fixed inset-0 z-[70] overflow-y-auto bg-navy-950/70 p-4 backdrop-blur-sm sm:p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Organization record editor"
+        >
           <div className="mx-auto my-8 max-w-xl rounded-3xl border border-slate-200 bg-white shadow-2xl">
             <div className="flex items-start justify-between border-b border-slate-200 px-5 py-5 sm:px-7">
               <div>

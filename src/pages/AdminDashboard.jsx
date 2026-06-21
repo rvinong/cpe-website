@@ -1,6 +1,8 @@
+import { motion as Motion } from 'framer-motion'
 import {
   Bell,
   CalendarDays,
+  ExternalLink,
   FileText,
   GraduationCap,
   Images,
@@ -15,7 +17,7 @@ import {
   UsersRound,
   X,
 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import AdminActivityCenter from '../components/AdminActivityCenter'
 import AdminAnalyticsPanel from '../components/AdminAnalyticsPanel'
@@ -145,6 +147,18 @@ const sectionTitles = {
   users: 'Manage Users & Roles',
 }
 
+const sectionDescriptions = {
+  overview: 'Monitor content, schedules, and team priorities.',
+  announcements: 'Draft, publish, feature, and archive notices.',
+  events: 'Keep schedules and registration details accurate.',
+  media: 'Manage verified stories, albums, and approved photos.',
+  organization: 'Maintain public organization records and leadership.',
+  alumni: 'Curate verified graduate profiles and spotlights.',
+  resources: 'Publish approved learning files and external links.',
+  team: 'Coordinate assignments and staff profile information.',
+  users: 'Approve accounts and manage role-based access.',
+}
+
 function AdminDashboard() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
@@ -166,12 +180,33 @@ function AdminDashboard() {
   )
     ? requestedSection
     : 'overview'
+  const activeSectionConfig =
+    visibleSections.find((section) => section.key === activeSection) ||
+    visibleSections[0]
+  const ActiveSectionIcon = activeSectionConfig?.icon || LayoutDashboard
   const {
     dashboardSignals,
     isLoading: isLoadingDashboardSignals,
     loadedAt: dashboardSignalsLoadedAt,
     sourceError: dashboardSignalsError,
   } = useAdminDashboardSignals(activeSection === 'overview')
+
+  useEffect(() => {
+    if (!isSidebarOpen) return undefined
+
+    const previousOverflow = document.body.style.overflow
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setIsSidebarOpen(false)
+    }
+
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', closeOnEscape)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [isSidebarOpen])
 
   const selectSection = (sectionKey) => {
     const targetSection = adminSections.find(
@@ -186,6 +221,9 @@ function AdminDashboard() {
     setMessage('')
     setSearchParams(sectionKey === 'overview' ? {} : { section: sectionKey })
     setIsSidebarOpen(false)
+    window.requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+    })
   }
 
   const handleSignOut = async () => {
@@ -203,9 +241,9 @@ function AdminDashboard() {
     profile?.full_name || user?.email?.split('@')[0] || 'Administrator'
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="admin-dashboard min-h-screen overflow-x-clip bg-slate-50">
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 border-r border-white/10 bg-navy-950 text-white shadow-2xl transition-transform duration-300 lg:translate-x-0 ${
+        className={`admin-sidebar fixed inset-y-0 left-0 z-50 w-72 border-r border-white/10 bg-navy-950 text-white shadow-2xl transition-transform duration-300 lg:translate-x-0 ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -273,6 +311,7 @@ function AdminDashboard() {
                         type="button"
                         disabled={!canOpen}
                         onClick={() => selectSection(sectionKey)}
+                        aria-current={isActive ? 'page' : undefined}
                         className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm font-bold transition ${
                           isActive
                             ? 'bg-brand-600 text-white shadow-lg shadow-blue-950/35'
@@ -312,8 +351,8 @@ function AdminDashboard() {
       )}
 
       <div className="lg:pl-72">
-        <header className="sticky top-0 z-30 flex h-[76px] items-center justify-between border-b border-slate-200 bg-white/90 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">
+        <header className="admin-topbar sticky top-0 z-30 flex h-[76px] items-center justify-between border-b border-slate-200 bg-white/90 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
+          <div className="flex min-w-0 items-center gap-3">
             <button
               type="button"
               onClick={() => setIsSidebarOpen(true)}
@@ -322,11 +361,14 @@ function AdminDashboard() {
             >
               <Menu size={20} />
             </button>
-            <div>
+            <span className="hidden size-10 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-600 sm:grid">
+              <ActiveSectionIcon size={19} aria-hidden="true" />
+            </span>
+            <div className="min-w-0">
               <p className="text-xs font-extrabold tracking-[0.15em] text-brand-600 uppercase">
                 Administration
               </p>
-              <h1 className="text-lg font-black text-navy-900">
+              <h1 className="truncate text-base font-black text-navy-900 sm:text-lg">
                 {sectionTitles[activeSection] || 'Dashboard Overview'}
               </h1>
             </div>
@@ -347,11 +389,51 @@ function AdminDashboard() {
                 </option>
               ))}
             </select>
+            <Link
+              to="/"
+              target="_blank"
+              className="hidden size-10 place-items-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-brand-500 hover:text-brand-600 sm:grid"
+              aria-label="Open public website"
+            >
+              <ExternalLink size={17} aria-hidden="true" />
+            </Link>
             <ThemeToggle />
           </div>
         </header>
 
-        <main className="px-4 py-7 sm:px-6 lg:px-8 lg:py-9">
+        <nav
+          className="admin-mobile-tabs nav-scroll sticky top-[76px] z-20 flex gap-2 overflow-x-auto border-b border-slate-200 bg-white/95 px-3 py-2.5 backdrop-blur-xl md:hidden"
+          aria-label="Dashboard sections"
+        >
+          {visibleSections.map(({ key, label, icon: Icon }) => {
+            const isActive = activeSection === key
+
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => selectSection(key)}
+                aria-current={isActive ? 'page' : undefined}
+                className={`flex shrink-0 items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-extrabold transition ${
+                  isActive
+                    ? 'bg-brand-600 text-white shadow-md shadow-blue-600/20'
+                    : 'border border-slate-200 bg-white text-slate-600'
+                }`}
+              >
+                <Icon size={15} aria-hidden="true" />
+                {label}
+              </button>
+            )
+          })}
+        </nav>
+
+        <main className="px-3 py-6 sm:px-6 sm:py-7 lg:px-8 lg:py-9">
+          <Motion.div
+            key={activeSection}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+          >
           {activeSection === 'announcements' ? (
             <AdminAnnouncements />
           ) : activeSection === 'events' ? (
@@ -370,21 +452,21 @@ function AdminDashboard() {
             <AdminUsers />
           ) : (
             <div className="mx-auto max-w-7xl">
-              <section className="relative isolate overflow-hidden rounded-[2rem] bg-navy-950 px-6 py-9 text-white shadow-[0_30px_80px_-45px_rgba(7,21,47,0.75)] sm:px-9 lg:py-11">
+              <section className="admin-welcome relative isolate overflow-hidden rounded-[2rem] bg-navy-950 px-6 py-9 text-white shadow-[0_30px_80px_-45px_rgba(7,21,47,0.75)] sm:px-9 lg:py-11">
                 <div className="subtle-grid absolute inset-0 -z-20 opacity-10" />
                 <div className="absolute -right-20 -top-24 -z-10 size-72 rounded-full bg-brand-600/25 blur-3xl" />
                 <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
                   <div>
                     <p className="text-xs font-extrabold tracking-[0.2em] text-blue-300 uppercase">
-                      Backend foundation connected
+                      Your organization workspace
                     </p>
                     <h2 className="mt-3 text-3xl font-black sm:text-4xl">
                       Welcome, {displayName}
                     </h2>
                     <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300">
-                      Authentication, session persistence, and role-protected
-                      dashboard access are active. Public organization content
-                      can now be managed from this control center.
+                      {sectionDescriptions.overview} Publish updates, review
+                      activity, and keep the public website current from one
+                      role-protected workspace.
                     </p>
                     <div className="mt-6 flex flex-wrap gap-3">
                       <button
@@ -434,7 +516,7 @@ function AdminDashboard() {
                 ].map(([label, value, detail]) => (
                   <article
                     key={label}
-                    className="surface-card p-5"
+                    className="surface-card interactive-card p-5"
                   >
                     <p className="text-xs font-extrabold tracking-wide text-slate-400 uppercase">
                       {label}
@@ -476,7 +558,7 @@ function AdminDashboard() {
                     }) => (
                       <article
                         key={title}
-                        className="surface-card group p-6 transition hover:-translate-y-1 hover:border-brand-500"
+                        className="surface-card interactive-card group p-6"
                       >
                         <div className="flex items-start justify-between gap-4">
                           <span className="grid size-12 place-items-center rounded-xl bg-brand-50 text-brand-600 transition group-hover:bg-brand-600 group-hover:text-white">
@@ -542,6 +624,7 @@ function AdminDashboard() {
               </p>
             </div>
           )}
+          </Motion.div>
         </main>
       </div>
     </div>

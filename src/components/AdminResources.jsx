@@ -12,6 +12,8 @@ import {
   X,
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
+import AdminListSkeleton from './AdminListSkeleton'
 import { resourceCategories } from '../data/resources'
 import {
   createResource,
@@ -44,7 +46,7 @@ const statusStyles = {
 }
 
 const inputClassName =
-  'mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-navy-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-100'
+  'admin-field mt-2 placeholder:text-slate-400'
 
 function existingFile(item) {
   if (!item?.file_path) return null
@@ -67,6 +69,8 @@ function AdminResources() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [needsSchema, setNeedsSchema] = useState(false)
+
+  useBodyScrollLock(isEditorOpen)
 
   const loadResources = useCallback(async () => {
     setIsLoading(true)
@@ -251,7 +255,7 @@ function AdminResources() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl">
+    <div className="admin-page mx-auto max-w-7xl">
       <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-extrabold tracking-[0.18em] text-brand-600 uppercase">
@@ -319,13 +323,7 @@ function AdminResources() {
 
       <section className="mt-7 overflow-hidden rounded-2xl border border-slate-200 bg-white">
         {isLoading ? (
-          <div className="grid min-h-64 place-items-center">
-            <LoaderCircle
-              size={28}
-              className="animate-spin text-brand-600"
-              aria-label="Loading resources"
-            />
-          </div>
+          <AdminListSkeleton label="Loading resources" />
         ) : items.length === 0 ? (
           <div className="px-6 py-16 text-center">
             <FileText size={30} className="mx-auto text-brand-600" />
@@ -409,7 +407,12 @@ function AdminResources() {
       </section>
 
       {isEditorOpen && (
-        <div className="fixed inset-0 z-[70] overflow-y-auto bg-navy-950/70 p-4 backdrop-blur-sm sm:p-6">
+        <div
+          className="admin-modal-backdrop fixed inset-0 z-[70] overflow-y-auto bg-navy-950/70 p-4 backdrop-blur-sm sm:p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Resource editor"
+        >
           <div className="mx-auto my-4 max-w-3xl rounded-3xl border border-slate-200 bg-white shadow-2xl sm:my-8">
             <div className="flex items-start justify-between border-b border-slate-200 px-5 py-5 sm:px-7">
               <div>

@@ -16,7 +16,9 @@ import {
   X,
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import AdminListSkeleton from './AdminListSkeleton'
 import useAuth from '../context/useAuth'
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import {
   createTeamTask,
   deleteTeamTask,
@@ -42,7 +44,7 @@ const emptyTaskForm = {
 }
 
 const inputClassName =
-  'mt-2 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-navy-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-100'
+  'admin-field mt-2 placeholder:text-slate-400'
 
 const statusOptions = [
   ['todo', 'To do'],
@@ -101,6 +103,8 @@ function AdminTeam() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [needsSchema, setNeedsSchema] = useState(false)
+
+  useBodyScrollLock(isTaskEditorOpen)
 
   const loadTeam = useCallback(async () => {
     setIsLoading(true)
@@ -378,7 +382,7 @@ function AdminTeam() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl">
+    <div className="admin-page mx-auto max-w-7xl">
       <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-extrabold tracking-[0.18em] text-brand-600 uppercase">
@@ -547,12 +551,8 @@ function AdminTeam() {
         </div>
 
         {isLoading ? (
-          <div className="mt-5 grid min-h-48 place-items-center rounded-2xl border border-slate-200 bg-white">
-            <LoaderCircle
-              size={28}
-              className="animate-spin text-brand-600"
-              aria-label="Loading team"
-            />
+          <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+            <AdminListSkeleton rows={3} withMedia label="Loading team" />
           </div>
         ) : (
           <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -635,11 +635,11 @@ function AdminTeam() {
                 value={taskSearchTerm}
                 onChange={(event) => setTaskSearchTerm(event.target.value)}
                 placeholder="Search by task, priority, assignee, or assigner"
-                className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-sm text-navy-900 outline-none transition focus:border-brand-500 focus:ring-4 focus:ring-brand-100"
+                className="admin-search-field"
               />
             </label>
             <div
-              className="flex flex-wrap gap-2"
+              className="flex flex-wrap justify-center gap-2 sm:justify-start"
               aria-label="Filter team tasks by status"
             >
               {[['all', 'All'], ...statusOptions].map(([value, label]) => {
@@ -651,10 +651,8 @@ function AdminTeam() {
                     type="button"
                     onClick={() => setSelectedTaskStatus(value)}
                     aria-pressed={isActive}
-                    className={`rounded-full px-3.5 py-2 text-xs font-extrabold transition ${
-                      isActive
-                        ? 'bg-brand-600 text-white shadow-md shadow-blue-600/20'
-                        : 'border border-slate-200 bg-white text-slate-600 hover:border-brand-300 hover:text-brand-600'
+                    className={`filter-chip ${
+                      isActive ? 'filter-chip-active' : ''
                     }`}
                   >
                     {label}
@@ -666,12 +664,8 @@ function AdminTeam() {
         )}
 
         {isLoading ? (
-          <div className="mt-5 grid min-h-48 place-items-center rounded-2xl border border-slate-200 bg-white">
-            <LoaderCircle
-              size={28}
-              className="animate-spin text-brand-600"
-              aria-label="Loading team tasks"
-            />
+          <div className="mt-5 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+            <AdminListSkeleton rows={3} label="Loading team tasks" />
           </div>
         ) : scopedTasks.length === 0 ? (
           <div className="mt-5 rounded-2xl border border-dashed border-blue-200 bg-brand-50/35 px-6 py-14 text-center">
@@ -810,7 +804,12 @@ function AdminTeam() {
       </section>
 
       {isTaskEditorOpen && isAdmin && (
-        <div className="fixed inset-0 z-[70] overflow-y-auto bg-navy-950/70 p-4 backdrop-blur-sm sm:p-6">
+        <div
+          className="admin-modal-backdrop fixed inset-0 z-[70] overflow-y-auto bg-navy-950/70 p-4 backdrop-blur-sm sm:p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Team task editor"
+        >
           <div className="mx-auto my-8 max-w-2xl rounded-3xl border border-slate-200 bg-white shadow-2xl">
             <div className="flex items-start justify-between border-b border-slate-200 px-5 py-5 sm:px-7">
               <div>
