@@ -72,26 +72,15 @@ function getInitialPausePreference() {
   }
 }
 
-function RobotEyes({ active, kind }) {
-  const isPixel = kind === 'pixel'
-
+function RobotEyes({ active }) {
   return (
     <Motion.g
       animate={active ? { scaleY: [1, 1, 0.12, 1, 1] } : { scaleY: 1 }}
       transition={{ duration: 4.2, repeat: Infinity, times: [0, 0.72, 0.76, 0.8, 1] }}
       style={{ transformOrigin: '40px 23px' }}
     >
-      {isPixel ? (
-        <>
-          <rect x="29" y="20" width="6" height="6" rx="1" fill="white" />
-          <rect x="45" y="20" width="6" height="6" rx="1" fill="white" />
-        </>
-      ) : (
-        <>
-          <circle cx="32" cy="23" r="3" fill="white" />
-          <circle cx="48" cy="23" r="3" fill="white" />
-        </>
-      )}
+      <rect x="29" y="20" width="6" height="6" fill="white" />
+      <rect x="45" y="20" width="6" height="6" fill="white" />
     </Motion.g>
   )
 }
@@ -110,7 +99,7 @@ function WalkingLeg({ x, direction, active, color }) {
         y2="59"
         stroke={color}
         strokeWidth="5"
-        strokeLinecap="round"
+        strokeLinecap="square"
       />
       <line
         x1={x + direction * 2}
@@ -119,7 +108,7 @@ function WalkingLeg({ x, direction, active, color }) {
         y2="59"
         stroke="white"
         strokeWidth="4"
-        strokeLinecap="round"
+        strokeLinecap="square"
       />
     </Motion.g>
   )
@@ -134,21 +123,21 @@ function ByteRobot({ design, active, reacting }) {
       transition={reacting ? { duration: 0.55 } : { duration: 0.7, repeat: Infinity }}
     >
       <line x1="40" y1="9" x2="40" y2="4" stroke={design.accent} strokeWidth="3" />
-      <circle cx="40" cy="3" r="3" fill={design.accent} />
+      <rect x="37" y="0" width="6" height="6" fill={design.accent} />
       <Motion.g
         animate={reacting ? { rotate: [0, -35, 18, -35, 0] } : { rotate: 0 }}
         transition={{ duration: 0.65 }}
         style={{ transformOrigin: '61px 39px' }}
       >
-        <line x1="59" y1="37" x2="69" y2="30" stroke={design.primary} strokeWidth="5" strokeLinecap="round" />
-        <circle cx="70" cy="29" r="3" fill={design.accent} />
+        <line x1="59" y1="37" x2="69" y2="30" stroke={design.primary} strokeWidth="5" strokeLinecap="square" />
+        <rect x="67" y="26" width="6" height="6" fill={design.accent} />
       </Motion.g>
-      <line x1="21" y1="37" x2="13" y2="44" stroke={design.primary} strokeWidth="5" strokeLinecap="round" />
-      <rect x="18" y="9" width="44" height="31" rx="10" fill={design.primary} stroke="white" strokeWidth="2" />
-      <rect x="24" y="15" width="32" height="17" rx="6" fill="#07152f" />
-      <RobotEyes active={active} kind={design.kind} />
-      <path d="M35 29h10" stroke={design.accent} strokeWidth="2" strokeLinecap="round" />
-      <rect x="26" y="39" width="28" height="13" rx="6" fill={design.accent} stroke="white" strokeWidth="2" />
+      <line x1="21" y1="37" x2="13" y2="44" stroke={design.primary} strokeWidth="5" strokeLinecap="square" />
+      <path d="M22 9h36v4h4v23h-4v4H22v-4h-4V13h4V9Z" fill={design.primary} stroke="white" strokeWidth="2" />
+      <rect x="24" y="15" width="32" height="17" fill="#07152f" />
+      <RobotEyes active={active} />
+      <path d="M35 29h10" stroke={design.accent} strokeWidth="2" />
+      <path d="M29 39h22v3h3v8h-3v3H29v-3h-3v-8h3v-3Z" fill={design.accent} stroke="white" strokeWidth="2" />
       <WalkingLeg x={33} direction={-1} active={active} color={design.primary} />
       <WalkingLeg x={47} direction={1} active={active} color={design.primary} />
     </Motion.svg>
@@ -164,12 +153,12 @@ function BoltRobot({ design, active, reacting }) {
       transition={reacting ? { duration: 0.55 } : { duration: 0.62, repeat: Infinity }}
     >
       <path d="M39 2l-5 9h7l-2 8 8-11h-7l3-6Z" fill={design.accent} />
-      <circle cx="17" cy="27" r="7" fill={design.accent} stroke="white" strokeWidth="2" />
-      <circle cx="63" cy="27" r="7" fill={design.accent} stroke="white" strokeWidth="2" />
-      <rect x="20" y="10" width="40" height="34" rx="14" fill={design.primary} stroke="white" strokeWidth="2" />
-      <rect x="26" y="17" width="28" height="16" rx="8" fill="#07152f" />
-      <RobotEyes active={active} kind={design.kind} />
-      <path d="M35 30l5 3 5-3" fill="none" stroke={design.accent} strokeWidth="2" strokeLinecap="round" />
+      <path d="M10 21h10v4h4v8h-4v4H10v-4H7V25h3v-4Z" fill={design.accent} stroke="white" strokeWidth="2" />
+      <path d="M60 21h10v4h3v8h-3v4H60v-4h-4v-8h4v-4Z" fill={design.accent} stroke="white" strokeWidth="2" />
+      <path d="M26 10h28v4h6v26h-6v4H26v-4h-6V14h6v-4Z" fill={design.primary} stroke="white" strokeWidth="2" />
+      <rect x="26" y="17" width="28" height="16" fill="#07152f" />
+      <RobotEyes active={active} />
+      <path d="M35 30h4v3h6v-3h4" fill="none" stroke={design.accent} strokeWidth="2" />
       <path d="M29 43h22l5 9H24l5-9Z" fill={design.accent} stroke="white" strokeWidth="2" />
       <WalkingLeg x={32} direction={-1} active={active} color={design.primary} />
       <WalkingLeg x={48} direction={1} active={active} color={design.primary} />
@@ -185,16 +174,17 @@ function PixelRobot({ design, active, reacting }) {
       animate={reacting ? { rotate: [0, 4, -4, 4, 0], y: [0, -2, 0] } : { y: active ? [0, -1, 0] : 0 }}
       transition={reacting ? { duration: 0.6 } : { duration: 0.8, repeat: Infinity }}
     >
-      <rect x="12" y="10" width="56" height="34" rx="9" fill={design.primary} stroke="white" strokeWidth="2" />
-      <path d="M20 8V4m40 4V4" stroke={design.accent} strokeWidth="3" strokeLinecap="round" />
-      <rect x="18" y="16" width="44" height="20" rx="5" fill="#07152f" />
-      <RobotEyes active={active} kind={design.kind} />
+      <path d="M16 10h48v4h4v26h-4v4H16v-4h-4V14h4v-4Z" fill={design.primary} stroke="white" strokeWidth="2" />
+      <path d="M20 8V4m40 4V4" stroke={design.accent} strokeWidth="3" />
+      <rect x="18" y="16" width="44" height="20" fill="#07152f" />
+      <RobotEyes active={active} />
       <path d="M34 31h4v2h8v-2h4" fill="none" stroke={design.accent} strokeWidth="2" />
-      <rect x="25" y="43" width="30" height="9" rx="4.5" fill={design.accent} stroke="white" strokeWidth="2" />
-      <Motion.circle
-        cx="29"
-        cy="56"
-        r="6"
+      <rect x="25" y="43" width="30" height="9" fill={design.accent} stroke="white" strokeWidth="2" />
+      <Motion.rect
+        x="23"
+        y="50"
+        width="12"
+        height="12"
         fill={design.primary}
         stroke="white"
         strokeWidth="2"
@@ -202,10 +192,11 @@ function PixelRobot({ design, active, reacting }) {
         transition={{ duration: 0.9, repeat: Infinity, ease: 'linear' }}
         style={{ transformOrigin: '29px 56px' }}
       />
-      <Motion.circle
-        cx="51"
-        cy="56"
-        r="6"
+      <Motion.rect
+        x="45"
+        y="50"
+        width="12"
+        height="12"
         fill={design.primary}
         stroke="white"
         strokeWidth="2"
@@ -226,12 +217,12 @@ function OrbitRobot({ design, active, reacting }) {
       transition={reacting ? { duration: 0.7 } : { duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
     >
       <line x1="40" y1="10" x2="40" y2="4" stroke={design.accent} strokeWidth="3" />
-      <circle cx="40" cy="3" r="3" fill={design.accent} />
-      <circle cx="40" cy="27" r="20" fill={design.primary} stroke="white" strokeWidth="2" />
-      <rect x="24" y="17" width="32" height="18" rx="9" fill="#07152f" />
-      <RobotEyes active={active} kind={design.kind} />
-      <path d="M36 31h8" stroke={design.accent} strokeWidth="2" strokeLinecap="round" />
-      <ellipse cx="40" cy="50" rx="26" ry="8" fill={design.accent} stroke="white" strokeWidth="2" />
+      <rect x="37" y="0" width="6" height="6" fill={design.accent} />
+      <path d="M31 7h18v4h7v6h4v20h-4v6h-7v4H31v-4h-7v-6h-4V17h4v-6h7V7Z" fill={design.primary} stroke="white" strokeWidth="2" />
+      <rect x="24" y="17" width="32" height="18" fill="#07152f" />
+      <RobotEyes active={active} />
+      <path d="M36 31h8" stroke={design.accent} strokeWidth="2" />
+      <path d="M18 43h44v4h6v7h-6v4H18v-4h-6v-7h6v-4Z" fill={design.accent} stroke="white" strokeWidth="2" />
       <Motion.path
         d="M29 56h22l-4 6H33l-4-6Z"
         fill={design.primary}
