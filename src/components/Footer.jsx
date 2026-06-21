@@ -237,9 +237,14 @@ function Footer() {
             </p>
             <p className="mt-1 text-[11px] text-slate-600">
               Designed and developed by{' '}
-              <span className="font-bold text-slate-500">
+              <a
+                href="https://github.com/rvinong"
+                target="_blank"
+                rel="noreferrer"
+                className="font-bold text-slate-500 transition hover:text-slate-300"
+              >
                 Rvin Ong Labrada
-              </span>
+              </a>
             </p>
           </div>
           <p>Built for innovation, knowledge, and excellence.</p>
