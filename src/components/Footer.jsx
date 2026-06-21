@@ -230,10 +230,18 @@ function Footer() {
 
       <div className="border-t border-white/10">
         <div className="section-shell flex flex-col gap-3 py-5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-          <p>
-            &copy; {new Date().getFullYear()} {profile.name}. All rights
-            reserved.
-          </p>
+          <div>
+            <p>
+              &copy; {new Date().getFullYear()} {profile.name}. All rights
+              reserved.
+            </p>
+            <p className="mt-1 text-[11px] text-slate-600">
+              Designed and developed by{' '}
+              <span className="font-bold text-slate-500">
+                Rvin Ong Labrada
+              </span>
+            </p>
+          </div>
           <p>Built for innovation, knowledge, and excellence.</p>
         </div>
       </div>
