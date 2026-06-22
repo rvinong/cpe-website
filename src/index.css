@@ -477,22 +477,24 @@ a {
 
 .robot-parade {
   position: absolute;
-  top: -2.1rem;
+  top: -2.25rem;
   right: 1.5rem;
   left: 1.5rem;
   z-index: 20;
-  height: 3.75rem;
+  height: 4rem;
+  isolation: isolate;
   pointer-events: none;
 }
 
 .robot-character {
-  width: 3.7rem;
-  height: 3.45rem;
+  width: 3.55rem;
+  height: 3.35rem;
   padding: 0;
   border: 0;
   color: inherit;
   background: transparent;
-  filter: drop-shadow(4px 5px 0 rgba(7, 21, 47, 0.2));
+  cursor: pointer;
+  filter: drop-shadow(3px 4px 0 rgba(7, 21, 47, 0.18));
   pointer-events: auto;
   transform-origin: bottom center;
   will-change: left, transform;
@@ -513,17 +515,30 @@ a {
   image-rendering: pixelated;
 }
 
+.robot-figure {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: bottom center;
+}
+
+.robot-character[data-mode="sleep"] .robot-figure {
+  filter: saturate(0.78) brightness(0.96);
+}
+
 .robot-emote {
   position: absolute;
-  top: -1.2rem;
+  top: -1.15rem;
   left: 50%;
-  z-index: 4;
+  z-index: 5;
   min-width: 1.65rem;
   transform: translateX(-50%);
-  border: 1px solid rgba(21, 94, 239, 0.15);
-  border-radius: 0.18rem;
+  border: 2px solid rgba(21, 94, 239, 0.16);
+  border-radius: 0.22rem;
   background: rgba(255, 255, 255, 0.96);
-  padding: 0.2rem 0.38rem;
+  padding: 0.22rem 0.4rem;
   color: #0b1f46;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: 0.58rem;
@@ -531,33 +546,34 @@ a {
   line-height: 1;
   text-align: center;
   white-space: nowrap;
-  box-shadow: 3px 3px 0 rgba(15, 23, 42, 0.2);
+  box-shadow: 3px 3px 0 rgba(15, 23, 42, 0.18);
   pointer-events: none;
 }
 
 .robot-emote::after {
   position: absolute;
-  bottom: -0.22rem;
+  bottom: -0.3rem;
   left: 50%;
-  width: 0.42rem;
-  height: 0.42rem;
+  width: 0.45rem;
+  height: 0.45rem;
   transform: translateX(-50%) rotate(45deg);
-  border-right: 1px solid rgba(21, 94, 239, 0.15);
-  border-bottom: 1px solid rgba(21, 94, 239, 0.15);
+  border-right: 2px solid rgba(21, 94, 239, 0.16);
+  border-bottom: 2px solid rgba(21, 94, 239, 0.16);
   background: inherit;
   content: "";
 }
 
 .robot-shadow {
   position: absolute;
-  right: 16%;
-  bottom: -0.05rem;
-  left: 16%;
-  z-index: -1;
-  height: 0.22rem;
+  right: 18%;
+  bottom: -0.08rem;
+  left: 18%;
+  z-index: 0;
+  height: 0.2rem;
   border-radius: 0;
   background: rgba(7, 21, 47, 0.2);
   filter: none;
+  transform-origin: center;
 }
 
 .robot-pause-control {
@@ -590,8 +606,8 @@ a {
 
 .robot-connection-spark {
   position: absolute;
-  bottom: 1.85rem;
-  left: 26.5%;
+  bottom: 2rem;
+  left: 49%;
   width: 1.7rem;
   height: 1.7rem;
   place-items: center;

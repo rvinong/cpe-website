@@ -8,7 +8,7 @@ import {
 import useOrganization from '../context/useOrganization'
 import AnimatedCounter from './AnimatedCounter'
 import Reveal from './Reveal'
-import RobotParade from './RobotParade'
+import PixelPals from './PixelPals'
 
 const iconMap = {
   award: Award,
@@ -35,7 +35,7 @@ function GlanceSection() {
       <div className="section-shell">
         <Reveal direction="left">
           <div className="relative pt-4 sm:pt-6">
-            <RobotParade />
+            <PixelPals />
             <div className="relative isolate overflow-hidden rounded-[2.5rem] bg-navy-950 px-6 py-14 shadow-[0_34px_80px_-40px_rgba(7,21,47,0.85)] sm:px-10 lg:px-14 lg:py-18">
               <img
                 src="/images/ce-campus-hero.jpg"
