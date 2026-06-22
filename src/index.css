@@ -494,7 +494,6 @@ a {
   color: inherit;
   background: transparent;
   cursor: pointer;
-  filter: drop-shadow(3px 4px 0 rgba(7, 21, 47, 0.18));
   pointer-events: auto;
   transform-origin: bottom center;
   will-change: left, transform;
@@ -511,6 +510,11 @@ a {
   width: 100%;
   height: 100%;
   overflow: visible;
+  filter:
+    drop-shadow(1px 0 0 #020617)
+    drop-shadow(-1px 0 0 #020617)
+    drop-shadow(0 1px 0 #020617)
+    drop-shadow(0 -1px 0 #020617);
   shape-rendering: crispEdges;
   image-rendering: pixelated;
 }
@@ -561,47 +565,6 @@ a {
   border-bottom: 2px solid rgba(21, 94, 239, 0.16);
   background: inherit;
   content: "";
-}
-
-.robot-shadow {
-  position: absolute;
-  right: 18%;
-  bottom: -0.08rem;
-  left: 18%;
-  z-index: 0;
-  height: 0.2rem;
-  border-radius: 0;
-  background: rgba(7, 21, 47, 0.2);
-  filter: none;
-  transform-origin: center;
-}
-
-.robot-pause-control {
-  position: absolute;
-  top: 0.4rem;
-  right: 0;
-  display: grid;
-  width: 2rem;
-  height: 2rem;
-  place-items: center;
-  border: 1px solid var(--line);
-  border-radius: 0.3rem;
-  background: rgba(255, 255, 255, 0.92);
-  color: #64748b;
-  box-shadow: 0 12px 28px -18px rgba(15, 23, 42, 0.68);
-  backdrop-filter: blur(12px);
-  pointer-events: auto;
-  transition:
-    transform 180ms ease,
-    border-color 180ms ease,
-    color 180ms ease,
-    background-color 180ms ease;
-}
-
-.robot-pause-control:hover {
-  transform: translateY(-2px);
-  border-color: #2e73f6;
-  color: #155eef;
 }
 
 .robot-connection-spark {
@@ -958,17 +921,6 @@ html.dark .robot-emote {
 
 html.dark .robot-emote::after {
   border-color: rgba(96, 165, 250, 0.24);
-}
-
-html.dark .robot-pause-control {
-  border-color: rgba(125, 158, 202, 0.2);
-  background: rgba(12, 23, 40, 0.9);
-  color: #94a3b8;
-}
-
-html.dark .robot-pause-control:hover {
-  border-color: rgba(96, 165, 250, 0.58);
-  color: #93c5fd;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -1364,11 +1316,6 @@ html.dark .text-orange-500 {
     height: 3rem;
   }
 
-  .robot-pause-control {
-    top: 0.25rem;
-    width: 1.85rem;
-    height: 1.85rem;
-  }
 }
 
 @media (max-width: 767px) {

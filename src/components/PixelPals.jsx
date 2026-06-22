@@ -3,7 +3,7 @@ import {
   motion as Motion,
   useInView,
 } from 'framer-motion'
-import { Pause, Play, Sparkles } from 'lucide-react'
+import { Sparkles } from 'lucide-react'
 import {
   useCallback,
   useEffect,
@@ -33,7 +33,7 @@ const robots = [
     home: 5,
     compactHome: 5,
     route: [76, 12, 62, 7, 84, 28],
-    compactRoute: [68, 8, 61, 16, 70, 31],
+    compactRoute: [80, 8, 70, 16, 82, 31],
     speed: 8.4,
     lane: 1,
     idles: ['wave', 'look', 'sleep'],
@@ -49,7 +49,7 @@ const robots = [
     home: 31,
     compactHome: 58,
     route: [9, 81, 23, 69, 5, 49],
-    compactRoute: [8, 67, 19, 71, 35, 5],
+    compactRoute: [8, 79, 19, 82, 35, 5],
     speed: 9.2,
     lane: 0,
     idles: ['dance', 'charge', 'wave'],
@@ -64,7 +64,7 @@ const robots = [
     accent: '#a78bfa',
     home: 56,
     route: [82, 18, 72, 6, 49, 87],
-    compactRoute: [68, 18, 60, 7, 42, 70],
+    compactRoute: [78, 18, 70, 7, 42, 81],
     speed: 7.8,
     lane: 2,
     idles: ['scan', 'calculate', 'charge'],
@@ -102,16 +102,8 @@ function pick(items) {
   return items[Math.floor(Math.random() * items.length)]
 }
 
-function getInitialPausePreference() {
-  try {
-    return localStorage.getItem('robot-parade-paused') === 'true'
-  } catch {
-    return false
-  }
-}
-
 function useRobotBrain(design, active, compact) {
-  const maximumPosition = compact ? 72 : 88
+  const maximumPosition = compact ? 84 : 88
   const initialPosition = compact
     ? (design.compactHome ?? design.home)
     : design.home
@@ -556,7 +548,7 @@ function RobotCharacter({
     : ''
   const reaction = clickReaction || socialReaction
   const emote = reaction || actionEmote
-  const renderedPosition = clamp(brain.position, 3, compact ? 72 : 88)
+  const renderedPosition = clamp(brain.position, 3, compact ? 84 : 88)
 
   useEffect(() => {
     if (!clickReaction) return undefined
@@ -649,15 +641,6 @@ function RobotCharacter({
           reacting={Boolean(reaction)}
         />
       </Motion.span>
-      <Motion.span
-        className="robot-shadow"
-        animate={{
-          scaleX: moving ? [0.88, 1, 0.88] : 0.92,
-          opacity: brain.mode === 'hover' ? [0.12, 0.22, 0.12] : 0.2,
-        }}
-        transition={{ duration: moving ? 0.44 : 1.8, repeat: Infinity }}
-        aria-hidden="true"
-      />
     </Motion.button>
   )
 }
@@ -666,17 +649,8 @@ function PixelPals() {
   const stageRef = useRef(null)
   const isInView = useInView(stageRef, { margin: '120px 0px', amount: 0.2 })
   const { isCompactMotion, shouldReduceMotion } = useMotionPreferences()
-  const [isPaused, setIsPaused] = useState(getInitialPausePreference)
   const [encounter, setEncounter] = useState({ source: null, token: 0 })
-  const isActive = isInView && !isPaused && !shouldReduceMotion
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('robot-parade-paused', String(isPaused))
-    } catch {
-      // Pixel Pals still work when storage is unavailable.
-    }
-  }, [isPaused])
+  const isActive = isInView && !shouldReduceMotion
 
   useEffect(() => {
     if (!encounter.source) return undefined
@@ -726,15 +700,6 @@ function PixelPals() {
         />
       ))}
 
-      <button
-        type="button"
-        onClick={() => setIsPaused((current) => !current)}
-        className="robot-pause-control"
-        aria-label={isPaused ? 'Play Pixel Pals animations' : 'Pause Pixel Pals animations'}
-        title={isPaused ? 'Play Pixel Pals' : 'Pause Pixel Pals'}
-      >
-        {isPaused ? <Play size={14} /> : <Pause size={14} />}
-      </button>
     </div>
   )
 }
