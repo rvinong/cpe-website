@@ -24,6 +24,7 @@ import {
   isAnnouncementsTableMissing,
   updateAnnouncement,
 } from '../lib/announcements'
+import { signalBytePublished } from '../lib/byteAssistant'
 import {
   describeNotificationResult,
   notifyPublishedContent,
@@ -196,6 +197,7 @@ function AdminAnnouncements() {
       editingItem?.status !== 'published'
 
     if (shouldNotify) {
+      signalBytePublished('announcement', result.data.title)
       const notificationResult = await notifyPublishedContent(
         'announcement',
         result.data.id,

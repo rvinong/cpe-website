@@ -20,6 +20,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import AdminListSkeleton from './AdminListSkeleton'
+import { signalBytePublished } from '../lib/byteAssistant'
 import {
   createEvent,
   deleteEvent,
@@ -289,6 +290,13 @@ function AdminEvents() {
       setNeedsSchema(isEventsTableMissing(result.error))
       setIsSaving(false)
       return
+    }
+
+    if (
+      result.data.status === 'published' &&
+      editingItem?.status !== 'published'
+    ) {
+      signalBytePublished('event', result.data.title)
     }
 
     setSuccess(

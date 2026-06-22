@@ -580,6 +580,189 @@ a {
   box-shadow: 0 8px 20px -10px rgba(249, 115, 22, 0.8);
 }
 
+.byte-assistant-dock {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 45;
+  display: flex;
+  width: min(17rem, calc(100vw - 2rem));
+  flex-direction: column;
+  align-items: flex-end;
+  pointer-events: none;
+}
+
+.byte-assistant-character {
+  position: relative;
+  width: 4.8rem;
+  height: 4.45rem;
+  pointer-events: auto;
+}
+
+.byte-assistant-robot {
+  display: block;
+  width: 4.55rem;
+  height: 4.2rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transform-origin: bottom center;
+}
+
+.byte-assistant-float {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.byte-assistant-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter:
+    drop-shadow(1px 0 0 #020617)
+    drop-shadow(-1px 0 0 #020617)
+    drop-shadow(0 1px 0 #020617)
+    drop-shadow(0 -1px 0 #020617);
+  image-rendering: pixelated;
+  shape-rendering: crispEdges;
+}
+
+.byte-assistant-message {
+  position: relative;
+  display: flex;
+  max-width: 16.5rem;
+  flex-direction: column;
+  gap: 0.18rem;
+  margin: 0 0.4rem 0.65rem 0;
+  border: 1px solid var(--line);
+  border-radius: 0.85rem 0.85rem 0.2rem 0.85rem;
+  background: var(--surface-raised);
+  padding: 0.72rem 0.85rem;
+  color: var(--text-body);
+  font-size: 0.76rem;
+  font-weight: 650;
+  line-height: 1.45;
+  box-shadow: 0 18px 42px -28px rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(16px);
+  pointer-events: auto;
+}
+
+.byte-assistant-message::after {
+  position: absolute;
+  right: 0.6rem;
+  bottom: -0.34rem;
+  width: 0.65rem;
+  height: 0.65rem;
+  transform: rotate(45deg);
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: var(--surface);
+  content: "";
+}
+
+.byte-assistant-message-label {
+  color: #155eef;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.byte-assistant-menu-toggle {
+  position: absolute;
+  top: -0.35rem;
+  right: -0.1rem;
+  z-index: 4;
+  display: grid;
+  width: 1.65rem;
+  height: 1.65rem;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: var(--surface-raised);
+  color: var(--text-body);
+  box-shadow: 0 10px 24px -16px rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(12px);
+  transition:
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.byte-assistant-menu-toggle:hover {
+  transform: translateY(-1px);
+  border-color: #2e73f6;
+  color: #155eef;
+}
+
+.byte-assistant-menu {
+  position: absolute;
+  right: 0.25rem;
+  bottom: 4.75rem;
+  z-index: 5;
+  display: grid;
+  min-width: 8.5rem;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 0.8rem;
+  background: var(--surface-raised);
+  padding: 0.3rem;
+  box-shadow: 0 22px 52px -28px rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(16px);
+  pointer-events: auto;
+}
+
+.byte-assistant-menu button {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 0;
+  border-radius: 0.55rem;
+  background: transparent;
+  padding: 0.55rem 0.65rem;
+  color: var(--text-body);
+  font-size: 0.75rem;
+  font-weight: 750;
+  text-align: left;
+  transition:
+    color 150ms ease,
+    background-color 150ms ease;
+}
+
+.byte-assistant-menu button:hover {
+  background: var(--brand-soft);
+  color: #155eef;
+}
+
+.byte-assistant-minimized {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right));
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  z-index: 45;
+  display: grid;
+  width: 2.9rem;
+  height: 2.9rem;
+  place-items: center;
+  border: 1px solid rgba(21, 94, 239, 0.3);
+  border-radius: 0.85rem;
+  background: var(--surface-raised);
+  color: #155eef;
+  box-shadow: 0 18px 42px -26px rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(14px);
+}
+
+.byte-assistant-robot:focus-visible,
+.byte-assistant-menu-toggle:focus-visible,
+.byte-assistant-minimized:focus-visible,
+.byte-assistant-menu button:focus-visible {
+  outline: 3px solid rgba(46, 115, 246, 0.42);
+  outline-offset: 2px;
+}
+
 .admin-page article.rounded-2xl.border.border-slate-200.bg-white,
 .admin-page section.rounded-2xl.border.border-slate-200.bg-white {
   box-shadow: 0 22px 60px -50px rgba(15, 23, 42, 0.5);
@@ -921,6 +1104,24 @@ html.dark .robot-emote {
 
 html.dark .robot-emote::after {
   border-color: rgba(96, 165, 250, 0.24);
+}
+
+html.dark .byte-assistant-message,
+html.dark .byte-assistant-menu,
+html.dark .byte-assistant-menu-toggle,
+html.dark .byte-assistant-minimized {
+  border-color: rgba(125, 158, 202, 0.22);
+  box-shadow: 0 22px 52px -28px rgba(0, 0, 0, 0.9);
+}
+
+html.dark .byte-assistant-message-label,
+html.dark .byte-assistant-menu-toggle,
+html.dark .byte-assistant-minimized {
+  color: #93c5fd;
+}
+
+html.dark .byte-assistant-menu button:hover {
+  color: #93c5fd;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -1316,6 +1517,38 @@ html.dark .text-orange-500 {
     height: 3rem;
   }
 
+  .byte-assistant-dock {
+    right: max(0.7rem, env(safe-area-inset-right));
+    bottom: max(0.7rem, env(safe-area-inset-bottom));
+    width: min(14.5rem, calc(100vw - 1.4rem));
+  }
+
+  .byte-assistant-character {
+    width: 4.2rem;
+    height: 3.95rem;
+  }
+
+  .byte-assistant-robot {
+    width: 3.95rem;
+    height: 3.7rem;
+  }
+
+  .byte-assistant-message {
+    max-width: 14rem;
+    margin-right: 0.25rem;
+    padding: 0.65rem 0.75rem;
+    font-size: 0.72rem;
+  }
+
+  .byte-assistant-menu {
+    bottom: 4.2rem;
+  }
+
+  .byte-assistant-minimized {
+    right: max(0.7rem, env(safe-area-inset-right));
+    bottom: max(0.7rem, env(safe-area-inset-bottom));
+  }
+
 }
 
 @media (max-width: 767px) {
@@ -1337,7 +1570,9 @@ html.dark .text-orange-500 {
 @media (prefers-reduced-motion: reduce) {
   .robot-character,
   .robot-character *,
-  .robot-connection-spark {
+  .robot-connection-spark,
+  .byte-assistant-dock *,
+  .byte-assistant-minimized {
     animation: none !important;
     transition-duration: 0.01ms !important;
   }

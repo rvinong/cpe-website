@@ -6,6 +6,7 @@ import { lazy, Suspense, useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { useLocation } from 'react-router-dom'
 import AdminRoute from './components/AdminRoute'
+import ByteAssistant from './components/ByteAssistant'
 import Footer from './components/Footer'
 import Navbar from './components/Navbar'
 import { useMotionPreferences } from './hooks/useMotionPreferences'
@@ -164,6 +165,7 @@ function App() {
             </Motion.div>
           </AnimatePresence>
           <Footer />
+          <ByteAssistant />
         </>
       )}
     </>

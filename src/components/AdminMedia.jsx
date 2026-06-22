@@ -15,6 +15,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import AdminListSkeleton from './AdminListSkeleton'
+import { signalBytePublished } from '../lib/byteAssistant'
 import {
   createGalleryPhoto,
   createNewsPost,
@@ -304,6 +305,7 @@ function AdminMedia() {
       editingItem?.status !== 'published'
 
     if (shouldNotify) {
+      signalBytePublished('news', result.data.title)
       const notificationResult = await notifyPublishedContent(
         'news',
         result.data.id,
@@ -364,6 +366,13 @@ function AdminMedia() {
 
     if (uploadedPath && editingItem?.image_path) {
       await removeMedia(editingItem.image_path)
+    }
+
+    if (
+      result.data.status === 'published' &&
+      editingItem?.status !== 'published'
+    ) {
+      signalBytePublished('gallery', result.data.album)
     }
 
     setIsSaving(false)

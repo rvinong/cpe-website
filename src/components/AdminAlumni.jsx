@@ -13,6 +13,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import AdminListSkeleton from './AdminListSkeleton'
+import { signalBytePublished } from '../lib/byteAssistant'
 import {
   createAlumniProfile,
   deleteAlumniProfile,
@@ -228,6 +229,13 @@ function AdminAlumni() {
       editingItem.photo_path !== uploadedPath
     ) {
       await removeAlumniPhoto(editingItem.photo_path)
+    }
+
+    if (
+      result.data.status === 'published' &&
+      editingItem?.status !== 'published'
+    ) {
+      signalBytePublished('alumni', result.data.name)
     }
 
     setIsSaving(false)

@@ -15,6 +15,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import AdminListSkeleton from './AdminListSkeleton'
 import { resourceCategories } from '../data/resources'
+import { signalBytePublished } from '../lib/byteAssistant'
 import {
   createResource,
   createResourceDownload,
@@ -217,6 +218,13 @@ function AdminResources() {
 
     const oldPath = editingItem?.file_path
     if (oldPath && oldPath !== file?.path) await removeResource(oldPath)
+
+    if (
+      result.data.status === 'published' &&
+      editingItem?.status !== 'published'
+    ) {
+      signalBytePublished('resource', result.data.title)
+    }
 
     setIsSaving(false)
     closeEditor()
