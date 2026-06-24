@@ -1,5 +1,4 @@
 import {
-  ArrowRight,
   Briefcase,
   Camera,
   CheckCircle2,
@@ -8,7 +7,6 @@ import {
   MessageCircle,
   Play,
   ShieldCheck,
-  Sparkles,
 } from 'lucide-react'
 import useOrganization from '../context/useOrganization'
 import Logo from './Logo'
@@ -93,39 +91,7 @@ function Footer() {
       <div className="absolute -right-28 top-20 -z-10 size-96 rounded-full bg-brand-600/15 blur-3xl" />
 
       <div className="section-shell pt-14 sm:pt-18">
-        <div className="relative isolate overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.07] px-6 py-8 backdrop-blur-sm sm:px-9 lg:flex lg:items-center lg:justify-between lg:gap-10">
-          <div className="absolute -right-16 -top-24 -z-10 size-72 rounded-full bg-orange-500/15 blur-3xl" />
-          <div className="flex items-start gap-4">
-            <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-white/10 text-orange-400">
-              <Sparkles size={22} aria-hidden="true" />
-            </span>
-            <div>
-              <p className="text-xs font-extrabold tracking-[0.18em] text-blue-300 uppercase">
-                Built for the CPE community
-              </p>
-              <h2 className="mt-2 text-2xl font-black tracking-tight sm:text-3xl">
-                Everything students need, in one connected portal.
-              </h2>
-            </div>
-          </div>
-          <div className="mt-6 flex flex-wrap gap-3 lg:mt-0">
-            <a
-              href="/student-portal"
-              className="inline-flex min-h-12 items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-extrabold text-navy-900 transition hover:-translate-y-0.5 hover:bg-blue-50"
-            >
-              Student portal
-              <ArrowRight size={17} aria-hidden="true" />
-            </a>
-            <a
-              href="/account?mode=signup"
-              className="inline-flex min-h-12 items-center gap-2 rounded-xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-extrabold text-white transition hover:-translate-y-0.5 hover:bg-white/15"
-            >
-              Create account
-            </a>
-          </div>
-        </div>
-
-        <div className="mt-4 grid gap-3 md:grid-cols-3">
+        <div className="grid gap-3 md:grid-cols-3">
           {officialSignals.map(({ label, detail, icon: Icon }) => (
             <div
               key={label}
