@@ -7,8 +7,10 @@ import {
   MapPin,
   MessageCircle,
   Play,
+  Send,
   ShieldCheck,
 } from 'lucide-react'
+import { useState } from 'react'
 import useOrganization from '../context/useOrganization'
 import Logo from './Logo'
 
@@ -59,6 +61,7 @@ function GitHubIcon({ size = 13 }) {
 
 function Footer() {
   const { profile } = useOrganization()
+  const [contactStatus, setContactStatus] = useState(null)
   const socialLinks = [
     { label: 'Facebook', icon: MessageCircle, href: profile.facebookUrl },
     { label: 'Instagram', icon: Camera, href: profile.instagramUrl },
@@ -83,6 +86,35 @@ function Footer() {
     },
   ]
 
+  const handleContactSubmit = (event) => {
+    event.preventDefault()
+
+    if (!profile.contactEmail) {
+      setContactStatus({
+        tone: 'error',
+        message: 'The official contact email has not been configured yet.',
+      })
+      return
+    }
+
+    const form = event.currentTarget
+    const formData = new FormData(form)
+    const name = String(formData.get('name') || '').trim()
+    const email = String(formData.get('email') || '').trim()
+    const message = String(formData.get('message') || '').trim()
+    const subject = encodeURIComponent(`Website inquiry from ${name}`)
+    const body = encodeURIComponent(
+      `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
+    )
+
+    window.location.href = `mailto:${profile.contactEmail}?subject=${subject}&body=${body}`
+    setContactStatus({
+      tone: 'success',
+      message: 'Your email app is ready with the message details.',
+    })
+    form.reset()
+  }
+
   return (
     <footer
       id="footer"
@@ -92,7 +124,94 @@ function Footer() {
       <div className="absolute -right-28 top-20 -z-10 size-96 rounded-full bg-brand-600/15 blur-3xl" />
 
       <div className="section-shell pt-14 sm:pt-18">
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="relative isolate overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.06] p-6 backdrop-blur-sm sm:p-8 lg:grid lg:grid-cols-[0.8fr_1.2fr] lg:items-center lg:gap-12 lg:p-10">
+          <div className="absolute -right-20 -top-28 -z-10 size-80 rounded-full bg-brand-600/20 blur-3xl" />
+          <div>
+            <p className="text-xs font-extrabold tracking-[0.2em] text-blue-300 uppercase">
+              Start a conversation
+            </p>
+            <h2 className="mt-3 text-3xl font-black tracking-tight text-white sm:text-4xl">
+              Talk to us today
+            </h2>
+            <p className="mt-4 max-w-md text-sm leading-7 text-slate-300">
+              Send an inquiry, collaboration proposal, or question to the
+              NwSSU Computer Engineering Organization.
+            </p>
+            {profile.contactEmail && (
+              <a
+                href={`mailto:${profile.contactEmail}`}
+                className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-blue-200 transition hover:text-white"
+              >
+                <Mail size={16} aria-hidden="true" />
+                {profile.contactEmail}
+              </a>
+            )}
+          </div>
+
+          <form
+            onSubmit={handleContactSubmit}
+            className="mt-8 grid gap-3 sm:grid-cols-2 lg:mt-0"
+          >
+            <label className="sr-only" htmlFor="footer-contact-name">
+              Name
+            </label>
+            <input
+              id="footer-contact-name"
+              name="name"
+              type="text"
+              autoComplete="name"
+              required
+              placeholder="Name"
+              className="min-h-12 rounded-xl border border-white/10 bg-white/[0.08] px-4 text-sm text-white outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white/[0.11] focus:ring-4 focus:ring-blue-500/15"
+            />
+            <label className="sr-only" htmlFor="footer-contact-email">
+              Email address
+            </label>
+            <input
+              id="footer-contact-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              placeholder="Email address"
+              className="min-h-12 rounded-xl border border-white/10 bg-white/[0.08] px-4 text-sm text-white outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white/[0.11] focus:ring-4 focus:ring-blue-500/15"
+            />
+            <label className="sr-only" htmlFor="footer-contact-message">
+              Message
+            </label>
+            <textarea
+              id="footer-contact-message"
+              name="message"
+              rows="4"
+              required
+              placeholder="Message"
+              className="resize-y rounded-xl border border-white/10 bg-white/[0.08] px-4 py-3 text-sm leading-6 text-white outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white/[0.11] focus:ring-4 focus:ring-blue-500/15 sm:col-span-2"
+            />
+            <div className="flex flex-col gap-3 sm:col-span-2 sm:flex-row sm:items-center sm:justify-between">
+              <div
+                className={`text-xs ${
+                  contactStatus?.tone === 'error'
+                    ? 'text-red-300'
+                    : 'text-emerald-300'
+                }`}
+                role="status"
+                aria-live="polite"
+              >
+                {contactStatus?.message}
+              </div>
+              <button
+                type="submit"
+                disabled={!profile.contactEmail}
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 py-3 text-sm font-extrabold text-white shadow-[0_14px_30px_-16px_rgba(46,115,246,0.9)] transition hover:-translate-y-0.5 hover:bg-brand-500 disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:translate-y-0"
+              >
+                Send message
+                <Send size={16} aria-hidden="true" />
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div className="mt-4 grid gap-3 md:grid-cols-3">
           {officialSignals.map(({ label, detail, icon: Icon }) => (
             <div
               key={label}
