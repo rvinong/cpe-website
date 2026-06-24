@@ -3,6 +3,7 @@ import {
   BookOpenCheck,
   BriefcaseBusiness,
   Building2,
+  ExternalLink,
   FileCheck2,
   Flag,
   GraduationCap,
@@ -489,11 +490,23 @@ function About() {
                           {organizationProfile.contactPhone}
                         </a>
                       )}
+                      {organizationProfile.facebookUrl && (
+                        <a
+                          href={organizationProfile.facebookUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1.5 transition hover:text-white"
+                        >
+                          Facebook page
+                          <ExternalLink size={13} aria-hidden="true" />
+                        </a>
+                      )}
                       {organizationProfile.officeHours && (
                         <span>{organizationProfile.officeHours}</span>
                       )}
                       {!organizationProfile.contactEmail &&
                         !organizationProfile.contactPhone &&
+                        !organizationProfile.facebookUrl &&
                         !organizationProfile.officeHours && (
                           <span>
                             Official contact details will be posted once
