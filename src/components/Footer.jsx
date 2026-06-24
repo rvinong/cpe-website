@@ -1,4 +1,5 @@
 import {
+  ArrowRight,
   Briefcase,
   Camera,
   CheckCircle2,
