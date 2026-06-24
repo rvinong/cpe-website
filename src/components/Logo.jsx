@@ -1,9 +1,8 @@
 import useOrganization from '../context/useOrganization'
+import { siteBrand } from '../data/site'
 
 function Logo({ className = '', compact = false, light = false }) {
   const { profile } = useOrganization()
-  const shortName =
-    profile.name.replace(/^NwSSU\s*/i, '').trim() || profile.name
 
   return (
     <a
@@ -19,7 +18,7 @@ function Logo({ className = '', compact = false, light = false }) {
       >
         <img
           src="/images/nwssu-cpe-logo.png"
-          alt={`${profile.name} logo`}
+          alt={`${siteBrand.name}, ${profile.name}`}
           width="40"
           height="40"
           decoding="async"
@@ -27,20 +26,13 @@ function Logo({ className = '', compact = false, light = false }) {
         />
       </span>
       {!compact && (
-        <span className="block min-w-0 leading-tight">
+        <span className="block min-w-0">
           <span
-            className={`block text-[9px] font-bold tracking-[0.18em] uppercase sm:text-[11px] sm:tracking-[0.22em] ${
-              light ? 'text-blue-200' : 'text-brand-600'
-            }`}
-          >
-            NwSSU
-          </span>
-          <span
-            className={`block max-w-[8.5rem] truncate text-[11px] font-extrabold tracking-tight min-[375px]:max-w-[11rem] sm:max-w-52 sm:text-[13px] ${
+            className={`block max-w-[9rem] truncate text-[13px] font-extrabold tracking-tight min-[375px]:max-w-[11rem] sm:max-w-52 sm:text-[15px] ${
               light ? 'text-white' : 'text-navy-900'
             }`}
           >
-            {shortName}
+            {siteBrand.name}
           </span>
         </span>
       )}

@@ -265,11 +265,11 @@ Deno.serve(async (request) => {
     const emailMessages = emails.map((email) => ({
       from: fromAddress,
       to: [email],
-      subject: `[NwSSU CPE] New ${contentLabel}: ${content.title}`,
+      subject: `[ICpEP Connect] New ${contentLabel}: ${content.title}`,
       html: `
         <div style="margin:0 auto;max-width:620px;padding:32px 20px;font-family:Arial,sans-serif;color:#0f172a">
           <p style="margin:0 0 12px;color:#2563eb;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase">
-            NwSSU Computer Engineering Organization
+            ICpEP Connect
           </p>
           <h1 style="margin:0 0 16px;font-size:28px;line-height:1.25">${safeTitle}</h1>
           <p style="margin:0 0 24px;color:#475569;font-size:16px;line-height:1.7">${safeSummary}</p>

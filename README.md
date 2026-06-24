@@ -1,4 +1,4 @@
-# NwSSU Computer Engineering Organization Portal
+# ICpEP Connect
 
 Frontend portal for the NwSSU Computer Engineering Organization, built with
 React, Vite, Tailwind CSS, Supabase, Framer Motion, and Lucide icons.
