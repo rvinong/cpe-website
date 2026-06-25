@@ -30,6 +30,7 @@ const baseNewsColumns = [
 ].join(', ')
 
 const newsImageColumns = [
+  'news_post_id',
   'id',
   'image_path',
   'alt_text',
@@ -37,8 +38,6 @@ const newsImageColumns = [
   'sort_order',
   'created_at',
 ].join(', ')
-
-const newsColumns = `${baseNewsColumns}, news_post_images (${newsImageColumns})`
 
 const galleryColumns = [
   'id',
@@ -181,11 +180,22 @@ export function isMediaSchemaMissing(error) {
     '42P01',
     '42703',
     '42883',
+    'PGRST200',
     'PGRST202',
     'PGRST204',
     'PGRST205',
     '404',
   ].includes(error?.code)
+}
+
+function isNewsImagesUnavailable(error) {
+  const message = error?.message || ''
+
+  return (
+    isMediaSchemaMissing(error) ||
+    message.includes('news_post_images') ||
+    message.includes('news_posts')
+  )
 }
 
 export function validateMediaFile(file) {
@@ -266,11 +276,41 @@ async function hydrateNewsReactionSummaries(posts) {
 async function getAdminNewsPostById(id) {
   const { data, error } = await supabase
     .from('news_posts')
-    .select(newsColumns)
+    .select(baseNewsColumns)
     .eq('id', id)
     .single()
 
-  return { data: data ? normalizeNewsPost(data) : null, error }
+  if (error || !data) return { data: null, error }
+
+  const [post] = await attachNewsImages([data])
+  return { data: normalizeNewsPost(post), error: null }
+}
+
+async function attachNewsImages(posts) {
+  if (!posts?.length) return posts
+
+  const ids = posts.map((post) => post.id)
+  const { data, error } = await supabase
+    .from('news_post_images')
+    .select(newsImageColumns)
+    .in('news_post_id', ids)
+    .order('sort_order', { ascending: true })
+    .order('created_at', { ascending: true })
+
+  if (error) return posts
+
+  const imagesByPostId = new Map()
+
+  data?.forEach((image) => {
+    const current = imagesByPostId.get(image.news_post_id) || []
+    current.push(image)
+    imagesByPostId.set(image.news_post_id, current)
+  })
+
+  return posts.map((post) => ({
+    ...post,
+    news_post_images: imagesByPostId.get(post.id) || [],
+  }))
 }
 
 export async function getPublicNews(limit) {
@@ -280,7 +320,7 @@ export async function getPublicNews(limit) {
 
   let query = supabase
     .from('news_posts')
-    .select(newsColumns)
+    .select(baseNewsColumns)
     .eq('status', 'published')
     .lte('published_at', new Date().toISOString())
     .order('is_featured', { ascending: false })
@@ -291,7 +331,8 @@ export async function getPublicNews(limit) {
   const { data, error } = await query
   if (error) return { data: null, error }
 
-  const posts = data?.map((row) => normalizeNewsPost(row)) ?? []
+  const rows = await attachNewsImages(data || [])
+  const posts = rows.map((row) => normalizeNewsPost(row))
   return { data: await hydrateNewsReactionSummaries(posts), error: null }
 }
 
@@ -302,7 +343,7 @@ export async function getPublicNewsBySlug(slug) {
 
   const { data, error } = await supabase
     .from('news_posts')
-    .select(newsColumns)
+    .select(baseNewsColumns)
     .eq('slug', slug)
     .eq('status', 'published')
     .lte('published_at', new Date().toISOString())
@@ -310,7 +351,8 @@ export async function getPublicNewsBySlug(slug) {
 
   if (error || !data) return { data: null, error }
 
-  const [post] = await hydrateNewsReactionSummaries([normalizeNewsPost(data)])
+  const [row] = await attachNewsImages([data])
+  const [post] = await hydrateNewsReactionSummaries([normalizeNewsPost(row)])
   return { data: post, error: null }
 }
 
@@ -332,10 +374,13 @@ export async function getPublicGalleryPhotos() {
 export async function getAdminNews() {
   const { data, error } = await supabase
     .from('news_posts')
-    .select(newsColumns)
+    .select(baseNewsColumns)
     .order('updated_at', { ascending: false })
 
-  return { data: data?.map((row) => normalizeNewsPost(row)) ?? null, error }
+  if (error) return { data: null, error }
+
+  const rows = await attachNewsImages(data || [])
+  return { data: rows.map((row) => normalizeNewsPost(row)), error: null }
 }
 
 export async function getAdminGalleryPhotos() {
@@ -400,7 +445,13 @@ async function replaceNewsImages(newsPostId, images) {
     .delete()
     .eq('news_post_id', newsPostId)
 
-  if (deleteResult.error) return deleteResult
+  if (deleteResult.error) {
+    if (isNewsImagesUnavailable(deleteResult.error) && images.length <= 1) {
+      return { data: [], error: null }
+    }
+
+    return deleteResult
+  }
 
   const payload = images.map((image, index) =>
     toNewsImagePayload(newsPostId, image, index),
@@ -408,7 +459,17 @@ async function replaceNewsImages(newsPostId, images) {
 
   if (payload.length === 0) return { data: [], error: null }
 
-  return supabase.from('news_post_images').insert(payload)
+  const insertResult = await supabase.from('news_post_images').insert(payload)
+
+  if (
+    insertResult.error &&
+    isNewsImagesUnavailable(insertResult.error) &&
+    images.length <= 1
+  ) {
+    return { data: [], error: null }
+  }
+
+  return insertResult
 }
 
 export async function createNewsPost(values, images = []) {
