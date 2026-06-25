@@ -91,6 +91,381 @@ for delete
 to authenticated
 using (public.current_user_role() in ('admin', 'editor'));
 
+create table if not exists public.news_post_images (
+  id uuid primary key default gen_random_uuid(),
+  news_post_id uuid not null references public.news_posts(id) on delete cascade,
+  image_path text not null unique,
+  alt_text text not null default '',
+  caption text not null default '',
+  sort_order integer not null default 0,
+  created_by uuid references public.profiles(id) on delete set null
+    default auth.uid(),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists news_post_images_post_order_idx
+  on public.news_post_images (news_post_id, sort_order, created_at);
+
+drop trigger if exists set_news_post_images_updated_at
+  on public.news_post_images;
+create trigger set_news_post_images_updated_at
+  before update on public.news_post_images
+  for each row execute procedure public.set_updated_at();
+
+alter table public.news_post_images enable row level security;
+
+drop policy if exists "Published news images are public"
+  on public.news_post_images;
+create policy "Published news images are public"
+on public.news_post_images
+for select
+to anon, authenticated
+using (
+  exists (
+    select 1
+    from public.news_posts
+    where news_posts.id = news_post_images.news_post_id
+      and news_posts.status = 'published'
+      and news_posts.published_at is not null
+      and news_posts.published_at <= now()
+  )
+);
+
+drop policy if exists "Admins and editors can read news images"
+  on public.news_post_images;
+create policy "Admins and editors can read news images"
+on public.news_post_images
+for select
+to authenticated
+using (public.current_user_role() in ('admin', 'editor'));
+
+drop policy if exists "Admins and editors can create news images"
+  on public.news_post_images;
+create policy "Admins and editors can create news images"
+on public.news_post_images
+for insert
+to authenticated
+with check (
+  public.current_user_role() in ('admin', 'editor')
+  and created_by = auth.uid()
+);
+
+drop policy if exists "Admins and editors can update news images"
+  on public.news_post_images;
+create policy "Admins and editors can update news images"
+on public.news_post_images
+for update
+to authenticated
+using (public.current_user_role() in ('admin', 'editor'))
+with check (public.current_user_role() in ('admin', 'editor'));
+
+drop policy if exists "Admins and editors can delete news images"
+  on public.news_post_images;
+create policy "Admins and editors can delete news images"
+on public.news_post_images
+for delete
+to authenticated
+using (public.current_user_role() in ('admin', 'editor'));
+
+insert into public.news_post_images (
+  news_post_id,
+  image_path,
+  alt_text,
+  sort_order,
+  created_by
+)
+select
+  news_posts.id,
+  news_posts.image_path,
+  news_posts.image_alt,
+  0,
+  news_posts.created_by
+from public.news_posts
+where news_posts.image_path is not null
+  and news_posts.image_path <> ''
+  and not exists (
+    select 1
+    from public.news_post_images
+    where news_post_images.news_post_id = news_posts.id
+      and news_post_images.image_path = news_posts.image_path
+  );
+
+create table if not exists public.news_reactions (
+  id uuid primary key default gen_random_uuid(),
+  news_post_id uuid not null references public.news_posts(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  reaction_type text not null
+    check (reaction_type in ('like', 'love', 'celebrate', 'wow', 'support')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (news_post_id, user_id)
+);
+
+create index if not exists news_reactions_post_type_idx
+  on public.news_reactions (news_post_id, reaction_type);
+
+drop trigger if exists set_news_reactions_updated_at
+  on public.news_reactions;
+create trigger set_news_reactions_updated_at
+  before update on public.news_reactions
+  for each row execute procedure public.set_updated_at();
+
+alter table public.news_reactions enable row level security;
+
+drop policy if exists "Signed-in users can react to published news"
+  on public.news_reactions;
+create policy "Signed-in users can react to published news"
+on public.news_reactions
+for insert
+to authenticated
+with check (
+  user_id = auth.uid()
+  and exists (
+    select 1
+    from public.news_posts
+    where news_posts.id = news_reactions.news_post_id
+      and news_posts.status = 'published'
+      and news_posts.published_at is not null
+      and news_posts.published_at <= now()
+  )
+);
+
+drop policy if exists "Signed-in users can update their news reactions"
+  on public.news_reactions;
+create policy "Signed-in users can update their news reactions"
+on public.news_reactions
+for update
+to authenticated
+using (user_id = auth.uid())
+with check (user_id = auth.uid());
+
+drop policy if exists "Signed-in users can delete their news reactions"
+  on public.news_reactions;
+create policy "Signed-in users can delete their news reactions"
+on public.news_reactions
+for delete
+to authenticated
+using (user_id = auth.uid());
+
+create or replace function public.get_news_reaction_summary(
+  selected_news_post_id uuid
+)
+returns table (
+  reaction_type text,
+  total integer,
+  user_reaction text
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  current_reaction text;
+begin
+  if not exists (
+    select 1
+    from public.news_posts
+    where id = selected_news_post_id
+      and status = 'published'
+      and published_at is not null
+      and published_at <= now()
+  ) and coalesce(public.current_user_role() in ('admin', 'editor'), false) = false then
+    return;
+  end if;
+
+  if auth.uid() is not null then
+    select news_reactions.reaction_type
+    into current_reaction
+    from public.news_reactions
+    where news_reactions.news_post_id = selected_news_post_id
+      and news_reactions.user_id = auth.uid()
+    limit 1;
+  end if;
+
+  return query
+  with allowed_reactions as (
+    select unnest(
+      array['like', 'love', 'celebrate', 'wow', 'support']::text[]
+    ) as reaction_type
+  )
+  select
+    allowed_reactions.reaction_type,
+    count(news_reactions.id)::integer as total,
+    current_reaction as user_reaction
+  from allowed_reactions
+  left join public.news_reactions
+    on news_reactions.news_post_id = selected_news_post_id
+    and news_reactions.reaction_type = allowed_reactions.reaction_type
+  group by allowed_reactions.reaction_type
+  order by array_position(
+    array['like', 'love', 'celebrate', 'wow', 'support']::text[],
+    allowed_reactions.reaction_type
+  );
+end;
+$$;
+
+create or replace function public.set_news_reaction(
+  selected_news_post_id uuid,
+  selected_reaction_type text
+)
+returns table (
+  reaction_type text,
+  total integer,
+  user_reaction text
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if auth.uid() is null then
+    raise exception 'Authentication required';
+  end if;
+
+  if selected_reaction_type not in (
+    'like',
+    'love',
+    'celebrate',
+    'wow',
+    'support'
+  ) then
+    raise exception 'Unsupported reaction type';
+  end if;
+
+  if not exists (
+    select 1
+    from public.news_posts
+    where id = selected_news_post_id
+      and status = 'published'
+      and published_at is not null
+      and published_at <= now()
+  ) then
+    raise exception 'News story not found';
+  end if;
+
+  insert into public.news_reactions (
+    news_post_id,
+    user_id,
+    reaction_type
+  )
+  values (
+    selected_news_post_id,
+    auth.uid(),
+    selected_reaction_type
+  )
+  on conflict (news_post_id, user_id)
+  do update set
+    reaction_type = excluded.reaction_type,
+    updated_at = now();
+
+  return query
+  select *
+  from public.get_news_reaction_summary(selected_news_post_id);
+end;
+$$;
+
+create or replace function public.clear_news_reaction(
+  selected_news_post_id uuid
+)
+returns table (
+  reaction_type text,
+  total integer,
+  user_reaction text
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if auth.uid() is null then
+    raise exception 'Authentication required';
+  end if;
+
+  delete from public.news_reactions
+  where news_post_id = selected_news_post_id
+    and user_id = auth.uid();
+
+  return query
+  select *
+  from public.get_news_reaction_summary(selected_news_post_id);
+end;
+$$;
+
+create or replace function public.get_news_reaction_members(
+  selected_news_post_id uuid,
+  selected_reaction_type text
+)
+returns table (
+  profile_id uuid,
+  full_name text,
+  reaction_type text,
+  reacted_at timestamptz
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if auth.uid() is null then
+    raise exception 'Authentication required';
+  end if;
+
+  if selected_reaction_type not in (
+    'like',
+    'love',
+    'celebrate',
+    'wow',
+    'support'
+  ) then
+    raise exception 'Unsupported reaction type';
+  end if;
+
+  if not exists (
+    select 1
+    from public.news_posts
+    where id = selected_news_post_id
+      and status = 'published'
+      and published_at is not null
+      and published_at <= now()
+  ) then
+    raise exception 'News story not found';
+  end if;
+
+  return query
+  select
+    profiles.id as profile_id,
+    coalesce(nullif(trim(profiles.full_name), ''), 'Member') as full_name,
+    news_reactions.reaction_type,
+    news_reactions.updated_at as reacted_at
+  from public.news_reactions
+  join public.profiles
+    on profiles.id = news_reactions.user_id
+  where news_reactions.news_post_id = selected_news_post_id
+    and news_reactions.reaction_type = selected_reaction_type
+    and profiles.status = 'approved'
+  order by news_reactions.updated_at desc, profiles.full_name;
+end;
+$$;
+
+revoke all on function public.get_news_reaction_summary(uuid)
+  from public;
+revoke all on function public.set_news_reaction(uuid, text)
+  from public;
+revoke all on function public.clear_news_reaction(uuid)
+  from public;
+revoke all on function public.get_news_reaction_members(uuid, text)
+  from public;
+
+grant execute on function public.get_news_reaction_summary(uuid)
+  to anon, authenticated;
+grant execute on function public.set_news_reaction(uuid, text)
+  to authenticated;
+grant execute on function public.clear_news_reaction(uuid)
+  to authenticated;
+grant execute on function public.get_news_reaction_members(uuid, text)
+  to authenticated;
+
 create table if not exists public.gallery_photos (
   id uuid primary key default gen_random_uuid(),
   album text not null,

@@ -1,7 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { galleryPhotos as fallbackGallery } from '../data/gallery'
 import { organizationNews as fallbackNews } from '../data/news'
-import { getPublicGalleryPhotos, getPublicNews } from '../lib/media'
+import {
+  getPublicGalleryPhotos,
+  getPublicNews,
+  getPublicNewsBySlug,
+} from '../lib/media'
 import { isSupabaseConfigured } from '../lib/supabase'
 
 export function useNews(limit) {
@@ -47,4 +51,54 @@ export function useGalleryPhotos() {
   }, [])
 
   return { photos, isLoading }
+}
+
+export function useNewsPost(slug) {
+  const [newsPost, setNewsPost] = useState(null)
+  const [isLoading, setIsLoading] = useState(isSupabaseConfigured)
+  const [error, setError] = useState('')
+
+  const loadNewsPost = useCallback(async () => {
+    if (!isSupabaseConfigured || !slug) {
+      setNewsPost(null)
+      setIsLoading(false)
+      return
+    }
+
+    setIsLoading(true)
+    const { data, error: loadError } = await getPublicNewsBySlug(slug)
+    setNewsPost(loadError ? null : data)
+    setError(loadError?.message || '')
+    setIsLoading(false)
+  }, [slug])
+
+  useEffect(() => {
+    let isMounted = true
+
+    const load = async () => {
+      if (!isSupabaseConfigured || !slug) {
+        if (isMounted) {
+          setNewsPost(null)
+          setIsLoading(false)
+        }
+        return
+      }
+
+      setIsLoading(true)
+      const { data, error: loadError } = await getPublicNewsBySlug(slug)
+
+      if (!isMounted) return
+      setNewsPost(loadError ? null : data)
+      setError(loadError?.message || '')
+      setIsLoading(false)
+    }
+
+    load()
+
+    return () => {
+      isMounted = false
+    }
+  }, [slug])
+
+  return { newsPost, isLoading, error, refresh: loadNewsPost, setNewsPost }
 }

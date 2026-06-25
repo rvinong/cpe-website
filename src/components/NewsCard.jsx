@@ -1,8 +1,9 @@
-import { CalendarDays, Star } from 'lucide-react'
+import { ArrowRight, CalendarDays, Star, ThumbsUp } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 function NewsCard({ article, compact = false }) {
-  return (
-    <article className="surface-card interactive-card group h-full overflow-hidden">
+  const cardContent = (
+    <>
       {article.image && (
         <div className={`media-frame ${compact ? 'h-52' : 'h-60'}`}>
           <img
@@ -41,7 +42,34 @@ function NewsCard({ article, compact = false }) {
             {article.body}
           </p>
         )}
+        {compact && (
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
+            <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-slate-500">
+              <ThumbsUp size={14} aria-hidden="true" />
+              {article.reactionTotal || 0} reactions
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-brand-600">
+              Read full story
+              <ArrowRight size={14} aria-hidden="true" />
+            </span>
+          </div>
+        )}
       </div>
+    </>
+  )
+
+  return (
+    <article className="surface-card interactive-card group h-full overflow-hidden">
+      {compact && article.slug ? (
+        <Link
+          to={`/gallery/news/${article.slug}`}
+          className="block h-full focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-200"
+        >
+          {cardContent}
+        </Link>
+      ) : (
+        cardContent
+      )}
     </article>
   )
 }

@@ -43,7 +43,7 @@ function Navbar() {
         ? 'alumni'
       : pathname === '/about'
         ? 'about'
-      : pathname === '/gallery'
+      : pathname.startsWith('/gallery')
         ? 'gallery'
       : pathname === '/events'
         ? 'events'

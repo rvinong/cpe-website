@@ -2,9 +2,18 @@ import { isSupabaseConfigured, supabase } from './supabase'
 
 export const mediaBucket = 'organization-media'
 export const maxMediaFileSize = 8 * 1024 * 1024
+export const maxNewsImages = 10
 export const acceptedMediaTypes = ['image/jpeg', 'image/png', 'image/webp']
 
-const newsColumns = [
+export const newsReactionTypes = [
+  { id: 'like', label: 'Like' },
+  { id: 'love', label: 'Love' },
+  { id: 'celebrate', label: 'Celebrate' },
+  { id: 'wow', label: 'Wow' },
+  { id: 'support', label: 'Support' },
+]
+
+const baseNewsColumns = [
   'id',
   'slug',
   'title',
@@ -19,6 +28,17 @@ const newsColumns = [
   'created_at',
   'updated_at',
 ].join(', ')
+
+const newsImageColumns = [
+  'id',
+  'image_path',
+  'alt_text',
+  'caption',
+  'sort_order',
+  'created_at',
+].join(', ')
+
+const newsColumns = `${baseNewsColumns}, news_post_images (${newsImageColumns})`
 
 const galleryColumns = [
   'id',
@@ -60,21 +80,87 @@ export const galleryCategories = [
   'Workshops',
 ]
 
+function createDefaultReactionSummary() {
+  const counts = Object.fromEntries(
+    newsReactionTypes.map(({ id }) => [id, 0]),
+  )
+
+  return {
+    counts,
+    total: 0,
+    userReaction: '',
+  }
+}
+
 function getPublicImageUrl(path) {
-  if (!path) return null
+  if (!path || !supabase) return null
+  if (/^(https?:)?\/\//.test(path) || path.startsWith('/')) return path
 
   return supabase.storage.from(mediaBucket).getPublicUrl(path).data.publicUrl
 }
 
-export function normalizeNewsPost(row) {
+function normalizeReactionSummary(rows = []) {
+  const summary = createDefaultReactionSummary()
+
+  rows.forEach((row) => {
+    if (!row?.reaction_type) return
+    summary.counts[row.reaction_type] = Number(row.total) || 0
+    if (row.user_reaction) summary.userReaction = row.user_reaction
+  })
+
+  summary.total = Object.values(summary.counts).reduce(
+    (total, count) => total + count,
+    0,
+  )
+
+  return summary
+}
+
+function normalizeNewsImages(row) {
+  const relatedImages = Array.isArray(row.news_post_images)
+    ? row.news_post_images
+    : []
+  const images = relatedImages
+    .filter((image) => image?.image_path)
+    .sort(
+      (first, second) =>
+        (Number(first.sort_order) || 0) - (Number(second.sort_order) || 0),
+    )
+
+  if (images.length === 0 && row.image_path) {
+    images.push({
+      id: `legacy-${row.id}`,
+      image_path: row.image_path,
+      alt_text: row.image_alt || '',
+      caption: '',
+      sort_order: 0,
+      created_at: row.created_at,
+    })
+  }
+
+  return images.map((image, index) => ({
+    ...image,
+    sort_order: Number(image.sort_order) || index,
+    imagePath: image.image_path,
+    altText: image.alt_text || '',
+    image: getPublicImageUrl(image.image_path),
+  }))
+}
+
+export function normalizeNewsPost(row, reactionSummary) {
+  const images = normalizeNewsImages(row)
+  const coverImage = images[0]
+  const reactions = reactionSummary || createDefaultReactionSummary()
+
   return {
     ...row,
-    date: dateFormatter.format(
-      new Date(row.published_at || row.created_at),
-    ),
-    image: getPublicImageUrl(row.image_path),
-    imageAlt: row.image_alt,
+    date: dateFormatter.format(new Date(row.published_at || row.created_at)),
+    images,
+    image: coverImage?.image || getPublicImageUrl(row.image_path),
+    imageAlt: coverImage?.altText || row.image_alt,
     isFeatured: row.is_featured,
+    reactions,
+    reactionTotal: reactions.total,
   }
 }
 
@@ -91,7 +177,15 @@ export function normalizeGalleryPhoto(row) {
 }
 
 export function isMediaSchemaMissing(error) {
-  return ['42P01', 'PGRST204', 'PGRST205', '404'].includes(error?.code)
+  return [
+    '42P01',
+    '42703',
+    '42883',
+    'PGRST202',
+    'PGRST204',
+    'PGRST205',
+    '404',
+  ].includes(error?.code)
 }
 
 export function validateMediaFile(file) {
@@ -138,6 +232,47 @@ export async function removeMedia(path) {
   return supabase.storage.from(mediaBucket).remove([path])
 }
 
+async function getReactionSummaryRows(newsPostId) {
+  if (!isSupabaseConfigured) return { data: [], error: null }
+
+  const { data, error } = await supabase.rpc('get_news_reaction_summary', {
+    selected_news_post_id: newsPostId,
+  })
+
+  return { data: data || [], error }
+}
+
+async function hydrateNewsReactionSummaries(posts) {
+  if (!posts?.length) return posts
+
+  const summaries = await Promise.all(
+    posts.map((post) => getReactionSummaryRows(post.id)),
+  )
+
+  return posts.map((post, index) => {
+    const { data, error } = summaries[index]
+    const reactions = error
+      ? createDefaultReactionSummary()
+      : normalizeReactionSummary(data)
+
+    return {
+      ...post,
+      reactions,
+      reactionTotal: reactions.total,
+    }
+  })
+}
+
+async function getAdminNewsPostById(id) {
+  const { data, error } = await supabase
+    .from('news_posts')
+    .select(newsColumns)
+    .eq('id', id)
+    .single()
+
+  return { data: data ? normalizeNewsPost(data) : null, error }
+}
+
 export async function getPublicNews(limit) {
   if (!isSupabaseConfigured) {
     return { data: null, error: new Error('Supabase is not configured.') }
@@ -154,7 +289,29 @@ export async function getPublicNews(limit) {
   if (limit) query = query.limit(limit)
 
   const { data, error } = await query
-  return { data: data?.map(normalizeNewsPost) ?? null, error }
+  if (error) return { data: null, error }
+
+  const posts = data?.map((row) => normalizeNewsPost(row)) ?? []
+  return { data: await hydrateNewsReactionSummaries(posts), error: null }
+}
+
+export async function getPublicNewsBySlug(slug) {
+  if (!isSupabaseConfigured) {
+    return { data: null, error: new Error('Supabase is not configured.') }
+  }
+
+  const { data, error } = await supabase
+    .from('news_posts')
+    .select(newsColumns)
+    .eq('slug', slug)
+    .eq('status', 'published')
+    .lte('published_at', new Date().toISOString())
+    .maybeSingle()
+
+  if (error || !data) return { data: null, error }
+
+  const [post] = await hydrateNewsReactionSummaries([normalizeNewsPost(data)])
+  return { data: post, error: null }
 }
 
 export async function getPublicGalleryPhotos() {
@@ -173,10 +330,12 @@ export async function getPublicGalleryPhotos() {
 }
 
 export async function getAdminNews() {
-  return supabase
+  const { data, error } = await supabase
     .from('news_posts')
     .select(newsColumns)
     .order('updated_at', { ascending: false })
+
+  return { data: data?.map((row) => normalizeNewsPost(row)) ?? null, error }
 }
 
 export async function getAdminGalleryPhotos() {
@@ -208,14 +367,14 @@ async function createAvailableNewsSlug(title) {
   return `${baseSlug}-${Date.now().toString(36).slice(-6)}`
 }
 
-function toNewsPayload(values, imagePath, publishedAt) {
+function toNewsPayload(values, coverImage, publishedAt) {
   return {
     title: values.title.trim(),
     category: values.category,
     summary: values.summary.trim(),
     body: values.body.trim(),
-    image_path: imagePath,
-    image_alt: values.imageAlt.trim(),
+    image_path: coverImage?.imagePath || null,
+    image_alt: coverImage?.altText?.trim() || '',
     status: values.status,
     is_featured: values.isFeatured,
     published_at:
@@ -225,35 +384,119 @@ function toNewsPayload(values, imagePath, publishedAt) {
   }
 }
 
-export async function createNewsPost(values, imagePath) {
-  const slug = await createAvailableNewsSlug(values.title)
+function toNewsImagePayload(newsPostId, image, index) {
+  return {
+    news_post_id: newsPostId,
+    image_path: image.imagePath,
+    alt_text: image.altText.trim(),
+    caption: image.caption?.trim() || '',
+    sort_order: index,
+  }
+}
 
-  return supabase
+async function replaceNewsImages(newsPostId, images) {
+  const deleteResult = await supabase
+    .from('news_post_images')
+    .delete()
+    .eq('news_post_id', newsPostId)
+
+  if (deleteResult.error) return deleteResult
+
+  const payload = images.map((image, index) =>
+    toNewsImagePayload(newsPostId, image, index),
+  )
+
+  if (payload.length === 0) return { data: [], error: null }
+
+  return supabase.from('news_post_images').insert(payload)
+}
+
+export async function createNewsPost(values, images = []) {
+  const slug = await createAvailableNewsSlug(values.title)
+  const coverImage = images[0] || null
+
+  const insertResult = await supabase
     .from('news_posts')
     .insert({
-      ...toNewsPayload(values, imagePath, null),
+      ...toNewsPayload(values, coverImage, null),
       slug,
     })
-    .select(newsColumns)
+    .select(baseNewsColumns)
     .single()
+
+  if (insertResult.error) return insertResult
+
+  const imageResult = await replaceNewsImages(insertResult.data.id, images)
+  if (imageResult.error) {
+    await supabase.from('news_posts').delete().eq('id', insertResult.data.id)
+    return { data: null, error: imageResult.error }
+  }
+
+  return getAdminNewsPostById(insertResult.data.id)
 }
 
 export async function updateNewsPost(
   id,
   values,
-  imagePath,
+  images = [],
   publishedAt,
 ) {
-  return supabase
+  const coverImage = images[0] || null
+  const updateResult = await supabase
     .from('news_posts')
-    .update(toNewsPayload(values, imagePath, publishedAt))
+    .update(toNewsPayload(values, coverImage, publishedAt))
     .eq('id', id)
-    .select(newsColumns)
+    .select(baseNewsColumns)
     .single()
+
+  if (updateResult.error) return updateResult
+
+  const imageResult = await replaceNewsImages(id, images)
+  if (imageResult.error) return { data: null, error: imageResult.error }
+
+  return getAdminNewsPostById(id)
 }
 
 export async function deleteNewsPost(id) {
   return supabase.from('news_posts').delete().eq('id', id)
+}
+
+export async function getNewsReactionSummary(newsPostId) {
+  const { data, error } = await getReactionSummaryRows(newsPostId)
+  return {
+    data: error ? createDefaultReactionSummary() : normalizeReactionSummary(data),
+    error,
+  }
+}
+
+export async function setNewsReaction(newsPostId, reactionType) {
+  const { data, error } = await supabase.rpc('set_news_reaction', {
+    selected_news_post_id: newsPostId,
+    selected_reaction_type: reactionType,
+  })
+
+  return {
+    data: error ? null : normalizeReactionSummary(data),
+    error,
+  }
+}
+
+export async function clearNewsReaction(newsPostId) {
+  const { data, error } = await supabase.rpc('clear_news_reaction', {
+    selected_news_post_id: newsPostId,
+  })
+
+  return {
+    data: error ? null : normalizeReactionSummary(data),
+    error,
+  }
+}
+
+export async function getNewsReactionMembers(newsPostId, reactionType) {
+  return supabase.rpc('get_news_reaction_members', {
+    selected_news_post_id: newsPostId,
+    selected_reaction_type: reactionType,
+  })
 }
 
 function toGalleryPayload(values, imagePath) {

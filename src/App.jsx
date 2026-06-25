@@ -21,6 +21,7 @@ const Alumni = lazy(() => import('./pages/Alumni'))
 const Events = lazy(() => import('./pages/Events'))
 const Gallery = lazy(() => import('./pages/Gallery'))
 const Home = lazy(() => import('./pages/Home'))
+const NewsDetails = lazy(() => import('./pages/NewsDetails'))
 const StudentPortal = lazy(() => import('./pages/StudentPortal'))
 
 function RouteLoading({ admin = false }) {
@@ -158,6 +159,7 @@ function App() {
                   <Route path="/alumni" element={<Alumni />} />
                   <Route path="/events" element={<Events />} />
                   <Route path="/gallery" element={<Gallery />} />
+                  <Route path="/gallery/news/:slug" element={<NewsDetails />} />
                   <Route path="/student-portal" element={<StudentPortal />} />
                   <Route path="*" element={<Home />} />
                 </Routes>

@@ -164,7 +164,7 @@ function Gallery() {
           accentIcon={Camera}
         />
 
-        <section className="bg-white py-20 sm:py-24">
+        <section id="news" className="bg-white py-20 sm:py-24">
           <div className="section-shell">
             <Motion.div
               initial={{ opacity: 0, y: 18 }}

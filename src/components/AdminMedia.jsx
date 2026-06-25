@@ -25,6 +25,7 @@ import {
   getAdminGalleryPhotos,
   getAdminNews,
   isMediaSchemaMissing,
+  maxNewsImages,
   mediaBucket,
   newsCategories,
   removeMedia,
@@ -73,6 +74,39 @@ function getImageUrl(path) {
   return supabase.storage.from(mediaBucket).getPublicUrl(path).data.publicUrl
 }
 
+function revokePreviewUrl(url) {
+  if (url?.startsWith('blob:')) URL.revokeObjectURL(url)
+}
+
+function toNewsImageDraft(image) {
+  const imagePath = image.imagePath || image.image_path || ''
+
+  return {
+    localId: image.id?.startsWith?.('legacy-')
+      ? crypto.randomUUID()
+      : image.id || crypto.randomUUID(),
+    id: image.id?.startsWith?.('legacy-') ? null : image.id,
+    imagePath,
+    previewUrl: image.image || getImageUrl(imagePath),
+    altText: image.altText || image.alt_text || '',
+    caption: image.caption || '',
+    file: null,
+  }
+}
+
+function getNewsImagePaths(item) {
+  const paths = new Set()
+
+  item?.images?.forEach((image) => {
+    const imagePath = image.imagePath || image.image_path
+    if (imagePath) paths.add(imagePath)
+  })
+
+  if (item?.image_path) paths.add(item.image_path)
+
+  return [...paths]
+}
+
 function AdminMedia() {
   const [activeTab, setActiveTab] = useState('news')
   const [news, setNews] = useState([])
@@ -82,6 +116,7 @@ function AdminMedia() {
   const [editorType, setEditorType] = useState(null)
   const [editingItem, setEditingItem] = useState(null)
   const [newsForm, setNewsForm] = useState(emptyNewsForm)
+  const [newsImageDrafts, setNewsImageDrafts] = useState([])
   const [photoForm, setPhotoForm] = useState(emptyPhotoForm)
   const [selectedFile, setSelectedFile] = useState(null)
   const [previewUrl, setPreviewUrl] = useState('')
@@ -157,10 +192,12 @@ function AdminMedia() {
   )
 
   const resetEditor = () => {
-    if (previewUrl.startsWith('blob:')) URL.revokeObjectURL(previewUrl)
+    revokePreviewUrl(previewUrl)
+    newsImageDrafts.forEach((image) => revokePreviewUrl(image.previewUrl))
     setEditorType(null)
     setEditingItem(null)
     setNewsForm(emptyNewsForm)
+    setNewsImageDrafts([])
     setPhotoForm(emptyPhotoForm)
     setSelectedFile(null)
     setPreviewUrl('')
@@ -176,13 +213,14 @@ function AdminMedia() {
             category: item.category,
             summary: item.summary,
             body: item.body,
-            imageAlt: item.image_alt,
+            imageAlt: item.image_alt || '',
             status: item.status,
             isFeatured: item.is_featured,
           }
         : emptyNewsForm,
     )
-    setPreviewUrl(getImageUrl(item?.image_path))
+    setNewsImageDrafts(item?.images?.map(toNewsImageDraft) || [])
+    setPreviewUrl('')
     setSelectedFile(null)
     setError('')
     setSuccess('')
@@ -239,6 +277,70 @@ function AdminMedia() {
     setError('')
   }
 
+  const handleNewsFilesChange = (event) => {
+    const files = Array.from(event.target.files || [])
+    if (files.length === 0) return
+
+    if (newsImageDrafts.length + files.length > maxNewsImages) {
+      setError(`News stories can include up to ${maxNewsImages} images.`)
+      event.target.value = ''
+      return
+    }
+
+    const fileError = files.map(validateMediaFile).find(Boolean)
+    if (fileError) {
+      setError(fileError)
+      event.target.value = ''
+      return
+    }
+
+    const drafts = files.map((file) => ({
+      localId: crypto.randomUUID(),
+      id: null,
+      imagePath: '',
+      previewUrl: URL.createObjectURL(file),
+      altText: '',
+      caption: '',
+      file,
+    }))
+
+    setNewsImageDrafts((current) => [...current, ...drafts])
+    setError('')
+    event.target.value = ''
+  }
+
+  const updateNewsImageField = (localId, field, value) => {
+    setNewsImageDrafts((current) =>
+      current.map((image) =>
+        image.localId === localId ? { ...image, [field]: value } : image,
+      ),
+    )
+  }
+
+  const moveNewsImage = (localId, direction) => {
+    setNewsImageDrafts((current) => {
+      const index = current.findIndex((image) => image.localId === localId)
+      const targetIndex = index + direction
+
+      if (index < 0 || targetIndex < 0 || targetIndex >= current.length) {
+        return current
+      }
+
+      const next = [...current]
+      const [image] = next.splice(index, 1)
+      next.splice(targetIndex, 0, image)
+      return next
+    })
+  }
+
+  const removeNewsImageDraft = (localId) => {
+    setNewsImageDrafts((current) => {
+      const image = current.find((item) => item.localId === localId)
+      revokePreviewUrl(image?.previewUrl)
+      return current.filter((item) => item.localId !== localId)
+    })
+  }
+
   const saveNews = async (event) => {
     event.preventDefault()
     setError('')
@@ -253,47 +355,66 @@ function AdminMedia() {
       return
     }
 
-    if (
-      (selectedFile || editingItem?.image_path) &&
-      !newsForm.imageAlt.trim()
-    ) {
-      setError('Add alternative text for the cover image.')
+    if (newsImageDrafts.length > maxNewsImages) {
+      setError(`News stories can include up to ${maxNewsImages} images.`)
+      return
+    }
+
+    if (newsImageDrafts.some((image) => !image.altText.trim())) {
+      setError('Add alternative text for every news image.')
       return
     }
 
     setIsSaving(true)
-    let uploadedPath = null
+    const uploadedPaths = []
+    const preparedImages = []
 
-    if (selectedFile) {
-      const uploadResult = await uploadMedia(selectedFile, 'news')
-      if (uploadResult.error) {
-        setError(uploadResult.error.message)
-        setIsSaving(false)
-        return
+    for (const image of newsImageDrafts) {
+      let imagePath = image.imagePath
+
+      if (image.file) {
+        const uploadResult = await uploadMedia(image.file, 'news')
+        if (uploadResult.error) {
+          await Promise.all(uploadedPaths.map((path) => removeMedia(path)))
+          setError(uploadResult.error.message)
+          setIsSaving(false)
+          return
+        }
+
+        imagePath = uploadResult.data.path
+        uploadedPaths.push(imagePath)
       }
-      uploadedPath = uploadResult.data.path
+
+      preparedImages.push({
+        imagePath,
+        altText: image.altText,
+        caption: image.caption,
+      })
     }
 
-    const imagePath = uploadedPath || editingItem?.image_path || null
     const result = editingItem
       ? await updateNewsPost(
           editingItem.id,
           newsForm,
-          imagePath,
+          preparedImages,
           editingItem.published_at,
         )
-      : await createNewsPost(newsForm, imagePath)
+      : await createNewsPost(newsForm, preparedImages)
 
     if (result.error) {
-      if (uploadedPath) await removeMedia(uploadedPath)
+      await Promise.all(uploadedPaths.map((path) => removeMedia(path)))
       setError(result.error.message)
       setNeedsSchema(isMediaSchemaMissing(result.error))
       setIsSaving(false)
       return
     }
 
-    if (uploadedPath && editingItem?.image_path) {
-      await removeMedia(editingItem.image_path)
+    if (editingItem) {
+      const savedPaths = new Set(preparedImages.map((image) => image.imagePath))
+      const deletedPaths = getNewsImagePaths(editingItem).filter(
+        (path) => !savedPaths.has(path),
+      )
+      await Promise.all(deletedPaths.map((path) => removeMedia(path)))
     }
 
     let successMessage = editingItem
@@ -389,7 +510,7 @@ function AdminMedia() {
       setError(deleteError.message)
       return
     }
-    await removeMedia(item.image_path)
+    await Promise.all(getNewsImagePaths(item).map((path) => removeMedia(path)))
     setSuccess('News story deleted.')
     await loadMedia()
   }
@@ -708,16 +829,6 @@ function AdminMedia() {
                         required
                       />
                     </label>
-                    <label className="text-sm font-extrabold text-navy-900 sm:col-span-2">
-                      Cover image alternative text
-                      <input
-                        name="imageAlt"
-                        value={newsForm.imageAlt}
-                        onChange={updateNewsField}
-                        className={inputClassName}
-                        placeholder="Describe the image for screen readers"
-                      />
-                    </label>
                   </>
                 ) : (
                   <>
@@ -804,32 +915,153 @@ function AdminMedia() {
                 )}
               </div>
 
-              <div className="mt-5 rounded-2xl border border-dashed border-blue-200 bg-brand-50/35 p-5">
-                <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-extrabold text-brand-600 ring-1 ring-blue-100">
-                  <Upload size={17} />
-                  {selectedFile
-                    ? 'Choose another image'
-                    : editingItem
-                      ? 'Replace image'
-                      : 'Choose image'}
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    onChange={handleFileChange}
-                    className="sr-only"
-                  />
-                </label>
-                <p className="mt-2 text-center text-xs text-slate-500">
-                  JPG, PNG, or WebP. Maximum 8 MB.
-                </p>
-                {previewUrl && (
-                  <img
-                    src={previewUrl}
-                    alt="Selected upload preview"
-                    className="mx-auto mt-4 max-h-64 rounded-xl object-contain"
-                  />
-                )}
-              </div>
+              {editorType === 'news' ? (
+                <div className="mt-5 rounded-2xl border border-dashed border-blue-200 bg-brand-50/35 p-5">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-sm font-extrabold text-navy-900">
+                        Story images
+                      </p>
+                      <p className="mt-1 text-xs leading-5 text-slate-500">
+                        Add up to {maxNewsImages} JPG, PNG, or WebP images.
+                        The first image becomes the cover.
+                      </p>
+                    </div>
+                    <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-extrabold text-brand-600 ring-1 ring-blue-100">
+                      <Upload size={17} />
+                      Add images
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        multiple
+                        onChange={handleNewsFilesChange}
+                        className="sr-only"
+                      />
+                    </label>
+                  </div>
+
+                  <p className="mt-3 text-xs font-bold text-slate-500">
+                    {newsImageDrafts.length} / {maxNewsImages} images selected
+                  </p>
+
+                  {newsImageDrafts.length === 0 ? (
+                    <div className="mt-4 rounded-2xl border border-dashed border-blue-200 bg-white/70 p-6 text-center text-sm font-bold text-slate-500">
+                      No images attached yet. The story can still be saved as a
+                      text-only update.
+                    </div>
+                  ) : (
+                    <div className="mt-4 grid gap-4">
+                      {newsImageDrafts.map((image, index) => (
+                        <article
+                          key={image.localId}
+                          className="grid gap-4 rounded-2xl border border-blue-100 bg-white p-4 sm:grid-cols-[140px_1fr]"
+                        >
+                          <div>
+                            <img
+                              src={image.previewUrl}
+                              alt=""
+                              className="aspect-[4/3] w-full rounded-xl bg-slate-100 object-cover"
+                            />
+                            {index === 0 && (
+                              <span className="mt-2 inline-flex rounded-full bg-brand-600 px-2.5 py-1 text-[10px] font-extrabold text-white">
+                                Cover
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="grid gap-3">
+                            <label className="text-sm font-extrabold text-navy-900">
+                              Alternative text
+                              <input
+                                value={image.altText}
+                                onChange={(event) =>
+                                  updateNewsImageField(
+                                    image.localId,
+                                    'altText',
+                                    event.target.value,
+                                  )
+                                }
+                                className={inputClassName}
+                                placeholder="Describe the image for screen readers"
+                                required
+                              />
+                            </label>
+                            <label className="text-sm font-extrabold text-navy-900">
+                              Caption
+                              <input
+                                value={image.caption}
+                                onChange={(event) =>
+                                  updateNewsImageField(
+                                    image.localId,
+                                    'caption',
+                                    event.target.value,
+                                  )
+                                }
+                                className={inputClassName}
+                                placeholder="Optional short caption"
+                              />
+                            </label>
+                            <div className="flex flex-wrap gap-2">
+                              <button
+                                type="button"
+                                onClick={() => moveNewsImage(image.localId, -1)}
+                                disabled={index === 0}
+                                className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-extrabold text-slate-600 transition hover:border-brand-500 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-40"
+                              >
+                                Move up
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => moveNewsImage(image.localId, 1)}
+                                disabled={index === newsImageDrafts.length - 1}
+                                className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-extrabold text-slate-600 transition hover:border-brand-500 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-40"
+                              >
+                                Move down
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  removeNewsImageDraft(image.localId)
+                                }
+                                className="rounded-lg border border-red-200 px-3 py-2 text-xs font-extrabold text-red-600 transition hover:bg-red-50"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="mt-5 rounded-2xl border border-dashed border-blue-200 bg-brand-50/35 p-5">
+                  <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-extrabold text-brand-600 ring-1 ring-blue-100">
+                    <Upload size={17} />
+                    {selectedFile
+                      ? 'Choose another image'
+                      : editingItem
+                        ? 'Replace image'
+                        : 'Choose image'}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      onChange={handleFileChange}
+                      className="sr-only"
+                    />
+                  </label>
+                  <p className="mt-2 text-center text-xs text-slate-500">
+                    JPG, PNG, or WebP. Maximum 8 MB.
+                  </p>
+                  {previewUrl && (
+                    <img
+                      src={previewUrl}
+                      alt="Selected upload preview"
+                      className="mx-auto mt-4 max-h-64 rounded-xl object-contain"
+                    />
+                  )}
+                </div>
+              )}
 
               {editorType === 'news' && (
                 <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-xl border border-blue-100 bg-brand-50/45 p-4">
