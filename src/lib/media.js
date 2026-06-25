@@ -2,7 +2,7 @@ import { isSupabaseConfigured, supabase } from './supabase'
 
 export const mediaBucket = 'organization-media'
 export const maxMediaFileSize = 8 * 1024 * 1024
-export const maxNewsImages = 10
+export const maxNewsImages = 50
 export const acceptedMediaTypes = ['image/jpeg', 'image/png', 'image/webp']
 
 export const newsReactionTypes = [
