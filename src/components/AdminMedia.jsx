@@ -108,6 +108,11 @@ function getNewsImagePaths(item) {
   return [...paths]
 }
 
+function getNewsImageCount(item) {
+  if (item?.images?.length) return item.images.length
+  return item?.image_path ? 1 : 0
+}
+
 function toDatetimeLocalValue(value) {
   if (!value) return ''
 
@@ -202,9 +207,20 @@ function AdminMedia() {
     () => ({
       publishedNews: news.filter((item) => item.status === 'published').length,
       draftNews: news.filter((item) => item.status === 'draft').length,
-      publishedPhotos: photos.filter((item) => item.status === 'published')
-        .length,
-      albums: new Set(photos.map((item) => item.album)).size,
+      publishedPhotos:
+        photos.filter((item) => item.status === 'published').length +
+        news
+          .filter((item) => item.status === 'published')
+          .reduce((total, item) => total + getNewsImageCount(item), 0),
+      albums: new Set([
+        ...photos.map((item) => item.album),
+        ...news
+          .filter(
+            (item) =>
+              item.status === 'published' && getNewsImageCount(item) > 0,
+          )
+          .map((item) => item.title),
+      ]).size,
     }),
     [news, photos],
   )

@@ -26,9 +26,9 @@ import { useGalleryPhotos, useNews } from '../hooks/useMedia'
 const archiveDetails = [
   {
     icon: Images,
-    title: 'Event albums',
+    title: 'Story and event albums',
     description:
-      'Photos will be grouped by workshops, outreach programs, competitions, and organization activities.',
+      'Photos are grouped by news stories, workshops, outreach programs, competitions, and organization activities.',
   },
   {
     icon: Tags,
@@ -323,11 +323,11 @@ function Gallery() {
                 Media archive
               </p>
               <h2 className="mt-3 text-3xl font-black tracking-tight text-navy-900 sm:text-4xl">
-                Browse Event Photos
+                Browse Published Photos
               </h2>
               <p className="mt-4 text-base leading-7 text-slate-600">
-                Use the filters to explore approved organization photos by
-                activity type and year.
+                Use the filters to explore approved news, event, and gallery
+                photos by activity type and year.
               </p>
             </Motion.div>
 
@@ -343,7 +343,7 @@ function Gallery() {
                 icon={Images}
                 className="mt-10"
                 title="The photo archive is being prepared"
-                description="No official gallery albums have been published yet. Approved event photos, dates, and descriptions will appear here once the organization archive is ready."
+                description="No official gallery albums have been published yet. Approved news and event photos will appear here once the organization archive is ready."
               />
             ) : (
               <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

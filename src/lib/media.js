@@ -219,6 +219,39 @@ export function normalizeEventGalleryPhoto(row) {
   }
 }
 
+export function normalizeNewsGalleryPhotos(row) {
+  const dateValue = row.published_at || row.created_at
+  const capturedOn = new Date(dateValue)
+  const safeDate = Number.isNaN(capturedOn.getTime())
+    ? new Date()
+    : capturedOn
+  const album = row.title
+
+  return normalizeNewsImages(row).map((image, index) => {
+    const altText = image.altText || row.image_alt || `${album} photo`
+
+    return {
+      id: `news-${row.id}-${image.id || index}`,
+      sourceType: 'news',
+      album,
+      category: row.category || 'News',
+      description: image.caption || row.summary || '',
+      alt_text: altText,
+      image_path: image.imagePath,
+      captured_on: safeDate.toISOString().slice(0, 10),
+      status: row.status,
+      sort_order: Number(image.sort_order) || index,
+      created_at: row.published_at || row.created_at,
+      updated_at: row.updated_at,
+      newsSlug: row.slug,
+      image: image.image,
+      alt: altText,
+      date: dateFormatter.format(safeDate),
+      year: safeDate.getFullYear(),
+    }
+  })
+}
+
 export function isMediaSchemaMissing(error) {
   return [
     '42P01',
@@ -425,7 +458,7 @@ export async function getPublicGalleryPhotos() {
     return { data: null, error: new Error('Supabase is not configured.') }
   }
 
-  const [galleryResult, eventResult] = await Promise.all([
+  const [galleryResult, eventResult, newsResult] = await Promise.all([
     supabase
       .from('gallery_photos')
       .select(galleryColumns)
@@ -440,6 +473,12 @@ export async function getPublicGalleryPhotos() {
       .not('image_path', 'is', null)
       .lte('published_at', new Date().toISOString())
       .order('starts_at', { ascending: false }),
+    supabase
+      .from('news_posts')
+      .select(baseNewsColumns)
+      .eq('status', 'published')
+      .lte('published_at', new Date().toISOString())
+      .order('published_at', { ascending: false }),
   ])
 
   if (galleryResult.error) {
@@ -450,9 +489,13 @@ export async function getPublicGalleryPhotos() {
   const eventPhotos = eventResult.error
     ? []
     : eventResult.data?.map(normalizeEventGalleryPhoto) ?? []
+  const newsRows = newsResult.error
+    ? []
+    : await attachNewsImages(newsResult.data || [])
+  const newsPhotos = newsRows.flatMap(normalizeNewsGalleryPhotos)
 
   return {
-    data: [...galleryPhotos, ...eventPhotos].sort(
+    data: [...galleryPhotos, ...eventPhotos, ...newsPhotos].sort(
       (first, second) =>
         getGallerySortTime(second) - getGallerySortTime(first) ||
         (Number(first.sort_order) || 0) - (Number(second.sort_order) || 0),
