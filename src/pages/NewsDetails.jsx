@@ -8,47 +8,15 @@ import {
   CalendarDays,
   ChevronLeft,
   ChevronRight,
-  Handshake,
-  Heart,
   Image as ImageIcon,
-  LogIn,
   Newspaper,
-  PartyPopper,
-  SmilePlus,
   Star,
-  ThumbsUp,
-  UsersRound,
-  X,
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import ContentSkeleton from '../components/ContentSkeleton'
-import useAuth from '../context/useAuth'
-import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
+import NewsReactionSummary from '../components/NewsReactionSummary'
 import { useNewsPost } from '../hooks/useMedia'
-import {
-  clearNewsReaction,
-  getFriendlyReactionError,
-  getNewsReactionMembers,
-  newsReactionTypes,
-  setNewsReaction,
-} from '../lib/media'
-
-const reactionIcons = {
-  like: ThumbsUp,
-  love: Heart,
-  celebrate: PartyPopper,
-  wow: SmilePlus,
-  support: Handshake,
-}
-
-const reactionButtonStyles = {
-  like: 'text-brand-600 bg-brand-50 border-blue-100',
-  love: 'text-rose-600 bg-rose-50 border-rose-100',
-  celebrate: 'text-amber-600 bg-amber-50 border-amber-100',
-  wow: 'text-violet-600 bg-violet-50 border-violet-100',
-  support: 'text-emerald-600 bg-emerald-50 border-emerald-100',
-}
 
 function getBodyParagraphs(body) {
   return String(body || '')
@@ -57,44 +25,13 @@ function getBodyParagraphs(body) {
     .filter(Boolean)
 }
 
-function getOptimisticReactionSummary(summary, nextReaction) {
-  const counts = { ...summary.counts }
-  const currentReaction = summary.userReaction
-
-  if (currentReaction && counts[currentReaction] > 0) {
-    counts[currentReaction] -= 1
-  }
-
-  if (nextReaction) {
-    counts[nextReaction] = (counts[nextReaction] || 0) + 1
-  }
-
-  const total = Object.values(counts).reduce((sum, count) => sum + count, 0)
-
-  return {
-    counts,
-    total,
-    userReaction: nextReaction,
-  }
-}
-
 function NewsDetails() {
   const { slug } = useParams()
-  const navigate = useNavigate()
-  const location = useLocation()
   const shouldReduceMotion = useReducedMotion()
-  const { user } = useAuth()
   const { newsPost, isLoading, setNewsPost } = useNewsPost(slug)
   const [activeImageIndex, setActiveImageIndex] = useState(0)
   const [navigationDirection, setNavigationDirection] = useState(1)
   const [reactionOverride, setReactionOverride] = useState(null)
-  const [isReactionPickerOpen, setIsReactionPickerOpen] = useState(false)
-  const [isSavingReaction, setIsSavingReaction] = useState(false)
-  const [reactionError, setReactionError] = useState('')
-  const [membersReaction, setMembersReaction] = useState('')
-  const [reactionMembers, setReactionMembers] = useState([])
-  const [isLoadingMembers, setIsLoadingMembers] = useState(false)
-  const [memberError, setMemberError] = useState('')
   const images = useMemo(
     () => newsPost?.images?.filter((image) => image.image) ?? [],
     [newsPost],
@@ -110,8 +47,6 @@ function NewsDetails() {
     reactionOverride?.slug === slug
       ? reactionOverride.summary
       : newsPost?.reactions || null
-
-  useBodyScrollLock(Boolean(membersReaction))
 
   const showPreviousImage = useCallback(() => {
     setNavigationDirection(-1)
@@ -143,12 +78,6 @@ function NewsDetails() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [images.length, showNextImage, showPreviousImage])
 
-  const loginRedirect = () => {
-    navigate(
-      `/account?mode=login&redirect=${encodeURIComponent(location.pathname)}`,
-    )
-  }
-
   const updateReactionState = (summary) => {
     setReactionOverride({ slug, summary })
     setNewsPost((current) =>
@@ -160,60 +89,6 @@ function NewsDetails() {
           }
         : current,
     )
-  }
-
-  const handleReaction = async (reactionType) => {
-    if (!newsPost || !reactionSummary) return
-    if (!user) {
-      loginRedirect()
-      return
-    }
-
-    setIsSavingReaction(true)
-    setReactionError('')
-
-    const previousSummary = reactionSummary
-    const nextReaction =
-      previousSummary.userReaction === reactionType ? '' : reactionType
-    updateReactionState(
-      getOptimisticReactionSummary(previousSummary, nextReaction),
-    )
-
-    const result = nextReaction
-      ? await setNewsReaction(newsPost.id, nextReaction)
-      : await clearNewsReaction(newsPost.id)
-
-    if (result.error) {
-      updateReactionState(previousSummary)
-      setReactionError(getFriendlyReactionError(result.error))
-    } else {
-      updateReactionState(result.data)
-    }
-
-    setIsReactionPickerOpen(false)
-    setIsSavingReaction(false)
-  }
-
-  const openReactionMembers = async (reactionType) => {
-    if (!newsPost) return
-    if (!user) {
-      loginRedirect()
-      return
-    }
-
-    setMembersReaction(reactionType)
-    setReactionMembers([])
-    setMemberError('')
-    setIsLoadingMembers(true)
-
-    const { data, error } = await getNewsReactionMembers(
-      newsPost.id,
-      reactionType,
-    )
-
-    setReactionMembers(error ? [] : data || [])
-    setMemberError(error ? getFriendlyReactionError(error) : '')
-    setIsLoadingMembers(false)
   }
 
   if (isLoading && !newsPost) {
@@ -255,27 +130,6 @@ function NewsDetails() {
       </main>
     )
   }
-
-  const selectedReaction = membersReaction
-    ? newsReactionTypes.find((reaction) => reaction.id === membersReaction)
-    : null
-  const activeReaction =
-    newsReactionTypes.find(
-      (reaction) => reaction.id === reactionSummary?.userReaction,
-    ) || null
-  const ActiveReactionIcon = activeReaction
-    ? reactionIcons[activeReaction.id]
-    : ThumbsUp
-  const positiveReactions = reactionSummary
-    ? newsReactionTypes.filter(
-        (reaction) => (reactionSummary.counts[reaction.id] || 0) > 0,
-      )
-    : []
-  const primaryMembersReactionId =
-    activeReaction?.id || positiveReactions[0]?.id || ''
-  const reactionTotalLabel = `${reactionSummary?.total || 0} ${
-    reactionSummary?.total === 1 ? 'reaction' : 'reactions'
-  }`
 
   return (
     <>
@@ -451,144 +305,14 @@ function NewsDetails() {
                 </div>
 
                 {reactionSummary && (
-                  <section
-                    className="mt-10 border-y border-slate-100 py-3"
-                    aria-label="News reactions"
-                  >
-                    <div className="flex min-h-8 items-center justify-end">
-                      {reactionSummary.total > 0 ? (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            primaryMembersReactionId &&
-                            openReactionMembers(primaryMembersReactionId)
-                          }
-                          className="inline-flex items-center gap-2 rounded-full px-1.5 py-1 text-sm font-bold text-slate-500 transition hover:text-brand-600"
-                        >
-                          <span className="flex -space-x-1.5">
-                            {positiveReactions.slice(0, 3).map(({ id }) => {
-                              const Icon = reactionIcons[id]
-                              return (
-                                <span
-                                  key={id}
-                                  className={`grid size-6 place-items-center rounded-full border-2 border-white ${reactionButtonStyles[id]}`}
-                                >
-                                  <Icon size={12} aria-hidden="true" />
-                                </span>
-                              )
-                            })}
-                          </span>
-                          {reactionTotalLabel}
-                        </button>
-                      ) : (
-                        <span className="text-sm font-bold text-slate-400">
-                          Be the first to react
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="mt-2 grid grid-cols-1 border-t border-slate-100 pt-2">
-                      <div
-                        className="relative"
-                        onMouseEnter={() => setIsReactionPickerOpen(true)}
-                        onMouseLeave={() => setIsReactionPickerOpen(false)}
-                        onBlur={(event) => {
-                          if (!event.currentTarget.contains(event.relatedTarget)) {
-                            setIsReactionPickerOpen(false)
-                          }
-                        }}
-                      >
-                        <AnimatePresence>
-                          {isReactionPickerOpen && (
-                            <>
-                              <span
-                                className="absolute bottom-full left-0 h-4 w-full"
-                                aria-hidden="true"
-                              />
-                              <Motion.div
-                                initial={{ opacity: 0, y: 10, scale: 0.94 }}
-                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                exit={{ opacity: 0, y: 8, scale: 0.96 }}
-                                transition={{
-                                  duration: shouldReduceMotion ? 0.01 : 0.18,
-                                }}
-                                className="absolute bottom-full left-1/2 z-20 mb-3 flex -translate-x-1/2 gap-2 rounded-full border border-slate-200 bg-white p-2 shadow-[0_18px_55px_-28px_rgba(15,23,42,0.45)]"
-                              >
-                                {newsReactionTypes.map(({ id, label }) => {
-                                  const Icon = reactionIcons[id]
-                                  const isActive =
-                                    reactionSummary.userReaction === id
-
-                                  return (
-                                    <Motion.button
-                                      key={id}
-                                      type="button"
-                                      onClick={() => handleReaction(id)}
-                                      disabled={isSavingReaction}
-                                      whileHover={
-                                        shouldReduceMotion
-                                          ? undefined
-                                          : { y: -8, scale: 1.14 }
-                                      }
-                                      whileTap={
-                                        shouldReduceMotion
-                                          ? undefined
-                                          : { scale: 0.94 }
-                                      }
-                                      className={`group/reaction relative grid size-12 place-items-center rounded-full border transition disabled:cursor-wait disabled:opacity-60 sm:size-14 ${
-                                        isActive
-                                          ? 'border-brand-500 shadow-lg shadow-blue-600/15'
-                                          : 'shadow-sm'
-                                      } ${reactionButtonStyles[id]}`}
-                                      aria-label={`React with ${label}`}
-                                    >
-                                      <Icon size={22} aria-hidden="true" />
-                                      <span className="pointer-events-none absolute -top-8 rounded-full bg-navy-950 px-2.5 py-1 text-[10px] font-extrabold text-white opacity-0 shadow-lg transition group-hover/reaction:opacity-100">
-                                        {label}
-                                      </span>
-                                    </Motion.button>
-                                  )
-                                })}
-                              </Motion.div>
-                            </>
-                          )}
-                        </AnimatePresence>
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setIsReactionPickerOpen((open) => !open)
-                          }
-                          disabled={isSavingReaction}
-                          className={`inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-extrabold transition hover:bg-slate-50 disabled:cursor-wait disabled:opacity-70 ${
-                            activeReaction
-                              ? `${reactionButtonStyles[activeReaction.id]} border-transparent bg-transparent`
-                              : 'text-slate-600 hover:text-brand-600'
-                          }`}
-                        >
-                          <ActiveReactionIcon size={19} aria-hidden="true" />
-                          {activeReaction?.label || 'Like'}
-                        </button>
-                      </div>
-                    </div>
-
-                    {!user && (
-                      <button
-                        type="button"
-                        onClick={loginRedirect}
-                        className="mt-3 inline-flex items-center gap-2 text-xs font-extrabold text-brand-600"
-                      >
-                        <LogIn size={15} aria-hidden="true" />
-                        Sign in to react
-                      </button>
-                    )}
-
-                    {reactionError && (
-                      <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800">
-                        {reactionError}
-                      </p>
-                    )}
-                  </section>
+                  <NewsReactionSummary
+                    key={newsPost.id}
+                    className="mt-10"
+                    initialSummary={reactionSummary}
+                    newsPostId={newsPost.id}
+                    onSummaryChange={updateReactionState}
+                    variant="detail"
+                  />
                 )}
 
                 <div className="mt-10 border-t border-slate-100 pt-8">
@@ -603,86 +327,6 @@ function NewsDetails() {
         </div>
       </main>
 
-      <AnimatePresence>
-        {membersReaction && (
-          <Motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[80] grid place-items-center bg-navy-950/75 p-4 backdrop-blur-sm"
-            role="dialog"
-            aria-modal="true"
-            aria-label={`${selectedReaction?.label || 'Reaction'} members`}
-            onPointerDown={(event) => {
-              if (event.target === event.currentTarget) setMembersReaction('')
-            }}
-          >
-            <Motion.div
-              initial={{ opacity: 0, y: 18, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 18, scale: 0.98 }}
-              className="w-full max-w-md overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl"
-            >
-              <div className="flex items-center justify-between border-b border-slate-200 px-5 py-5">
-                <div>
-                  <p className="text-xs font-extrabold tracking-[0.16em] text-brand-600 uppercase">
-                    Reaction members
-                  </p>
-                  <h2 className="mt-1 text-xl font-black text-navy-900">
-                    {selectedReaction?.label || 'Reaction'}
-                  </h2>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setMembersReaction('')}
-                  className="grid size-10 place-items-center rounded-xl border border-slate-200 text-slate-500"
-                  aria-label="Close members list"
-                >
-                  <X size={19} />
-                </button>
-              </div>
-
-              <div className="max-h-[60vh] overflow-y-auto p-5">
-                {isLoadingMembers ? (
-                  <p className="rounded-xl bg-brand-50 p-4 text-sm font-bold text-brand-600">
-                    Loading members...
-                  </p>
-                ) : memberError ? (
-                  <p className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">
-                    {memberError}
-                  </p>
-                ) : reactionMembers.length === 0 ? (
-                  <p className="rounded-xl border border-dashed border-blue-200 bg-brand-50/35 p-4 text-sm leading-6 text-slate-600">
-                    No approved member names are available for this reaction
-                    yet.
-                  </p>
-                ) : (
-                  <div className="grid gap-3">
-                    {reactionMembers.map((member) => (
-                      <div
-                        key={`${member.profile_id}-${member.reacted_at}`}
-                        className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-3"
-                      >
-                        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-brand-600 text-sm font-black text-white">
-                          {member.full_name.slice(0, 1).toUpperCase()}
-                        </span>
-                        <span className="min-w-0">
-                          <span className="block truncate text-sm font-extrabold text-navy-900">
-                            {member.full_name}
-                          </span>
-                          <span className="text-xs font-bold text-slate-500">
-                            {selectedReaction?.label}
-                          </span>
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </Motion.div>
-          </Motion.div>
-        )}
-      </AnimatePresence>
     </>
   )
 }

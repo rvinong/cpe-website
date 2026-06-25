@@ -102,6 +102,9 @@ function createDefaultReactionSummary() {
 
   return {
     counts,
+    reactorNames: Object.fromEntries(
+      newsReactionTypes.map(({ id }) => [id, []]),
+    ),
     total: 0,
     userReaction: '',
   }
@@ -120,6 +123,11 @@ function normalizeReactionSummary(rows = []) {
   rows.forEach((row) => {
     if (!row?.reaction_type) return
     summary.counts[row.reaction_type] = Number(row.total) || 0
+    summary.reactorNames[row.reaction_type] = Array.isArray(
+      row.reactor_names,
+    )
+      ? row.reactor_names.filter(Boolean)
+      : []
     if (row.user_reaction) summary.userReaction = row.user_reaction
   })
 

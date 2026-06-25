@@ -248,13 +248,18 @@ for delete
 to authenticated
 using (user_id = auth.uid());
 
+drop function if exists public.set_news_reaction(uuid, text);
+drop function if exists public.clear_news_reaction(uuid);
+drop function if exists public.get_news_reaction_summary(uuid);
+
 create or replace function public.get_news_reaction_summary(
   selected_news_post_id uuid
 )
 returns table (
   reaction_type text,
   total integer,
-  user_reaction text
+  user_reaction text,
+  reactor_names text[]
 )
 language plpgsql
 security definer
@@ -288,16 +293,49 @@ begin
     select unnest(
       array['like', 'love', 'celebrate', 'wow', 'support']::text[]
     ) as reaction_type
+  ),
+  ranked_reactor_names as (
+    select
+      news_reactions.reaction_type,
+      coalesce(nullif(trim(profiles.full_name), ''), 'Member') as full_name,
+      row_number() over (
+        partition by news_reactions.reaction_type
+        order by news_reactions.updated_at desc, profiles.full_name
+      ) as name_rank
+    from public.news_reactions
+    join public.profiles
+      on profiles.id = news_reactions.user_id
+    where news_reactions.news_post_id = selected_news_post_id
+      and profiles.status = 'approved'
+      and auth.uid() is not null
+      and news_reactions.user_id <> auth.uid()
+  ),
+  reaction_name_previews as (
+    select
+      ranked_reactor_names.reaction_type,
+      array_agg(
+        ranked_reactor_names.full_name
+        order by ranked_reactor_names.name_rank
+      ) as reactor_names
+    from ranked_reactor_names
+    where ranked_reactor_names.name_rank <= 3
+    group by ranked_reactor_names.reaction_type
   )
   select
     allowed_reactions.reaction_type,
     count(news_reactions.id)::integer as total,
-    current_reaction as user_reaction
+    current_reaction as user_reaction,
+    coalesce(
+      reaction_name_previews.reactor_names,
+      array[]::text[]
+    ) as reactor_names
   from allowed_reactions
   left join public.news_reactions
     on news_reactions.news_post_id = selected_news_post_id
     and news_reactions.reaction_type = allowed_reactions.reaction_type
-  group by allowed_reactions.reaction_type
+  left join reaction_name_previews
+    on reaction_name_previews.reaction_type = allowed_reactions.reaction_type
+  group by allowed_reactions.reaction_type, reaction_name_previews.reactor_names
   order by array_position(
     array['like', 'love', 'celebrate', 'wow', 'support']::text[],
     allowed_reactions.reaction_type
@@ -312,7 +350,8 @@ create or replace function public.set_news_reaction(
 returns table (
   reaction_type text,
   total integer,
-  user_reaction text
+  user_reaction text,
+  reactor_names text[]
 )
 language plpgsql
 security definer
@@ -371,7 +410,8 @@ create or replace function public.clear_news_reaction(
 returns table (
   reaction_type text,
   total integer,
-  user_reaction text
+  user_reaction text,
+  reactor_names text[]
 )
 language plpgsql
 security definer
