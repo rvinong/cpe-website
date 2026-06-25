@@ -53,6 +53,22 @@ const galleryColumns = [
   'updated_at',
 ].join(', ')
 
+const eventGalleryColumns = [
+  'id',
+  'slug',
+  'title',
+  'category',
+  'summary',
+  'description',
+  'starts_at',
+  'image_path',
+  'image_alt',
+  'status',
+  'published_at',
+  'show_in_gallery',
+  'created_at',
+].join(', ')
+
 const dateFormatter = new Intl.DateTimeFormat('en-US', {
   month: 'long',
   day: 'numeric',
@@ -175,6 +191,34 @@ export function normalizeGalleryPhoto(row) {
   }
 }
 
+export function normalizeEventGalleryPhoto(row) {
+  const dateValue = row.starts_at || row.published_at || row.created_at
+  const capturedOn = new Date(dateValue)
+  const safeDate = Number.isNaN(capturedOn.getTime())
+    ? new Date()
+    : capturedOn
+
+  return {
+    id: `event-${row.id}`,
+    sourceType: 'event',
+    album: row.title,
+    category: row.category || 'Events',
+    description: row.summary || row.description || '',
+    alt_text: row.image_alt || `${row.title} event photo`,
+    image_path: row.image_path,
+    captured_on: safeDate.toISOString().slice(0, 10),
+    status: row.status,
+    sort_order: 0,
+    created_at: row.published_at || row.starts_at || row.created_at,
+    updated_at: row.created_at,
+    eventSlug: row.slug,
+    image: getPublicImageUrl(row.image_path),
+    alt: row.image_alt || `${row.title} event photo`,
+    date: dateFormatter.format(safeDate),
+    year: safeDate.getFullYear(),
+  }
+}
+
 export function isMediaSchemaMissing(error) {
   return [
     '42P01',
@@ -211,6 +255,11 @@ export function getFriendlyReactionError(error) {
   return isSchemaCacheError
     ? 'Reactions are being set up. Run the updated supabase/media.sql, then try again.'
     : message || 'Could not update reactions right now.'
+}
+
+function getGallerySortTime(photo) {
+  const date = new Date(photo.captured_on || photo.created_at || 0)
+  return Number.isNaN(date.getTime()) ? 0 : date.getTime()
 }
 
 export function validateMediaFile(file) {
@@ -376,14 +425,40 @@ export async function getPublicGalleryPhotos() {
     return { data: null, error: new Error('Supabase is not configured.') }
   }
 
-  const { data, error } = await supabase
-    .from('gallery_photos')
-    .select(galleryColumns)
-    .eq('status', 'published')
-    .order('captured_on', { ascending: false })
-    .order('sort_order', { ascending: true })
+  const [galleryResult, eventResult] = await Promise.all([
+    supabase
+      .from('gallery_photos')
+      .select(galleryColumns)
+      .eq('status', 'published')
+      .order('captured_on', { ascending: false })
+      .order('sort_order', { ascending: true }),
+    supabase
+      .from('events')
+      .select(eventGalleryColumns)
+      .in('status', ['published', 'cancelled'])
+      .eq('show_in_gallery', true)
+      .not('image_path', 'is', null)
+      .lte('published_at', new Date().toISOString())
+      .order('starts_at', { ascending: false }),
+  ])
 
-  return { data: data?.map(normalizeGalleryPhoto) ?? null, error }
+  if (galleryResult.error) {
+    return { data: null, error: galleryResult.error }
+  }
+
+  const galleryPhotos = galleryResult.data?.map(normalizeGalleryPhoto) ?? []
+  const eventPhotos = eventResult.error
+    ? []
+    : eventResult.data?.map(normalizeEventGalleryPhoto) ?? []
+
+  return {
+    data: [...galleryPhotos, ...eventPhotos].sort(
+      (first, second) =>
+        getGallerySortTime(second) - getGallerySortTime(first) ||
+        (Number(first.sort_order) || 0) - (Number(second.sort_order) || 0),
+    ),
+    error: null,
+  }
 }
 
 export async function getAdminNews() {

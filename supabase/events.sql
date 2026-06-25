@@ -11,6 +11,9 @@ create table if not exists public.events (
   starts_at timestamptz not null,
   ends_at timestamptz,
   registration_url text,
+  image_path text,
+  image_alt text not null default '',
+  show_in_gallery boolean not null default true,
   status text not null default 'draft'
     check (status in ('draft', 'published', 'cancelled', 'archived')),
   is_featured boolean not null default false,
@@ -22,8 +25,17 @@ create table if not exists public.events (
   check (ends_at is null or ends_at >= starts_at)
 );
 
+alter table public.events
+  add column if not exists image_path text,
+  add column if not exists image_alt text not null default '',
+  add column if not exists show_in_gallery boolean not null default true;
+
 create index if not exists events_public_listing_idx
   on public.events (status, is_featured desc, starts_at);
+
+create index if not exists events_gallery_listing_idx
+  on public.events (show_in_gallery, status, starts_at desc)
+  where image_path is not null;
 
 create or replace function public.set_updated_at()
 returns trigger

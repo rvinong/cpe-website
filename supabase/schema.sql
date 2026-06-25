@@ -202,6 +202,9 @@ create table public.events (
   starts_at timestamptz not null,
   ends_at timestamptz,
   registration_url text,
+  image_path text,
+  image_alt text not null default '',
+  show_in_gallery boolean not null default true,
   status text not null default 'draft'
     check (status in ('draft', 'published', 'cancelled', 'archived')),
   is_featured boolean not null default false,
@@ -215,6 +218,10 @@ create table public.events (
 
 create index events_public_listing_idx
   on public.events (status, is_featured desc, starts_at);
+
+create index events_gallery_listing_idx
+  on public.events (show_in_gallery, status, starts_at desc)
+  where image_path is not null;
 
 create trigger set_events_updated_at
   before update on public.events

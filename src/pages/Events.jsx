@@ -234,36 +234,49 @@ function Events() {
                                 </a>
                               )}
                           </div>
-                          <div className="rounded-3xl bg-navy-950 p-5 text-white shadow-[0_24px_70px_-38px_rgba(7,21,47,0.85)]">
-                            <span className="grid size-12 place-items-center rounded-2xl bg-white/10 text-blue-200">
-                              <CalendarDays size={24} aria-hidden="true" />
-                            </span>
-                            <div className="mt-5 grid gap-3 text-sm">
-                              <span className="inline-flex items-start gap-3">
-                                <CalendarDays
-                                  size={17}
-                                  className="mt-0.5 text-blue-200"
-                                  aria-hidden="true"
+                          <div className="grid gap-4">
+                            {highlightedEvent.image && (
+                              <div className="media-frame aspect-[4/3] rounded-3xl">
+                                <img
+                                  src={highlightedEvent.image}
+                                  alt={highlightedEvent.imageAlt || ''}
+                                  loading="lazy"
+                                  decoding="async"
+                                  className="media-image"
                                 />
-                                <span>
-                                  <strong className="block text-white">
-                                    {highlightedEvent.date}
-                                  </strong>
-                                  <span className="text-slate-300">
-                                    {highlightedEvent.time}
+                              </div>
+                            )}
+                            <div className="rounded-3xl bg-navy-950 p-5 text-white shadow-[0_24px_70px_-38px_rgba(7,21,47,0.85)]">
+                              <span className="grid size-12 place-items-center rounded-2xl bg-white/10 text-blue-200">
+                                <CalendarDays size={24} aria-hidden="true" />
+                              </span>
+                              <div className="mt-5 grid gap-3 text-sm">
+                                <span className="inline-flex items-start gap-3">
+                                  <CalendarDays
+                                    size={17}
+                                    className="mt-0.5 text-blue-200"
+                                    aria-hidden="true"
+                                  />
+                                  <span>
+                                    <strong className="block text-white">
+                                      {highlightedEvent.date}
+                                    </strong>
+                                    <span className="text-slate-300">
+                                      {highlightedEvent.time}
+                                    </span>
                                   </span>
                                 </span>
-                              </span>
-                              <span className="inline-flex items-start gap-3">
-                                <MapPin
-                                  size={17}
-                                  className="mt-0.5 text-blue-200"
-                                  aria-hidden="true"
-                                />
-                                <span className="text-slate-300">
-                                  {highlightedEvent.venue}
+                                <span className="inline-flex items-start gap-3">
+                                  <MapPin
+                                    size={17}
+                                    className="mt-0.5 text-blue-200"
+                                    aria-hidden="true"
+                                  />
+                                  <span className="text-slate-300">
+                                    {highlightedEvent.venue}
+                                  </span>
                                 </span>
-                              </span>
+                              </div>
                             </div>
                           </div>
                         </div>

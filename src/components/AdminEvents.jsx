@@ -8,12 +8,14 @@ import {
   ExternalLink,
   Filter,
   FileText,
+  Image as ImageIcon,
   LoaderCircle,
   MapPin,
   Save,
   Search,
   Star,
   Trash2,
+  Upload,
   X,
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -30,6 +32,13 @@ import {
   isEventsTableMissing,
   updateEvent,
 } from '../lib/events'
+import {
+  mediaBucket,
+  removeMedia,
+  uploadMedia,
+  validateMediaFile,
+} from '../lib/media'
+import { supabase } from '../lib/supabase'
 
 const emptyForm = {
   title: '',
@@ -40,6 +49,8 @@ const emptyForm = {
   startsAt: '',
   endsAt: '',
   registrationUrl: '',
+  imageAlt: '',
+  showInGallery: true,
   status: 'draft',
   isFeatured: false,
 }
@@ -106,6 +117,15 @@ function formatAdminDate(value) {
   }).format(new Date(value))
 }
 
+function getImageUrl(path) {
+  if (!path) return ''
+  return supabase.storage.from(mediaBucket).getPublicUrl(path).data.publicUrl
+}
+
+function revokePreviewUrl(url) {
+  if (url?.startsWith('blob:')) URL.revokeObjectURL(url)
+}
+
 function getTimingLabel(item) {
   const timing = getEventTiming(item)
 
@@ -121,6 +141,8 @@ function AdminEvents() {
   const [isEditorOpen, setIsEditorOpen] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
   const [form, setForm] = useState(emptyForm)
+  const [selectedFile, setSelectedFile] = useState(null)
+  const [previewUrl, setPreviewUrl] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedStatus, setSelectedStatus] = useState('all')
   const [selectedTiming, setSelectedTiming] = useState('all')
@@ -169,6 +191,13 @@ function AdminEvents() {
     }
   }, [])
 
+  useEffect(
+    () => () => {
+      revokePreviewUrl(previewUrl)
+    },
+    [previewUrl],
+  )
+
   const counts = useMemo(
     () => ({
       all: items.length,
@@ -216,14 +245,18 @@ function AdminEvents() {
   }, [items, searchTerm, selectedStatus, selectedTiming])
 
   const openCreateEditor = () => {
+    revokePreviewUrl(previewUrl)
     setEditingItem(null)
     setForm(emptyForm)
+    setSelectedFile(null)
+    setPreviewUrl('')
     setError('')
     setSuccess('')
     setIsEditorOpen(true)
   }
 
   const openEditEditor = (item) => {
+    revokePreviewUrl(previewUrl)
     setEditingItem(item)
     setForm({
       title: item.title,
@@ -234,9 +267,13 @@ function AdminEvents() {
       startsAt: toDateTimeInput(item.starts_at),
       endsAt: toDateTimeInput(item.ends_at),
       registrationUrl: item.registration_url || '',
+      imageAlt: item.image_alt || '',
+      showInGallery: item.show_in_gallery ?? true,
       status: item.status,
       isFeatured: item.is_featured,
     })
+    setSelectedFile(null)
+    setPreviewUrl(getImageUrl(item.image_path))
     setError('')
     setSuccess('')
     setIsEditorOpen(true)
@@ -244,9 +281,12 @@ function AdminEvents() {
 
   const closeEditor = () => {
     if (isSaving) return
+    revokePreviewUrl(previewUrl)
     setIsEditorOpen(false)
     setEditingItem(null)
     setForm(emptyForm)
+    setSelectedFile(null)
+    setPreviewUrl('')
   }
 
   const updateField = (event) => {
@@ -254,6 +294,38 @@ function AdminEvents() {
     setForm((current) => ({
       ...current,
       [name]: type === 'checkbox' ? checked : value,
+    }))
+  }
+
+  const handleFileChange = (event) => {
+    const file = event.target.files?.[0] || null
+    const fileError = validateMediaFile(file)
+
+    if (fileError) {
+      setError(fileError)
+      event.target.value = ''
+      return
+    }
+
+    revokePreviewUrl(previewUrl)
+    setSelectedFile(file)
+    setPreviewUrl(file ? URL.createObjectURL(file) : '')
+    setForm((current) => ({
+      ...current,
+      showInGallery: file ? current.showInGallery : false,
+    }))
+    setError('')
+    event.target.value = ''
+  }
+
+  const clearEventImage = () => {
+    revokePreviewUrl(previewUrl)
+    setSelectedFile(null)
+    setPreviewUrl('')
+    setForm((current) => ({
+      ...current,
+      imageAlt: '',
+      showInGallery: false,
     }))
   }
 
@@ -280,16 +352,46 @@ function AdminEvents() {
       return
     }
 
+    if ((selectedFile || previewUrl) && !form.imageAlt.trim()) {
+      setError('Add a short image description before saving this event photo.')
+      return
+    }
+
     setIsSaving(true)
+    let uploadedPath = null
+
+    if (selectedFile) {
+      const uploadResult = await uploadMedia(selectedFile, 'events')
+      if (uploadResult.error) {
+        setError(uploadResult.error.message)
+        setIsSaving(false)
+        return
+      }
+
+      uploadedPath = uploadResult.data.path
+    }
+
+    const imagePath =
+      uploadedPath || (previewUrl ? editingItem?.image_path : null)
     const result = editingItem
-      ? await updateEvent(editingItem.id, form, editingItem.published_at)
-      : await createEvent(form)
+      ? await updateEvent(
+          editingItem.id,
+          form,
+          imagePath,
+          editingItem.published_at,
+        )
+      : await createEvent(form, imagePath)
 
     if (result.error) {
+      if (uploadedPath) await removeMedia(uploadedPath)
       setError(result.error.message)
       setNeedsSchema(isEventsTableMissing(result.error))
       setIsSaving(false)
       return
+    }
+
+    if (editingItem?.image_path && editingItem.image_path !== imagePath) {
+      await removeMedia(editingItem.image_path)
     }
 
     if (
@@ -305,9 +407,12 @@ function AdminEvents() {
         : 'Event created successfully.',
     )
     setIsSaving(false)
+    revokePreviewUrl(previewUrl)
     setIsEditorOpen(false)
     setEditingItem(null)
     setForm(emptyForm)
+    setSelectedFile(null)
+    setPreviewUrl('')
     await loadEvents()
   }
 
@@ -326,6 +431,8 @@ function AdminEvents() {
       setError(deleteError.message)
       return
     }
+
+    if (item.image_path) await removeMedia(item.image_path)
 
     setSuccess('Event deleted.')
     await loadEvents()
@@ -763,6 +870,88 @@ function AdminEvents() {
                     placeholder="https://forms.example.com/event-registration"
                   />
                 </label>
+
+                <div className="rounded-2xl border border-dashed border-blue-200 bg-brand-50/35 p-5 sm:col-span-2">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <p className="text-sm font-extrabold text-navy-900">
+                        Event photo
+                      </p>
+                      <p className="mt-1 text-xs leading-5 text-slate-500">
+                        Upload one approved image. It can also appear in the
+                        public gallery archive.
+                      </p>
+                    </div>
+                    <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-extrabold text-brand-600 ring-1 ring-blue-100">
+                      <Upload size={17} aria-hidden="true" />
+                      {previewUrl ? 'Change image' : 'Upload image'}
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        onChange={handleFileChange}
+                        className="sr-only"
+                      />
+                    </label>
+                  </div>
+
+                  {previewUrl ? (
+                    <div className="mt-4 grid gap-4 rounded-2xl border border-blue-100 bg-white p-4 sm:grid-cols-[180px_1fr]">
+                      <img
+                        src={previewUrl}
+                        alt=""
+                        className="aspect-[4/3] w-full rounded-xl bg-slate-100 object-cover"
+                      />
+                      <div className="grid gap-4">
+                        <label className="text-sm font-extrabold text-navy-900">
+                          Image description
+                          <input
+                            name="imageAlt"
+                            value={form.imageAlt}
+                            onChange={updateField}
+                            className={inputClassName}
+                            placeholder="Describe who or what is shown"
+                            required
+                          />
+                        </label>
+                        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-blue-100 bg-brand-50/45 p-4">
+                          <input
+                            type="checkbox"
+                            name="showInGallery"
+                            checked={form.showInGallery}
+                            onChange={updateField}
+                            className="mt-0.5 size-4 accent-blue-600"
+                          />
+                          <span>
+                            <span className="block text-sm font-extrabold text-navy-900">
+                              Show this photo in Gallery archive
+                            </span>
+                            <span className="mt-1 block text-xs leading-5 text-slate-600">
+                              Published events marked here will appear in News
+                              & Gallery automatically.
+                            </span>
+                          </span>
+                        </label>
+                        <button
+                          type="button"
+                          onClick={clearEventImage}
+                          className="justify-self-start rounded-xl border border-red-200 px-4 py-2 text-xs font-extrabold text-red-600 transition hover:bg-red-50"
+                        >
+                          Remove image
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-4 rounded-2xl border border-dashed border-blue-200 bg-white/70 p-6 text-center text-sm font-bold text-slate-500">
+                      <ImageIcon
+                        size={24}
+                        className="mx-auto mb-2 text-brand-600"
+                        aria-hidden="true"
+                      />
+                      No event photo yet. The event can still be saved without
+                      an image.
+                    </div>
+                  )}
+                </div>
               </div>
 
               <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-xl border border-blue-100 bg-brand-50/45 p-4">

@@ -28,6 +28,17 @@ function EventCard({ event, compact = false }) {
             : 'bg-gradient-to-r from-brand-600 via-blue-400 to-orange-400'
         }`}
       />
+      {event.image && (
+        <div className={compact ? 'media-frame h-48' : 'media-frame h-56'}>
+          <img
+            src={event.image}
+            alt={event.imageAlt || ''}
+            loading="lazy"
+            decoding="async"
+            className="media-image"
+          />
+        </div>
+      )}
       <div className="flex flex-1 flex-col p-6 sm:p-7">
         <div className="flex flex-wrap items-center gap-2">
           <span

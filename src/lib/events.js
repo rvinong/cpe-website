@@ -1,4 +1,5 @@
 import { isSupabaseConfigured, supabase } from './supabase'
+import { mediaBucket } from './media'
 
 const eventColumns = [
   'id',
@@ -11,6 +12,9 @@ const eventColumns = [
   'starts_at',
   'ends_at',
   'registration_url',
+  'image_path',
+  'image_alt',
+  'show_in_gallery',
   'status',
   'is_featured',
   'published_at',
@@ -31,6 +35,13 @@ const timeFormatter = new Intl.DateTimeFormat('en-US', {
   minute: '2-digit',
   timeZone: 'Asia/Manila',
 })
+
+function getPublicEventImageUrl(path) {
+  if (!path || !supabase) return null
+  if (/^(https?:)?\/\//.test(path) || path.startsWith('/')) return path
+
+  return supabase.storage.from(mediaBucket).getPublicUrl(path).data.publicUrl
+}
 
 export const eventCategories = [
   'Academic',
@@ -65,13 +76,16 @@ export function normalizeEvent(row) {
     time: endsAt
       ? `${timeFormatter.format(startsAt)} - ${timeFormatter.format(endsAt)}`
       : timeFormatter.format(startsAt),
+    image: getPublicEventImageUrl(row.image_path),
+    imageAlt: row.image_alt || `${row.title} event photo`,
     isFeatured: row.is_featured,
+    showInGallery: row.show_in_gallery,
     timing: getEventTiming(row),
   }
 }
 
 export function isEventsTableMissing(error) {
-  return ['42P01', 'PGRST204', 'PGRST205'].includes(error?.code)
+  return ['42P01', '42703', 'PGRST204', 'PGRST205'].includes(error?.code)
 }
 
 export async function getPublicEvents() {
@@ -123,7 +137,7 @@ async function createAvailableSlug(title) {
   return `${baseSlug}-${Date.now().toString(36).slice(-6)}`
 }
 
-function toEventPayload(values, publishedAt) {
+function toEventPayload(values, imagePath, publishedAt) {
   const isPublic = ['published', 'cancelled'].includes(values.status)
 
   return {
@@ -137,6 +151,9 @@ function toEventPayload(values, publishedAt) {
       ? new Date(values.endsAt).toISOString()
       : null,
     registration_url: values.registrationUrl.trim() || null,
+    image_path: imagePath || null,
+    image_alt: values.imageAlt?.trim() || '',
+    show_in_gallery: Boolean(values.showInGallery),
     status: values.status,
     is_featured: values.isFeatured,
     published_at: isPublic
@@ -145,23 +162,23 @@ function toEventPayload(values, publishedAt) {
   }
 }
 
-export async function createEvent(values) {
+export async function createEvent(values, imagePath = null) {
   const slug = await createAvailableSlug(values.title)
 
   return supabase
     .from('events')
     .insert({
-      ...toEventPayload(values, null),
+      ...toEventPayload(values, imagePath, null),
       slug,
     })
     .select(eventColumns)
     .single()
 }
 
-export async function updateEvent(id, values, publishedAt) {
+export async function updateEvent(id, values, imagePath, publishedAt) {
   return supabase
     .from('events')
-    .update(toEventPayload(values, publishedAt))
+    .update(toEventPayload(values, imagePath, publishedAt))
     .eq('id', id)
     .select(eventColumns)
     .single()
