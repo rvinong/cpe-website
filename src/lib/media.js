@@ -184,6 +184,10 @@ export function normalizeGalleryPhoto(row) {
 
   return {
     ...row,
+    sourceType: 'gallery',
+    sourceId: row.id,
+    sourceLabel: 'Gallery upload',
+    groupId: `gallery-${row.album || row.id}`,
     image: getPublicImageUrl(row.image_path),
     alt: row.alt_text,
     date: dateFormatter.format(capturedOn),
@@ -201,6 +205,9 @@ export function normalizeEventGalleryPhoto(row) {
   return {
     id: `event-${row.id}`,
     sourceType: 'event',
+    sourceId: row.id,
+    sourceLabel: 'Event upload',
+    groupId: `event-${row.id}`,
     album: row.title,
     category: row.category || 'Events',
     description: row.summary || row.description || '',
@@ -233,6 +240,9 @@ export function normalizeNewsGalleryPhotos(row) {
     return {
       id: `news-${row.id}-${image.id || index}`,
       sourceType: 'news',
+      sourceId: row.id,
+      sourceLabel: 'News story',
+      groupId: `news-${row.id}`,
       album,
       category: row.category || 'News',
       description: image.caption || row.summary || '',
@@ -522,6 +532,46 @@ export async function getAdminGalleryPhotos() {
     .select(galleryColumns)
     .order('captured_on', { ascending: false })
     .order('sort_order', { ascending: true })
+}
+
+export async function getAdminGalleryArchivePhotos() {
+  const [galleryResult, newsResult, eventResult] = await Promise.all([
+    getAdminGalleryPhotos(),
+    supabase
+      .from('news_posts')
+      .select(baseNewsColumns)
+      .order('updated_at', { ascending: false }),
+    supabase
+      .from('events')
+      .select(eventGalleryColumns)
+      .not('image_path', 'is', null)
+      .order('starts_at', { ascending: false }),
+  ])
+
+  if (galleryResult.error) {
+    return { data: null, error: galleryResult.error }
+  }
+
+  if (newsResult.error) {
+    return { data: null, error: newsResult.error }
+  }
+
+  const galleryPhotos =
+    galleryResult.data?.map(normalizeGalleryPhoto) ?? []
+  const newsRows = await attachNewsImages(newsResult.data || [])
+  const newsPhotos = newsRows.flatMap(normalizeNewsGalleryPhotos)
+  const eventPhotos = eventResult.error
+    ? []
+    : eventResult.data?.map(normalizeEventGalleryPhoto) ?? []
+
+  return {
+    data: [...galleryPhotos, ...newsPhotos, ...eventPhotos].sort(
+      (first, second) =>
+        getGallerySortTime(second) - getGallerySortTime(first) ||
+        (Number(first.sort_order) || 0) - (Number(second.sort_order) || 0),
+    ),
+    error: null,
+  }
 }
 
 function slugify(value) {

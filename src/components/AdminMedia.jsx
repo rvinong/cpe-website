@@ -13,6 +13,7 @@ import {
   X,
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import AdminListSkeleton from './AdminListSkeleton'
 import { signalBytePublished } from '../lib/byteAssistant'
@@ -22,7 +23,7 @@ import {
   deleteGalleryPhoto,
   deleteNewsPost,
   galleryCategories,
-  getAdminGalleryPhotos,
+  getAdminGalleryArchivePhotos,
   getAdminNews,
   isMediaSchemaMissing,
   maxNewsImages,
@@ -64,7 +65,14 @@ const emptyPhotoForm = {
 const statusStyles = {
   draft: 'bg-amber-50 text-amber-700 ring-amber-200',
   published: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
+  cancelled: 'bg-red-50 text-red-700 ring-red-200',
   archived: 'bg-slate-100 text-slate-600 ring-slate-200',
+}
+
+const archiveSourceStyles = {
+  gallery: 'bg-blue-50 text-blue-700 ring-blue-100',
+  news: 'bg-violet-50 text-violet-700 ring-violet-100',
+  event: 'bg-orange-50 text-orange-700 ring-orange-100',
 }
 
 const inputClassName =
@@ -108,11 +116,6 @@ function getNewsImagePaths(item) {
   return [...paths]
 }
 
-function getNewsImageCount(item) {
-  if (item?.images?.length) return item.images.length
-  return item?.image_path ? 1 : 0
-}
-
 function toDatetimeLocalValue(value) {
   if (!value) return ''
 
@@ -133,7 +136,7 @@ function fromDatetimeLocalValue(value) {
 function AdminMedia() {
   const [activeTab, setActiveTab] = useState('news')
   const [news, setNews] = useState([])
-  const [photos, setPhotos] = useState([])
+  const [archivePhotos, setArchivePhotos] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [editorType, setEditorType] = useState(null)
@@ -151,18 +154,18 @@ function AdminMedia() {
 
   const loadMedia = useCallback(async () => {
     setIsLoading(true)
-    const [newsResult, photoResult] = await Promise.all([
+    const [newsResult, archiveResult] = await Promise.all([
       getAdminNews(),
-      getAdminGalleryPhotos(),
+      getAdminGalleryArchivePhotos(),
     ])
-    const loadError = newsResult.error || photoResult.error
+    const loadError = newsResult.error || archiveResult.error
 
     if (loadError) {
       setError(loadError.message)
       setNeedsSchema(isMediaSchemaMissing(loadError))
     } else {
       setNews(newsResult.data)
-      setPhotos(photoResult.data)
+      setArchivePhotos(archiveResult.data)
       setError('')
       setNeedsSchema(false)
     }
@@ -173,17 +176,20 @@ function AdminMedia() {
   useEffect(() => {
     let isMounted = true
 
-    Promise.all([getAdminNews(), getAdminGalleryPhotos()]).then(
-      ([newsResult, photoResult]) => {
+    Promise.all([
+      getAdminNews(),
+      getAdminGalleryArchivePhotos(),
+    ]).then(
+      ([newsResult, archiveResult]) => {
         if (!isMounted) return
-        const loadError = newsResult.error || photoResult.error
+        const loadError = newsResult.error || archiveResult.error
 
         if (loadError) {
           setError(loadError.message)
           setNeedsSchema(isMediaSchemaMissing(loadError))
         } else {
           setNews(newsResult.data)
-          setPhotos(photoResult.data)
+          setArchivePhotos(archiveResult.data)
           setNeedsSchema(false)
         }
 
@@ -207,22 +213,12 @@ function AdminMedia() {
     () => ({
       publishedNews: news.filter((item) => item.status === 'published').length,
       draftNews: news.filter((item) => item.status === 'draft').length,
-      publishedPhotos:
-        photos.filter((item) => item.status === 'published').length +
-        news
-          .filter((item) => item.status === 'published')
-          .reduce((total, item) => total + getNewsImageCount(item), 0),
-      albums: new Set([
-        ...photos.map((item) => item.album),
-        ...news
-          .filter(
-            (item) =>
-              item.status === 'published' && getNewsImageCount(item) > 0,
-          )
-          .map((item) => item.title),
-      ]).size,
+      publishedPhotos: archivePhotos.filter((item) =>
+        ['published', 'cancelled'].includes(item.status),
+      ).length,
+      albums: new Set(archivePhotos.map((item) => item.groupId)).size,
     }),
-    [news, photos],
+    [archivePhotos, news],
   )
 
   const resetEditor = () => {
@@ -576,7 +572,20 @@ function AdminMedia() {
     await loadMedia()
   }
 
-  const currentItems = activeTab === 'news' ? news : photos
+  const currentItems = activeTab === 'news' ? news : archivePhotos
+
+  const openArchiveSource = (item) => {
+    if (item.sourceType !== 'news') return
+
+    const sourceNews = news.find((story) => story.id === item.sourceId)
+    if (!sourceNews) {
+      setError('Could not find the source news story for this photo.')
+      return
+    }
+
+    setActiveTab('news')
+    openNewsEditor(sourceNews)
+  }
 
   return (
     <div className="admin-page mx-auto max-w-7xl">
@@ -708,7 +717,7 @@ function AdminMedia() {
               >
                 {item.image_path ? (
                   <img
-                    src={getImageUrl(item.image_path)}
+                    src={item.image || getImageUrl(item.image_path)}
                     alt=""
                     loading="lazy"
                     decoding="async"
@@ -723,11 +732,21 @@ function AdminMedia() {
                   <div className="flex flex-wrap items-center gap-2">
                     <span
                       className={`rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase ring-1 ring-inset ${
-                        statusStyles[item.status]
+                        statusStyles[item.status] || statusStyles.archived
                       }`}
                     >
                       {item.status}
                     </span>
+                    {activeTab === 'gallery' && item.sourceLabel && (
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase ring-1 ring-inset ${
+                          archiveSourceStyles[item.sourceType] ||
+                          archiveSourceStyles.gallery
+                        }`}
+                      >
+                        {item.sourceLabel}
+                      </span>
+                    )}
                     <span className="text-xs font-bold text-slate-500">
                       {item.category}
                     </span>
@@ -751,32 +770,74 @@ function AdminMedia() {
                       Published: {item.published_at ? item.date : 'Not set'}
                     </p>
                   )}
+                  {activeTab === 'gallery' && (
+                    <p className="mt-1 text-xs font-bold text-slate-400">
+                      {item.date}
+                      {item.sourceType === 'news' && item.newsSlug
+                        ? ' from News'
+                        : item.sourceType === 'event'
+                          ? ' from Events'
+                          : ' from Gallery uploads'}
+                    </p>
+                  )}
                 </div>
                 <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      activeTab === 'news'
-                        ? openNewsEditor(item)
-                        : openPhotoEditor(item)
-                    }
-                    className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3.5 py-2 text-xs font-extrabold text-slate-600 transition hover:border-brand-500 hover:text-brand-600"
-                  >
-                    <Edit3 size={15} />
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      activeTab === 'news'
-                        ? handleDeleteNews(item)
-                        : handleDeletePhoto(item)
-                    }
-                    className="grid size-10 place-items-center rounded-lg border border-red-200 text-red-600 transition hover:bg-red-50"
-                    aria-label={`Delete ${activeTab === 'news' ? item.title : item.album}`}
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                  {activeTab === 'news' ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => openNewsEditor(item)}
+                        className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3.5 py-2 text-xs font-extrabold text-slate-600 transition hover:border-brand-500 hover:text-brand-600"
+                      >
+                        <Edit3 size={15} />
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteNews(item)}
+                        className="grid size-10 place-items-center rounded-lg border border-red-200 text-red-600 transition hover:bg-red-50"
+                        aria-label={`Delete ${item.title}`}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </>
+                  ) : item.sourceType === 'gallery' ? (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => openPhotoEditor(item)}
+                        className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3.5 py-2 text-xs font-extrabold text-slate-600 transition hover:border-brand-500 hover:text-brand-600"
+                      >
+                        <Edit3 size={15} />
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeletePhoto(item)}
+                        className="grid size-10 place-items-center rounded-lg border border-red-200 text-red-600 transition hover:bg-red-50"
+                        aria-label={`Delete ${item.album}`}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </>
+                  ) : item.sourceType === 'news' ? (
+                    <button
+                      type="button"
+                      onClick={() => openArchiveSource(item)}
+                      className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3.5 py-2 text-xs font-extrabold text-slate-600 transition hover:border-brand-500 hover:text-brand-600"
+                    >
+                      <Edit3 size={15} />
+                      Edit story
+                    </button>
+                  ) : (
+                    <Link
+                      to="/admin?section=events"
+                      className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3.5 py-2 text-xs font-extrabold text-slate-600 transition hover:border-brand-500 hover:text-brand-600"
+                    >
+                      <Edit3 size={15} />
+                      Manage event
+                    </Link>
+                  )}
                 </div>
               </article>
             ))}

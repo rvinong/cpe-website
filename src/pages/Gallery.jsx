@@ -44,6 +44,39 @@ const archiveDetails = [
   },
 ]
 
+function getPhotoGroupId(photo) {
+  return photo.groupId || `${photo.sourceType || 'gallery'}-${photo.album}`
+}
+
+function groupArchivePhotos(photos) {
+  const groups = new Map()
+
+  photos.forEach((photo) => {
+    const id = getPhotoGroupId(photo)
+    const current = groups.get(id) || {
+      id,
+      album: photo.album,
+      category: photo.category,
+      date: photo.date,
+      year: photo.year,
+      description: photo.description,
+      sourceLabel: photo.sourceLabel,
+      photos: [],
+    }
+
+    current.photos.push(photo)
+    groups.set(id, current)
+  })
+
+  return [...groups.values()].map((group) => ({
+    ...group,
+    photos: group.photos.sort(
+      (first, second) =>
+        (Number(first.sort_order) || 0) - (Number(second.sort_order) || 0),
+    ),
+  }))
+}
+
 function Gallery() {
   const { news: organizationNews, isLoading: isNewsLoading } = useNews()
   const { photos: galleryPhotos, isLoading: isGalleryLoading } =
@@ -53,6 +86,7 @@ function Gallery() {
   const [selectedYear, setSelectedYear] = useState('All years')
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(null)
   const [navigationDirection, setNavigationDirection] = useState(1)
+  const [activeAlbumSlides, setActiveAlbumSlides] = useState({})
 
   const categories = useMemo(
     () =>
@@ -71,7 +105,7 @@ function Gallery() {
   )
 
   const albums = useMemo(
-    () => [...new Set(galleryPhotos.map((photo) => photo.album))],
+    () => groupArchivePhotos(galleryPhotos),
     [galleryPhotos],
   )
 
@@ -89,8 +123,48 @@ function Gallery() {
     [galleryPhotos, selectedCategory, selectedYear],
   )
 
+  const filteredAlbums = useMemo(
+    () => groupArchivePhotos(filteredPhotos),
+    [filteredPhotos],
+  )
+
   const selectedPhoto =
     selectedPhotoIndex === null ? null : filteredPhotos[selectedPhotoIndex]
+
+  const getActiveAlbumPhoto = (album) => {
+    const activeIndex = Math.min(
+      activeAlbumSlides[album.id] || 0,
+      album.photos.length - 1,
+    )
+
+    return album.photos[activeIndex] || album.photos[0]
+  }
+
+  const openPhoto = (photo) => {
+    const index = filteredPhotos.findIndex((item) => item.id === photo.id)
+    if (index < 0) return
+
+    setNavigationDirection(1)
+    setSelectedPhotoIndex(index)
+  }
+
+  const showAlbumPhoto = (album, direction) => {
+    if (album.photos.length < 2) return
+
+    setActiveAlbumSlides((current) => {
+      const currentIndex = Math.min(
+        current[album.id] || 0,
+        album.photos.length - 1,
+      )
+      const nextIndex =
+        (currentIndex + direction + album.photos.length) % album.photos.length
+
+      return {
+        ...current,
+        [album.id]: nextIndex,
+      }
+    })
+  }
 
   useEffect(() => {
     if (selectedPhotoIndex === null) return undefined
@@ -238,6 +312,7 @@ function Gallery() {
                   onChange={(event) => {
                     setSelectedCategory(event.target.value)
                     setSelectedPhotoIndex(null)
+                    setActiveAlbumSlides({})
                   }}
                   className="field-control px-4 font-bold"
                 >
@@ -258,6 +333,7 @@ function Gallery() {
                   onChange={(event) => {
                     setSelectedYear(event.target.value)
                     setSelectedPhotoIndex(null)
+                    setActiveAlbumSlides({})
                   }}
                   className="field-control px-4 font-bold"
                 >
@@ -338,7 +414,7 @@ function Gallery() {
                 className="mt-10"
                 label="Loading gallery photos"
               />
-            ) : filteredPhotos.length === 0 ? (
+            ) : filteredAlbums.length === 0 ? (
               <EmptyState
                 icon={Images}
                 className="mt-10"
@@ -347,48 +423,101 @@ function Gallery() {
               />
             ) : (
               <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {filteredPhotos.map((photo, index) => (
-                  <Motion.button
-                    key={photo.id}
-                    type="button"
-                    initial={{ opacity: 0, y: 18 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    whileHover={{ y: -5 }}
-                    viewport={{ once: true, amount: 0.2 }}
-                    transition={{ duration: 0.45, delay: index * 0.04 }}
-                    onClick={() => {
-                      setNavigationDirection(1)
-                      setSelectedPhotoIndex(index)
-                    }}
-                    className="surface-card interactive-card group overflow-hidden text-left"
-                  >
-                    <span className="media-frame aspect-[4/3]">
-                      <img
-                        src={photo.image}
-                        alt={photo.alt}
-                        loading="lazy"
-                        decoding="async"
-                        className="media-image"
-                      />
-                      <span className="absolute inset-0 bg-gradient-to-t from-navy-950/65 via-transparent to-transparent" />
-                      <span className="absolute right-4 top-4 grid size-10 place-items-center rounded-xl bg-white/90 text-brand-600 opacity-0 shadow-sm transition group-hover:opacity-100">
-                        <Maximize2 size={18} aria-hidden="true" />
+                {filteredAlbums.map((album, index) => {
+                  const photo = getActiveAlbumPhoto(album)
+                  const activeIndex = album.photos.findIndex(
+                    (item) => item.id === photo.id,
+                  )
+
+                  return (
+                    <Motion.article
+                      key={album.id}
+                      initial={{ opacity: 0, y: 18 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      whileHover={{ y: -5 }}
+                      viewport={{ once: true, amount: 0.2 }}
+                      transition={{ duration: 0.45, delay: index * 0.04 }}
+                      className="surface-card interactive-card group overflow-hidden"
+                    >
+                      <span className="media-frame aspect-[4/3]">
+                        <AnimatePresence mode="wait" initial={false}>
+                          <Motion.img
+                            key={photo.id}
+                            src={photo.image}
+                            alt={photo.alt}
+                            loading="lazy"
+                            decoding="async"
+                            initial={
+                              shouldReduceMotion
+                                ? false
+                                : { opacity: 0, x: 18 }
+                            }
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={
+                              shouldReduceMotion
+                                ? undefined
+                                : { opacity: 0, x: -18 }
+                            }
+                            transition={{
+                              duration: shouldReduceMotion ? 0.01 : 0.22,
+                            }}
+                            className="media-image"
+                          />
+                        </AnimatePresence>
+                        <span className="absolute inset-0 bg-gradient-to-t from-navy-950/65 via-transparent to-transparent" />
+                        <button
+                          type="button"
+                          onClick={() => openPhoto(photo)}
+                          className="absolute inset-0 z-10"
+                          aria-label={`Open ${album.album} photo viewer`}
+                        />
+                        <span className="absolute left-4 top-4 rounded-full bg-white/90 px-3 py-1.5 text-[10px] font-extrabold text-brand-600 shadow-sm">
+                          {album.photos.length}{' '}
+                          {album.photos.length === 1 ? 'photo' : 'photos'}
+                        </span>
+                        <span className="absolute right-4 top-4 z-20 grid size-10 place-items-center rounded-xl bg-white/90 text-brand-600 opacity-0 shadow-sm transition group-hover:opacity-100">
+                          <Maximize2 size={18} aria-hidden="true" />
+                        </span>
+                        {album.photos.length > 1 && (
+                          <span className="absolute bottom-4 left-4 right-4 z-20 flex items-center justify-between gap-3">
+                            <button
+                              type="button"
+                              onClick={() => showAlbumPhoto(album, -1)}
+                              className="grid size-9 place-items-center rounded-xl bg-white/90 text-navy-900 shadow-sm transition hover:bg-white"
+                              aria-label={`Previous photo in ${album.album}`}
+                            >
+                              <ChevronLeft size={19} aria-hidden="true" />
+                            </button>
+                            <span className="rounded-full bg-navy-950/80 px-3 py-1 text-[10px] font-extrabold text-white backdrop-blur">
+                              {activeIndex + 1} / {album.photos.length}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => showAlbumPhoto(album, 1)}
+                              className="grid size-9 place-items-center rounded-xl bg-white/90 text-navy-900 shadow-sm transition hover:bg-white"
+                              aria-label={`Next photo in ${album.album}`}
+                            >
+                              <ChevronRight size={19} aria-hidden="true" />
+                            </button>
+                          </span>
+                        )}
                       </span>
-                    </span>
-                    <span className="block p-5">
-                      <span className="text-xs font-extrabold tracking-wide text-brand-600 uppercase">
-                        {photo.category}
+                      <span className="block p-5">
+                        <span className="text-xs font-extrabold tracking-wide text-brand-600 uppercase">
+                          {album.category}
+                          {album.sourceLabel ? ` / ${album.sourceLabel}` : ''}
+                        </span>
+                        <span className="mt-2 block text-lg font-extrabold text-navy-900">
+                          {album.album}
+                        </span>
+                        <span className="mt-2 flex items-center gap-2 text-sm text-slate-500">
+                          <CalendarDays size={15} aria-hidden="true" />
+                          {album.date}
+                        </span>
                       </span>
-                      <span className="mt-2 block text-lg font-extrabold text-navy-900">
-                        {photo.album}
-                      </span>
-                      <span className="mt-2 flex items-center gap-2 text-sm text-slate-500">
-                        <CalendarDays size={15} aria-hidden="true" />
-                        {photo.date}
-                      </span>
-                    </span>
-                  </Motion.button>
-                ))}
+                    </Motion.article>
+                  )
+                })}
               </div>
             )}
           </div>
