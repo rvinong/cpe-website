@@ -15,7 +15,7 @@ function NewsCard({ article, compact = false }) {
           />
         </div>
       )}
-      <div className="p-6 sm:p-7">
+      <div className="flex flex-1 flex-col p-6 sm:p-7">
         <div className="flex flex-wrap items-center gap-2">
           <p className="text-xs font-extrabold tracking-wide text-brand-600 uppercase">
             {article.category}
@@ -34,7 +34,11 @@ function NewsCard({ article, compact = false }) {
           <CalendarDays size={14} />
           {article.date}
         </p>
-        <p className="mt-4 text-sm leading-6 text-slate-600">
+        <p
+          className={`mt-4 text-sm leading-6 text-slate-600 ${
+            compact ? 'line-clamp-3' : ''
+          }`}
+        >
           {article.summary}
         </p>
         {!compact && article.body && (
@@ -43,7 +47,7 @@ function NewsCard({ article, compact = false }) {
           </p>
         )}
         {compact && (
-          <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
+          <div className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
             <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-slate-500">
               <ThumbsUp size={14} aria-hidden="true" />
               {article.reactionTotal || 0} reactions
@@ -59,11 +63,11 @@ function NewsCard({ article, compact = false }) {
   )
 
   return (
-    <article className="surface-card interactive-card group h-full overflow-hidden">
+    <article className="surface-card interactive-card group flex h-full flex-col overflow-hidden">
       {compact && article.slug ? (
         <Link
           to={`/gallery/news/${article.slug}`}
-          className="block h-full focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-200"
+          className="flex h-full flex-1 flex-col focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-200"
         >
           {cardContent}
         </Link>
