@@ -269,7 +269,7 @@ function NewsReactionSummary({
   const pickerSizeClass = isDetail ? 'size-12 sm:size-14' : 'size-10'
   const pickerIconSize = isDetail ? 22 : 18
   const actionButtonClass = activeReaction
-    ? `${reactionButtonStyles[activeReaction.id]} border-transparent`
+    ? 'border-transparent px-1.5 text-slate-600 hover:text-brand-600'
     : 'border-slate-200 text-slate-600 hover:border-blue-200 hover:bg-brand-50/60 hover:text-brand-600'
 
   const picker = (
@@ -380,8 +380,16 @@ function NewsReactionSummary({
         disabled={isSavingReaction}
         className={`inline-flex min-h-9 items-center justify-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-extrabold transition disabled:cursor-wait disabled:opacity-70 ${actionButtonClass}`}
       >
-        <ActiveReactionIcon size={14} aria-hidden="true" />
-        {activeReaction?.label || 'Like'}
+        {activeReaction ? (
+          <span
+            className={`grid size-6 place-items-center rounded-full border-2 border-white ${reactionButtonStyles[activeReaction.id]}`}
+          >
+            <ActiveReactionIcon size={12} aria-hidden="true" />
+          </span>
+        ) : (
+          <ActiveReactionIcon size={14} aria-hidden="true" />
+        )}
+        {activeReaction ? 'You' : 'Like'}
       </button>
     </div>
   )
