@@ -456,51 +456,45 @@ function NewsDetails() {
                 </div>
 
                 {reactionSummary && (
-                  <section className="mt-12 rounded-3xl border border-blue-100 bg-brand-50/35 p-5 sm:p-6">
-                    <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-                      <div>
-                        <p className="text-xs font-extrabold tracking-[0.16em] text-brand-600 uppercase">
-                          Community reactions
-                        </p>
-                        <h2 className="mt-1 text-2xl font-black text-navy-900">
-                          React to this story
-                        </h2>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          primaryMembersReactionId &&
-                          openReactionMembers(primaryMembersReactionId)
-                        }
-                        disabled={reactionSummary.total === 0}
-                        className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-extrabold text-slate-600 shadow-sm transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-55"
-                      >
-                        <span className="flex -space-x-2">
-                          {positiveReactions.slice(0, 3).map(({ id }) => {
-                            const Icon = reactionIcons[id]
-                            return (
-                              <span
-                                key={id}
-                                className={`grid size-7 place-items-center rounded-full border-2 border-white ${reactionButtonStyles[id]}`}
-                              >
-                                <Icon size={14} aria-hidden="true" />
-                              </span>
-                            )
-                          })}
-                          {positiveReactions.length === 0 && (
-                            <span className="grid size-7 place-items-center rounded-full border-2 border-white bg-slate-50 text-slate-400">
-                              <UsersRound size={14} aria-hidden="true" />
-                            </span>
-                          )}
+                  <section
+                    className="mt-10 border-y border-slate-100 py-3"
+                    aria-label="News reactions"
+                  >
+                    <div className="flex min-h-8 items-center justify-end">
+                      {reactionSummary.total > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            primaryMembersReactionId &&
+                            openReactionMembers(primaryMembersReactionId)
+                          }
+                          className="inline-flex items-center gap-2 rounded-full px-1.5 py-1 text-sm font-bold text-slate-500 transition hover:text-brand-600"
+                        >
+                          <span className="flex -space-x-1.5">
+                            {positiveReactions.slice(0, 3).map(({ id }) => {
+                              const Icon = reactionIcons[id]
+                              return (
+                                <span
+                                  key={id}
+                                  className={`grid size-6 place-items-center rounded-full border-2 border-white ${reactionButtonStyles[id]}`}
+                                >
+                                  <Icon size={12} aria-hidden="true" />
+                                </span>
+                              )
+                            })}
+                          </span>
+                          {reactionTotalLabel}
+                        </button>
+                      ) : (
+                        <span className="text-sm font-bold text-slate-400">
+                          Be the first to react
                         </span>
-                        {reactionTotalLabel}
-                      </button>
+                      )}
                     </div>
 
-                    <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                    <div className="mt-2 grid grid-cols-1 border-t border-slate-100 pt-2">
                       <div
-                        className="relative w-fit"
+                        className="relative"
                         onMouseEnter={() => setIsReactionPickerOpen(true)}
                         onMouseLeave={() => setIsReactionPickerOpen(false)}
                         onBlur={(event) => {
@@ -523,7 +517,7 @@ function NewsDetails() {
                                 transition={{
                                   duration: shouldReduceMotion ? 0.01 : 0.18,
                                 }}
-                                className="absolute bottom-full left-0 z-20 mb-3 flex gap-2 rounded-full border border-slate-200 bg-white p-2 shadow-[0_18px_55px_-28px_rgba(15,23,42,0.45)]"
+                                className="absolute bottom-full left-1/2 z-20 mb-3 flex -translate-x-1/2 gap-2 rounded-full border border-slate-200 bg-white p-2 shadow-[0_18px_55px_-28px_rgba(15,23,42,0.45)]"
                               >
                                 {newsReactionTypes.map(({ id, label }) => {
                                   const Icon = reactionIcons[id]
@@ -571,51 +565,31 @@ function NewsDetails() {
                             setIsReactionPickerOpen((open) => !open)
                           }
                           disabled={isSavingReaction}
-                          className={`inline-flex min-h-12 items-center gap-2 rounded-full border px-5 py-3 text-sm font-extrabold shadow-sm transition hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-70 ${
+                          className={`inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-extrabold transition hover:bg-slate-50 disabled:cursor-wait disabled:opacity-70 ${
                             activeReaction
-                              ? reactionButtonStyles[activeReaction.id]
-                              : 'border-slate-200 bg-white text-slate-600 hover:border-brand-300 hover:text-brand-600'
+                              ? `${reactionButtonStyles[activeReaction.id]} border-transparent bg-transparent`
+                              : 'text-slate-600 hover:text-brand-600'
                           }`}
                         >
                           <ActiveReactionIcon size={19} aria-hidden="true" />
-                          {activeReaction?.label || 'React'}
+                          {activeReaction?.label || 'Like'}
                         </button>
                       </div>
-
-                      {positiveReactions.length > 0 && (
-                        <div className="flex flex-wrap gap-2">
-                          {positiveReactions.map(({ id, label }) => {
-                            const Icon = reactionIcons[id]
-                            return (
-                              <button
-                                key={id}
-                                type="button"
-                                onClick={() => openReactionMembers(id)}
-                                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-extrabold transition hover:-translate-y-0.5 ${reactionButtonStyles[id]}`}
-                              >
-                                <Icon size={14} aria-hidden="true" />
-                                {label}
-                                <span>{reactionSummary.counts[id]}</span>
-                              </button>
-                            )
-                          })}
-                        </div>
-                      )}
                     </div>
 
                     {!user && (
                       <button
                         type="button"
                         onClick={loginRedirect}
-                        className="mt-5 inline-flex items-center gap-2 text-sm font-extrabold text-brand-600"
+                        className="mt-3 inline-flex items-center gap-2 text-xs font-extrabold text-brand-600"
                       >
-                        <LogIn size={17} aria-hidden="true" />
+                        <LogIn size={15} aria-hidden="true" />
                         Sign in to react
                       </button>
                     )}
 
                     {reactionError && (
-                      <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-800">
+                      <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800">
                         {reactionError}
                       </p>
                     )}
