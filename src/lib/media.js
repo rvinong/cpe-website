@@ -198,6 +198,21 @@ function isNewsImagesUnavailable(error) {
   )
 }
 
+export function getFriendlyReactionError(error) {
+  const message = error?.message || ''
+  const isSchemaCacheError =
+    isMediaSchemaMissing(error) ||
+    message.includes('schema cache') ||
+    message.includes('get_news_reaction_summary') ||
+    message.includes('set_news_reaction') ||
+    message.includes('clear_news_reaction') ||
+    message.includes('get_news_reaction_members')
+
+  return isSchemaCacheError
+    ? 'Reactions are being set up. Run the updated supabase/media.sql, then try again.'
+    : message || 'Could not update reactions right now.'
+}
+
 export function validateMediaFile(file) {
   if (!file) return ''
   if (!acceptedMediaTypes.includes(file.type)) {

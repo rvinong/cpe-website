@@ -28,6 +28,7 @@ import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import { useNewsPost } from '../hooks/useMedia'
 import {
   clearNewsReaction,
+  getFriendlyReactionError,
   getNewsReactionMembers,
   newsReactionTypes,
   setNewsReaction,
@@ -41,12 +42,12 @@ const reactionIcons = {
   support: Handshake,
 }
 
-const reactionStyles = {
-  like: 'text-brand-600 bg-brand-50 ring-blue-100',
-  love: 'text-rose-600 bg-rose-50 ring-rose-100',
-  celebrate: 'text-amber-600 bg-amber-50 ring-amber-100',
-  wow: 'text-violet-600 bg-violet-50 ring-violet-100',
-  support: 'text-emerald-600 bg-emerald-50 ring-emerald-100',
+const reactionButtonStyles = {
+  like: 'text-brand-600 bg-brand-50 border-blue-100',
+  love: 'text-rose-600 bg-rose-50 border-rose-100',
+  celebrate: 'text-amber-600 bg-amber-50 border-amber-100',
+  wow: 'text-violet-600 bg-violet-50 border-violet-100',
+  support: 'text-emerald-600 bg-emerald-50 border-emerald-100',
 }
 
 function getBodyParagraphs(body) {
@@ -87,6 +88,7 @@ function NewsDetails() {
   const [activeImageIndex, setActiveImageIndex] = useState(0)
   const [navigationDirection, setNavigationDirection] = useState(1)
   const [reactionOverride, setReactionOverride] = useState(null)
+  const [isReactionPickerOpen, setIsReactionPickerOpen] = useState(false)
   const [isSavingReaction, setIsSavingReaction] = useState(false)
   const [reactionError, setReactionError] = useState('')
   const [membersReaction, setMembersReaction] = useState('')
@@ -183,11 +185,12 @@ function NewsDetails() {
 
     if (result.error) {
       updateReactionState(previousSummary)
-      setReactionError(result.error.message)
+      setReactionError(getFriendlyReactionError(result.error))
     } else {
       updateReactionState(result.data)
     }
 
+    setIsReactionPickerOpen(false)
     setIsSavingReaction(false)
   }
 
@@ -209,7 +212,7 @@ function NewsDetails() {
     )
 
     setReactionMembers(error ? [] : data || [])
-    setMemberError(error?.message || '')
+    setMemberError(error ? getFriendlyReactionError(error) : '')
     setIsLoadingMembers(false)
   }
 
@@ -256,6 +259,23 @@ function NewsDetails() {
   const selectedReaction = membersReaction
     ? newsReactionTypes.find((reaction) => reaction.id === membersReaction)
     : null
+  const activeReaction =
+    newsReactionTypes.find(
+      (reaction) => reaction.id === reactionSummary?.userReaction,
+    ) || null
+  const ActiveReactionIcon = activeReaction
+    ? reactionIcons[activeReaction.id]
+    : ThumbsUp
+  const positiveReactions = reactionSummary
+    ? newsReactionTypes.filter(
+        (reaction) => (reactionSummary.counts[reaction.id] || 0) > 0,
+      )
+    : []
+  const primaryMembersReactionId =
+    activeReaction?.id || positiveReactions[0]?.id || ''
+  const reactionTotalLabel = `${reactionSummary?.total || 0} ${
+    reactionSummary?.total === 1 ? 'reaction' : 'reactions'
+  }`
 
   return (
     <>
@@ -437,7 +457,7 @@ function NewsDetails() {
 
                 {reactionSummary && (
                   <section className="mt-12 rounded-3xl border border-blue-100 bg-brand-50/35 p-5 sm:p-6">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                       <div>
                         <p className="text-xs font-extrabold tracking-[0.16em] text-brand-600 uppercase">
                           Community reactions
@@ -446,53 +466,141 @@ function NewsDetails() {
                           React to this story
                         </h2>
                       </div>
-                      <span className="inline-flex items-center gap-2 text-sm font-extrabold text-slate-500">
-                        <UsersRound size={17} aria-hidden="true" />
-                        {reactionSummary.total} total
-                      </span>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          primaryMembersReactionId &&
+                          openReactionMembers(primaryMembersReactionId)
+                        }
+                        disabled={reactionSummary.total === 0}
+                        className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-extrabold text-slate-600 shadow-sm transition hover:border-brand-300 hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-55"
+                      >
+                        <span className="flex -space-x-2">
+                          {positiveReactions.slice(0, 3).map(({ id }) => {
+                            const Icon = reactionIcons[id]
+                            return (
+                              <span
+                                key={id}
+                                className={`grid size-7 place-items-center rounded-full border-2 border-white ${reactionButtonStyles[id]}`}
+                              >
+                                <Icon size={14} aria-hidden="true" />
+                              </span>
+                            )
+                          })}
+                          {positiveReactions.length === 0 && (
+                            <span className="grid size-7 place-items-center rounded-full border-2 border-white bg-slate-50 text-slate-400">
+                              <UsersRound size={14} aria-hidden="true" />
+                            </span>
+                          )}
+                        </span>
+                        {reactionTotalLabel}
+                      </button>
                     </div>
 
-                    <div className="mt-5 grid gap-3 sm:grid-cols-5">
-                      {newsReactionTypes.map(({ id, label }) => {
-                        const Icon = reactionIcons[id]
-                        const isActive = reactionSummary.userReaction === id
-                        const count = reactionSummary.counts[id] || 0
-
-                        return (
-                          <div key={id} className="grid gap-2">
-                            <button
-                              type="button"
-                              onClick={() => handleReaction(id)}
-                              disabled={isSavingReaction}
-                              className={`rounded-2xl border px-3 py-4 text-center transition hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-70 ${
-                                isActive
-                                  ? 'border-brand-500 bg-white shadow-lg shadow-blue-600/10'
-                                  : 'border-slate-200 bg-white hover:border-brand-300'
-                              }`}
-                            >
+                    <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                      <div
+                        className="relative w-fit"
+                        onMouseEnter={() => setIsReactionPickerOpen(true)}
+                        onMouseLeave={() => setIsReactionPickerOpen(false)}
+                        onBlur={(event) => {
+                          if (!event.currentTarget.contains(event.relatedTarget)) {
+                            setIsReactionPickerOpen(false)
+                          }
+                        }}
+                      >
+                        <AnimatePresence>
+                          {isReactionPickerOpen && (
+                            <>
                               <span
-                                className={`mx-auto grid size-11 place-items-center rounded-xl ring-1 ${reactionStyles[id]}`}
+                                className="absolute bottom-full left-0 h-4 w-full"
+                                aria-hidden="true"
+                              />
+                              <Motion.div
+                                initial={{ opacity: 0, y: 10, scale: 0.94 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                                transition={{
+                                  duration: shouldReduceMotion ? 0.01 : 0.18,
+                                }}
+                                className="absolute bottom-full left-0 z-20 mb-3 flex gap-2 rounded-full border border-slate-200 bg-white p-2 shadow-[0_18px_55px_-28px_rgba(15,23,42,0.45)]"
                               >
-                                <Icon size={20} aria-hidden="true" />
-                              </span>
-                              <span className="mt-3 block text-sm font-extrabold text-navy-900">
+                                {newsReactionTypes.map(({ id, label }) => {
+                                  const Icon = reactionIcons[id]
+                                  const isActive =
+                                    reactionSummary.userReaction === id
+
+                                  return (
+                                    <Motion.button
+                                      key={id}
+                                      type="button"
+                                      onClick={() => handleReaction(id)}
+                                      disabled={isSavingReaction}
+                                      whileHover={
+                                        shouldReduceMotion
+                                          ? undefined
+                                          : { y: -8, scale: 1.14 }
+                                      }
+                                      whileTap={
+                                        shouldReduceMotion
+                                          ? undefined
+                                          : { scale: 0.94 }
+                                      }
+                                      className={`group/reaction relative grid size-12 place-items-center rounded-full border transition disabled:cursor-wait disabled:opacity-60 sm:size-14 ${
+                                        isActive
+                                          ? 'border-brand-500 shadow-lg shadow-blue-600/15'
+                                          : 'shadow-sm'
+                                      } ${reactionButtonStyles[id]}`}
+                                      aria-label={`React with ${label}`}
+                                    >
+                                      <Icon size={22} aria-hidden="true" />
+                                      <span className="pointer-events-none absolute -top-8 rounded-full bg-navy-950 px-2.5 py-1 text-[10px] font-extrabold text-white opacity-0 shadow-lg transition group-hover/reaction:opacity-100">
+                                        {label}
+                                      </span>
+                                    </Motion.button>
+                                  )
+                                })}
+                              </Motion.div>
+                            </>
+                          )}
+                        </AnimatePresence>
+
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setIsReactionPickerOpen((open) => !open)
+                          }
+                          disabled={isSavingReaction}
+                          className={`inline-flex min-h-12 items-center gap-2 rounded-full border px-5 py-3 text-sm font-extrabold shadow-sm transition hover:-translate-y-0.5 disabled:cursor-wait disabled:opacity-70 ${
+                            activeReaction
+                              ? reactionButtonStyles[activeReaction.id]
+                              : 'border-slate-200 bg-white text-slate-600 hover:border-brand-300 hover:text-brand-600'
+                          }`}
+                        >
+                          <ActiveReactionIcon size={19} aria-hidden="true" />
+                          {activeReaction?.label || 'React'}
+                        </button>
+                      </div>
+
+                      {positiveReactions.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {positiveReactions.map(({ id, label }) => {
+                            const Icon = reactionIcons[id]
+                            return (
+                              <button
+                                key={id}
+                                type="button"
+                                onClick={() => openReactionMembers(id)}
+                                className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-extrabold transition hover:-translate-y-0.5 ${reactionButtonStyles[id]}`}
+                              >
+                                <Icon size={14} aria-hidden="true" />
                                 {label}
-                              </span>
-                              <span className="mt-1 block text-xs font-bold text-slate-500">
-                                {count}
-                              </span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => openReactionMembers(id)}
-                              disabled={count === 0}
-                              className="text-xs font-bold text-slate-500 transition hover:text-brand-600 disabled:cursor-not-allowed disabled:opacity-40"
-                            >
-                              View members
-                            </button>
-                          </div>
-                        )
-                      })}
+                                <span>{reactionSummary.counts[id]}</span>
+                              </button>
+                            )
+                          })}
+                        </div>
+                      )}
                     </div>
 
                     {!user && (
@@ -507,7 +615,7 @@ function NewsDetails() {
                     )}
 
                     {reactionError && (
-                      <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
+                      <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-800">
                         {reactionError}
                       </p>
                     )}
