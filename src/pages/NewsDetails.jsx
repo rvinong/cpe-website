@@ -324,7 +324,7 @@ function NewsDetails() {
               <div className="px-6 py-10 sm:px-10 sm:py-12 lg:px-14">
                 {images.length > 0 && (
                   <section aria-label="News story images">
-                    <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-navy-950">
+                    <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white">
                       <AnimatePresence
                         mode="wait"
                         initial={false}
@@ -373,11 +373,6 @@ function NewsDetails() {
                             draggable="false"
                             className="max-h-[620px] w-full select-none object-contain"
                           />
-                          {(activeImage.caption || images.length > 1) && (
-                            <figcaption className="border-t border-white/10 bg-navy-950/95 px-5 py-4 text-sm text-slate-200">
-                              {activeImage.caption || newsPost.title}
-                            </figcaption>
-                          )}
                         </Motion.figure>
                       </AnimatePresence>
 

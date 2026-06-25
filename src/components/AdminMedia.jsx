@@ -98,7 +98,6 @@ function toNewsImageDraft(image) {
     imagePath,
     previewUrl: image.image || getImageUrl(imagePath),
     altText: image.altText || image.alt_text || '',
-    caption: image.caption || '',
     file: null,
   }
 }
@@ -331,7 +330,6 @@ function AdminMedia() {
       imagePath: '',
       previewUrl: URL.createObjectURL(file),
       altText: '',
-      caption: '',
       file,
     }))
 
@@ -427,7 +425,6 @@ function AdminMedia() {
       preparedImages.push({
         imagePath,
         altText: image.altText,
-        caption: image.caption,
       })
     }
 
@@ -1112,21 +1109,6 @@ function AdminMedia() {
                                 className={inputClassName}
                                 placeholder="Describe the image for screen readers"
                                 required
-                              />
-                            </label>
-                            <label className="text-sm font-extrabold text-navy-900">
-                              Caption
-                              <input
-                                value={image.caption}
-                                onChange={(event) =>
-                                  updateNewsImageField(
-                                    image.localId,
-                                    'caption',
-                                    event.target.value,
-                                  )
-                                }
-                                className={inputClassName}
-                                placeholder="Optional short caption"
                               />
                             </label>
                             <div className="flex flex-wrap gap-2">
