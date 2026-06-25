@@ -487,14 +487,14 @@ async function replaceNewsImages(newsPostId, images) {
   return insertResult
 }
 
-export async function createNewsPost(values, images = []) {
+export async function createNewsPost(values, images = [], publishedAt = null) {
   const slug = await createAvailableNewsSlug(values.title)
   const coverImage = images[0] || null
 
   const insertResult = await supabase
     .from('news_posts')
     .insert({
-      ...toNewsPayload(values, coverImage, null),
+      ...toNewsPayload(values, coverImage, publishedAt),
       slug,
     })
     .select(baseNewsColumns)

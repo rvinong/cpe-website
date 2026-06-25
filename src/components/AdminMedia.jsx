@@ -46,6 +46,7 @@ const emptyNewsForm = {
   summary: '',
   body: '',
   imageAlt: '',
+  publishedAt: '',
   status: 'draft',
   isFeatured: false,
 }
@@ -105,6 +106,23 @@ function getNewsImagePaths(item) {
   if (item?.image_path) paths.add(item.image_path)
 
   return [...paths]
+}
+
+function toDatetimeLocalValue(value) {
+  if (!value) return ''
+
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+
+  const offsetDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+  return offsetDate.toISOString().slice(0, 16)
+}
+
+function fromDatetimeLocalValue(value) {
+  if (!value) return null
+
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? null : date.toISOString()
 }
 
 function AdminMedia() {
@@ -214,6 +232,7 @@ function AdminMedia() {
             summary: item.summary,
             body: item.body,
             imageAlt: item.image_alt || '',
+            publishedAt: toDatetimeLocalValue(item.published_at),
             status: item.status,
             isFeatured: item.is_featured,
           }
@@ -365,6 +384,14 @@ function AdminMedia() {
       return
     }
 
+    if (newsForm.status === 'published' && newsForm.publishedAt) {
+      const publishedAt = fromDatetimeLocalValue(newsForm.publishedAt)
+      if (!publishedAt) {
+        setError('Choose a valid publication date and time.')
+        return
+      }
+    }
+
     setIsSaving(true)
     const uploadedPaths = []
     const preparedImages = []
@@ -392,14 +419,19 @@ function AdminMedia() {
       })
     }
 
+    const selectedPublishedAt =
+      newsForm.status === 'published'
+        ? fromDatetimeLocalValue(newsForm.publishedAt)
+        : editingItem?.published_at || null
+
     const result = editingItem
       ? await updateNewsPost(
           editingItem.id,
           newsForm,
           preparedImages,
-          editingItem.published_at,
+          selectedPublishedAt,
         )
-      : await createNewsPost(newsForm, preparedImages)
+      : await createNewsPost(newsForm, preparedImages, selectedPublishedAt)
 
     if (result.error) {
       await Promise.all(uploadedPaths.map((path) => removeMedia(path)))
@@ -698,6 +730,11 @@ function AdminMedia() {
                       ? item.summary
                       : item.description || item.alt_text}
                   </p>
+                  {activeTab === 'news' && (
+                    <p className="mt-1 text-xs font-bold text-slate-400">
+                      Published: {item.published_at ? item.date : 'Not set'}
+                    </p>
+                  )}
                 </div>
                 <div className="flex gap-2">
                   <button
@@ -807,6 +844,20 @@ function AdminMedia() {
                         <option value="published">Published</option>
                         <option value="archived">Archived</option>
                       </select>
+                    </label>
+                    <label className="text-sm font-extrabold text-navy-900 sm:col-span-2">
+                      Publication date and time
+                      <input
+                        type="datetime-local"
+                        name="publishedAt"
+                        value={newsForm.publishedAt}
+                        onChange={updateNewsField}
+                        className={inputClassName}
+                      />
+                      <span className="mt-2 block text-xs leading-5 text-slate-500">
+                        Optional. Leave blank to publish using the current date
+                        and time. Use this for older news stories.
+                      </span>
                     </label>
                     <label className="text-sm font-extrabold text-navy-900 sm:col-span-2">
                       Summary
