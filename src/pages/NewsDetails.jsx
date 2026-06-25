@@ -365,13 +365,13 @@ function NewsDetails() {
                             if (info.offset.x > 0) showPreviousImage()
                             else showNextImage()
                           }}
-                          className="cursor-grab touch-pan-y active:cursor-grabbing"
+                          className="grid cursor-grab place-items-center touch-pan-y active:cursor-grabbing"
                         >
                           <img
                             src={activeImage.image}
                             alt={activeImage.altText}
                             draggable="false"
-                            className="max-h-[620px] w-full select-none object-contain"
+                            className="max-h-[620px] w-auto max-w-full select-none rounded-3xl object-contain"
                           />
                         </Motion.figure>
                       </AnimatePresence>
