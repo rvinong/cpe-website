@@ -132,6 +132,17 @@ function Account() {
   const nicknameValue = isNicknameDirty
     ? profileForm.nickname
     : profileNickname
+  const hasProfileChanges =
+    Boolean(avatarFile) || nicknameValue.trim() !== profileNickname.trim()
+  const isProfileSaved =
+    isApprovedMember && !hasProfileChanges && !isSavingProfile
+  const isProfileSaveDisabled =
+    !isApprovedMember || isSavingProfile || isProfileSaved
+  const profileSaveLabel = isSavingProfile
+    ? 'Saving...'
+    : isProfileSaved
+      ? 'Saved'
+      : 'Save profile'
   const dashboardAnnouncements = announcements.slice(0, 3)
   const dashboardEvents = upcoming.slice(0, 2)
   const dashboardResources = isApprovedMember ? resources.slice(0, 3) : []
@@ -712,11 +723,19 @@ function Account() {
 
                         <button
                           type="submit"
-                          disabled={!isApprovedMember || isSavingProfile}
-                          className="inline-flex min-h-13 items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 py-3 text-sm font-extrabold text-white shadow-lg shadow-blue-600/20 transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+                          disabled={isProfileSaveDisabled}
+                          className={`inline-flex min-h-13 items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-extrabold transition disabled:cursor-not-allowed ${
+                            isProfileSaved
+                              ? 'border border-emerald-200 bg-emerald-50 text-emerald-700'
+                              : 'bg-brand-600 text-white shadow-lg shadow-blue-600/20 hover:bg-brand-700 disabled:opacity-60'
+                          }`}
                         >
-                          <Save size={17} aria-hidden="true" />
-                          {isSavingProfile ? 'Saving...' : 'Save profile'}
+                          {isProfileSaved ? (
+                            <CheckCircle2 size={17} aria-hidden="true" />
+                          ) : (
+                            <Save size={17} aria-hidden="true" />
+                          )}
+                          {profileSaveLabel}
                         </button>
                       </div>
                     </div>
