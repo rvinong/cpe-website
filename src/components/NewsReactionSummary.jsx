@@ -182,6 +182,7 @@ function NewsReactionSummary({
   const ignoreNextClickRef = useRef(false)
   const isTouchPickingRef = useRef(false)
   const highlightedReactionRef = useRef('')
+  const pickerRailRef = useRef(null)
   const reactionButtonRefs = useRef({})
   const [highlightedReaction, setHighlightedReaction] = useState('')
   const isDetail = variant === 'detail'
@@ -308,23 +309,51 @@ function NewsReactionSummary({
     setHighlightedReaction(reactionId)
   }
 
-  const getReactionAtPoint = (clientX, clientY) => {
-    const hitPadding = 8
+  const getReactionFromRail = (clientX, clientY) => {
+    const railNode = pickerRailRef.current
+    if (!railNode) return ''
 
-    return (
-      newsReactionTypes.find(({ id }) => {
-        const node = reactionButtonRefs.current[id]
-        if (!node) return false
+    const rect = railNode.getBoundingClientRect()
+    const horizontalPadding = 26
+    const topPadding = 18
+    const bottomPadding = 96
 
-        const rect = node.getBoundingClientRect()
-        return (
-          clientX >= rect.left - hitPadding &&
-          clientX <= rect.right + hitPadding &&
-          clientY >= rect.top - hitPadding &&
-          clientY <= rect.bottom + hitPadding
-        )
-      })?.id || ''
+    const isInsideRail =
+      clientX >= rect.left - horizontalPadding &&
+      clientX <= rect.right + horizontalPadding &&
+      clientY >= rect.top - topPadding &&
+      clientY <= rect.bottom + bottomPadding
+
+    if (!isInsideRail) return ''
+
+    const clampedX = Math.min(
+      Math.max(clientX, rect.left),
+      rect.right,
     )
+    const segmentWidth = rect.width / newsReactionTypes.length
+    const reactionIndex = Math.min(
+      newsReactionTypes.length - 1,
+      Math.max(0, Math.floor((clampedX - rect.left) / segmentWidth)),
+    )
+
+    return newsReactionTypes[reactionIndex]?.id || ''
+  }
+
+  const getReactionAtPoint = (clientX, clientY) => {
+    const directReaction = newsReactionTypes.find(({ id }) => {
+      const node = reactionButtonRefs.current[id]
+      if (!node) return false
+
+      const rect = node.getBoundingClientRect()
+      return (
+        clientX >= rect.left &&
+        clientX <= rect.right &&
+        clientY >= rect.top &&
+        clientY <= rect.bottom
+      )
+    })?.id
+
+    return directReaction || getReactionFromRail(clientX, clientY)
   }
 
   const handleActionPointerDown = (event) => {
@@ -431,12 +460,17 @@ function NewsReactionSummary({
             aria-hidden="true"
           />
           <Motion.div
+            ref={pickerRailRef}
             initial={{ opacity: 0, y: 10, scale: 0.94 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.96 }}
             transition={{ duration: shouldReduceMotion ? 0.01 : 0.18 }}
             className="absolute bottom-full left-0 z-30 mb-3 flex gap-1.5 rounded-full border border-slate-200 bg-white p-1.5 shadow-[0_18px_55px_-28px_rgba(15,23,42,0.45)]"
           >
+            <span
+              className="pointer-events-none absolute -inset-x-6 -top-4 -bottom-24"
+              aria-hidden="true"
+            />
             {newsReactionTypes.map(({ id, label }) => {
               const Icon = reactionIcons[id]
               const isActive = summary.userReaction === id
