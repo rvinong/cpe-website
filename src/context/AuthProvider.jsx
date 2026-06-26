@@ -4,6 +4,18 @@ import AuthContext from './auth-context'
 
 const dashboardRoles = new Set(['admin', 'editor'])
 const configuredSiteUrl = import.meta.env.VITE_SITE_URL?.replace(/\/+$/, '')
+const profileColumns =
+  'id, full_name, nickname, student_number, role, status, email_notifications, avatar_path'
+const legacyProfileColumns =
+  'id, full_name, student_number, role, status, email_notifications, avatar_path'
+
+function isNicknameColumnMissing(error) {
+  return (
+    error?.code === '42703' ||
+    error?.code === 'PGRST204' ||
+    error?.message?.toLowerCase().includes('nickname')
+  )
+}
 
 function getAuthRedirectUrl() {
   const siteUrl = configuredSiteUrl || window.location.origin
@@ -23,13 +35,23 @@ function AuthProvider({ children }) {
       return null
     }
 
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('profiles')
-      .select(
-        'id, full_name, nickname, student_number, role, status, email_notifications, avatar_path',
-      )
+      .select(profileColumns)
       .eq('id', user.id)
       .maybeSingle()
+
+    if (error && isNicknameColumnMissing(error)) {
+      const fallbackResult = await supabase
+        .from('profiles')
+        .select(legacyProfileColumns)
+        .eq('id', user.id)
+        .maybeSingle()
+
+      data = fallbackResult.data
+      error = fallbackResult.error
+      if (data) data = { ...data, nickname: '' }
+    }
 
     if (error) {
       setProfile(null)
