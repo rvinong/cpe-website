@@ -8,7 +8,6 @@ import {
   Heart,
   LogIn,
   PartyPopper,
-  SmilePlus,
   ThumbsUp,
   X,
 } from 'lucide-react'
@@ -24,14 +23,6 @@ import {
   setNewsReaction,
 } from '../lib/media'
 
-const reactionIcons = {
-  like: ThumbsUp,
-  love: Heart,
-  celebrate: PartyPopper,
-  wow: SmilePlus,
-  support: Handshake,
-}
-
 const reactionButtonStyles = {
   like: 'text-brand-600 bg-brand-50 border-blue-100',
   love: 'text-rose-600 bg-rose-50 border-rose-100',
@@ -41,6 +32,31 @@ const reactionButtonStyles = {
 }
 
 const touchReactionActiveClass = 'reaction-touch-active'
+
+function WowReactionIcon({ size = 18, className = '', style, ...props }) {
+  return (
+    <span
+      {...props}
+      className={`inline-grid place-items-center leading-none ${className}`}
+      style={{
+        width: size,
+        height: size,
+        fontSize: Math.max(12, size * 0.95),
+        ...style,
+      }}
+    >
+      😮
+    </span>
+  )
+}
+
+const reactionIcons = {
+  like: ThumbsUp,
+  love: Heart,
+  celebrate: PartyPopper,
+  wow: WowReactionIcon,
+  support: Handshake,
+}
 
 function createDefaultReactionSummary(total = 0) {
   return {
