@@ -183,6 +183,7 @@ function NewsReactionSummary({
   const isTouchPickingRef = useRef(false)
   const highlightedReactionRef = useRef('')
   const pickerRailRef = useRef(null)
+  const actionButtonRef = useRef(null)
   const reactionButtonRefs = useRef({})
   const [highlightedReaction, setHighlightedReaction] = useState('')
   const isDetail = variant === 'detail'
@@ -311,18 +312,22 @@ function NewsReactionSummary({
 
   const getReactionFromRail = (clientX, clientY) => {
     const railNode = pickerRailRef.current
+    const actionNode = actionButtonRef.current
     if (!railNode) return ''
 
     const rect = railNode.getBoundingClientRect()
-    const horizontalPadding = 26
+    const actionRect = actionNode?.getBoundingClientRect()
+    const horizontalPadding = 34
     const topPadding = 18
-    const bottomPadding = 96
+    const bottomEdge = actionRect
+      ? actionRect.bottom + 22
+      : rect.bottom + 132
 
     const isInsideRail =
       clientX >= rect.left - horizontalPadding &&
       clientX <= rect.right + horizontalPadding &&
       clientY >= rect.top - topPadding &&
-      clientY <= rect.bottom + bottomPadding
+      clientY <= bottomEdge
 
     if (!isInsideRail) return ''
 
@@ -468,7 +473,7 @@ function NewsReactionSummary({
             className="absolute bottom-full left-0 z-30 mb-3 flex gap-1.5 rounded-full border border-slate-200 bg-white p-1.5 shadow-[0_18px_55px_-28px_rgba(15,23,42,0.45)]"
           >
             <span
-              className="pointer-events-none absolute -inset-x-6 -top-4 -bottom-24"
+              className="pointer-events-none absolute -inset-x-8 -top-4 -bottom-32"
               aria-hidden="true"
             />
             {newsReactionTypes.map(({ id, label }) => {
@@ -542,6 +547,7 @@ function NewsReactionSummary({
       >
         {picker}
         <button
+          ref={actionButtonRef}
           type="button"
           onClick={handleActionClick}
           onPointerDown={handleActionPointerDown}
