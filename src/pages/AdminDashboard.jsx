@@ -34,6 +34,7 @@ import StaffAvatar from '../components/StaffAvatar'
 import ThemeToggle from '../components/ThemeToggle'
 import useAuth from '../context/useAuth'
 import { useAdminDashboardSignals } from '../hooks/useAdminDashboardSignals'
+import { getDisplayName } from '../lib/accountProfile'
 
 const adminSections = [
   { key: 'overview', label: 'Overview', icon: LayoutDashboard, enabled: true },
@@ -237,8 +238,7 @@ function AdminDashboard() {
     navigate('/')
   }
 
-  const displayName =
-    profile?.full_name || user?.email?.split('@')[0] || 'Administrator'
+  const displayName = getDisplayName(profile, user, 'Administrator')
 
   return (
     <div className="admin-dashboard min-h-screen overflow-x-clip bg-slate-50">

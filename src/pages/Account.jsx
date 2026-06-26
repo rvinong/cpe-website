@@ -4,6 +4,7 @@ import {
   Bell,
   BookOpen,
   CalendarDays,
+  Camera,
   CheckCircle2,
   Clock3,
   Eye,
@@ -12,16 +13,26 @@ import {
   LockKeyhole,
   LogIn,
   Mail,
+  Save,
   ShieldCheck,
   Sparkles,
+  Trash2,
   UserPlus,
   UserRound,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import ProfileAvatar from '../components/ProfileAvatar'
 import useAuth from '../context/useAuth'
 import { useAnnouncements } from '../hooks/useAnnouncements'
 import { useEvents } from '../hooks/useEvents'
+import {
+  getDisplayName,
+  removeProfileAvatar,
+  updateMyAccountProfile,
+  uploadProfileAvatar,
+  validateProfileAvatar,
+} from '../lib/accountProfile'
 import { getPublishedResources } from '../lib/resources'
 
 const modes = [
@@ -89,6 +100,7 @@ function Account() {
     signUp,
     signOut,
     updateEmailNotifications,
+    refreshProfile,
   } = useAuth()
   const requestedMode = searchParams.get('mode')
   const activeMode = requestedMode === 'signup' ? 'signup' : 'login'
@@ -108,9 +120,17 @@ function Account() {
   })
   const [message, setMessage] = useState({ type: '', text: '' })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [profileForm, setProfileForm] = useState({ nickname: '' })
+  const [isNicknameDirty, setIsNicknameDirty] = useState(false)
+  const [avatarFile, setAvatarFile] = useState(null)
+  const [avatarPreview, setAvatarPreview] = useState('')
+  const [isSavingProfile, setIsSavingProfile] = useState(false)
   const userId = user?.id || ''
-  const displayName =
-    profile?.full_name || user?.email?.split('@')[0] || 'Student'
+  const displayName = getDisplayName(profile, user, 'Student')
+  const profileNickname = profile?.nickname || ''
+  const nicknameValue = isNicknameDirty
+    ? profileForm.nickname
+    : profileNickname
   const dashboardAnnouncements = announcements.slice(0, 3)
   const dashboardEvents = upcoming.slice(0, 2)
   const dashboardResources = isApprovedMember ? resources.slice(0, 3) : []
@@ -139,18 +159,8 @@ function Account() {
         href: '/announcements',
         icon: Bell,
       },
-      ...(canAccessAdmin
-        ? [
-            {
-              title: 'Admin Dashboard',
-              detail: 'Manage content and tasks',
-              href: '/admin',
-              icon: LayoutDashboard,
-            },
-          ]
-        : []),
     ],
-    [canAccessAdmin],
+    [],
   )
 
   useEffect(() => {
@@ -179,12 +189,140 @@ function Account() {
     }
   }, [isApprovedMember, isConfigured, userId])
 
+  useEffect(
+    () => () => {
+      if (avatarPreview) URL.revokeObjectURL(avatarPreview)
+    },
+    [avatarPreview],
+  )
+
   const updateField = (field) => (event) => {
     setFormData((current) => ({
       ...current,
       [field]: event.target.value,
     }))
     setMessage({ type: '', text: '' })
+  }
+
+  const updateProfileField = (field) => (event) => {
+    setProfileForm((current) => ({
+      ...current,
+      [field]: event.target.value,
+    }))
+    if (field === 'nickname') setIsNicknameDirty(true)
+    setMessage({ type: '', text: '' })
+  }
+
+  const handleAvatarSelection = (event) => {
+    const [file] = event.target.files || []
+    if (!file) return
+
+    const fileError = validateProfileAvatar(file)
+    if (fileError) {
+      setMessage({ type: 'error', text: fileError })
+      event.target.value = ''
+      return
+    }
+
+    setAvatarFile(file)
+    setAvatarPreview(URL.createObjectURL(file))
+    setMessage({ type: '', text: '' })
+    event.target.value = ''
+  }
+
+  const resetSelectedAvatar = () => {
+    setAvatarFile(null)
+    setAvatarPreview('')
+  }
+
+  const handleProfileSave = async (event) => {
+    event.preventDefault()
+
+    if (!isApprovedMember || !user) {
+      setMessage({
+        type: 'info',
+        text: 'Your account must be approved before editing your profile.',
+      })
+      return
+    }
+
+    setIsSavingProfile(true)
+    setMessage({ type: '', text: '' })
+
+    let nextAvatarPath = profile?.avatar_path || null
+    let uploadedAvatarPath = ''
+
+    if (avatarFile) {
+      const { data, error } = await uploadProfileAvatar(avatarFile, user.id)
+
+      if (error) {
+        setIsSavingProfile(false)
+        setMessage({ type: 'error', text: error.message })
+        return
+      }
+
+      nextAvatarPath = data.path
+      uploadedAvatarPath = data.path
+    }
+
+    const { error } = await updateMyAccountProfile({
+      nickname: nicknameValue,
+      avatarPath: nextAvatarPath,
+    })
+
+    if (error) {
+      if (uploadedAvatarPath) await removeProfileAvatar(uploadedAvatarPath)
+      setIsSavingProfile(false)
+      setMessage({ type: 'error', text: error.message })
+      return
+    }
+
+    if (
+      uploadedAvatarPath &&
+      profile?.avatar_path &&
+      profile.avatar_path !== uploadedAvatarPath
+    ) {
+      await removeProfileAvatar(profile.avatar_path)
+    }
+
+    await refreshProfile()
+    resetSelectedAvatar()
+    setIsNicknameDirty(false)
+    setIsSavingProfile(false)
+    setMessage({ type: 'success', text: 'Your profile has been updated.' })
+  }
+
+  const handleAvatarRemove = async () => {
+    if (!isApprovedMember || !user) {
+      setMessage({
+        type: 'info',
+        text: 'Your account must be approved before editing your profile.',
+      })
+      return
+    }
+
+    setIsSavingProfile(true)
+    setMessage({ type: '', text: '' })
+
+    const previousAvatarPath = profile?.avatar_path || ''
+    const { error } = await updateMyAccountProfile({
+      nickname: nicknameValue,
+      avatarPath: null,
+    })
+
+    if (error) {
+      setIsSavingProfile(false)
+      setMessage({ type: 'error', text: error.message })
+      return
+    }
+
+    if (previousAvatarPath) await removeProfileAvatar(previousAvatarPath)
+
+    await refreshProfile()
+    resetSelectedAvatar()
+    setIsNicknameDirty(false)
+    setIsSavingProfile(false)
+    setMessage({ type: 'success', text: 'Profile photo removed.' })
   }
 
   const selectMode = (mode) => {
@@ -343,7 +481,7 @@ function Account() {
                 </p>
                 <h2 className="mt-2 text-3xl font-black tracking-tight text-navy-900">
                   {user
-                    ? `Signed in as ${profile?.full_name || user.email}`
+                    ? `Signed in as ${displayName}`
                     : activeMode === 'signup'
                       ? 'Join the organization portal'
                       : 'Log in to your account'}
@@ -379,10 +517,31 @@ function Account() {
                           Here is the latest from the CpE organization, gathered
                           into one account view.
                         </p>
+                        {canAccessAdmin && (
+                          <Link
+                            to="/admin"
+                            className="mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-xs font-extrabold text-navy-900 shadow-lg shadow-blue-950/20 transition hover:-translate-y-0.5 hover:bg-blue-50"
+                          >
+                            <LayoutDashboard size={16} aria-hidden="true" />
+                            Open Dashboard
+                            <ArrowRight size={15} aria-hidden="true" />
+                          </Link>
+                        )}
                       </div>
-                      <span className="grid size-16 place-items-center rounded-2xl bg-white/10 text-blue-200">
-                        <UserRound size={29} aria-hidden="true" />
-                      </span>
+                      {avatarPreview ? (
+                        <img
+                          src={avatarPreview}
+                          alt={`${displayName} profile preview`}
+                          className="size-20 shrink-0 rounded-3xl border border-white/10 object-cover shadow-xl shadow-blue-950/20"
+                        />
+                      ) : (
+                        <ProfileAvatar
+                          path={profile?.avatar_path}
+                          name={displayName}
+                          className="size-20 rounded-3xl border border-white/10"
+                          textClassName="text-xl"
+                        />
+                      )}
                     </div>
                   </section>
 
@@ -448,6 +607,113 @@ function Account() {
                       </div>
                     </div>
                   )}
+
+                  <form
+                    onSubmit={handleProfileSave}
+                    className="rounded-2xl border border-slate-200 bg-white p-5"
+                  >
+                    <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="flex items-center gap-4">
+                        {avatarPreview ? (
+                          <img
+                            src={avatarPreview}
+                            alt={`${displayName} profile preview`}
+                            className="size-20 shrink-0 rounded-2xl object-cover"
+                          />
+                        ) : (
+                          <ProfileAvatar
+                            path={profile?.avatar_path}
+                            name={displayName}
+                            className="size-20 rounded-2xl"
+                            textClassName="text-xl"
+                          />
+                        )}
+                        <div>
+                          <p className="text-xs font-extrabold tracking-[0.16em] text-brand-600 uppercase">
+                            My account profile
+                          </p>
+                          <h3 className="mt-1 text-xl font-black text-navy-900">
+                            Nickname and photo
+                          </h3>
+                          <p className="mt-1 max-w-xl text-sm leading-6 text-slate-600">
+                            This is the friendly name and photo shown around the
+                            site. Your official full name stays unchanged.
+                          </p>
+                        </div>
+                      </div>
+
+                      {!isApprovedMember && (
+                        <span className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-extrabold text-amber-800">
+                          <Clock3 size={14} aria-hidden="true" />
+                          Approval required
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
+                      <label htmlFor="account-nickname" className="block">
+                        <span className="mb-2 block text-xs font-extrabold tracking-wide text-slate-600 uppercase">
+                          Nickname
+                        </span>
+                        <input
+                          id="account-nickname"
+                          type="text"
+                          value={nicknameValue}
+                          onChange={updateProfileField('nickname')}
+                          maxLength={40}
+                          disabled={!isApprovedMember || isSavingProfile}
+                          placeholder="Add a nickname"
+                          autoComplete="nickname"
+                          className="h-13 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-sm text-navy-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-100 disabled:cursor-not-allowed disabled:opacity-60"
+                        />
+                      </label>
+
+                      <div className="flex flex-wrap gap-2">
+                        <label
+                          className={`inline-flex min-h-13 cursor-pointer items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-extrabold text-slate-600 transition hover:border-brand-500 hover:text-brand-600 ${
+                            !isApprovedMember || isSavingProfile
+                              ? 'pointer-events-none opacity-60'
+                              : ''
+                          }`}
+                        >
+                          <Camera size={17} aria-hidden="true" />
+                          Change photo
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp"
+                            className="sr-only"
+                            onChange={handleAvatarSelection}
+                            disabled={!isApprovedMember || isSavingProfile}
+                          />
+                        </label>
+
+                        {(profile?.avatar_path || avatarPreview) && (
+                          <button
+                            type="button"
+                            onClick={
+                              avatarPreview
+                                ? resetSelectedAvatar
+                                : handleAvatarRemove
+                            }
+                            disabled={!isApprovedMember || isSavingProfile}
+                            className="inline-flex min-h-13 items-center justify-center gap-2 rounded-xl border border-rose-200 px-4 py-3 text-sm font-extrabold text-rose-600 transition hover:border-rose-300 hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            <Trash2 size={17} aria-hidden="true" />
+                            {avatarPreview ? 'Cancel photo' : 'Remove photo'}
+                          </button>
+                        )}
+
+                        <button
+                          type="submit"
+                          disabled={!isApprovedMember || isSavingProfile}
+                          className="inline-flex min-h-13 items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 py-3 text-sm font-extrabold text-white shadow-lg shadow-blue-600/20 transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          <Save size={17} aria-hidden="true" />
+                          {isSavingProfile ? 'Saving...' : 'Save profile'}
+                        </button>
+                      </div>
+                    </div>
+                  </form>
 
                   <section className="grid gap-4 lg:grid-cols-2">
                     <article className="rounded-2xl border border-slate-200 bg-white p-5">

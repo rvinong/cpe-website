@@ -29,7 +29,7 @@ const MotionLink = Motion.create(Link)
 
 function Navbar() {
   const { pathname } = useLocation()
-  const { user, canAccessAdmin } = useAuth()
+  const { user } = useAuth()
   const { isCompactMotion, shouldReduceMotion } = useMotionPreferences()
   const isHomePage = pathname === '/'
   const [isScrolled, setIsScrolled] = useState(false)
@@ -188,12 +188,8 @@ function Navbar() {
             <ThemeToggle />
           </div>
           <a
-            href={canAccessAdmin ? '/admin' : '/account'}
-            aria-current={
-              pathname === '/account' || pathname === '/admin'
-                ? 'page'
-                : undefined
-            }
+            href="/account"
+            aria-current={pathname === '/account' ? 'page' : undefined}
             className={`hidden min-h-11 shrink-0 items-center gap-1.5 rounded-xl px-4 py-2 text-[11px] font-extrabold shadow-sm transition hover:-translate-y-0.5 xl:inline-flex ${
               pathname === '/account'
                 ? 'bg-navy-900 text-white'
@@ -201,7 +197,7 @@ function Navbar() {
             }`}
           >
             <LogIn size={14} aria-hidden="true" />
-            {canAccessAdmin ? 'Dashboard' : user ? 'Account' : 'Sign In'}
+            {user ? 'Account' : 'Sign In'}
             <ArrowUpRight size={13} aria-hidden="true" />
           </a>
 
@@ -295,7 +291,7 @@ function Navbar() {
                 ))}
               </Motion.ul>
               <MotionLink
-                to={canAccessAdmin ? '/admin' : '/account'}
+                to="/account"
                 onClick={() => setIsOpen(false)}
                 variants={mobileItemVariants}
                 whileTap={shouldReduceMotion ? undefined : { scale: 0.985 }}
@@ -303,11 +299,7 @@ function Navbar() {
                 className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-brand-600 px-5 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-blue-600/20"
               >
                 <LogIn size={18} aria-hidden="true" />
-                {canAccessAdmin
-                  ? 'Open Admin Dashboard'
-                  : user
-                    ? 'View Account'
-                    : 'Log In / Sign Up'}
+                {user ? 'View Account' : 'Log In / Sign Up'}
               </MotionLink>
               <Motion.div
                 variants={mobileItemVariants}

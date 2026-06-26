@@ -1,5 +1,8 @@
 -- Run this file in the Supabase SQL Editor after supabase/schema.sql.
 
+alter table public.profiles
+  add column if not exists nickname text not null default '';
+
 insert into storage.buckets (
   id,
   name,
@@ -251,6 +254,7 @@ using (user_id = auth.uid());
 drop function if exists public.set_news_reaction(uuid, text);
 drop function if exists public.clear_news_reaction(uuid);
 drop function if exists public.get_news_reaction_summary(uuid);
+drop function if exists public.get_news_reaction_members(uuid, text);
 
 create or replace function public.get_news_reaction_summary(
   selected_news_post_id uuid
@@ -297,7 +301,11 @@ begin
   ranked_reactor_names as (
     select
       news_reactions.reaction_type,
-      coalesce(nullif(trim(profiles.full_name), ''), 'Member') as full_name,
+      coalesce(
+        nullif(trim(profiles.nickname), ''),
+        nullif(trim(profiles.full_name), ''),
+        'Member'
+      ) as full_name,
       row_number() over (
         partition by news_reactions.reaction_type
         order by news_reactions.updated_at desc, profiles.full_name
@@ -439,6 +447,7 @@ create or replace function public.get_news_reaction_members(
 returns table (
   profile_id uuid,
   full_name text,
+  avatar_path text,
   reaction_type text,
   reacted_at timestamptz
 )
@@ -475,7 +484,12 @@ begin
   return query
   select
     profiles.id as profile_id,
-    coalesce(nullif(trim(profiles.full_name), ''), 'Member') as full_name,
+    coalesce(
+      nullif(trim(profiles.nickname), ''),
+      nullif(trim(profiles.full_name), ''),
+      'Member'
+    ) as full_name,
+    profiles.avatar_path,
     news_reactions.reaction_type,
     news_reactions.updated_at as reacted_at
   from public.news_reactions

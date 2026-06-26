@@ -22,6 +22,7 @@ import {
   newsReactionTypes,
   setNewsReaction,
 } from '../lib/media'
+import ProfileAvatar from './ProfileAvatar'
 
 const reactionButtonStyles = {
   like: 'text-brand-600 bg-brand-50 border-blue-100',
@@ -758,9 +759,12 @@ function NewsReactionSummary({
                                     key={`${reaction.id}-${member.profile_id}-${member.reacted_at}`}
                                     className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-3"
                                   >
-                                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-brand-600 text-sm font-black text-white">
-                                      {displayName.slice(0, 1).toUpperCase()}
-                                    </span>
+                                    <ProfileAvatar
+                                      path={member.avatar_path}
+                                      name={displayName}
+                                      className="size-10 rounded-xl"
+                                      textClassName="text-sm"
+                                    />
                                     <span className="min-w-0">
                                       <span className="block truncate text-sm font-extrabold text-navy-900">
                                         {displayName}

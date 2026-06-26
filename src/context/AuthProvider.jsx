@@ -26,7 +26,7 @@ function AuthProvider({ children }) {
     const { data, error } = await supabase
       .from('profiles')
       .select(
-        'id, full_name, student_number, role, status, email_notifications, avatar_path',
+        'id, full_name, nickname, student_number, role, status, email_notifications, avatar_path',
       )
       .eq('id', user.id)
       .maybeSingle()
