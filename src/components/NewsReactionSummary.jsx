@@ -37,15 +37,24 @@ function WowReactionIcon({ size = 18, className = '', style, ...props }) {
   return (
     <span
       {...props}
-      className={`inline-grid place-items-center leading-none ${className}`}
+      className={`inline-flex items-center justify-center ${className}`}
       style={{
         width: size,
         height: size,
-        fontSize: Math.max(12, size * 0.95),
+        fontSize: Math.max(12, size * 0.86),
+        lineHeight: 1,
         ...style,
       }}
     >
-      😮
+      <span
+        aria-hidden="true"
+        className="block leading-none"
+        style={{
+          transform: 'translateY(-0.04em)',
+        }}
+      >
+        {'\u{1F62E}'}
+      </span>
     </span>
   )
 }
