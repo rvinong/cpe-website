@@ -176,7 +176,12 @@ function NewsReactionSummary({
   const [isLoadingMembers, setIsLoadingMembers] = useState(false)
   const [memberError, setMemberError] = useState('')
   const longPressTimerRef = useRef(null)
+  const ignoredClickResetTimerRef = useRef(null)
   const ignoreNextClickRef = useRef(false)
+  const isTouchPickingRef = useRef(false)
+  const highlightedReactionRef = useRef('')
+  const reactionButtonRefs = useRef({})
+  const [highlightedReaction, setHighlightedReaction] = useState('')
   const isDetail = variant === 'detail'
   const topReactions = useMemo(() => getTopReactions(summary), [summary])
   const allPositiveReactions = useMemo(
@@ -196,6 +201,7 @@ function NewsReactionSummary({
   useEffect(
     () => () => {
       window.clearTimeout(longPressTimerRef.current)
+      window.clearTimeout(ignoredClickResetTimerRef.current)
     },
     [],
   )
@@ -229,6 +235,7 @@ function NewsReactionSummary({
     const nextReaction =
       previousSummary.userReaction === reactionType ? '' : reactionType
     updateSummary(getOptimisticReactionSummary(previousSummary, nextReaction))
+    setIsReactionPickerOpen(false)
 
     const result = nextReaction
       ? await setNewsReaction(newsPostId, nextReaction)
@@ -241,7 +248,6 @@ function NewsReactionSummary({
       updateSummary(result.data)
     }
 
-    setIsReactionPickerOpen(false)
     setIsSavingReaction(false)
   }
 
@@ -280,17 +286,111 @@ function NewsReactionSummary({
     longPressTimerRef.current = null
   }
 
-  const handleActionPointerDown = (event) => {
-    if (event.pointerType === 'mouse') return
+  const resetIgnoredClickSoon = () => {
+    window.clearTimeout(ignoredClickResetTimerRef.current)
+    ignoredClickResetTimerRef.current = window.setTimeout(() => {
+      ignoreNextClickRef.current = false
+    }, 220)
+  }
 
+  const setTouchHighlightedReaction = (reactionId) => {
+    highlightedReactionRef.current = reactionId
+    setHighlightedReaction(reactionId)
+  }
+
+  const getReactionAtPoint = (clientX, clientY) => {
+    const hitPadding = 8
+
+    return (
+      newsReactionTypes.find(({ id }) => {
+        const node = reactionButtonRefs.current[id]
+        if (!node) return false
+
+        const rect = node.getBoundingClientRect()
+        return (
+          clientX >= rect.left - hitPadding &&
+          clientX <= rect.right + hitPadding &&
+          clientY >= rect.top - hitPadding &&
+          clientY <= rect.bottom + hitPadding
+        )
+      })?.id || ''
+    )
+  }
+
+  const handleActionPointerDown = (event) => {
+    if (event.pointerType === 'mouse' || isSavingReaction) return
+
+    event.stopPropagation()
     clearLongPressTimer()
+    setTouchHighlightedReaction('')
+
+    try {
+      event.currentTarget.setPointerCapture(event.pointerId)
+    } catch {
+      // Some browsers may not support capture on this target; pointer move
+      // still works while the finger stays over the control.
+    }
+
     longPressTimerRef.current = window.setTimeout(() => {
       ignoreNextClickRef.current = true
+      isTouchPickingRef.current = true
       setIsReactionPickerOpen(true)
     }, 420)
   }
 
-  const handleActionPointerEnd = () => {
+  const handleActionPointerMove = (event) => {
+    if (event.pointerType === 'mouse') return
+
+    if (!isTouchPickingRef.current) {
+      return
+    }
+
+    event.preventDefault()
+    event.stopPropagation()
+    setTouchHighlightedReaction(
+      getReactionAtPoint(event.clientX, event.clientY),
+    )
+  }
+
+  const handleActionPointerEnd = (event) => {
+    if (event.pointerType === 'mouse') return
+
+    event.stopPropagation()
+    clearLongPressTimer()
+
+    if (!isTouchPickingRef.current) return
+
+    event.preventDefault()
+    const selectedReaction =
+      getReactionAtPoint(event.clientX, event.clientY) ||
+      highlightedReactionRef.current
+
+    isTouchPickingRef.current = false
+    setTouchHighlightedReaction('')
+    setIsReactionPickerOpen(false)
+
+    if (selectedReaction) {
+      handleReaction(selectedReaction)
+    }
+
+    resetIgnoredClickSoon()
+  }
+
+  const handleActionPointerCancel = (event) => {
+    if (event.pointerType === 'mouse') return
+
+    clearLongPressTimer()
+    isTouchPickingRef.current = false
+    ignoreNextClickRef.current = true
+    setTouchHighlightedReaction('')
+    setIsReactionPickerOpen(false)
+    resetIgnoredClickSoon()
+  }
+
+  const handleActionPointerLeave = (event) => {
+    if (event.pointerType === 'mouse') return
+    if (isTouchPickingRef.current) return
+
     clearLongPressTimer()
   }
 
@@ -326,21 +426,39 @@ function NewsReactionSummary({
             {newsReactionTypes.map(({ id, label }) => {
               const Icon = reactionIcons[id]
               const isActive = summary.userReaction === id
+              const isHighlighted = highlightedReaction === id
 
               return (
                 <Motion.button
                   key={id}
+                  ref={(node) => {
+                    if (node) reactionButtonRefs.current[id] = node
+                    else delete reactionButtonRefs.current[id]
+                  }}
                   type="button"
-                  onClick={() => handleReaction(id)}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    if (isTouchPickingRef.current || ignoreNextClickRef.current) {
+                      ignoreNextClickRef.current = false
+                      return
+                    }
+
+                    handleReaction(id)
+                  }}
                   disabled={isSavingReaction}
                   whileHover={
                     shouldReduceMotion ? undefined : { y: -7, scale: 1.12 }
                   }
                   whileTap={shouldReduceMotion ? undefined : { scale: 0.94 }}
-                  className={`group/reaction relative grid ${pickerSizeClass} place-items-center rounded-full border transition disabled:cursor-wait disabled:opacity-60 ${
-                    isActive
+                  onContextMenu={(event) => event.preventDefault()}
+                  className={`group/reaction relative grid ${pickerSizeClass} touch-none select-none place-items-center rounded-full border transition disabled:cursor-wait disabled:opacity-60 ${
+                    isActive || isHighlighted
                       ? 'border-brand-500 shadow-lg shadow-blue-600/15'
                       : 'shadow-sm'
+                  } ${
+                    isHighlighted
+                      ? '-translate-y-1 scale-110 ring-2 ring-navy-900/15'
+                      : ''
                   } ${reactionButtonStyles[id]}`}
                   aria-label={`React with ${label}`}
                 >
@@ -360,25 +478,32 @@ function NewsReactionSummary({
   const controls = (
     <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
       <div
-        className="relative"
-        onMouseEnter={() => setIsReactionPickerOpen(true)}
-        onMouseLeave={() => setIsReactionPickerOpen(false)}
+        className="relative touch-none select-none"
+        onPointerEnter={(event) => {
+          if (event.pointerType === 'mouse') setIsReactionPickerOpen(true)
+        }}
+        onPointerLeave={(event) => {
+          if (event.pointerType === 'mouse') setIsReactionPickerOpen(false)
+        }}
         onBlur={(event) => {
           if (!event.currentTarget.contains(event.relatedTarget)) {
             setIsReactionPickerOpen(false)
           }
         }}
+        onContextMenu={(event) => event.preventDefault()}
       >
         {picker}
         <button
           type="button"
           onClick={handleActionClick}
           onPointerDown={handleActionPointerDown}
+          onPointerMove={handleActionPointerMove}
           onPointerUp={handleActionPointerEnd}
-          onPointerCancel={handleActionPointerEnd}
-          onPointerLeave={handleActionPointerEnd}
+          onPointerCancel={handleActionPointerCancel}
+          onPointerLeave={handleActionPointerLeave}
+          onContextMenu={(event) => event.preventDefault()}
           disabled={isSavingReaction}
-          className={`inline-flex min-h-9 items-center justify-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-extrabold transition disabled:cursor-wait disabled:opacity-70 ${actionButtonClass}`}
+          className={`inline-flex min-h-9 touch-none select-none items-center justify-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-extrabold transition disabled:cursor-wait disabled:opacity-70 ${actionButtonClass}`}
         >
           {activeReaction ? (
             <span
