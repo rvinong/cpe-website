@@ -321,7 +321,7 @@ function NewsReactionSummary({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.96 }}
             transition={{ duration: shouldReduceMotion ? 0.01 : 0.18 }}
-            className="absolute right-0 bottom-full z-30 mb-3 flex gap-1.5 rounded-full border border-slate-200 bg-white p-1.5 shadow-[0_18px_55px_-28px_rgba(15,23,42,0.45)]"
+            className="absolute bottom-full left-0 z-30 mb-3 flex gap-1.5 rounded-full border border-slate-200 bg-white p-1.5 shadow-[0_18px_55px_-28px_rgba(15,23,42,0.45)]"
           >
             {newsReactionTypes.map(({ id, label }) => {
               const Icon = reactionIcons[id]
@@ -359,41 +359,6 @@ function NewsReactionSummary({
 
   const controls = (
     <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
-      <button
-        type="button"
-        onClick={summary.total > 0 ? openMembers : undefined}
-        disabled={isSavingReaction}
-        title={
-          summary.total > 0
-            ? 'View reactions'
-            : 'No reactions yet'
-        }
-        className={`inline-flex min-h-9 max-w-full items-center gap-2 rounded-full px-1.5 py-1 text-xs font-extrabold text-slate-500 transition hover:text-brand-600 disabled:cursor-wait disabled:opacity-70 ${
-          isDetail ? 'text-sm' : ''
-        }`}
-      >
-        {topReactions.length > 0 ? (
-          <span className="flex shrink-0 -space-x-1.5">
-            {topReactions.map(({ id }) => {
-              const Icon = reactionIcons[id]
-              return (
-                <span
-                  key={id}
-                  className={`grid size-6 place-items-center rounded-full border-2 border-white ${reactionButtonStyles[id]}`}
-                >
-                  <Icon size={12} aria-hidden="true" />
-                </span>
-              )
-            })}
-          </span>
-        ) : (
-          <span className="grid size-6 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-slate-400">
-            <ThumbsUp size={12} aria-hidden="true" />
-          </span>
-        )}
-        <span className="min-w-0 truncate">{summaryText}</span>
-      </button>
-
       <div
         className="relative"
         onMouseEnter={() => setIsReactionPickerOpen(true)}
@@ -427,6 +392,37 @@ function NewsReactionSummary({
           {activeReaction?.label || 'Like'}
         </button>
       </div>
+
+      <button
+        type="button"
+        onClick={summary.total > 0 ? openMembers : undefined}
+        disabled={isSavingReaction}
+        title={summary.total > 0 ? 'View reactions' : 'No reactions yet'}
+        className={`inline-flex min-h-9 max-w-full items-center gap-2 rounded-full px-1.5 py-1 text-xs font-extrabold text-slate-500 transition hover:text-brand-600 disabled:cursor-wait disabled:opacity-70 ${
+          isDetail ? 'text-sm' : ''
+        }`}
+      >
+        {topReactions.length > 0 ? (
+          <span className="flex shrink-0 -space-x-1.5">
+            {topReactions.map(({ id }) => {
+              const Icon = reactionIcons[id]
+              return (
+                <span
+                  key={id}
+                  className={`grid size-6 place-items-center rounded-full border-2 border-white ${reactionButtonStyles[id]}`}
+                >
+                  <Icon size={12} aria-hidden="true" />
+                </span>
+              )
+            })}
+          </span>
+        ) : (
+          <span className="grid size-6 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-slate-400">
+            <ThumbsUp size={12} aria-hidden="true" />
+          </span>
+        )}
+        <span className="min-w-0 truncate">{summaryText}</span>
+      </button>
     </div>
   )
 
