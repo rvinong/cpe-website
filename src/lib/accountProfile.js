@@ -6,6 +6,25 @@ export const maxProfileAvatarSize = 5 * 1024 * 1024
 const legacyAvatarBuckets = ['staff-avatars']
 const acceptedAvatarTypes = ['image/jpeg', 'image/png', 'image/webp']
 
+export function isAccountProfileSchemaMissing(error) {
+  const message = error?.message?.toLowerCase() || ''
+
+  return (
+    ['42883', 'PGRST202', 'PGRST204', '404'].includes(error?.code) ||
+    message.includes('update_my_account_profile') ||
+    message.includes('profile-avatars') ||
+    message.includes('nickname')
+  )
+}
+
+export function getFriendlyAccountProfileError(error) {
+  if (isAccountProfileSchemaMissing(error)) {
+    return 'One database step is still required. Run supabase/account_profiles.sql in the Supabase SQL Editor, then refresh this page.'
+  }
+
+  return error?.message || 'Profile could not be updated.'
+}
+
 export function getDisplayName(profile, user, fallback = 'Member') {
   return (
     profile?.nickname?.trim() ||

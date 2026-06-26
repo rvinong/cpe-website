@@ -28,6 +28,7 @@ import { useAnnouncements } from '../hooks/useAnnouncements'
 import { useEvents } from '../hooks/useEvents'
 import {
   getDisplayName,
+  getFriendlyAccountProfileError,
   removeProfileAvatar,
   updateMyAccountProfile,
   uploadProfileAvatar,
@@ -273,7 +274,10 @@ function Account() {
     if (error) {
       if (uploadedAvatarPath) await removeProfileAvatar(uploadedAvatarPath)
       setIsSavingProfile(false)
-      setMessage({ type: 'error', text: error.message })
+      setMessage({
+        type: 'error',
+        text: getFriendlyAccountProfileError(error),
+      })
       return
     }
 
@@ -312,7 +316,10 @@ function Account() {
 
     if (error) {
       setIsSavingProfile(false)
-      setMessage({ type: 'error', text: error.message })
+      setMessage({
+        type: 'error',
+        text: getFriendlyAccountProfileError(error),
+      })
       return
     }
 
