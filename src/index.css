@@ -1557,6 +1557,10 @@ html.dark .text-orange-500 {
     will-change: auto;
   }
 
+  html.reaction-touch-active .interactive-card:active {
+    transform: none;
+  }
+
   .primary-button:hover,
   .secondary-button:hover {
     transform: none;

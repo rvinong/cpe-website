@@ -40,6 +40,8 @@ const reactionButtonStyles = {
   support: 'text-emerald-600 bg-emerald-50 border-emerald-100',
 }
 
+const touchReactionActiveClass = 'reaction-touch-active'
+
 function createDefaultReactionSummary(total = 0) {
   return {
     counts: Object.fromEntries(newsReactionTypes.map(({ id }) => [id, 0])),
@@ -202,6 +204,7 @@ function NewsReactionSummary({
     () => () => {
       window.clearTimeout(longPressTimerRef.current)
       window.clearTimeout(ignoredClickResetTimerRef.current)
+      document.documentElement.classList.remove(touchReactionActiveClass)
     },
     [],
   )
@@ -286,6 +289,13 @@ function NewsReactionSummary({
     longPressTimerRef.current = null
   }
 
+  const setTouchReactionActive = (isActive) => {
+    document.documentElement.classList.toggle(
+      touchReactionActiveClass,
+      isActive,
+    )
+  }
+
   const resetIgnoredClickSoon = () => {
     window.clearTimeout(ignoredClickResetTimerRef.current)
     ignoredClickResetTimerRef.current = window.setTimeout(() => {
@@ -321,6 +331,7 @@ function NewsReactionSummary({
     if (event.pointerType === 'mouse' || isSavingReaction) return
 
     event.stopPropagation()
+    setTouchReactionActive(true)
     clearLongPressTimer()
     setTouchHighlightedReaction('')
 
@@ -357,6 +368,7 @@ function NewsReactionSummary({
 
     event.stopPropagation()
     clearLongPressTimer()
+    setTouchReactionActive(false)
 
     if (!isTouchPickingRef.current) return
 
@@ -380,6 +392,7 @@ function NewsReactionSummary({
     if (event.pointerType === 'mouse') return
 
     clearLongPressTimer()
+    setTouchReactionActive(false)
     isTouchPickingRef.current = false
     ignoreNextClickRef.current = true
     setTouchHighlightedReaction('')
@@ -392,6 +405,7 @@ function NewsReactionSummary({
     if (isTouchPickingRef.current) return
 
     clearLongPressTimer()
+    setTouchReactionActive(false)
   }
 
   const handleActionClick = () => {
