@@ -12,7 +12,7 @@ import {
   ThumbsUp,
   X,
 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import useAuth from '../context/useAuth'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
@@ -175,6 +175,8 @@ function NewsReactionSummary({
   const [reactionGroups, setReactionGroups] = useState([])
   const [isLoadingMembers, setIsLoadingMembers] = useState(false)
   const [memberError, setMemberError] = useState('')
+  const longPressTimerRef = useRef(null)
+  const ignoreNextClickRef = useRef(false)
   const isDetail = variant === 'detail'
   const topReactions = useMemo(() => getTopReactions(summary), [summary])
   const allPositiveReactions = useMemo(
@@ -190,6 +192,13 @@ function NewsReactionSummary({
   const summaryText = getReactionText(summary)
 
   useBodyScrollLock(isMembersOpen)
+
+  useEffect(
+    () => () => {
+      window.clearTimeout(longPressTimerRef.current)
+    },
+    [],
+  )
 
   const loginRedirect = () => {
     navigate(
@@ -266,11 +275,38 @@ function NewsReactionSummary({
     setIsLoadingMembers(false)
   }
 
+  const clearLongPressTimer = () => {
+    window.clearTimeout(longPressTimerRef.current)
+    longPressTimerRef.current = null
+  }
+
+  const handleActionPointerDown = (event) => {
+    if (event.pointerType === 'mouse') return
+
+    clearLongPressTimer()
+    longPressTimerRef.current = window.setTimeout(() => {
+      ignoreNextClickRef.current = true
+      setIsReactionPickerOpen(true)
+    }, 420)
+  }
+
+  const handleActionPointerEnd = () => {
+    clearLongPressTimer()
+  }
+
+  const handleActionClick = () => {
+    if (ignoreNextClickRef.current) {
+      ignoreNextClickRef.current = false
+      return
+    }
+
+    handleReaction(activeReaction?.id || 'like')
+  }
+
   const pickerSizeClass = isDetail ? 'size-12 sm:size-14' : 'size-10'
   const pickerIconSize = isDetail ? 22 : 18
-  const actionButtonClass = activeReaction
-    ? 'border-transparent px-1.5 text-slate-600 hover:text-brand-600'
-    : 'border-slate-200 text-slate-600 hover:border-blue-200 hover:bg-brand-50/60 hover:text-brand-600'
+  const actionButtonClass =
+    'border-slate-200 text-slate-600 hover:border-blue-200 hover:bg-brand-50/60 hover:text-brand-600'
 
   const picker = (
     <AnimatePresence>
@@ -285,9 +321,7 @@ function NewsReactionSummary({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.96 }}
             transition={{ duration: shouldReduceMotion ? 0.01 : 0.18 }}
-            className={`absolute bottom-full z-30 mb-3 flex gap-1.5 rounded-full border border-slate-200 bg-white p-1.5 shadow-[0_18px_55px_-28px_rgba(15,23,42,0.45)] ${
-              isDetail ? 'left-1/2 -translate-x-1/2' : 'left-0'
-            }`}
+            className="absolute right-0 bottom-full z-30 mb-3 flex gap-1.5 rounded-full border border-slate-200 bg-white p-1.5 shadow-[0_18px_55px_-28px_rgba(15,23,42,0.45)]"
           >
             {newsReactionTypes.map(({ id, label }) => {
               const Icon = reactionIcons[id]
@@ -324,29 +358,15 @@ function NewsReactionSummary({
   )
 
   const controls = (
-    <div
-      className="relative flex min-w-0 flex-wrap items-center gap-2"
-      onMouseEnter={() => setIsReactionPickerOpen(true)}
-      onMouseLeave={() => setIsReactionPickerOpen(false)}
-      onBlur={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget)) {
-          setIsReactionPickerOpen(false)
-        }
-      }}
-    >
-      {picker}
+    <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
       <button
         type="button"
-        onClick={
-          summary.total > 0 ? openMembers : () => setIsReactionPickerOpen(true)
-        }
+        onClick={summary.total > 0 ? openMembers : undefined}
         disabled={isSavingReaction}
         title={
           summary.total > 0
             ? 'View reactions'
-            : user
-              ? 'React to this story'
-              : 'Sign in to react'
+            : 'No reactions yet'
         }
         className={`inline-flex min-h-9 max-w-full items-center gap-2 rounded-full px-1.5 py-1 text-xs font-extrabold text-slate-500 transition hover:text-brand-600 disabled:cursor-wait disabled:opacity-70 ${
           isDetail ? 'text-sm' : ''
@@ -374,23 +394,39 @@ function NewsReactionSummary({
         <span className="min-w-0 truncate">{summaryText}</span>
       </button>
 
-      <button
-        type="button"
-        onClick={() => setIsReactionPickerOpen((open) => !open)}
-        disabled={isSavingReaction}
-        className={`inline-flex min-h-9 items-center justify-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-extrabold transition disabled:cursor-wait disabled:opacity-70 ${actionButtonClass}`}
+      <div
+        className="relative"
+        onMouseEnter={() => setIsReactionPickerOpen(true)}
+        onMouseLeave={() => setIsReactionPickerOpen(false)}
+        onBlur={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget)) {
+            setIsReactionPickerOpen(false)
+          }
+        }}
       >
-        {activeReaction ? (
-          <span
-            className={`grid size-6 place-items-center rounded-full border-2 border-white ${reactionButtonStyles[activeReaction.id]}`}
-          >
-            <ActiveReactionIcon size={12} aria-hidden="true" />
-          </span>
-        ) : (
-          <ActiveReactionIcon size={14} aria-hidden="true" />
-        )}
-        {activeReaction ? 'You' : 'Like'}
-      </button>
+        {picker}
+        <button
+          type="button"
+          onClick={handleActionClick}
+          onPointerDown={handleActionPointerDown}
+          onPointerUp={handleActionPointerEnd}
+          onPointerCancel={handleActionPointerEnd}
+          onPointerLeave={handleActionPointerEnd}
+          disabled={isSavingReaction}
+          className={`inline-flex min-h-9 items-center justify-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-extrabold transition disabled:cursor-wait disabled:opacity-70 ${actionButtonClass}`}
+        >
+          {activeReaction ? (
+            <span
+              className={`grid size-6 place-items-center rounded-full border-2 border-white ${reactionButtonStyles[activeReaction.id]}`}
+            >
+              <ActiveReactionIcon size={12} aria-hidden="true" />
+            </span>
+          ) : (
+            <ActiveReactionIcon size={14} aria-hidden="true" />
+          )}
+          {activeReaction?.label || 'Like'}
+        </button>
+      </div>
     </div>
   )
 
