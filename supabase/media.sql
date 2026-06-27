@@ -647,26 +647,26 @@ begin
   if not exists (
     select 1
     from public.news_posts
-    where id = selected_news_post_id
-      and status = 'published'
-      and published_at is not null
-      and published_at <= now()
+    where news_posts.id = selected_news_post_id
+      and news_posts.status = 'published'
+      and news_posts.published_at is not null
+      and news_posts.published_at <= now()
   ) and coalesce(public.current_user_role() in ('admin', 'editor'), false) = false then
     return 0;
   end if;
 
   select count(*)::integer
   into visible_count
-  from public.news_comments
-  where news_post_id = selected_news_post_id
-    and deleted_at is null
+  from public.news_comments as visible_comments
+  where visible_comments.news_post_id = selected_news_post_id
+    and visible_comments.deleted_at is null
     and (
-      parent_comment_id is null
+      visible_comments.parent_comment_id is null
       or exists (
         select 1
         from public.news_comments as parent_comments
-        where parent_comments.id = news_comments.parent_comment_id
-          and parent_comments.news_post_id = news_comments.news_post_id
+        where parent_comments.id = visible_comments.parent_comment_id
+          and parent_comments.news_post_id = visible_comments.news_post_id
           and parent_comments.parent_comment_id is null
           and parent_comments.deleted_at is null
       )
@@ -782,8 +782,8 @@ begin
   if not exists (
     select 1
     from public.profiles
-    where id = auth.uid()
-      and status = 'approved'
+    where profiles.id = auth.uid()
+      and profiles.status = 'approved'
   ) then
     raise exception 'Approved account required';
   end if;
@@ -791,10 +791,10 @@ begin
   if not exists (
     select 1
     from public.news_posts
-    where id = selected_news_post_id
-      and status = 'published'
-      and published_at is not null
-      and published_at <= now()
+    where news_posts.id = selected_news_post_id
+      and news_posts.status = 'published'
+      and news_posts.published_at is not null
+      and news_posts.published_at <= now()
   ) then
     raise exception 'News story not found';
   end if;
@@ -812,11 +812,11 @@ begin
   if selected_parent_comment_id is not null then
     if not exists (
       select 1
-      from public.news_comments
-      where id = selected_parent_comment_id
-        and news_post_id = selected_news_post_id
-        and parent_comment_id is null
-        and deleted_at is null
+      from public.news_comments as parent_comments
+      where parent_comments.id = selected_parent_comment_id
+        and parent_comments.news_post_id = selected_news_post_id
+        and parent_comments.parent_comment_id is null
+        and parent_comments.deleted_at is null
     ) then
       raise exception 'Replies can only be added to visible parent comments';
     end if;
@@ -859,11 +859,11 @@ begin
     raise exception 'Authentication required';
   end if;
 
-  select news_post_id, user_id
+  select news_comments.news_post_id, news_comments.user_id
   into target_news_post_id, target_user_id
   from public.news_comments
-  where id = selected_comment_id
-    and deleted_at is null;
+  where news_comments.id = selected_comment_id
+    and news_comments.deleted_at is null;
 
   if target_news_post_id is null then
     raise exception 'Comment not found';
@@ -879,8 +879,8 @@ begin
   set
     deleted_at = now(),
     deleted_by = auth.uid()
-  where id = selected_comment_id
-    and deleted_at is null;
+  where news_comments.id = selected_comment_id
+    and news_comments.deleted_at is null;
 
   return public.get_news_comment_summary(target_news_post_id);
 end;
