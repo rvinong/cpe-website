@@ -1,6 +1,10 @@
-import { ArrowRight, CalendarDays, Star } from 'lucide-react'
+import { ArrowRight, CalendarDays, MessageCircle, Star } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import NewsReactionSummary from './NewsReactionSummary'
+
+function pluralizeComment(count) {
+  return `${count} ${count === 1 ? 'comment' : 'comments'}`
+}
 
 function NewsCard({ article, compact = false }) {
   const storyHref = `/gallery/news/${article.slug}`
@@ -77,10 +81,22 @@ function NewsCard({ article, compact = false }) {
         )}
         {compact && (
           <div className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
-            <NewsReactionSummary
-              initialSummary={initialReactionSummary}
-              newsPostId={article.id}
-            />
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <NewsReactionSummary
+                initialSummary={initialReactionSummary}
+                newsPostId={article.id}
+              />
+              <Link
+                to={`${storyHref}#comments`}
+                className="inline-flex min-h-9 items-center gap-2 rounded-full px-1.5 py-1 text-xs font-extrabold text-slate-500 transition hover:text-brand-600"
+                title="View comments"
+              >
+                <span className="grid size-6 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-slate-400">
+                  <MessageCircle size={12} aria-hidden="true" />
+                </span>
+                {pluralizeComment(Number(article.commentTotal) || 0)}
+              </Link>
+            </div>
             <Link
               to={storyHref}
               className="inline-flex items-center gap-1.5 text-xs font-extrabold text-brand-600"

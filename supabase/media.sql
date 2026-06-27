@@ -520,6 +520,390 @@ grant execute on function public.clear_news_reaction(uuid)
 grant execute on function public.get_news_reaction_members(uuid, text)
   to authenticated;
 
+create table if not exists public.news_comments (
+  id uuid primary key default gen_random_uuid(),
+  news_post_id uuid not null references public.news_posts(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  parent_comment_id uuid references public.news_comments(id) on delete cascade,
+  body text not null,
+  deleted_at timestamptz,
+  deleted_by uuid references public.profiles(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  check (char_length(trim(body)) between 1 and 1000)
+);
+
+create index if not exists news_comments_post_created_idx
+  on public.news_comments (news_post_id, created_at desc)
+  where deleted_at is null;
+
+create index if not exists news_comments_parent_created_idx
+  on public.news_comments (parent_comment_id, created_at)
+  where deleted_at is null;
+
+create index if not exists news_comments_user_idx
+  on public.news_comments (user_id);
+
+drop trigger if exists set_news_comments_updated_at
+  on public.news_comments;
+create trigger set_news_comments_updated_at
+  before update on public.news_comments
+  for each row execute procedure public.set_updated_at();
+
+alter table public.news_comments enable row level security;
+
+drop policy if exists "Published news comments are public"
+  on public.news_comments;
+create policy "Published news comments are public"
+on public.news_comments
+for select
+to anon, authenticated
+using (
+  deleted_at is null
+  and exists (
+    select 1
+    from public.news_posts
+    where news_posts.id = news_comments.news_post_id
+      and news_posts.status = 'published'
+      and news_posts.published_at is not null
+      and news_posts.published_at <= now()
+  )
+  and (
+    parent_comment_id is null
+    or exists (
+      select 1
+      from public.news_comments as parent_comments
+      where parent_comments.id = news_comments.parent_comment_id
+        and parent_comments.news_post_id = news_comments.news_post_id
+        and parent_comments.parent_comment_id is null
+        and parent_comments.deleted_at is null
+    )
+  )
+);
+
+drop policy if exists "Approved users can create news comments"
+  on public.news_comments;
+create policy "Approved users can create news comments"
+on public.news_comments
+for insert
+to authenticated
+with check (
+  user_id = auth.uid()
+  and public.current_user_role() is not null
+  and deleted_at is null
+  and deleted_by is null
+  and exists (
+    select 1
+    from public.news_posts
+    where news_posts.id = news_comments.news_post_id
+      and news_posts.status = 'published'
+      and news_posts.published_at is not null
+      and news_posts.published_at <= now()
+  )
+  and (
+    parent_comment_id is null
+    or exists (
+      select 1
+      from public.news_comments as parent_comments
+      where parent_comments.id = news_comments.parent_comment_id
+        and parent_comments.news_post_id = news_comments.news_post_id
+        and parent_comments.parent_comment_id is null
+        and parent_comments.deleted_at is null
+    )
+  )
+);
+
+drop policy if exists "Authors and staff can soft delete news comments"
+  on public.news_comments;
+create policy "Authors and staff can soft delete news comments"
+on public.news_comments
+for update
+to authenticated
+using (
+  user_id = auth.uid()
+  or public.current_user_role() in ('admin', 'editor')
+)
+with check (
+  user_id = auth.uid()
+  or public.current_user_role() in ('admin', 'editor')
+);
+
+drop function if exists public.get_news_comment_summary(uuid);
+drop function if exists public.list_news_comments(uuid);
+drop function if exists public.create_news_comment(uuid, uuid, text);
+drop function if exists public.delete_news_comment(uuid);
+
+create or replace function public.get_news_comment_summary(
+  selected_news_post_id uuid
+)
+returns integer
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  visible_count integer;
+begin
+  if not exists (
+    select 1
+    from public.news_posts
+    where id = selected_news_post_id
+      and status = 'published'
+      and published_at is not null
+      and published_at <= now()
+  ) and coalesce(public.current_user_role() in ('admin', 'editor'), false) = false then
+    return 0;
+  end if;
+
+  select count(*)::integer
+  into visible_count
+  from public.news_comments
+  where news_post_id = selected_news_post_id
+    and deleted_at is null
+    and (
+      parent_comment_id is null
+      or exists (
+        select 1
+        from public.news_comments as parent_comments
+        where parent_comments.id = news_comments.parent_comment_id
+          and parent_comments.news_post_id = news_comments.news_post_id
+          and parent_comments.parent_comment_id is null
+          and parent_comments.deleted_at is null
+      )
+    );
+
+  return coalesce(visible_count, 0);
+end;
+$$;
+
+create or replace function public.list_news_comments(
+  selected_news_post_id uuid
+)
+returns table (
+  id uuid,
+  parent_comment_id uuid,
+  profile_id uuid,
+  full_name text,
+  avatar_path text,
+  body text,
+  created_at timestamptz,
+  updated_at timestamptz,
+  can_delete boolean
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not exists (
+    select 1
+    from public.news_posts
+    where news_posts.id = selected_news_post_id
+      and news_posts.status = 'published'
+      and news_posts.published_at is not null
+      and news_posts.published_at <= now()
+  ) then
+    return;
+  end if;
+
+  return query
+  select
+    news_comments.id,
+    news_comments.parent_comment_id,
+    profiles.id as profile_id,
+    coalesce(
+      nullif(trim(profiles.nickname), ''),
+      nullif(trim(profiles.full_name), ''),
+      'Member'
+    ) as full_name,
+    profiles.avatar_path,
+    news_comments.body,
+    news_comments.created_at,
+    news_comments.updated_at,
+    (
+      auth.uid() = news_comments.user_id
+      or public.current_user_role() in ('admin', 'editor')
+    ) as can_delete
+  from public.news_comments
+  join public.profiles
+    on profiles.id = news_comments.user_id
+  where news_comments.news_post_id = selected_news_post_id
+    and news_comments.deleted_at is null
+    and profiles.status = 'approved'
+    and (
+      news_comments.parent_comment_id is null
+      or exists (
+        select 1
+        from public.news_comments as parent_comments
+        where parent_comments.id = news_comments.parent_comment_id
+          and parent_comments.news_post_id = news_comments.news_post_id
+          and parent_comments.parent_comment_id is null
+          and parent_comments.deleted_at is null
+      )
+    )
+  order by
+    case when news_comments.parent_comment_id is null then 0 else 1 end,
+    case
+      when news_comments.parent_comment_id is null
+        then extract(epoch from news_comments.created_at) * -1
+      else extract(epoch from news_comments.created_at)
+    end;
+end;
+$$;
+
+create or replace function public.create_news_comment(
+  selected_news_post_id uuid,
+  selected_parent_comment_id uuid,
+  comment_body text
+)
+returns table (
+  id uuid,
+  parent_comment_id uuid,
+  profile_id uuid,
+  full_name text,
+  avatar_path text,
+  body text,
+  created_at timestamptz,
+  updated_at timestamptz,
+  can_delete boolean
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  clean_body text;
+  inserted_comment_id uuid;
+begin
+  if auth.uid() is null then
+    raise exception 'Authentication required';
+  end if;
+
+  if not exists (
+    select 1
+    from public.profiles
+    where id = auth.uid()
+      and status = 'approved'
+  ) then
+    raise exception 'Approved account required';
+  end if;
+
+  if not exists (
+    select 1
+    from public.news_posts
+    where id = selected_news_post_id
+      and status = 'published'
+      and published_at is not null
+      and published_at <= now()
+  ) then
+    raise exception 'News story not found';
+  end if;
+
+  clean_body := trim(coalesce(comment_body, ''));
+
+  if clean_body = '' then
+    raise exception 'Comment cannot be empty';
+  end if;
+
+  if char_length(clean_body) > 1000 then
+    raise exception 'Comment must be 1000 characters or fewer';
+  end if;
+
+  if selected_parent_comment_id is not null then
+    if not exists (
+      select 1
+      from public.news_comments
+      where id = selected_parent_comment_id
+        and news_post_id = selected_news_post_id
+        and parent_comment_id is null
+        and deleted_at is null
+    ) then
+      raise exception 'Replies can only be added to visible parent comments';
+    end if;
+  end if;
+
+  insert into public.news_comments (
+    news_post_id,
+    user_id,
+    parent_comment_id,
+    body
+  )
+  values (
+    selected_news_post_id,
+    auth.uid(),
+    selected_parent_comment_id,
+    clean_body
+  )
+  returning news_comments.id into inserted_comment_id;
+
+  return query
+  select *
+  from public.list_news_comments(selected_news_post_id) as comment_rows
+  where comment_rows.id = inserted_comment_id;
+end;
+$$;
+
+create or replace function public.delete_news_comment(
+  selected_comment_id uuid
+)
+returns integer
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  target_news_post_id uuid;
+  target_user_id uuid;
+begin
+  if auth.uid() is null then
+    raise exception 'Authentication required';
+  end if;
+
+  select news_post_id, user_id
+  into target_news_post_id, target_user_id
+  from public.news_comments
+  where id = selected_comment_id
+    and deleted_at is null;
+
+  if target_news_post_id is null then
+    raise exception 'Comment not found';
+  end if;
+
+  if target_user_id <> auth.uid()
+    and coalesce(public.current_user_role() in ('admin', 'editor'), false) = false
+  then
+    raise exception 'Not allowed to delete this comment';
+  end if;
+
+  update public.news_comments
+  set
+    deleted_at = now(),
+    deleted_by = auth.uid()
+  where id = selected_comment_id
+    and deleted_at is null;
+
+  return public.get_news_comment_summary(target_news_post_id);
+end;
+$$;
+
+revoke all on function public.get_news_comment_summary(uuid)
+  from public;
+revoke all on function public.list_news_comments(uuid)
+  from public;
+revoke all on function public.create_news_comment(uuid, uuid, text)
+  from public;
+revoke all on function public.delete_news_comment(uuid)
+  from public;
+
+grant execute on function public.get_news_comment_summary(uuid)
+  to anon, authenticated;
+grant execute on function public.list_news_comments(uuid)
+  to anon, authenticated;
+grant execute on function public.create_news_comment(uuid, uuid, text)
+  to authenticated;
+grant execute on function public.delete_news_comment(uuid)
+  to authenticated;
+
 create table if not exists public.gallery_photos (
   id uuid primary key default gen_random_uuid(),
   album text not null,

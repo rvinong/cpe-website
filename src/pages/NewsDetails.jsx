@@ -13,8 +13,9 @@ import {
   Star,
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import ContentSkeleton from '../components/ContentSkeleton'
+import NewsComments from '../components/NewsComments'
 import NewsReactionSummary from '../components/NewsReactionSummary'
 import { useNewsPost } from '../hooks/useMedia'
 
@@ -27,6 +28,7 @@ function getBodyParagraphs(body) {
 
 function NewsDetails() {
   const { slug } = useParams()
+  const location = useLocation()
   const shouldReduceMotion = useReducedMotion()
   const { newsPost, isLoading, setNewsPost } = useNewsPost(slug)
   const [activeImageIndex, setActiveImageIndex] = useState(0)
@@ -78,6 +80,19 @@ function NewsDetails() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [images.length, showNextImage, showPreviousImage])
 
+  useEffect(() => {
+    if (!newsPost || location.hash !== '#comments') return undefined
+
+    const scrollTimer = window.setTimeout(() => {
+      document.getElementById('comments')?.scrollIntoView({
+        block: 'start',
+        behavior: shouldReduceMotion ? 'auto' : 'smooth',
+      })
+    }, 80)
+
+    return () => window.clearTimeout(scrollTimer)
+  }, [location.hash, newsPost, shouldReduceMotion])
+
   const updateReactionState = (summary) => {
     setReactionOverride({ slug, summary })
     setNewsPost((current) =>
@@ -86,6 +101,17 @@ function NewsDetails() {
             ...current,
             reactions: summary,
             reactionTotal: summary.total,
+          }
+        : current,
+    )
+  }
+
+  const updateCommentTotal = (commentTotal) => {
+    setNewsPost((current) =>
+      current
+        ? {
+            ...current,
+            commentTotal,
           }
         : current,
     )
@@ -314,6 +340,14 @@ function NewsDetails() {
                     variant="detail"
                   />
                 )}
+
+                <NewsComments
+                  key={`${newsPost.id}-comments`}
+                  className="mt-10"
+                  initialCommentTotal={newsPost.commentTotal}
+                  newsPostId={newsPost.id}
+                  onCommentTotalChange={updateCommentTotal}
+                />
 
                 <div className="mt-10 border-t border-slate-100 pt-8">
                   <Link to="/gallery#news" className="primary-button">

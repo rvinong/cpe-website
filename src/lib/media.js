@@ -3,6 +3,7 @@ import { isSupabaseConfigured, supabase } from './supabase'
 export const mediaBucket = 'organization-media'
 export const maxMediaFileSize = 8 * 1024 * 1024
 export const maxNewsImages = 50
+export const maxNewsCommentLength = 1000
 export const acceptedMediaTypes = ['image/jpeg', 'image/png', 'image/webp']
 
 export const newsReactionTypes = [
@@ -73,6 +74,15 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
   month: 'long',
   day: 'numeric',
   year: 'numeric',
+  timeZone: 'Asia/Manila',
+})
+
+const commentDateFormatter = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+  hour: 'numeric',
+  minute: '2-digit',
   timeZone: 'Asia/Manila',
 })
 
@@ -184,6 +194,32 @@ export function normalizeNewsPost(row, reactionSummary) {
     isFeatured: row.is_featured,
     reactions,
     reactionTotal: reactions.total,
+    commentTotal: Number(row.commentTotal || row.comment_total) || 0,
+  }
+}
+
+function normalizeNewsComment(row) {
+  const createdAt = new Date(row.created_at)
+  const updatedAt = new Date(row.updated_at || row.created_at)
+
+  return {
+    id: row.id,
+    parentCommentId: row.parent_comment_id || null,
+    profileId: row.profile_id,
+    fullName: row.full_name || 'Member',
+    avatarPath: row.avatar_path || '',
+    body: row.body || '',
+    createdAt: row.created_at,
+    updatedAt: row.updated_at || row.created_at,
+    canDelete: Boolean(row.can_delete),
+    date:
+      Number.isNaN(createdAt.getTime())
+        ? ''
+        : commentDateFormatter.format(createdAt),
+    isEdited:
+      !Number.isNaN(createdAt.getTime()) &&
+      !Number.isNaN(updatedAt.getTime()) &&
+      updatedAt.getTime() - createdAt.getTime() > 1000,
   }
 }
 
@@ -308,6 +344,22 @@ export function getFriendlyReactionError(error) {
     : message || 'Could not update reactions right now.'
 }
 
+export function getFriendlyCommentError(error) {
+  const message = error?.message || ''
+  const isSchemaCacheError =
+    isMediaSchemaMissing(error) ||
+    message.includes('schema cache') ||
+    message.includes('news_comments') ||
+    message.includes('get_news_comment_summary') ||
+    message.includes('list_news_comments') ||
+    message.includes('create_news_comment') ||
+    message.includes('delete_news_comment')
+
+  return isSchemaCacheError
+    ? 'Comments are being set up. Run the updated supabase/media.sql, then try again.'
+    : message || 'Could not update comments right now.'
+}
+
 function getGallerySortTime(photo) {
   const date = new Date(photo.captured_on || photo.created_at || 0)
   return Number.isNaN(date.getTime()) ? 0 : date.getTime()
@@ -367,6 +419,16 @@ async function getReactionSummaryRows(newsPostId) {
   return { data: data || [], error }
 }
 
+async function getCommentSummaryValue(newsPostId) {
+  if (!isSupabaseConfigured) return { data: 0, error: null }
+
+  const { data, error } = await supabase.rpc('get_news_comment_summary', {
+    selected_news_post_id: newsPostId,
+  })
+
+  return { data: Number(data) || 0, error }
+}
+
 async function hydrateNewsReactionSummaries(posts) {
   if (!posts?.length) return posts
 
@@ -384,6 +446,23 @@ async function hydrateNewsReactionSummaries(posts) {
       ...post,
       reactions,
       reactionTotal: reactions.total,
+    }
+  })
+}
+
+async function hydrateNewsCommentSummaries(posts) {
+  if (!posts?.length) return posts
+
+  const summaries = await Promise.all(
+    posts.map((post) => getCommentSummaryValue(post.id)),
+  )
+
+  return posts.map((post, index) => {
+    const { data, error } = summaries[index]
+
+    return {
+      ...post,
+      commentTotal: error ? Number(post.commentTotal) || 0 : data,
     }
   })
 }
@@ -448,7 +527,11 @@ export async function getPublicNews(limit) {
 
   const rows = await attachNewsImages(data || [])
   const posts = rows.map((row) => normalizeNewsPost(row))
-  return { data: await hydrateNewsReactionSummaries(posts), error: null }
+  const withReactions = await hydrateNewsReactionSummaries(posts)
+  return {
+    data: await hydrateNewsCommentSummaries(withReactions),
+    error: null,
+  }
 }
 
 export async function getPublicNewsBySlug(slug) {
@@ -467,7 +550,10 @@ export async function getPublicNewsBySlug(slug) {
   if (error || !data) return { data: null, error }
 
   const [row] = await attachNewsImages([data])
-  const [post] = await hydrateNewsReactionSummaries([normalizeNewsPost(row)])
+  const [withReactions] = await hydrateNewsReactionSummaries([
+    normalizeNewsPost(row),
+  ])
+  const [post] = await hydrateNewsCommentSummaries([withReactions])
   return { data: post, error: null }
 }
 
@@ -749,6 +835,45 @@ export async function getNewsReactionMembers(newsPostId, reactionType) {
     selected_news_post_id: newsPostId,
     selected_reaction_type: reactionType,
   })
+}
+
+export async function getNewsCommentSummary(newsPostId) {
+  return getCommentSummaryValue(newsPostId)
+}
+
+export async function getNewsComments(newsPostId) {
+  const { data, error } = await supabase.rpc('list_news_comments', {
+    selected_news_post_id: newsPostId,
+  })
+
+  return {
+    data: error ? [] : (data || []).map(normalizeNewsComment),
+    error,
+  }
+}
+
+export async function createNewsComment(newsPostId, body, parentCommentId) {
+  const { data, error } = await supabase.rpc('create_news_comment', {
+    selected_news_post_id: newsPostId,
+    selected_parent_comment_id: parentCommentId || null,
+    comment_body: body,
+  })
+
+  return {
+    data: error ? null : normalizeNewsComment(data?.[0] || {}),
+    error,
+  }
+}
+
+export async function deleteNewsComment(commentId) {
+  const { data, error } = await supabase.rpc('delete_news_comment', {
+    selected_comment_id: commentId,
+  })
+
+  return {
+    data: Number(data) || 0,
+    error,
+  }
 }
 
 function toGalleryPayload(values, imagePath) {
