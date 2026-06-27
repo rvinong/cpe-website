@@ -214,6 +214,7 @@ function NewsReactionSummary({
   const reactionButtonRefs = useRef({})
   const [highlightedReaction, setHighlightedReaction] = useState('')
   const isDetail = variant === 'detail'
+  const isCommentsVariant = variant === 'comments'
   const topReactions = useMemo(() => getTopReactions(summary), [summary])
   const allPositiveReactions = useMemo(
     () => getTopReactions(summary, newsReactionTypes.length),
@@ -377,14 +378,21 @@ function NewsReactionSummary({
     const actionRect = actionNode?.getBoundingClientRect()
     const horizontalPadding = 34
     const topPadding = 18
-    const bottomEdge = actionRect
-      ? actionRect.bottom + 22
-      : rect.bottom + 132
+    const topEdge = isCommentsVariant
+      ? actionRect
+        ? actionRect.top - 16
+        : rect.top - 80
+      : rect.top - topPadding
+    const bottomEdge = isCommentsVariant
+      ? rect.bottom + 18
+      : actionRect
+        ? actionRect.bottom + 22
+        : rect.bottom + 132
 
     const isInsideRail =
       clientX >= rect.left - horizontalPadding &&
       clientX <= rect.right + horizontalPadding &&
-      clientY >= rect.top - topPadding &&
+      clientY >= topEdge &&
       clientY <= bottomEdge
 
     if (!isInsideRail) return ''
@@ -519,16 +527,28 @@ function NewsReactionSummary({
       {isReactionPickerOpen && (
         <>
           <span
-            className="absolute bottom-full left-0 h-4 w-full"
+            className={`absolute left-0 h-4 w-full ${
+              isCommentsVariant ? 'top-full' : 'bottom-full'
+            }`}
             aria-hidden="true"
           />
           <Motion.div
             ref={pickerRailRef}
-            initial={{ opacity: 0, y: 10, scale: 0.94 }}
+            initial={{
+              opacity: 0,
+              y: isCommentsVariant ? -10 : 10,
+              scale: 0.94,
+            }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 8, scale: 0.96 }}
+            exit={{
+              opacity: 0,
+              y: isCommentsVariant ? -8 : 8,
+              scale: 0.96,
+            }}
             transition={{ duration: shouldReduceMotion ? 0.01 : 0.18 }}
-            className="absolute bottom-full left-0 z-30 mb-3 flex gap-1.5 rounded-full border border-slate-200 bg-white p-1.5 shadow-[0_18px_55px_-28px_rgba(15,23,42,0.45)]"
+            className={`absolute left-0 z-30 flex gap-1.5 rounded-full border border-slate-200 bg-white p-1.5 shadow-[0_18px_55px_-28px_rgba(15,23,42,0.45)] ${
+              isCommentsVariant ? 'top-full mt-3' : 'bottom-full mb-3'
+            }`}
           >
             <span
               className="pointer-events-none absolute -inset-x-8 -top-4 -bottom-32"
