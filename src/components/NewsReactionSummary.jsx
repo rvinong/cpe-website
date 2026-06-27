@@ -184,6 +184,7 @@ function getReactionText(summary) {
 function NewsReactionSummary({
   className = '',
   initialSummary,
+  middleSlot = null,
   newsPostId,
   onSummaryChange,
   variant = 'card',
@@ -585,86 +586,111 @@ function NewsReactionSummary({
     </AnimatePresence>
   )
 
-  const controls = (
-    <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
-      <div
-        className="relative touch-none select-none"
-        onPointerEnter={(event) => {
-          if (event.pointerType === 'mouse') setIsReactionPickerOpen(true)
-        }}
-        onPointerLeave={(event) => {
-          if (event.pointerType === 'mouse') setIsReactionPickerOpen(false)
-        }}
-        onBlur={(event) => {
-          if (!event.currentTarget.contains(event.relatedTarget)) {
-            setIsReactionPickerOpen(false)
-          }
-        }}
-        onContextMenu={(event) => event.preventDefault()}
-      >
-        {picker}
-        <button
-          ref={actionButtonRef}
-          type="button"
-          onClick={handleActionClick}
-          onPointerDown={handleActionPointerDown}
-          onPointerMove={handleActionPointerMove}
-          onPointerUp={handleActionPointerEnd}
-          onPointerCancel={handleActionPointerCancel}
-          onPointerLeave={handleActionPointerLeave}
-          onContextMenu={(event) => event.preventDefault()}
-          disabled={isSavingReaction}
-          className={`inline-flex min-h-9 touch-none select-none items-center justify-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-extrabold transition disabled:cursor-wait disabled:opacity-70 ${actionButtonClass}`}
-        >
-          {activeReaction ? (
-            <span
-              className={`grid size-6 place-items-center rounded-full border-2 border-white ${reactionButtonStyles[activeReaction.id]}`}
-            >
-              <ActiveReactionIcon size={12} aria-hidden="true" />
-            </span>
-          ) : (
-            <ActiveReactionIcon size={14} aria-hidden="true" />
-          )}
-          {activeReaction?.label || 'Like'}
-        </button>
-      </div>
-
+  const reactionAction = (
+    <div
+      className="relative touch-none select-none"
+      onPointerEnter={(event) => {
+        if (event.pointerType === 'mouse') setIsReactionPickerOpen(true)
+      }}
+      onPointerLeave={(event) => {
+        if (event.pointerType === 'mouse') setIsReactionPickerOpen(false)
+      }}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+          setIsReactionPickerOpen(false)
+        }
+      }}
+      onContextMenu={(event) => event.preventDefault()}
+    >
+      {picker}
       <button
+        ref={actionButtonRef}
         type="button"
-        onClick={summary.total > 0 ? openMembers : undefined}
+        onClick={handleActionClick}
+        onPointerDown={handleActionPointerDown}
+        onPointerMove={handleActionPointerMove}
+        onPointerUp={handleActionPointerEnd}
+        onPointerCancel={handleActionPointerCancel}
+        onPointerLeave={handleActionPointerLeave}
+        onContextMenu={(event) => event.preventDefault()}
         disabled={isSavingReaction}
-        title={summary.total > 0 ? 'View reactions' : 'No reactions yet'}
-        className={`inline-flex min-h-9 max-w-full items-center gap-2 rounded-full px-1.5 py-1 text-xs font-extrabold text-slate-500 transition hover:text-brand-600 disabled:cursor-wait disabled:opacity-70 ${
-          isDetail ? 'text-sm' : ''
-        }`}
+        className={`inline-flex min-h-9 touch-none select-none items-center justify-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-extrabold transition disabled:cursor-wait disabled:opacity-70 ${actionButtonClass}`}
       >
-        {topReactions.length > 0 ? (
-          <span className="flex shrink-0 -space-x-1.5">
-            {topReactions.map(({ id }) => {
-              const Icon = reactionIcons[id]
-              return (
-                <span
-                  key={id}
-                  className={`grid size-6 place-items-center rounded-full border-2 border-white ${reactionButtonStyles[id]}`}
-                >
-                  <Icon size={12} aria-hidden="true" />
-                </span>
-              )
-            })}
+        {activeReaction ? (
+          <span
+            className={`grid size-6 place-items-center rounded-full border-2 border-white ${reactionButtonStyles[activeReaction.id]}`}
+          >
+            <ActiveReactionIcon size={12} aria-hidden="true" />
           </span>
         ) : (
-          <span className="grid size-6 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-slate-400">
-            <ThumbsUp size={12} aria-hidden="true" />
-          </span>
+          <ActiveReactionIcon size={14} aria-hidden="true" />
         )}
-        <span className="min-w-0 truncate">{summaryText}</span>
+        {activeReaction?.label || 'Like'}
       </button>
     </div>
   )
 
+  const reactionMembersButton = (
+    <button
+      type="button"
+      onClick={summary.total > 0 ? openMembers : undefined}
+      disabled={isSavingReaction}
+      title={summary.total > 0 ? 'View reactions' : 'No reactions yet'}
+      className={`inline-flex min-h-9 max-w-full items-center gap-2 rounded-full px-1.5 py-1 text-xs font-extrabold text-slate-500 transition hover:text-brand-600 disabled:cursor-wait disabled:opacity-70 ${
+        isDetail ? 'text-sm' : ''
+      }`}
+    >
+      {topReactions.length > 0 ? (
+        <span className="flex shrink-0 -space-x-1.5">
+          {topReactions.map(({ id }) => {
+            const Icon = reactionIcons[id]
+            return (
+              <span
+                key={id}
+                className={`grid size-6 place-items-center rounded-full border-2 border-white ${reactionButtonStyles[id]}`}
+              >
+                <Icon size={12} aria-hidden="true" />
+              </span>
+            )
+          })}
+        </span>
+      ) : (
+        <span className="grid size-6 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-slate-400">
+          <ThumbsUp size={12} aria-hidden="true" />
+        </span>
+      )}
+      {variant !== 'comments' && (
+        <span className="min-w-0 truncate">{summaryText}</span>
+      )}
+    </button>
+  )
+
+  const controls =
+    variant === 'comments' ? (
+      <div className="flex min-w-0 flex-wrap items-center gap-3">
+        {reactionAction}
+        {middleSlot}
+        <span className="ml-auto">{reactionMembersButton}</span>
+      </div>
+    ) : (
+      <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
+        {reactionAction}
+        {reactionMembersButton}
+      </div>
+    )
+
   return (
     <>
-      {isDetail ? (
+      {variant === 'comments' ? (
+        <div className={`min-w-0 ${className}`} aria-label="News reactions">
+          {controls}
+          {reactionError && (
+            <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800">
+              {reactionError}
+            </p>
+          )}
+        </div>
+      ) : isDetail ? (
         <section
           className={`border-y border-slate-100 py-3 ${className}`}
           aria-label="News reactions"

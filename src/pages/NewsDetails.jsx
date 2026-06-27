@@ -16,7 +16,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import ContentSkeleton from '../components/ContentSkeleton'
 import NewsComments from '../components/NewsComments'
-import NewsReactionSummary from '../components/NewsReactionSummary'
 import { useNewsPost } from '../hooks/useMedia'
 
 function getBodyParagraphs(body) {
@@ -330,23 +329,14 @@ function NewsDetails() {
                   ))}
                 </div>
 
-                {reactionSummary && (
-                  <NewsReactionSummary
-                    key={newsPost.id}
-                    className="mt-10"
-                    initialSummary={reactionSummary}
-                    newsPostId={newsPost.id}
-                    onSummaryChange={updateReactionState}
-                    variant="detail"
-                  />
-                )}
-
                 <NewsComments
                   key={`${newsPost.id}-comments`}
                   className="mt-10"
                   initialCommentTotal={newsPost.commentTotal}
+                  initialReactionSummary={reactionSummary}
                   newsPostId={newsPost.id}
                   onCommentTotalChange={updateCommentTotal}
+                  onReactionSummaryChange={updateReactionState}
                 />
 
                 <div className="mt-10 border-t border-slate-100 pt-8">

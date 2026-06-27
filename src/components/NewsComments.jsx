@@ -1,10 +1,7 @@
 import {
   ChevronDown,
-  Heart,
   MessageCircle,
-  Reply,
   Send,
-  ThumbsUp,
   Trash2,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
@@ -17,6 +14,7 @@ import {
   getNewsComments,
   maxNewsCommentLength,
 } from '../lib/media'
+import NewsReactionSummary from './NewsReactionSummary'
 import ProfileAvatar from './ProfileAvatar'
 
 function pluralizeComment(count) {
@@ -57,7 +55,7 @@ function CommentComposer({
           maxLength={maxNewsCommentLength + 1}
           rows={isReply ? 2 : 3}
           placeholder={placeholder}
-          className={`w-full resize-none rounded-[1.35rem] border border-white/10 bg-white/[0.08] px-4 py-3 pr-14 text-sm font-semibold text-white outline-none transition placeholder:text-blue-100/45 focus:border-brand-300 focus:bg-white/[0.12] focus:ring-4 focus:ring-blue-500/15 disabled:cursor-not-allowed disabled:bg-white/[0.05] disabled:text-blue-100/40 ${
+          className={`w-full resize-none rounded-[1.35rem] border border-slate-200 bg-slate-100/80 px-4 py-3 pr-14 text-sm font-semibold text-navy-900 outline-none transition placeholder:text-slate-400 focus:border-brand-300 focus:bg-white focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 ${
             isReply ? 'min-h-16' : 'min-h-20'
           }`}
         />
@@ -83,7 +81,7 @@ function CommentComposer({
             <button
               type="button"
               onClick={onCancel}
-              className="rounded-full px-3 py-1 text-xs font-extrabold text-blue-100/65 transition hover:bg-white/10 hover:text-white"
+              className="rounded-full px-3 py-1 text-xs font-extrabold text-slate-500 transition hover:bg-slate-100 hover:text-navy-900"
             >
               Cancel
             </button>
@@ -96,7 +94,7 @@ function CommentComposer({
         )}
       </div>
       {error && (
-        <p className="rounded-xl border border-amber-300/30 bg-amber-400/10 px-3 py-2 text-xs font-bold text-amber-100">
+        <p className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800">
           {error}
         </p>
       )}
@@ -120,44 +118,33 @@ function CommentItem({
         <ProfileAvatar
           path={comment.avatarPath}
           name={comment.fullName}
-          className={
-            isReply
-              ? 'size-8 rounded-full ring-2 ring-navy-950'
-              : 'size-9 rounded-full ring-2 ring-navy-950'
-          }
+          className={isReply ? 'size-8 rounded-full' : 'size-9 rounded-full'}
           textClassName="text-xs"
         />
         <div className="min-w-0 flex-1">
-          <div className="inline-block max-w-full rounded-[1.25rem] bg-white/[0.11] px-3.5 py-2.5 text-left ring-1 ring-white/10">
+          <div className="inline-block max-w-full rounded-[1.25rem] bg-slate-100 px-3.5 py-2.5 text-left ring-1 ring-slate-200/70">
             <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5">
-              <h3 className="truncate text-[13px] font-extrabold leading-4 text-white">
+              <h3 className="truncate text-[13px] font-extrabold leading-4 text-navy-900">
                 {comment.fullName}
               </h3>
               {isCurrentUser && (
-                <span className="rounded-full bg-brand-500/20 px-1.5 py-0.5 text-[9px] font-black leading-none text-blue-100">
+                <span className="rounded-full bg-brand-100 px-1.5 py-0.5 text-[9px] font-black leading-none text-brand-700">
                   You
                 </span>
               )}
             </div>
-            <p className="mt-1 whitespace-pre-wrap text-[15px] leading-5 text-blue-50/90">
+            <p className="mt-1 whitespace-pre-wrap text-[15px] leading-5 text-slate-700">
               {comment.body}
             </p>
           </div>
 
-          <div className="mt-1 flex flex-wrap items-center gap-3 pl-3 text-[11px] font-extrabold text-blue-100/55">
+          <div className="mt-1 flex flex-wrap items-center gap-3 pl-3 text-[11px] font-extrabold text-slate-500">
             <span>{comment.date}</span>
-            <button
-              type="button"
-              className="transition hover:text-white"
-              aria-label="Like comment"
-            >
-              Like
-            </button>
             {!isReply && (
               <button
                 type="button"
                 onClick={() => onReply(comment.id)}
-                className="transition hover:text-white"
+                className="transition hover:text-brand-600"
               >
                 Reply
               </button>
@@ -166,7 +153,7 @@ function CommentItem({
               <button
                 type="button"
                 onClick={() => onDelete(comment)}
-                className="inline-flex items-center gap-1 transition hover:text-red-200"
+                className="inline-flex items-center gap-1 transition hover:text-red-600"
               >
                 <Trash2 size={11} aria-hidden="true" />
                 Delete
@@ -177,7 +164,7 @@ function CommentItem({
       </div>
 
       {replies.length > 0 && (
-        <div className="relative ml-4 mt-2 space-y-2 border-l-2 border-white/10 pl-4 sm:ml-4">
+        <div className="relative ml-4 mt-2 space-y-2 border-l-2 border-slate-200 pl-4 sm:ml-4">
           {replies.map((reply) => (
             <CommentItem
               key={reply.id}
@@ -197,8 +184,10 @@ function CommentItem({
 function NewsComments({
   className = '',
   initialCommentTotal = 0,
+  initialReactionSummary,
   newsPostId,
   onCommentTotalChange,
+  onReactionSummaryChange,
 }) {
   const { isApprovedMember, profile, user } = useAuth()
   const [comments, setComments] = useState([])
@@ -320,38 +309,27 @@ function NewsComments({
 
   return (
     <section id="comments" className={`scroll-mt-28 ${className}`}>
-      <div className="overflow-hidden rounded-3xl border border-white/10 bg-navy-950 text-white shadow-[0_30px_80px_-44px_rgba(7,21,47,0.85)]">
-        <div className="border-b border-white/10 px-4 py-3 sm:px-5">
-          <div className="flex flex-wrap items-center justify-between gap-3 text-xs font-extrabold text-blue-100/60">
-            <div className="flex items-center gap-5">
-              <span className="inline-flex items-center gap-1.5">
-                <ThumbsUp size={16} aria-hidden="true" />
-                Reactions
-              </span>
-              <span className="inline-flex items-center gap-1.5 text-blue-100">
+      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_30px_80px_-48px_rgba(15,23,42,0.42)]">
+        <div className="border-b border-slate-100 px-4 py-3 sm:px-5">
+          <NewsReactionSummary
+            className="w-full"
+            initialSummary={initialReactionSummary}
+            middleSlot={
+              <span className="inline-flex min-h-9 items-center gap-1.5 rounded-full px-1.5 py-1 text-xs font-extrabold text-slate-500">
                 <MessageCircle size={16} aria-hidden="true" />
                 {pluralizeComment(commentTotal)}
               </span>
-              <span className="inline-flex items-center gap-1.5">
-                <Reply size={16} aria-hidden="true" />
-                Reply
-              </span>
-            </div>
-            <span className="flex -space-x-1.5">
-              <span className="grid size-5 place-items-center rounded-full border-2 border-navy-950 bg-brand-600 text-white">
-                <ThumbsUp size={10} aria-hidden="true" />
-              </span>
-              <span className="grid size-5 place-items-center rounded-full border-2 border-navy-950 bg-rose-500 text-white">
-                <Heart size={10} fill="currentColor" aria-hidden="true" />
-              </span>
-            </span>
-          </div>
+            }
+            newsPostId={newsPostId}
+            onSummaryChange={onReactionSummaryChange}
+            variant="comments"
+          />
         </div>
 
         <div className="px-4 py-3 sm:px-5">
           <button
             type="button"
-            className="inline-flex items-center gap-1.5 text-sm font-extrabold text-blue-100/65 transition hover:text-white"
+            className="inline-flex items-center gap-1.5 text-sm font-extrabold text-slate-500 transition hover:text-brand-600"
           >
             Most relevant
             <ChevronDown size={15} aria-hidden="true" />
@@ -360,21 +338,21 @@ function NewsComments({
 
         <div className="px-4 pb-4 sm:px-5">
           {isLoading ? (
-            <p className="rounded-2xl bg-white/[0.08] p-4 text-sm font-bold text-blue-100/70">
+            <p className="rounded-2xl bg-slate-50 p-4 text-sm font-bold text-slate-500">
               Loading comments...
             </p>
           ) : loadError ? (
-            <p className="rounded-2xl border border-red-300/30 bg-red-500/10 p-4 text-sm font-bold text-red-100">
+            <p className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">
               {loadError}
             </p>
           ) : rootComments.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-white/15 bg-white/[0.06] p-6 text-center">
+            <div className="rounded-2xl border border-dashed border-blue-200 bg-brand-50/30 p-6 text-center">
               <MessageCircle
                 size={28}
-                className="mx-auto text-blue-200"
+                className="mx-auto text-brand-600"
                 aria-hidden="true"
               />
-              <p className="mt-3 text-sm font-bold text-blue-100/75">
+              <p className="mt-3 text-sm font-bold text-slate-600">
                 No comments yet. Be the first to start the conversation.
               </p>
             </div>
@@ -395,7 +373,7 @@ function NewsComments({
                   />
 
                   {activeReplyId === comment.id && (
-                    <div className="ml-11 rounded-2xl bg-white/[0.07] p-3 ring-1 ring-white/10">
+                    <div className="ml-11 rounded-2xl bg-slate-50 p-3 ring-1 ring-slate-200">
                       {user && isApprovedMember ? (
                         <CommentComposer
                           autoFocus
@@ -412,7 +390,7 @@ function NewsComments({
                           placeholder={`Reply to ${comment.fullName}...`}
                         />
                       ) : (
-                        <p className="text-sm font-bold text-blue-100/75">
+                        <p className="text-sm font-bold text-slate-600">
                           Approved accounts can reply to comments.
                         </p>
                       )}
@@ -424,13 +402,13 @@ function NewsComments({
           )}
         </div>
 
-        <div className="border-t border-white/10 bg-navy-950/95 px-4 py-4 sm:px-5">
+        <div className="border-t border-slate-100 bg-white px-4 py-4 sm:px-5">
           {user && isApprovedMember ? (
             <div className="flex items-start gap-3">
               <ProfileAvatar
                 path={profile?.avatar_path}
                 name={profile?.nickname || profile?.full_name || user.email}
-                className="size-9 rounded-full ring-2 ring-navy-950"
+                className="size-9 rounded-full"
                 textClassName="text-xs"
               />
               <div className="min-w-0 flex-1">
@@ -449,12 +427,12 @@ function NewsComments({
               </div>
             </div>
           ) : user ? (
-            <p className="rounded-2xl border border-amber-300/30 bg-amber-400/10 px-4 py-3 text-sm font-bold text-amber-100">
+            <p className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold text-amber-800">
               Your account needs approval before you can comment.
             </p>
           ) : (
-            <p className="rounded-2xl border border-white/10 bg-white/[0.08] px-4 py-3 text-sm font-bold text-blue-100/75">
-              <Link to="/account" className="text-blue-100 underline">
+            <p className="rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm font-bold text-slate-600">
+              <Link to="/account" className="text-brand-600 underline">
                 Sign in
               </Link>{' '}
               with an approved account to join the comments.
@@ -463,7 +441,7 @@ function NewsComments({
         </div>
 
         {deletingCommentId && (
-          <p className="border-t border-white/10 px-5 py-3 text-xs font-bold text-blue-100/50">
+          <p className="border-t border-slate-100 px-5 py-3 text-xs font-bold text-slate-400">
             Removing comment...
           </p>
         )}
