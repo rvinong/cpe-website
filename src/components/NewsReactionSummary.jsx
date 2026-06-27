@@ -202,6 +202,7 @@ function NewsReactionSummary({
   const [reactionGroups, setReactionGroups] = useState([])
   const [isLoadingMembers, setIsLoadingMembers] = useState(false)
   const [memberError, setMemberError] = useState('')
+  const [selectedMembersFilter, setSelectedMembersFilter] = useState('all')
   const longPressTimerRef = useRef(null)
   const ignoredClickResetTimerRef = useRef(null)
   const ignoreNextClickRef = useRef(false)
@@ -224,6 +225,38 @@ function NewsReactionSummary({
     ? reactionIcons[activeReaction.id]
     : ThumbsUp
   const summaryText = getReactionText(summary)
+  const reactionMemberRows = useMemo(
+    () =>
+      reactionGroups.flatMap((reaction) =>
+        reaction.members.map((member) => ({
+          ...member,
+          reactionId: reaction.id,
+          reactionLabel: reaction.label,
+          reactionCount: reaction.count,
+        })),
+      ),
+    [reactionGroups],
+  )
+  const memberFilterTabs = useMemo(
+    () => [
+      { id: 'all', label: 'All', count: summary.total },
+      ...reactionGroups.map((reaction) => ({
+        id: reaction.id,
+        label: reaction.label,
+        count: reaction.count,
+      })),
+    ],
+    [reactionGroups, summary.total],
+  )
+  const visibleReactionMembers = useMemo(
+    () =>
+      selectedMembersFilter === 'all'
+        ? reactionMemberRows
+        : reactionMemberRows.filter(
+            (member) => member.reactionId === selectedMembersFilter,
+          ),
+    [reactionMemberRows, selectedMembersFilter],
+  )
 
   useEffect(
     () => () => {
@@ -291,6 +324,7 @@ function NewsReactionSummary({
     setIsMembersOpen(true)
     setReactionGroups([])
     setMemberError('')
+    setSelectedMembersFilter('all')
     setIsLoadingMembers(true)
 
     const results = await Promise.all(
@@ -682,23 +716,68 @@ function NewsReactionSummary({
               aria-modal="false"
               aria-label="Reaction members"
             >
-              <div className="shrink-0 flex items-center justify-between border-b border-slate-200 px-5 py-5">
-                <div>
-                  <p className="text-xs font-extrabold tracking-[0.16em] text-brand-600 uppercase">
-                    Community reactions
-                  </p>
-                  <h2 className="mt-1 text-xl font-black text-navy-900">
-                    {pluralizeReaction(summary.total)}
-                  </h2>
+              <div className="shrink-0 border-b border-slate-200 bg-white px-5 pt-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <p className="text-xs font-extrabold tracking-[0.16em] text-brand-600 uppercase">
+                      Community reactions
+                    </p>
+                    <h2 className="mt-1 text-xl font-black text-navy-900">
+                      {pluralizeReaction(summary.total)}
+                    </h2>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsMembersOpen(false)}
+                    className="grid size-10 place-items-center rounded-full bg-slate-100 text-slate-500 transition hover:bg-slate-200 hover:text-navy-900"
+                    aria-label="Close members list"
+                  >
+                    <X size={19} />
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setIsMembersOpen(false)}
-                  className="grid size-10 place-items-center rounded-xl border border-slate-200 text-slate-500"
-                  aria-label="Close members list"
-                >
-                  <X size={19} />
-                </button>
+
+                {memberFilterTabs.length > 0 && (
+                  <div
+                    className="mt-4 flex gap-1 overflow-x-auto"
+                    aria-label="Filter reactions"
+                  >
+                    {memberFilterTabs.map((tab) => {
+                      const isActive = selectedMembersFilter === tab.id
+                      const Icon =
+                        tab.id === 'all' ? null : reactionIcons[tab.id]
+
+                      return (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          onClick={() => setSelectedMembersFilter(tab.id)}
+                          className={`relative inline-flex shrink-0 items-center gap-2 px-3 pb-3 pt-1 text-sm font-black transition ${
+                            isActive
+                              ? 'text-brand-600'
+                              : 'text-slate-500 hover:text-navy-900'
+                          }`}
+                          aria-pressed={isActive}
+                        >
+                          {Icon ? (
+                            <span
+                              className={`grid size-7 place-items-center rounded-full border-2 border-white shadow-sm ${
+                                reactionButtonStyles[tab.id]
+                              }`}
+                            >
+                              <Icon size={14} aria-hidden="true" />
+                            </span>
+                          ) : (
+                            <span>All</span>
+                          )}
+                          <span>{tab.count}</span>
+                          {isActive && (
+                            <span className="absolute inset-x-2 bottom-0 h-1 rounded-full bg-brand-600" />
+                          )}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
 
               <div className="reaction-members-scroll min-h-0 flex-1 overflow-y-auto p-5">
@@ -715,66 +794,61 @@ function NewsReactionSummary({
                     No approved member names are available yet.
                   </p>
                 ) : (
-                  <div className="grid gap-5">
-                    {reactionGroups.map((reaction) => {
-                      const Icon = reactionIcons[reaction.id]
+                  <div className="grid gap-2">
+                    {visibleReactionMembers.length === 0 ? (
+                      <p className="rounded-xl bg-slate-50 p-3 text-xs font-bold text-slate-500">
+                        No approved member names are available for this
+                        reaction yet.
+                      </p>
+                    ) : (
+                      visibleReactionMembers.map((member) => {
+                        const Icon =
+                          reactionIcons[member.reactionId] || ThumbsUp
+                        const displayName = member.full_name || 'Member'
+                        const isCurrentUser = member.profile_id === user?.id
 
-                      return (
-                        <section key={reaction.id} className="grid gap-3">
-                          <div className="flex items-center gap-2">
-                            <span
-                              className={`grid size-8 place-items-center rounded-full border ${reactionButtonStyles[reaction.id]}`}
-                            >
-                              <Icon size={15} aria-hidden="true" />
+                        return (
+                          <div
+                            key={`${member.reactionId}-${member.profile_id}-${member.reacted_at}`}
+                            className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/70 px-3 py-3 transition hover:border-brand-200 hover:bg-white"
+                          >
+                            <span className="relative shrink-0">
+                              <ProfileAvatar
+                                path={member.avatar_path}
+                                name={displayName}
+                                className="size-11 rounded-full ring-2 ring-white"
+                                textClassName="text-sm"
+                              />
+                              <span
+                                className={`absolute -bottom-1 -right-1 grid size-6 place-items-center rounded-full border-2 border-white shadow-sm ${
+                                  reactionButtonStyles[member.reactionId]
+                                }`}
+                              >
+                                <Icon size={12} aria-hidden="true" />
+                              </span>
                             </span>
-                            <span className="text-sm font-black text-navy-900">
-                              {reaction.label}
+                            <span className="min-w-0 flex-1">
+                              <span className="flex min-w-0 items-center gap-2">
+                                <span className="truncate text-sm font-extrabold text-navy-900">
+                                  {displayName}
+                                </span>
+                                {isCurrentUser && (
+                                  <span className="rounded-full bg-brand-50 px-2 py-0.5 text-[10px] font-black text-brand-600">
+                                    You
+                                  </span>
+                                )}
+                              </span>
+                              <span className="mt-0.5 block text-xs font-bold text-slate-500">
+                                {member.reactionLabel}
+                              </span>
                             </span>
-                            <span className="text-xs font-bold text-slate-400">
-                              {pluralizeReaction(reaction.count)}
+                            <span className="hidden rounded-full bg-white px-3 py-1.5 text-[11px] font-extrabold text-slate-500 ring-1 ring-slate-200 sm:inline-flex">
+                              Member
                             </span>
                           </div>
-
-                          {reaction.members.length === 0 ? (
-                            <p className="rounded-xl bg-slate-50 p-3 text-xs font-bold text-slate-500">
-                              No approved member names are available for this
-                              reaction yet.
-                            </p>
-                          ) : (
-                            <div className="grid gap-2">
-                              {reaction.members.map((member) => {
-                                const displayName =
-                                  member.profile_id === user?.id
-                                    ? 'You'
-                                    : member.full_name
-
-                                return (
-                                  <div
-                                    key={`${reaction.id}-${member.profile_id}-${member.reacted_at}`}
-                                    className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/70 p-3"
-                                  >
-                                    <ProfileAvatar
-                                      path={member.avatar_path}
-                                      name={displayName}
-                                      className="size-10 rounded-xl"
-                                      textClassName="text-sm"
-                                    />
-                                    <span className="min-w-0">
-                                      <span className="block truncate text-sm font-extrabold text-navy-900">
-                                        {displayName}
-                                      </span>
-                                      <span className="text-xs font-bold text-slate-500">
-                                        {reaction.label}
-                                      </span>
-                                    </span>
-                                  </div>
-                                )
-                              })}
-                            </div>
-                          )}
-                        </section>
-                      )
-                    })}
+                        )
+                      })
+                    )}
                   </div>
                 )}
               </div>
