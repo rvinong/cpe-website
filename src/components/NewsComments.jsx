@@ -113,18 +113,22 @@ function CommentItem({
   const isCurrentUser = comment.profileId === currentUserId
 
   return (
-    <article className="relative">
-      <div className="flex items-start gap-2.5">
+    <article className="relative min-w-0">
+      <div className="flex min-w-0 items-start gap-2 sm:gap-2.5">
         <ProfileAvatar
           path={comment.avatarPath}
           name={comment.fullName}
-          className={isReply ? 'size-8 rounded-full' : 'size-9 rounded-full'}
+          className={
+            isReply
+              ? 'size-7 shrink-0 rounded-full sm:size-8'
+              : 'size-8 shrink-0 rounded-full sm:size-9'
+          }
           textClassName="text-xs"
         />
         <div className="min-w-0 flex-1">
           <div className="inline-block max-w-full rounded-[1.25rem] bg-slate-100 px-3.5 py-2.5 text-left ring-1 ring-slate-200/70">
             <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-0.5">
-              <h3 className="truncate text-[13px] font-extrabold leading-4 text-navy-900">
+              <h3 className="max-w-full break-words text-[13px] font-extrabold leading-4 text-navy-900">
                 {comment.fullName}
               </h3>
               {isCurrentUser && (
@@ -164,7 +168,7 @@ function CommentItem({
       </div>
 
       {replies.length > 0 && (
-        <div className="relative ml-4 mt-2 space-y-2 border-l-2 border-slate-200 pl-4 sm:ml-4">
+        <div className="relative ml-3 mt-2 space-y-2 border-l-2 border-slate-200 pl-3 sm:ml-4 sm:pl-4">
           {replies.map((reply) => (
             <CommentItem
               key={reply.id}
@@ -357,7 +361,7 @@ function NewsComments({
               </p>
             </div>
           ) : (
-            <div className="max-h-[520px] space-y-3 overflow-y-auto pr-1">
+            <div className="max-h-[520px] space-y-3 overflow-x-hidden overflow-y-auto pr-1">
               {rootComments.map((comment) => (
                 <div key={comment.id} className="grid gap-2">
                   <CommentItem
@@ -373,7 +377,7 @@ function NewsComments({
                   />
 
                   {activeReplyId === comment.id && (
-                    <div className="ml-11 rounded-2xl bg-slate-50 p-3 ring-1 ring-slate-200">
+                    <div className="ml-10 rounded-2xl bg-slate-50 p-3 ring-1 ring-slate-200 sm:ml-11">
                       {user && isApprovedMember ? (
                         <CommentComposer
                           autoFocus
@@ -408,7 +412,7 @@ function NewsComments({
               <ProfileAvatar
                 path={profile?.avatar_path}
                 name={profile?.nickname || profile?.full_name || user.email}
-                className="size-9 rounded-full"
+                className="size-8 shrink-0 rounded-full sm:size-9"
                 textClassName="text-xs"
               />
               <div className="min-w-0 flex-1">
