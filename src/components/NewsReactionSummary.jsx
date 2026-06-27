@@ -14,7 +14,6 @@ import {
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import useAuth from '../context/useAuth'
-import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import {
   clearNewsReaction,
   getFriendlyReactionError,
@@ -225,8 +224,6 @@ function NewsReactionSummary({
     ? reactionIcons[activeReaction.id]
     : ThumbsUp
   const summaryText = getReactionText(summary)
-
-  useBodyScrollLock(isMembersOpen)
 
   useEffect(
     () => () => {
@@ -674,19 +671,16 @@ function NewsReactionSummary({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[80] overflow-y-auto bg-navy-950/75 p-4 backdrop-blur-sm sm:p-6"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Reaction members"
-            onPointerDown={(event) => {
-              if (event.target === event.currentTarget) setIsMembersOpen(false)
-            }}
+            className="pointer-events-none fixed inset-0 z-[80] overflow-y-auto bg-navy-950/75 p-4 backdrop-blur-sm sm:p-6"
           >
             <Motion.div
               initial={{ opacity: 0, y: 18, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 18, scale: 0.98 }}
-              className="mx-auto my-4 flex max-h-[calc(100dvh-2rem)] w-full max-w-md flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl sm:my-8 sm:max-h-[calc(100dvh-4rem)]"
+              className="pointer-events-auto mx-auto my-4 flex max-h-[calc(100dvh-2rem)] w-full max-w-md flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl sm:my-8 sm:max-h-[calc(100dvh-4rem)]"
+              role="dialog"
+              aria-modal="false"
+              aria-label="Reaction members"
             >
               <div className="shrink-0 flex items-center justify-between border-b border-slate-200 px-5 py-5">
                 <div>
