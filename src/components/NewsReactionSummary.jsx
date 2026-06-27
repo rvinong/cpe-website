@@ -674,7 +674,7 @@ function NewsReactionSummary({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[80] grid place-items-center bg-navy-950/75 p-4 backdrop-blur-sm"
+            className="fixed inset-0 z-[80] overflow-y-auto bg-navy-950/75 p-4 backdrop-blur-sm sm:p-6"
             role="dialog"
             aria-modal="true"
             aria-label="Reaction members"
@@ -686,9 +686,9 @@ function NewsReactionSummary({
               initial={{ opacity: 0, y: 18, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 18, scale: 0.98 }}
-              className="w-full max-w-md overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl"
+              className="mx-auto my-4 flex max-h-[calc(100dvh-2rem)] w-full max-w-md flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl sm:my-8 sm:max-h-[calc(100dvh-4rem)]"
             >
-              <div className="flex items-center justify-between border-b border-slate-200 px-5 py-5">
+              <div className="shrink-0 flex items-center justify-between border-b border-slate-200 px-5 py-5">
                 <div>
                   <p className="text-xs font-extrabold tracking-[0.16em] text-brand-600 uppercase">
                     Community reactions
@@ -707,7 +707,7 @@ function NewsReactionSummary({
                 </button>
               </div>
 
-              <div className="max-h-[60vh] overflow-y-auto p-5">
+              <div className="reaction-members-scroll min-h-0 flex-1 overflow-y-auto p-5">
                 {isLoadingMembers ? (
                   <p className="rounded-xl bg-brand-50 p-4 text-sm font-bold text-brand-600">
                     Loading members...

@@ -464,6 +464,12 @@ a {
   overscroll-behavior: contain;
 }
 
+.reaction-members-scroll {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
 .admin-modal-backdrop > div {
   animation: admin-modal-enter 220ms cubic-bezier(0.22, 1, 0.36, 1);
 }
