@@ -1,3 +1,58 @@
-export const upcomingEvents = []
+export const upcomingEvents = [
+  {
+    id: 'sample-cpe-orientation-peer-mentoring',
+    slug: 'sample-cpe-orientation-peer-mentoring',
+    title: 'Sample CpE Orientation and Peer Mentoring Day',
+    category: 'Academic',
+    summary:
+      'A welcome session introducing students to organization programs, peer support channels, and responsible campus involvement.',
+    description:
+      'This sample event can be replaced with the official orientation schedule once the organization confirms the date, venue, and program flow.',
+    venue: 'CEA Computer Laboratory',
+    starts_at: '2026-07-15T09:00:00+08:00',
+    ends_at: '2026-07-15T12:00:00+08:00',
+    registration_url: '',
+    image: null,
+    image_path: null,
+    imageAlt: 'Students attending a Computer Engineering orientation',
+    image_alt: 'Students attending a Computer Engineering orientation',
+    showInGallery: false,
+    show_in_gallery: false,
+    status: 'published',
+    isFeatured: true,
+    is_featured: true,
+    published_at: '2026-06-27T08:00:00+08:00',
+    date: 'July 15, 2026',
+    time: '9:00 AM - 12:00 PM',
+    timing: 'upcoming',
+  },
+  {
+    id: 'sample-embedded-systems-mini-workshop',
+    slug: 'sample-embedded-systems-mini-workshop',
+    title: 'Sample Embedded Systems Mini Workshop',
+    category: 'Workshop',
+    summary:
+      'A beginner-friendly practical session on microcontrollers, sensors, wiring checks, and simple firmware testing.',
+    description:
+      'This sample workshop gives the events page enough structure while the official student activity calendar is still being prepared.',
+    venue: 'Electronics Laboratory',
+    starts_at: '2026-08-08T13:00:00+08:00',
+    ends_at: '2026-08-08T16:00:00+08:00',
+    registration_url: '',
+    image: null,
+    image_path: null,
+    imageAlt: 'Computer Engineering students working with embedded systems',
+    image_alt: 'Computer Engineering students working with embedded systems',
+    showInGallery: false,
+    show_in_gallery: false,
+    status: 'published',
+    isFeatured: false,
+    is_featured: false,
+    published_at: '2026-06-27T08:00:00+08:00',
+    date: 'August 8, 2026',
+    time: '1:00 PM - 4:00 PM',
+    timing: 'upcoming',
+  },
+]
 
 export const pastEvents = []
