@@ -309,7 +309,7 @@ function NewsComments({
 
   return (
     <section id="comments" className={`scroll-mt-28 ${className}`}>
-      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_30px_80px_-48px_rgba(15,23,42,0.42)]">
+      <div className="rounded-3xl border border-slate-200 bg-white shadow-[0_30px_80px_-48px_rgba(15,23,42,0.42)]">
         <div className="border-b border-slate-100 px-4 py-3 sm:px-5">
           <NewsReactionSummary
             className="w-full"
