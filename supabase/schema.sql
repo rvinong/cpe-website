@@ -163,13 +163,35 @@ on conflict (id) do update set
   file_size_limit = excluded.file_size_limit,
   allowed_mime_types = excluded.allowed_mime_types;
 
-create policy "Approved users can view profile avatars"
+create or replace function public.is_approved_profile_avatar(
+  target_avatar_path text
+)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.profiles
+    where profiles.avatar_path = target_avatar_path
+      and profiles.status = 'approved'
+  );
+$$;
+
+revoke all on function public.is_approved_profile_avatar(text)
+  from public;
+grant execute on function public.is_approved_profile_avatar(text)
+  to anon, authenticated;
+
+create policy "Public can view approved profile avatars"
 on storage.objects
 for select
-to authenticated
+to anon, authenticated
 using (
   bucket_id = 'profile-avatars'
-  and public.current_user_role() is not null
+  and public.is_approved_profile_avatar(name)
 );
 
 create policy "Approved users can upload their own profile avatar"
