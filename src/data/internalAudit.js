@@ -1,10 +1,24 @@
 export const internalAuditCategories = [
   {
+    id: 'project_proposal',
+    label: 'Project Proposals',
+    shortLabel: 'Proposals',
+    description:
+      'Approved project proposals, implementation plans, objectives, and committee responsibilities.',
+  },
+  {
     id: 'accomplishment',
     label: 'Accomplishment Report',
     shortLabel: 'Accomplishments',
     description:
       'Records of completed programs, activities, initiatives, and organization outputs.',
+  },
+  {
+    id: 'activity',
+    label: 'Activities',
+    shortLabel: 'Activities',
+    description:
+      'Approved activity records, event documentation, and implementation summaries.',
   },
   {
     id: 'liquidation',
@@ -23,6 +37,24 @@ export const internalAuditCategories = [
 ]
 
 export const internalAuditReports = [
+  {
+    id: 'sample-approved-project-proposal',
+    type: 'project_proposal',
+    title: 'Sample Approved Project Proposal',
+    period: 'Proposal-based record',
+    publishedAt: 'For publication',
+    preparedBy: 'Project Committee',
+    reviewedBy: 'Internal Auditor',
+    status: 'Template',
+    summary:
+      'A sample proposal record for objectives, implementation plan, expected outputs, timeline, and approval notes.',
+    highlights: [
+      'Project objectives and rationale',
+      'Implementation timeline',
+      'Approval and committee responsibilities',
+    ],
+    fileUrl: '',
+  },
   {
     id: 'sample-first-semester-accomplishment-report',
     type: 'accomplishment',
@@ -56,6 +88,24 @@ export const internalAuditReports = [
       'Objectives and actual outcomes',
       'Committee responsibilities',
       'Photos and evidence checklist',
+    ],
+    fileUrl: '',
+  },
+  {
+    id: 'sample-approved-activity-record',
+    type: 'activity',
+    title: 'Sample Approved Activity Record',
+    period: 'Activity-based record',
+    publishedAt: 'For publication',
+    preparedBy: 'Activity Lead',
+    reviewedBy: 'Internal Auditor',
+    status: 'Template',
+    summary:
+      'A sample activity record for approved events, implementation notes, attendance documentation, and public summary details.',
+    highlights: [
+      'Approved activity overview',
+      'Event implementation notes',
+      'Documentation and attendance summary',
     ],
     fileUrl: '',
   },

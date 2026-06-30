@@ -5,7 +5,15 @@ create table if not exists public.audit_reports (
   slug text not null unique,
   title text not null,
   report_type text not null
-    check (report_type in ('accomplishment', 'liquidation', 'resolution')),
+    check (
+      report_type in (
+        'project_proposal',
+        'accomplishment',
+        'activity',
+        'liquidation',
+        'resolution'
+      )
+    ),
   period text not null default '',
   summary text not null default '',
   prepared_by text not null default '',
@@ -29,6 +37,21 @@ create table if not exists public.audit_reports (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.audit_reports
+  drop constraint if exists audit_reports_report_type_check;
+
+alter table public.audit_reports
+  add constraint audit_reports_report_type_check
+  check (
+    report_type in (
+      'project_proposal',
+      'accomplishment',
+      'activity',
+      'liquidation',
+      'resolution'
+    )
+  );
 
 create index if not exists audit_reports_public_listing_idx
   on public.audit_reports (

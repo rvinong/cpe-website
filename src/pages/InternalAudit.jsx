@@ -29,15 +29,25 @@ import {
 } from '../lib/internalAudit'
 
 const categoryIcons = {
+  project_proposal: ClipboardCheck,
   accomplishment: FileCheck2,
+  activity: CalendarDays,
   liquidation: ReceiptText,
   resolution: FileText,
 }
 
 const categoryStyles = {
+  project_proposal: {
+    icon: 'bg-violet-50 text-violet-600 ring-violet-100',
+    badge: 'bg-violet-50 text-violet-600 ring-violet-100',
+  },
   accomplishment: {
     icon: 'bg-brand-50 text-brand-600 ring-blue-100',
     badge: 'bg-brand-50 text-brand-700 ring-blue-100',
+  },
+  activity: {
+    icon: 'bg-amber-50 text-amber-600 ring-amber-100',
+    badge: 'bg-amber-50 text-amber-700 ring-amber-100',
   },
   liquidation: {
     icon: 'bg-orange-50 text-orange-500 ring-orange-100',
@@ -154,7 +164,7 @@ function InternalAudit() {
       <PageHero
         eyebrow="Organization accountability"
         title="Organizational Internal Audit"
-        description="Access accomplishment reports, liquidation reports, resolutions, and approved transparency records from the organization."
+        description="Access approved project proposals, activity records, accomplishment reports, liquidation reports, resolutions, and transparency records from the organization."
         icon={ShieldCheck}
         accentIcon={ClipboardCheck}
         actions={
@@ -352,9 +362,9 @@ function InternalAudit() {
               Reports and Records
             </h2>
             <p className="mt-4 text-base leading-7 text-slate-600">
-              Use this archive for published accomplishment reports,
-              liquidation reports, and resolutions. Only approved public
-              records appear in this archive.
+              Use this archive for approved project proposals, activity
+              records, accomplishment reports, liquidation reports, and
+              resolutions. Only approved public records appear in this archive.
             </p>
           </Motion.div>
 
@@ -431,8 +441,9 @@ function InternalAudit() {
               </span>
               <h3 className="empty-state-title">No reports found</h3>
               <p className="empty-state-description">
-                Published accomplishment reports, liquidation reports, and
-                resolutions will appear here after they are approved.
+                Published project proposals, activity records, accomplishment
+                reports, liquidation reports, and resolutions will appear here
+                after they are approved.
               </p>
             </div>
           ) : (

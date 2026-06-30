@@ -4,7 +4,7 @@ import GlanceSection from '../components/GlanceSection'
 import Hero from '../components/Hero'
 import NewsSection from '../components/NewsSection'
 import QuickAccess from '../components/QuickAccess'
-import StatsStrip from '../components/StatsStrip'
+import TransparencySnapshot from '../components/TransparencySnapshot'
 import UpcomingEvents from '../components/UpcomingEvents'
 
 function Home() {
@@ -15,9 +15,9 @@ function Home() {
       <GlanceSection />
       <UpcomingEvents />
       <FeaturedPrograms />
+      <TransparencySnapshot />
       <AlumniSection />
       <NewsSection />
-      <StatsStrip />
     </main>
   )
 }

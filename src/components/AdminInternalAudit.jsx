@@ -1,7 +1,9 @@
 import {
   Archive,
   BadgeCheck,
+  CalendarCheck,
   CirclePlus,
+  ClipboardList,
   Download,
   Edit3,
   FileCheck2,
@@ -36,7 +38,7 @@ import AdminListSkeleton from './AdminListSkeleton'
 
 const emptyForm = {
   title: '',
-  reportType: 'accomplishment',
+  reportType: 'project_proposal',
   period: '',
   summary: '',
   preparedBy: '',
@@ -59,7 +61,9 @@ const statusStyles = {
 }
 
 const typeIcons = {
+  project_proposal: ClipboardList,
   accomplishment: FileCheck2,
+  activity: CalendarCheck,
   liquidation: ReceiptText,
   resolution: FileText,
 }
@@ -377,8 +381,9 @@ function AdminInternalAudit() {
             Internal Audit
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-            Upload and publish accomplishment reports, liquidation reports, and
-            resolutions for the public transparency archive.
+            Upload and publish approved project proposals, activity records,
+            accomplishment reports, liquidation reports, and resolutions for the
+            public transparency archive.
           </p>
         </div>
         <button
@@ -457,7 +462,7 @@ function AdminInternalAudit() {
                 type="search"
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
-                placeholder="Search reports, periods, reviewers, or resolutions"
+                placeholder="Search reports, periods, reviewers, proposals, or resolutions"
                 className="admin-search-field"
               />
             </label>
