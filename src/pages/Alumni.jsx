@@ -300,7 +300,7 @@ function Alumni() {
           </div>
         </section>
 
-        <section className="bg-navy-950 py-20 text-white sm:py-24">
+        <section className="bg-slate-50/70 py-20 sm:py-24">
           <div className="section-shell">
             <Motion.div
               initial={{ opacity: 0, y: 18 }}
@@ -312,10 +312,10 @@ function Alumni() {
               <p className="text-xs font-extrabold tracking-[0.2em] text-brand-600 uppercase">
                 Graduate directory
               </p>
-              <h2 className="mt-3 text-3xl font-black tracking-tight text-white sm:text-4xl">
+              <h2 className="mt-3 text-3xl font-black tracking-tight text-navy-900 sm:text-4xl">
                 Browse the Yearbook
               </h2>
-              <p className="mt-4 text-base leading-7 text-slate-300">
+              <p className="mt-4 text-base leading-7 text-slate-600">
                 A compact portrait archive for verified graduates. Select a
                 portrait to view the approved profile details.
               </p>
@@ -324,30 +324,28 @@ function Alumni() {
             {isLoading ? (
               <ContentSkeleton
                 count={6}
-                tone="dark"
                 className="mt-10"
                 label="Loading alumni directory"
               />
             ) : filteredProfiles.length === 0 ? (
               <EmptyState
                 icon={Inbox}
-                tone="dark"
                 className="mt-10"
                 title="Yearbook records are being collected"
                 description="No verified alumni profiles have been published yet. Graduate records and batch photos will be added as the organization completes its archive."
               />
             ) : (
-              <div className="relative mt-10 overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.045] p-5 shadow-[0_30px_90px_-55px_rgba(0,0,0,0.9)] backdrop-blur-sm sm:p-8">
-                <div className="subtle-grid absolute inset-0 opacity-10" />
+              <div className="surface-card relative mt-10 overflow-hidden rounded-[2rem] bg-white/90 p-5 sm:p-8">
+                <div className="subtle-grid absolute inset-0 opacity-60" />
                 <div className="relative grid gap-10">
                   {yearbookGroups.map(([batch, batchProfiles]) => (
                     <div key={batch}>
                       <div className="mb-5 flex items-center gap-3">
-                        <span className="h-px flex-1 bg-white/10" />
-                        <p className="rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 text-xs font-extrabold tracking-[0.16em] text-blue-200 uppercase">
+                        <span className="h-px flex-1 bg-slate-200" />
+                        <p className="rounded-full border border-blue-100 bg-brand-50 px-4 py-2 text-xs font-extrabold tracking-[0.16em] text-brand-600 uppercase">
                           Batch {batch}
                         </p>
-                        <span className="h-px flex-1 bg-white/10" />
+                        <span className="h-px flex-1 bg-slate-200" />
                       </div>
 
                       <div className="grid grid-cols-3 gap-x-4 gap-y-7 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-9">
@@ -368,7 +366,7 @@ function Alumni() {
                             className="group rounded-xl border-0 bg-transparent p-0 text-center"
                             aria-label={`Open ${profile.name}'s alumni profile`}
                           >
-                            <span className="mx-auto block aspect-[3/4] w-full max-w-24 overflow-hidden rounded-xl border border-white/10 bg-navy-900 shadow-[0_18px_40px_-28px_rgba(0,0,0,0.85)] transition group-hover:border-blue-300/60 group-hover:shadow-[0_20px_46px_-26px_rgba(59,130,246,0.55)] sm:max-w-28">
+                            <span className="mx-auto block aspect-[3/4] w-full max-w-24 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.42)] transition group-hover:border-brand-500/60 group-hover:shadow-[0_22px_48px_-30px_rgba(21,94,239,0.42)] sm:max-w-28">
                               {profile.photo ? (
                                 <img
                                   src={profile.photo}
@@ -383,11 +381,11 @@ function Alumni() {
                                 </span>
                               )}
                             </span>
-                            <span className="mt-2 block truncate text-[0.68rem] font-extrabold leading-4 text-white transition group-hover:text-blue-200 sm:text-xs">
+                            <span className="mt-2 block truncate text-[0.68rem] font-extrabold leading-4 text-navy-900 transition group-hover:text-brand-600 sm:text-xs">
                               {profile.name}
                             </span>
                             {profile.role && (
-                              <span className="mt-0.5 block truncate text-[0.62rem] font-bold text-slate-400 sm:text-[0.68rem]">
+                              <span className="mt-0.5 block truncate text-[0.62rem] font-bold text-slate-500 sm:text-[0.68rem]">
                                 {profile.role}
                               </span>
                             )}
