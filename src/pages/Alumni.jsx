@@ -11,12 +11,14 @@ import {
   ShieldCheck,
   UserRound,
   UsersRound,
+  X,
 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import ContentSkeleton from '../components/ContentSkeleton'
 import EmptyState from '../components/EmptyState'
 import PageHero from '../components/PageHero'
 import { alumniProfiles as sampleAlumniProfiles } from '../data/alumni'
+import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import useAlumni from '../hooks/useAlumni'
 
 const profileDetails = [
@@ -56,10 +58,12 @@ function Alumni() {
   const { profiles, isLoading } = useAlumni()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedBatch, setSelectedBatch] = useState('All batches')
+  const [selectedProfile, setSelectedProfile] = useState(null)
   const isUsingSampleProfiles = !isLoading && profiles.length === 0
   const displayedProfiles = isUsingSampleProfiles
     ? sampleAlumniProfiles
     : profiles
+  useBodyScrollLock(Boolean(selectedProfile))
 
   const batches = useMemo(
     () =>
@@ -91,6 +95,19 @@ function Alumni() {
     () => displayedProfiles.filter((profile) => profile.featured),
     [displayedProfiles],
   )
+
+  const yearbookGroups = useMemo(() => {
+    const groups = new Map()
+
+    filteredProfiles.forEach((profile) => {
+      const batch = profile.batch || 'Unspecified batch'
+      groups.set(batch, [...(groups.get(batch) || []), profile])
+    })
+
+    return [...groups.entries()].sort(([first], [second]) =>
+      second.localeCompare(first),
+    )
+  }, [filteredProfiles])
 
   return (
     <>
@@ -284,7 +301,7 @@ function Alumni() {
           </div>
         </section>
 
-        <section className="bg-slate-50/70 py-20 sm:py-24">
+        <section className="bg-navy-950 py-20 text-white sm:py-24">
           <div className="section-shell">
             <Motion.div
               initial={{ opacity: 0, y: 18 }}
@@ -296,78 +313,91 @@ function Alumni() {
               <p className="text-xs font-extrabold tracking-[0.2em] text-brand-600 uppercase">
                 Graduate directory
               </p>
-              <h2 className="mt-3 text-3xl font-black tracking-tight text-navy-900 sm:text-4xl">
+              <h2 className="mt-3 text-3xl font-black tracking-tight text-white sm:text-4xl">
                 Browse the Yearbook
               </h2>
-              <p className="mt-4 text-base leading-7 text-slate-600">
-                Profiles will appear here after graduate details have been
-                checked and approved for publication.
+              <p className="mt-4 text-base leading-7 text-slate-300">
+                A compact portrait archive for verified graduates. Select a
+                portrait to view the approved profile details.
               </p>
             </Motion.div>
 
             {isLoading ? (
               <ContentSkeleton
-                count={3}
+                count={6}
+                tone="dark"
                 className="mt-10"
                 label="Loading alumni directory"
               />
             ) : filteredProfiles.length === 0 ? (
               <EmptyState
                 icon={Inbox}
+                tone="dark"
                 className="mt-10"
                 title="Yearbook records are being collected"
                 description="No verified alumni profiles have been published yet. Graduate records and batch photos will be added as the organization completes its archive."
               />
             ) : (
-              <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {filteredProfiles.map((profile, index) => (
-                  <Motion.article
-                    key={profile.id}
-                    initial={{ opacity: 0, y: 18 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    whileHover={{ y: -4 }}
-                    viewport={{ once: true, amount: 0.2 }}
-                    transition={{ duration: 0.45, delay: index * 0.04 }}
-                    className="surface-card interactive-card p-6"
-                  >
-                    <div className="flex items-start justify-between gap-4">
-                      {profile.photo ? (
-                        <img
-                          src={profile.photo}
-                          alt=""
-                          loading="lazy"
-                          decoding="async"
-                          className="profile-image size-16 rounded-2xl object-cover"
-                        />
-                      ) : (
-                        <span className="grid size-16 place-items-center rounded-2xl bg-brand-600 text-lg font-black text-white">
-                          {profile.initials}
-                        </span>
-                      )}
-                      <span className="rounded-full bg-brand-50 px-3 py-1.5 text-xs font-extrabold text-brand-600">
-                        Batch {profile.batch}
-                      </span>
+              <div className="relative mt-10 overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.045] p-5 shadow-[0_30px_90px_-55px_rgba(0,0,0,0.9)] backdrop-blur-sm sm:p-8">
+                <div className="subtle-grid absolute inset-0 opacity-10" />
+                <div className="relative grid gap-10">
+                  {yearbookGroups.map(([batch, batchProfiles]) => (
+                    <div key={batch}>
+                      <div className="mb-5 flex items-center gap-3">
+                        <span className="h-px flex-1 bg-white/10" />
+                        <p className="rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 text-xs font-extrabold tracking-[0.16em] text-blue-200 uppercase">
+                          Batch {batch}
+                        </p>
+                        <span className="h-px flex-1 bg-white/10" />
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-x-4 gap-y-7 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-9">
+                        {batchProfiles.map((profile, index) => (
+                          <Motion.button
+                            key={profile.id}
+                            type="button"
+                            onClick={() => setSelectedProfile(profile)}
+                            initial={{ opacity: 0, y: 14 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            whileHover={{ y: -4 }}
+                            whileTap={{ scale: 0.98 }}
+                            viewport={{ once: true, amount: 0.18 }}
+                            transition={{
+                              duration: 0.38,
+                              delay: Math.min(index * 0.018, 0.18),
+                            }}
+                            className="group rounded-xl border-0 bg-transparent p-0 text-center"
+                            aria-label={`Open ${profile.name}'s alumni profile`}
+                          >
+                            <span className="mx-auto block aspect-[3/4] w-full max-w-24 overflow-hidden rounded-xl border border-white/10 bg-navy-900 shadow-[0_18px_40px_-28px_rgba(0,0,0,0.85)] transition group-hover:border-blue-300/60 group-hover:shadow-[0_20px_46px_-26px_rgba(59,130,246,0.55)] sm:max-w-28">
+                              {profile.photo ? (
+                                <img
+                                  src={profile.photo}
+                                  alt=""
+                                  loading="lazy"
+                                  decoding="async"
+                                  className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                                />
+                              ) : (
+                                <span className="grid h-full w-full place-items-center bg-brand-600 text-xl font-black text-white">
+                                  {profile.initials}
+                                </span>
+                              )}
+                            </span>
+                            <span className="mt-2 block truncate text-[0.68rem] font-extrabold leading-4 text-white transition group-hover:text-blue-200 sm:text-xs">
+                              {profile.name}
+                            </span>
+                            {profile.role && (
+                              <span className="mt-0.5 block truncate text-[0.62rem] font-bold text-slate-400 sm:text-[0.68rem]">
+                                {profile.role}
+                              </span>
+                            )}
+                          </Motion.button>
+                        ))}
+                      </div>
                     </div>
-                    <h3 className="mt-5 text-xl font-black text-navy-900">
-                      {profile.name}
-                    </h3>
-                    {profile.role && (
-                      <p className="mt-2 text-sm font-extrabold text-brand-600">
-                        {profile.role}
-                      </p>
-                    )}
-                    {profile.organization && (
-                      <p className="mt-1 text-sm text-slate-500">
-                        {profile.organization}
-                      </p>
-                    )}
-                    {profile.history && (
-                      <p className="mt-4 border-t border-slate-100 pt-4 text-sm leading-6 text-slate-600">
-                        {profile.history}
-                      </p>
-                    )}
-                  </Motion.article>
-                ))}
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -443,6 +473,93 @@ function Alumni() {
           </div>
         </section>
       </main>
+
+      {selectedProfile && (
+        <div
+          className="fixed inset-0 z-[70] overflow-y-auto bg-navy-950/75 p-4 backdrop-blur-sm sm:p-6"
+          role="dialog"
+          aria-modal="true"
+          aria-label={`${selectedProfile.name} alumni profile`}
+          onClick={() => setSelectedProfile(null)}
+        >
+          <Motion.div
+            initial={{ opacity: 0, y: 18, scale: 0.985 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.22 }}
+            className="mx-auto my-8 max-w-3xl overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="relative bg-navy-950 p-6 text-white sm:p-8">
+              <div className="subtle-grid absolute inset-0 opacity-10" />
+              <button
+                type="button"
+                onClick={() => setSelectedProfile(null)}
+                className="absolute right-4 top-4 z-10 grid size-10 place-items-center rounded-xl border border-white/10 bg-white/10 text-white transition hover:bg-white/20"
+                aria-label="Close alumni profile"
+              >
+                <X size={19} aria-hidden="true" />
+              </button>
+
+              <div className="relative flex flex-col gap-6 sm:flex-row sm:items-end">
+                <div className="aspect-[3/4] w-36 overflow-hidden rounded-2xl border border-white/10 bg-navy-900 shadow-2xl sm:w-44">
+                  {selectedProfile.photo ? (
+                    <img
+                      src={selectedProfile.photo}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span className="grid h-full w-full place-items-center bg-brand-600 text-4xl font-black">
+                      {selectedProfile.initials}
+                    </span>
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-extrabold tracking-[0.18em] text-blue-300 uppercase">
+                    Batch {selectedProfile.batch}
+                  </p>
+                  <h2 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">
+                    {selectedProfile.name}
+                  </h2>
+                  {(selectedProfile.role || selectedProfile.organization) && (
+                    <p className="mt-3 text-sm font-bold text-blue-100">
+                      {[selectedProfile.role, selectedProfile.organization]
+                        .filter(Boolean)
+                        .join(' at ')}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="grid gap-5 p-6 sm:p-8">
+              {selectedProfile.history && (
+                <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5">
+                  <p className="text-xs font-extrabold tracking-[0.16em] text-brand-600 uppercase">
+                    Organization history
+                  </p>
+                  <p className="mt-2 text-sm leading-7 text-slate-600">
+                    {selectedProfile.history}
+                  </p>
+                </div>
+              )}
+              {selectedProfile.highlight && (
+                <div className="rounded-2xl border border-blue-100 bg-brand-50/45 p-5">
+                  <p className="text-xs font-extrabold tracking-[0.16em] text-brand-600 uppercase">
+                    Spotlight note
+                  </p>
+                  <p className="mt-2 text-sm leading-7 text-slate-600">
+                    {selectedProfile.highlight}
+                  </p>
+                </div>
+              )}
+              <p className="text-xs font-bold leading-5 text-slate-500">
+                Only approved public details are shown in the alumni yearbook.
+              </p>
+            </div>
+          </Motion.div>
+        </div>
+      )}
     </>
   )
 }
