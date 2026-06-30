@@ -12,8 +12,6 @@ import {
   Images,
   Maximize2,
   Newspaper,
-  ShieldCheck,
-  Tags,
   X,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
@@ -22,27 +20,6 @@ import EmptyState from '../components/EmptyState'
 import NewsCard from '../components/NewsCard'
 import PageHero from '../components/PageHero'
 import { useGalleryPhotos, useNews } from '../hooks/useMedia'
-
-const archiveDetails = [
-  {
-    icon: Images,
-    title: 'Story and event albums',
-    description:
-      'Photos are grouped by news stories, workshops, outreach programs, competitions, and organization activities.',
-  },
-  {
-    icon: Tags,
-    title: 'Clear information',
-    description:
-      'Each album can include its official title, date, category, and a short activity description.',
-  },
-  {
-    icon: ShieldCheck,
-    title: 'Approved media',
-    description:
-      'Only organization-approved photos with appropriate publication permission will be displayed.',
-  },
-]
 
 function getPhotoGroupId(photo) {
   return photo.groupId || `${photo.sourceType || 'gallery'}-${photo.album}`
@@ -345,7 +322,7 @@ function Gallery() {
               </label>
             </Motion.div>
 
-            <div className="mt-8 grid gap-4 sm:grid-cols-3">
+            <div className="mt-8 grid gap-4 sm:grid-cols-2">
               {[
                 {
                   label: 'Published photos',
@@ -356,11 +333,6 @@ function Gallery() {
                   label: 'Available albums',
                   value: albums.length,
                   icon: Images,
-                },
-                {
-                  label: 'Archive status',
-                  value: galleryPhotos.length > 0 ? 'Published' : 'Collecting',
-                  icon: Camera,
                 },
               ].map(({ label, value, icon: Icon }, index) => (
                 <Motion.article
@@ -523,68 +495,6 @@ function Gallery() {
           </div>
         </section>
 
-        <section className="bg-white py-20 sm:py-24">
-          <div className="section-shell">
-            <Motion.div
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.25 }}
-              transition={{ duration: 0.5 }}
-              className="max-w-2xl"
-            >
-              <p className="text-xs font-extrabold tracking-[0.2em] text-brand-600 uppercase">
-                Archive standards
-              </p>
-              <h2 className="mt-3 text-3xl font-black tracking-tight text-navy-900 sm:text-4xl">
-                How the gallery is organized
-              </h2>
-            </Motion.div>
-
-            <div className="mt-10 grid gap-5 md:grid-cols-3">
-              {archiveDetails.map(({ icon: Icon, title, description }, index) => (
-                <Motion.article
-                  key={title}
-                  initial={{ opacity: 0, y: 18 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, amount: 0.25 }}
-                  transition={{ duration: 0.5, delay: index * 0.07 }}
-                  className="surface-card interactive-card p-6"
-                >
-                  <span className="grid size-12 place-items-center rounded-xl bg-brand-50 text-brand-600">
-                    <Icon size={22} strokeWidth={1.7} aria-hidden="true" />
-                  </span>
-                  <h3 className="mt-5 text-lg font-extrabold text-navy-900">
-                    {title}
-                  </h3>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
-                    {description}
-                  </p>
-                </Motion.article>
-              ))}
-            </div>
-
-            <Motion.div
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.25 }}
-              transition={{ duration: 0.5 }}
-              className="mt-12 rounded-3xl bg-navy-950 px-6 py-10 text-center text-white shadow-[0_30px_80px_-44px_rgba(7,21,47,0.8)] sm:px-10"
-            >
-              <Camera
-                size={30}
-                className="mx-auto text-blue-300"
-                aria-hidden="true"
-              />
-              <h2 className="mt-4 text-2xl font-black">
-                Building the official photo archive
-              </h2>
-              <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-300">
-                Event name, date, album description, and approved image files
-                are needed before an activity can be published in the gallery.
-              </p>
-            </Motion.div>
-          </div>
-        </section>
       </main>
 
       <AnimatePresence>

@@ -1,7 +1,6 @@
 import { motion as Motion } from 'framer-motion'
 import {
   Archive,
-  BadgeCheck,
   CalendarDays,
   CheckCircle2,
   ClipboardCheck,
@@ -10,7 +9,6 @@ import {
   FileCheck2,
   FileText,
   Filter,
-  LockKeyhole,
   ReceiptText,
   Search,
   ShieldCheck,
@@ -19,10 +17,7 @@ import {
 import { useEffect, useMemo, useState } from 'react'
 import ContentSkeleton from '../components/ContentSkeleton'
 import PageHero from '../components/PageHero'
-import {
-  internalAuditCategories,
-  internalAuditProcess,
-} from '../data/internalAudit'
+import { internalAuditCategories } from '../data/internalAudit'
 import {
   createAuditReportDownload,
   getPublicAuditReports,
@@ -134,28 +129,35 @@ function InternalAudit() {
 
   const summaryCards = [
     {
-      label: 'Document groups',
-      value: internalAuditCategories.length,
-      description: 'Main transparency record types',
-      icon: Archive,
+      label: 'Project proposals',
+      value: isLoading
+        ? '...'
+        : reports.filter((report) => report.type === 'project_proposal')
+            .length,
+      description: 'Published approved proposals',
+      icon: ClipboardCheck,
+    },
+    {
+      label: 'Resolutions',
+      value: isLoading
+        ? '...'
+        : reports.filter((report) => report.type === 'resolution').length,
+      description: 'Published approved resolutions',
+      icon: FileText,
+    },
+    {
+      label: 'Activities',
+      value: isLoading
+        ? '...'
+        : reports.filter((report) => report.type === 'activity').length,
+      description: 'Documented organization activities',
+      icon: CalendarDays,
     },
     {
       label: 'Published records',
       value: isLoading ? '...' : reports.length,
-      description: 'Visible approved archive entries',
-      icon: ClipboardCheck,
-    },
-    {
-      label: 'Review flow',
-      value: internalAuditProcess.length,
-      description: 'Steps before publication',
-      icon: ShieldCheck,
-    },
-    {
-      label: 'Access rule',
-      value: 'Approved',
-      description: 'Only verified reports should go public',
-      icon: BadgeCheck,
+      description: 'Total public archive entries',
+      icon: Archive,
     },
   ]
 
@@ -172,10 +174,6 @@ function InternalAudit() {
             <a href="#reports" className="primary-button">
               <Archive size={18} aria-hidden="true" />
               Browse reports
-            </a>
-            <a href="#process" className="secondary-button">
-              <CheckCircle2 size={18} aria-hidden="true" />
-              Audit process
             </a>
           </>
         }
@@ -581,82 +579,6 @@ function InternalAudit() {
         </div>
       </section>
 
-      <section
-        id="process"
-        className="scroll-mt-22 bg-navy-950 py-20 text-white sm:py-24"
-      >
-        <div className="section-shell">
-          <Motion.div
-            initial={{ opacity: 0, y: 18 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.25 }}
-            transition={{ duration: 0.5 }}
-            className="max-w-3xl"
-          >
-            <p className="text-xs font-extrabold tracking-[0.2em] text-blue-300 uppercase">
-              Verification flow
-            </p>
-            <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">
-              How Records Become Public
-            </h2>
-            <p className="mt-4 text-base leading-7 text-slate-300">
-              Internal audit records should be organized, checked, verified,
-              and approved before being shared with students.
-            </p>
-          </Motion.div>
-
-          <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-            {internalAuditProcess.map((step, index) => (
-              <Motion.article
-                key={step.title}
-                initial={{ opacity: 0, y: 18 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.25 }}
-                transition={{ duration: 0.5, delay: index * 0.07 }}
-                className="rounded-3xl border border-white/10 bg-white/[0.07] p-6 backdrop-blur-sm"
-              >
-                <span className="grid size-12 place-items-center rounded-2xl bg-white/10 text-blue-200">
-                  {index + 1}
-                </span>
-                <h3 className="mt-5 text-xl font-black">{step.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-slate-300">
-                  {step.description}
-                </p>
-              </Motion.article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-white py-20 sm:py-24">
-        <div className="section-shell">
-          <Motion.div
-            initial={{ opacity: 0, y: 18 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.25 }}
-            transition={{ duration: 0.5 }}
-            className="relative isolate overflow-hidden rounded-3xl border border-blue-100 bg-brand-50/45 p-7 sm:p-9 lg:grid lg:grid-cols-[auto_1fr] lg:gap-6"
-          >
-            <span className="grid size-14 place-items-center rounded-2xl bg-white text-brand-600 shadow-sm ring-1 ring-blue-100">
-              <LockKeyhole size={25} aria-hidden="true" />
-            </span>
-            <div className="mt-5 lg:mt-0">
-              <p className="text-xs font-extrabold tracking-[0.18em] text-brand-600 uppercase">
-                Transparency notice
-              </p>
-              <h2 className="mt-2 text-2xl font-black text-navy-900">
-                Publish approved records only
-              </h2>
-              <p className="mt-3 max-w-4xl text-sm leading-7 text-slate-600">
-                Only approved transparency records should be uploaded here.
-                Sensitive personal information, private account details,
-                signatures, receipt reference numbers, and confidential
-                documents may be omitted or redacted for privacy and security.
-              </p>
-            </div>
-          </Motion.div>
-        </div>
-      </section>
     </main>
   )
 }

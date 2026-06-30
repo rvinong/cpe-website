@@ -5,7 +5,6 @@ import {
   GraduationCap,
   Inbox,
   Search,
-  ShieldCheck,
   UsersRound,
   X,
 } from 'lucide-react'
@@ -16,42 +15,6 @@ import PageHero from '../components/PageHero'
 import { alumniProfiles as sampleAlumniProfiles } from '../data/alumni'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import useAlumni from '../hooks/useAlumni'
-
-/*
-const profileDetails = [
-  {
-    icon: UserRound,
-    title: 'Graduate name',
-    description: 'The alumnus or alumna’s approved full name.',
-  },
-  {
-    icon: GraduationCap,
-    title: 'Graduation batch',
-    description: 'The year the graduate completed the program.',
-  },
-  {
-    icon: Image,
-    title: 'Profile photo',
-    description: 'A clear photo provided with permission for publication.',
-  },
-  {
-    icon: BriefcaseBusiness,
-    title: 'Career information',
-    description: 'Current role or professional field, when provided.',
-  },
-  {
-    icon: Building2,
-    title: 'Organization history',
-    description: 'Former position or involvement in the organization.',
-  },
-  {
-    icon: ShieldCheck,
-    title: 'Approved details',
-    description: 'Only information cleared for the public archive.',
-  },
-]
-
-*/
 
 function Alumni() {
   const { profiles, isLoading } = useAlumni()
@@ -151,7 +114,7 @@ function Alumni() {
               </label>
             </Motion.div>
 
-            <div className="mt-8 grid gap-4 sm:grid-cols-3">
+            <div className="mt-8 grid gap-4 sm:grid-cols-2">
               {[
                 {
                   label: 'Verified profiles',
@@ -162,11 +125,6 @@ function Alumni() {
                   label: 'Available batches',
                   value: batches.length,
                   icon: GraduationCap,
-                },
-                {
-                  label: 'Publication standard',
-                  value: 'Approved',
-                  icon: ShieldCheck,
                 },
               ].map(({ label, value, icon: Icon }, index) => (
                 <Motion.article
@@ -499,3 +457,4 @@ function Alumni() {
 }
 
 export default Alumni
+
