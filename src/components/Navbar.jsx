@@ -23,6 +23,7 @@ const links = [
   { key: 'events', label: 'Events', sectionId: 'events' },
   { key: 'alumni', label: 'Alumni', sectionId: 'alumni' },
   { key: 'gallery', label: 'News & Gallery', sectionId: 'news' },
+  { key: 'audit', label: 'Internal Audit', sectionId: 'internal-audit' },
 ]
 
 const MotionLink = Motion.create(Link)
@@ -39,6 +40,8 @@ function Navbar() {
       ? null
       : pathname.startsWith('/announcements')
       ? 'announcements'
+      : pathname === '/internal-audit'
+        ? 'audit'
       : pathname === '/alumni'
         ? 'alumni'
       : pathname === '/about'
@@ -57,6 +60,7 @@ function Navbar() {
     if (link.key === 'alumni') return '/alumni'
     if (link.key === 'events') return '/events'
     if (link.key === 'gallery') return '/gallery'
+    if (link.key === 'audit') return '/internal-audit'
     if (link.key === 'portal') return '/student-portal'
     return isHomePage ? `#${link.sectionId}` : `/#${link.sectionId}`
   }
