@@ -56,7 +56,7 @@ const profileDetails = [
 function Alumni() {
   const { profiles, isLoading } = useAlumni()
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedBatch, setSelectedBatch] = useState('All batches')
+  const [selectedBatch, setSelectedBatch] = useState('')
   const [selectedProfile, setSelectedProfile] = useState(null)
   const isUsingSampleProfiles = !isLoading && profiles.length === 0
   const displayedProfiles = isUsingSampleProfiles
@@ -72,12 +72,15 @@ function Alumni() {
     [displayedProfiles],
   )
 
+  const activeBatch = batches.includes(selectedBatch)
+    ? selectedBatch
+    : batches[0] || ''
+
   const filteredProfiles = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase()
 
     return displayedProfiles.filter((profile) => {
-      const matchesBatch =
-        selectedBatch === 'All batches' || profile.batch === selectedBatch
+      const matchesBatch = !activeBatch || profile.batch === activeBatch
       const matchesSearch =
         !normalizedSearch ||
         [profile.name, profile.batch, profile.role, profile.organization]
@@ -88,25 +91,12 @@ function Alumni() {
 
       return matchesBatch && matchesSearch
     })
-  }, [displayedProfiles, searchTerm, selectedBatch])
+  }, [activeBatch, displayedProfiles, searchTerm])
 
   const featuredProfiles = useMemo(
     () => displayedProfiles.filter((profile) => profile.featured),
     [displayedProfiles],
   )
-
-  const yearbookGroups = useMemo(() => {
-    const groups = new Map()
-
-    filteredProfiles.forEach((profile) => {
-      const batch = profile.batch || 'Unspecified batch'
-      groups.set(batch, [...(groups.get(batch) || []), profile])
-    })
-
-    return [...groups.entries()].sort(([first], [second]) =>
-      second.localeCompare(first),
-    )
-  }, [filteredProfiles])
 
   return (
     <>
@@ -149,11 +139,11 @@ function Alumni() {
                 <span className="sr-only">Filter alumni by batch</span>
                 <select
                   id="batch-filter"
-                  value={selectedBatch}
+                  value={activeBatch}
                   onChange={(event) => setSelectedBatch(event.target.value)}
                   className="field-control px-4 font-bold"
+                  disabled={batches.length === 0}
                 >
-                  <option>All batches</option>
                   {batches.map((batch) => (
                     <option key={batch}>{batch}</option>
                   ))}
@@ -319,6 +309,21 @@ function Alumni() {
                 A compact portrait archive for verified graduates. Select a
                 portrait to view the approved profile details.
               </p>
+              <div className="mt-6 flex flex-wrap justify-center gap-2">
+                {batches.map((batch) => (
+                  <button
+                    key={batch}
+                    type="button"
+                    onClick={() => setSelectedBatch(batch)}
+                    aria-pressed={activeBatch === batch}
+                    className={`filter-chip ${
+                      activeBatch === batch ? 'filter-chip-active' : ''
+                    }`}
+                  >
+                    Batch {batch}
+                  </button>
+                ))}
+              </div>
             </Motion.div>
 
             {isLoading ? (
@@ -337,63 +342,64 @@ function Alumni() {
             ) : (
               <div className="surface-card relative mt-10 overflow-hidden rounded-[2rem] bg-white/90 p-5 sm:p-8">
                 <div className="subtle-grid absolute inset-0 opacity-60" />
-                <div className="relative grid gap-10">
-                  {yearbookGroups.map(([batch, batchProfiles]) => (
-                    <div key={batch}>
-                      <div className="mb-5 flex items-center gap-3">
-                        <span className="h-px flex-1 bg-slate-200" />
-                        <p className="rounded-full border border-blue-100 bg-brand-50 px-4 py-2 text-xs font-extrabold tracking-[0.16em] text-brand-600 uppercase">
-                          Batch {batch}
-                        </p>
-                        <span className="h-px flex-1 bg-slate-200" />
-                      </div>
+                <div className="relative">
+                  <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4">
+                    <p className="text-xs font-extrabold tracking-[0.16em] text-brand-600 uppercase">
+                      Showing Batch {activeBatch}
+                    </p>
+                    <p className="text-xs font-bold text-slate-500">
+                      {filteredProfiles.length}{' '}
+                      {filteredProfiles.length === 1 ? 'profile' : 'profiles'}
+                    </p>
+                  </div>
 
-                      <div className="grid grid-cols-3 gap-x-4 gap-y-7 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-9">
-                        {batchProfiles.map((profile, index) => (
-                          <Motion.button
-                            key={profile.id}
-                            type="button"
-                            onClick={() => setSelectedProfile(profile)}
-                            initial={{ opacity: 0, y: 14 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            whileHover={{ y: -4 }}
-                            whileTap={{ scale: 0.98 }}
-                            viewport={{ once: true, amount: 0.18 }}
-                            transition={{
-                              duration: 0.38,
-                              delay: Math.min(index * 0.018, 0.18),
-                            }}
-                            className="group rounded-xl border-0 bg-transparent p-0 text-center"
-                            aria-label={`Open ${profile.name}'s alumni profile`}
-                          >
-                            <span className="mx-auto block aspect-[3/4] w-full max-w-24 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.42)] transition group-hover:border-brand-500/60 group-hover:shadow-[0_22px_48px_-30px_rgba(21,94,239,0.42)] sm:max-w-28">
-                              {profile.photo ? (
-                                <img
-                                  src={profile.photo}
-                                  alt=""
-                                  loading="lazy"
-                                  decoding="async"
-                                  className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                                />
-                              ) : (
-                                <span className="grid h-full w-full place-items-center bg-brand-600 text-xl font-black text-white">
-                                  {profile.initials}
-                                </span>
-                              )}
+                  <div className="grid grid-cols-3 gap-x-4 gap-y-7 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-9">
+                    {filteredProfiles.map((profile, index) => (
+                      <Motion.button
+                        key={profile.id}
+                        type="button"
+                        onClick={() => setSelectedProfile(profile)}
+                        initial={{ opacity: 0, y: 14 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        whileHover={{ y: -4 }}
+                        whileTap={{ scale: 0.98 }}
+                        viewport={{ once: true, amount: 0.18 }}
+                        transition={{
+                          duration: 0.38,
+                          delay: Math.min(index * 0.018, 0.18),
+                        }}
+                        className="group rounded-xl border-0 bg-transparent p-0 text-center"
+                        aria-label={`Open ${profile.name}'s alumni profile`}
+                      >
+                        <span className="mx-auto block aspect-[3/4] w-full max-w-24 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.42)] transition group-hover:border-brand-500/60 group-hover:shadow-[0_22px_48px_-30px_rgba(21,94,239,0.42)] sm:max-w-28">
+                          {profile.photo ? (
+                            <img
+                              src={profile.photo}
+                              alt=""
+                              loading="lazy"
+                              decoding="async"
+                              className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                            />
+                          ) : (
+                            <span className="grid h-full w-full place-items-center bg-brand-600 text-xl font-black text-white">
+                              {profile.initials}
                             </span>
-                            <span className="mt-2 block truncate text-[0.68rem] font-extrabold leading-4 text-navy-900 transition group-hover:text-brand-600 sm:text-xs">
-                              {profile.name}
-                            </span>
-                            {profile.role && (
-                              <span className="mt-0.5 block truncate text-[0.62rem] font-bold text-slate-500 sm:text-[0.68rem]">
-                                {profile.role}
-                              </span>
-                            )}
-                          </Motion.button>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
+                          )}
+                        </span>
+                        <span className="mt-2 block truncate text-[0.68rem] font-extrabold leading-4 text-navy-900 transition group-hover:text-brand-600 sm:text-xs">
+                          {profile.name}
+                        </span>
+                        <span className="mt-0.5 block truncate text-[0.62rem] font-bold text-brand-600 sm:text-[0.68rem]">
+                          Batch {profile.batch}
+                        </span>
+                        {profile.role && (
+                          <span className="mt-0.5 block truncate text-[0.62rem] font-bold text-slate-500 sm:text-[0.68rem]">
+                            {profile.role}
+                          </span>
+                        )}
+                      </Motion.button>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
