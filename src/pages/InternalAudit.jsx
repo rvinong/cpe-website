@@ -16,13 +16,17 @@ import {
   ShieldCheck,
   Sparkles,
 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import ContentSkeleton from '../components/ContentSkeleton'
 import PageHero from '../components/PageHero'
 import {
   internalAuditCategories,
   internalAuditProcess,
-  internalAuditReports,
 } from '../data/internalAudit'
+import {
+  createAuditReportDownload,
+  getPublicAuditReports,
+} from '../lib/internalAudit'
 
 const categoryIcons = {
   accomplishment: FileCheck2,
@@ -50,14 +54,32 @@ function getCategory(documentType) {
 }
 
 function InternalAudit() {
+  const [reports, setReports] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
+  const [downloadError, setDownloadError] = useState('')
 
-  const featuredReport = internalAuditReports[0]
+  useEffect(() => {
+    let isMounted = true
+
+    getPublicAuditReports().then(({ data }) => {
+      if (!isMounted) return
+      setReports(data || [])
+      setIsLoading(false)
+    })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  const featuredReport =
+    reports.find((report) => report.isFeatured) || reports[0] || null
   const filteredReports = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase()
 
-    return internalAuditReports.filter((report) => {
+    return reports.filter((report) => {
       const category = getCategory(report.type)
       const matchesCategory =
         selectedCategory === 'All' || report.type === selectedCategory
@@ -78,7 +100,27 @@ function InternalAudit() {
 
       return matchesCategory && matchesSearch
     })
-  }, [searchTerm, selectedCategory])
+  }, [reports, searchTerm, selectedCategory])
+
+  const openReportFile = async (report) => {
+    setDownloadError('')
+
+    const reportWindow = window.open('about:blank', '_blank')
+    if (reportWindow) reportWindow.opener = null
+
+    const { data, error } = await createAuditReportDownload(report)
+    if (error) {
+      reportWindow?.close()
+      setDownloadError(error.message)
+      return
+    }
+
+    if (reportWindow) {
+      reportWindow.location.replace(data.signedUrl)
+    } else {
+      window.location.assign(data.signedUrl)
+    }
+  }
 
   const summaryCards = [
     {
@@ -88,9 +130,9 @@ function InternalAudit() {
       icon: Archive,
     },
     {
-      label: 'Starter templates',
-      value: internalAuditReports.length,
-      description: 'Ready to replace with approved files',
+      label: 'Published records',
+      value: isLoading ? '...' : reports.length,
+      description: 'Visible approved archive entries',
       icon: ClipboardCheck,
     },
     {
@@ -179,10 +221,11 @@ function InternalAudit() {
                 Latest transparency file
               </p>
               <h2 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">
-                {featuredReport.title}
+                {featuredReport?.title || 'No published report yet'}
               </h2>
               <p className="mt-4 text-sm leading-7 text-slate-300">
-                {featuredReport.summary}
+                {featuredReport?.summary ||
+                  'Published audit records will appear here after admins or editors upload and approve the first transparency file.'}
               </p>
 
               <div className="mt-7 grid gap-3 text-sm">
@@ -194,10 +237,10 @@ function InternalAudit() {
                   />
                   <span>
                     <strong className="block text-white">
-                      {featuredReport.period}
+                      {featuredReport?.period || 'Awaiting first record'}
                     </strong>
                     <span className="text-slate-400">
-                      {featuredReport.publishedAt}
+                      {featuredReport?.publishedAt || 'Not published yet'}
                     </span>
                   </span>
                 </span>
@@ -209,23 +252,34 @@ function InternalAudit() {
                   />
                   <span>
                     <strong className="block text-white">
-                      Reviewed by {featuredReport.reviewedBy}
+                      Reviewed by {featuredReport?.reviewedBy || 'TBA'}
                     </strong>
                     <span className="text-slate-400">
-                      Prepared by {featuredReport.preparedBy}
+                      Prepared by {featuredReport?.preparedBy || 'TBA'}
                     </span>
                   </span>
                 </span>
               </div>
 
-              <button
-                type="button"
-                disabled
-                className="mt-7 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.08] px-5 py-3 text-sm font-extrabold text-slate-300 opacity-75"
-              >
-                <Download size={17} aria-hidden="true" />
-                PDF upload pending
-              </button>
+              {featuredReport?.filePath ? (
+                <button
+                  type="button"
+                  onClick={() => openReportFile(featuredReport)}
+                  className="mt-7 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-extrabold text-navy-900 transition hover:-translate-y-0.5 hover:bg-blue-50"
+                >
+                  <Download size={17} aria-hidden="true" />
+                  View latest PDF
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  disabled
+                  className="mt-7 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.08] px-5 py-3 text-sm font-extrabold text-slate-300 opacity-75"
+                >
+                  <Download size={17} aria-hidden="true" />
+                  PDF upload pending
+                </button>
+              )}
             </Motion.article>
 
             <Motion.div
@@ -237,7 +291,7 @@ function InternalAudit() {
             >
               {internalAuditCategories.map((category, index) => {
                 const Icon = categoryIcons[category.id]
-                const count = internalAuditReports.filter(
+                const count = reports.filter(
                   (report) => report.type === category.id,
                 ).length
 
@@ -270,7 +324,8 @@ function InternalAudit() {
                         </div>
                       </div>
                       <span className="shrink-0 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-extrabold text-slate-600">
-                        {count} templates
+                        {isLoading ? '...' : count}{' '}
+                        {count === 1 ? 'record' : 'records'}
                       </span>
                     </div>
                   </Motion.article>
@@ -298,8 +353,8 @@ function InternalAudit() {
             </h2>
             <p className="mt-4 text-base leading-7 text-slate-600">
               Use this archive for published accomplishment reports,
-              liquidation reports, and resolutions. The current cards are
-              starter templates until official documents are uploaded.
+              liquidation reports, and resolutions. Only approved public
+              records appear in this archive.
             </p>
           </Motion.div>
 
@@ -356,6 +411,31 @@ function InternalAudit() {
             </div>
           </Motion.div>
 
+          {downloadError && (
+            <p className="mt-7 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">
+              {downloadError}
+            </p>
+          )}
+
+          {isLoading ? (
+            <ContentSkeleton
+              count={4}
+              columns={2}
+              className="mt-10"
+              label="Loading internal audit records"
+            />
+          ) : filteredReports.length === 0 ? (
+            <div className="empty-state mt-10">
+              <span className="empty-state-icon">
+                <Archive size={26} aria-hidden="true" />
+              </span>
+              <h3 className="empty-state-title">No reports found</h3>
+              <p className="empty-state-description">
+                Published accomplishment reports, liquidation reports, and
+                resolutions will appear here after they are approved.
+              </p>
+            </div>
+          ) : (
           <div className="mt-10 grid gap-6 lg:grid-cols-2">
             {filteredReports.map((report, index) => {
               const category = getCategory(report.type)
@@ -459,14 +539,18 @@ function InternalAudit() {
 
                   <div className="mt-auto flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
                     <p className="text-xs font-bold text-slate-500">
-                      Prepared by {report.preparedBy} · reviewed by{' '}
+                      Prepared by {report.preparedBy} - reviewed by{' '}
                       {report.reviewedBy}
                     </p>
-                    {report.fileUrl ? (
-                      <a href={report.fileUrl} className="primary-button">
+                    {report.filePath ? (
+                      <button
+                        type="button"
+                        onClick={() => openReportFile(report)}
+                        className="primary-button"
+                      >
                         <Eye size={16} aria-hidden="true" />
                         View file
-                      </a>
+                      </button>
                     ) : (
                       <button
                         type="button"
@@ -482,6 +566,7 @@ function InternalAudit() {
               )
             })}
           </div>
+          )}
         </div>
       </section>
 

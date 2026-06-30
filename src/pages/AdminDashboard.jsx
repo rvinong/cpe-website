@@ -24,6 +24,7 @@ import AdminAnalyticsPanel from '../components/AdminAnalyticsPanel'
 import AdminAnnouncements from '../components/AdminAnnouncements'
 import AdminAlumni from '../components/AdminAlumni'
 import AdminEvents from '../components/AdminEvents'
+import AdminInternalAudit from '../components/AdminInternalAudit'
 import AdminMedia from '../components/AdminMedia'
 import AdminOrganization from '../components/AdminOrganization'
 import AdminResources from '../components/AdminResources'
@@ -59,6 +60,12 @@ const adminSections = [
   },
   { key: 'alumni', label: 'Alumni', icon: GraduationCap, enabled: true },
   { key: 'resources', label: 'Resources', icon: Newspaper, enabled: true },
+  {
+    key: 'audit',
+    label: 'Internal Audit',
+    icon: ShieldCheck,
+    enabled: true,
+  },
   { key: 'team', label: 'Team', icon: ListChecks, enabled: true },
   {
     key: 'users',
@@ -118,6 +125,14 @@ const contentModules = [
     action: 'Manage resources',
   },
   {
+    title: 'Internal Audit',
+    description: 'Publish transparency reports, liquidations, and resolutions.',
+    icon: ShieldCheck,
+    status: 'Available',
+    section: 'audit',
+    action: 'Manage audit reports',
+  },
+  {
     title: 'Team Management',
     description: 'Assign editor tasks and keep staff profiles familiar.',
     icon: ListChecks,
@@ -144,6 +159,7 @@ const sectionTitles = {
   organization: 'Manage About Content',
   alumni: 'Manage Alumni',
   resources: 'Manage Resources',
+  audit: 'Manage Internal Audit',
   team: 'Manage Team',
   users: 'Manage Users & Roles',
 }
@@ -156,6 +172,7 @@ const sectionDescriptions = {
   organization: 'Maintain public organization records and leadership.',
   alumni: 'Curate verified graduate profiles and spotlights.',
   resources: 'Publish approved learning files and external links.',
+  audit: 'Manage transparency reports, liquidations, and resolutions.',
   team: 'Coordinate assignments and staff profile information.',
   users: 'Approve accounts and manage role-based access.',
 }
@@ -446,6 +463,8 @@ function AdminDashboard() {
             <AdminAlumni />
           ) : activeSection === 'resources' ? (
             <AdminResources />
+          ) : activeSection === 'audit' ? (
+            <AdminInternalAudit />
           ) : activeSection === 'team' ? (
             <AdminTeam />
           ) : activeSection === 'users' && profile?.role === 'admin' ? (

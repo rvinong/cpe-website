@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { getAdminAlumni } from '../lib/alumni'
 import { getAdminAnnouncements } from '../lib/announcements'
 import { getAdminEvents } from '../lib/events'
+import { getAdminAuditReports } from '../lib/internalAudit'
 import { getAdminGalleryPhotos, getAdminNews } from '../lib/media'
 import { getAdminResources } from '../lib/resources'
 import { getTeamTasks } from '../lib/team'
@@ -13,6 +14,7 @@ export const emptyDashboardSignals = {
   news: [],
   gallery: [],
   alumni: [],
+  audit: [],
   tasks: [],
 }
 
@@ -23,6 +25,7 @@ const signalSources = [
   ['news', 'News', getAdminNews],
   ['gallery', 'Gallery', getAdminGalleryPhotos],
   ['alumni', 'Alumni', getAdminAlumni],
+  ['audit', 'Internal Audit', getAdminAuditReports],
   ['tasks', 'Team tasks', getTeamTasks],
 ]
 

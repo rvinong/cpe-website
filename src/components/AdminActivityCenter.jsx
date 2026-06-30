@@ -25,6 +25,7 @@ const sourceLabels = {
   gallery: 'Gallery',
   media: 'News & Gallery',
   alumni: 'Alumni',
+  audit: 'Internal Audit',
   team: 'Team',
 }
 
@@ -34,6 +35,7 @@ const sourceIcons = {
   resources: FileArchive,
   media: Images,
   alumni: GraduationCap,
+  audit: FileArchive,
   team: ListChecks,
 }
 
@@ -213,6 +215,19 @@ function buildActivities(data) {
         eyebrow: 'Alumni profile updated',
       }),
     ),
+    ...data.audit.map((item) =>
+      createActivity({
+        id: `audit-${item.id}`,
+        title: item.title,
+        detail: `${labelStatus(item.status)} - ${item.report_type}`,
+        section: 'audit',
+        timestamp: item.updated_at || item.published_at || item.created_at,
+        eyebrow:
+          item.status === 'published'
+            ? 'Audit report published'
+            : 'Audit report updated',
+      }),
+    ),
     ...data.tasks.map((task) =>
       createActivity({
         id: `task-${task.id}`,
@@ -272,6 +287,7 @@ function buildAttentionItems(data, role) {
     ...data.news.filter((item) => item.status === 'draft'),
     ...data.gallery.filter((item) => item.status === 'draft'),
     ...data.alumni.filter((item) => item.status === 'draft'),
+    ...data.audit.filter((item) => item.status === 'draft'),
   ]
   const upcomingSoon = data.events.filter(isUpcomingSoon)
   const needsAttention = []
@@ -396,6 +412,7 @@ function AdminActivityCenter({
       ...activityData.news,
       ...activityData.gallery,
       ...activityData.alumni,
+      ...activityData.audit,
     ].filter((item) => item.status === 'published').length
 
     return [

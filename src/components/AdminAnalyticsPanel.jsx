@@ -66,6 +66,7 @@ function buildContentSections(signals) {
     { label: 'News', section: 'media', items: signals.news },
     { label: 'Gallery', section: 'media', items: signals.gallery },
     { label: 'Alumni', section: 'alumni', items: signals.alumni },
+    { label: 'Internal Audit', section: 'audit', items: signals.audit },
   ]
 }
 
