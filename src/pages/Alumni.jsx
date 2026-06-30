@@ -2,14 +2,10 @@ import { motion as Motion } from 'framer-motion'
 import {
   Award,
   BookOpen,
-  BriefcaseBusiness,
-  Building2,
   GraduationCap,
-  Image,
   Inbox,
   Search,
   ShieldCheck,
-  UserRound,
   UsersRound,
   X,
 } from 'lucide-react'
@@ -21,6 +17,7 @@ import { alumniProfiles as sampleAlumniProfiles } from '../data/alumni'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import useAlumni from '../hooks/useAlumni'
 
+/*
 const profileDetails = [
   {
     icon: UserRound,
@@ -53,6 +50,8 @@ const profileDetails = [
     description: 'Only information cleared for the public archive.',
   },
 ]
+
+*/
 
 function Alumni() {
   const { profiles, isLoading } = useAlumni()
@@ -403,75 +402,6 @@ function Alumni() {
           </div>
         </section>
 
-        <section className="bg-white py-20 sm:py-24">
-          <div className="section-shell">
-            <Motion.div
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.25 }}
-              transition={{ duration: 0.5 }}
-              className="max-w-2xl"
-            >
-              <p className="text-xs font-extrabold tracking-[0.2em] text-brand-600 uppercase">
-                Profile information
-              </p>
-              <h2 className="mt-3 text-3xl font-black tracking-tight text-navy-900 sm:text-4xl">
-                What the yearbook will include
-              </h2>
-              <p className="mt-4 text-base leading-7 text-slate-600">
-                Each entry stays focused on useful, verified graduate
-                information.
-              </p>
-            </Motion.div>
-
-            <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {profileDetails.map(
-                ({ icon: Icon, title, description }, index) => (
-                  <Motion.article
-                    key={title}
-                    initial={{ opacity: 0, y: 18 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.25 }}
-                    transition={{ duration: 0.5, delay: index * 0.055 }}
-                    className="surface-card interactive-card p-6"
-                  >
-                    <span className="grid size-12 place-items-center rounded-xl bg-brand-50 text-brand-600">
-                      <Icon size={22} strokeWidth={1.7} aria-hidden="true" />
-                    </span>
-                    <h3 className="mt-5 text-lg font-extrabold text-navy-900">
-                      {title}
-                    </h3>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
-                      {description}
-                    </p>
-                  </Motion.article>
-                ),
-              )}
-            </div>
-
-            <Motion.div
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.25 }}
-              transition={{ duration: 0.5 }}
-              className="mt-12 rounded-3xl bg-navy-950 px-6 py-10 text-center text-white shadow-[0_30px_80px_-44px_rgba(7,21,47,0.8)] sm:px-10"
-            >
-              <ShieldCheck
-                size={30}
-                className="mx-auto text-blue-300"
-                aria-hidden="true"
-              />
-              <h2 className="mt-4 text-2xl font-black">
-                Built with alumni privacy in mind
-              </h2>
-              <p className="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-300">
-                Personal and professional details should only be published
-                after the graduate has granted permission and the organization
-                has verified the record.
-              </p>
-            </Motion.div>
-          </div>
-        </section>
       </main>
 
       {selectedProfile && (
