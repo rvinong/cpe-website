@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320" role="img" aria-label="Sample profile portrait">
+  <defs>
+    <linearGradient id="bg" x1="42" y1="20" x2="278" y2="300" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#dbeafe"/>
+      <stop offset="1" stop-color="#155eef"/>
+    </linearGradient>
+  </defs>
+  <rect width="320" height="320" rx="72" fill="url(#bg)"/>
+  <circle cx="160" cy="126" r="58" fill="#0b1f46"/>
+  <path d="M69 286c11-57 47-91 91-91s80 34 91 91" fill="#07152f"/>
+  <circle cx="138" cy="123" r="7" fill="#eff6ff"/>
+  <circle cx="182" cy="123" r="7" fill="#eff6ff"/>
+  <path d="M134 156c18 14 34 14 52 0" fill="none" stroke="#eff6ff" stroke-width="9" stroke-linecap="round"/>
+  <path d="M72 82c38-43 89-48 136-21 23 13 39 32 48 58-57-18-109-22-184-37z" fill="#f97316"/>
+</svg>

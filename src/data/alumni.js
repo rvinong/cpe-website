@@ -12,8 +12,8 @@ export const alumniProfiles = [
       'Former documentation lead who helped organize technical review sessions and student project showcases.',
     highlight:
       'Supports junior students by sharing testing workflows, portfolio tips, and early-career software engineering lessons.',
-    photo: null,
-    photo_path: null,
+    photo: '/images/samples/person-blue.svg',
+    photo_path: '/images/samples/person-blue.svg',
     initials: 'MS',
     featured: true,
     is_featured: true,
@@ -35,8 +35,8 @@ export const alumniProfiles = [
       'Served as a technical committee volunteer for laboratory support and peer troubleshooting activities.',
     highlight:
       'Works with campus-style network deployments and encourages students to build practical troubleshooting habits.',
-    photo: null,
-    photo_path: null,
+    photo: '/images/samples/person-orange.svg',
+    photo_path: '/images/samples/person-orange.svg',
     initials: 'CD',
     featured: false,
     is_featured: false,

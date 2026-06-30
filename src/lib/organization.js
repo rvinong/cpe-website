@@ -89,7 +89,9 @@ export function getPersonInitials(name = '') {
 }
 
 export function getOrganizationPersonPhotoUrl(path) {
-  if (!path || !supabase) return null
+  if (!path) return null
+  if (/^(https?:)?\/\//.test(path) || path.startsWith('/')) return path
+  if (!supabase) return null
   return supabase.storage.from(mediaBucket).getPublicUrl(path).data.publicUrl
 }
 

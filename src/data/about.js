@@ -28,7 +28,7 @@ export const organizationOfficers = [
     name: 'Sample Student President',
     position: 'President',
     academic_year: '2026-2027',
-    photo_path: null,
+    photo_path: '/images/samples/person-blue.svg',
     sort_order: 10,
   },
   {
@@ -37,7 +37,7 @@ export const organizationOfficers = [
     name: 'Sample Student Secretary',
     position: 'Secretary',
     academic_year: '2026-2027',
-    photo_path: null,
+    photo_path: '/images/samples/person-orange.svg',
     sort_order: 20,
   },
   {
@@ -46,7 +46,7 @@ export const organizationOfficers = [
     name: 'Engr. Sample Faculty Adviser',
     position: 'Faculty Adviser',
     academic_year: '2026-2027',
-    photo_path: null,
+    photo_path: '/images/samples/person-emerald.svg',
     sort_order: 90,
   },
   {
@@ -55,7 +55,7 @@ export const organizationOfficers = [
     name: 'Engr. Sample Program Mentor',
     position: 'Program Mentor',
     academic_year: '2026-2027',
-    photo_path: null,
+    photo_path: '/images/samples/person-violet.svg',
     sort_order: 100,
   },
 ]

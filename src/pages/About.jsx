@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import PageHero from '../components/PageHero'
 import useOrganization from '../context/useOrganization'
+import { fallbackOrganization } from '../lib/organization'
 
 const involvementAreas = [
   {
@@ -101,6 +102,10 @@ function About() {
     ...item,
     value: membershipDetails[item.key],
   }))
+  const isUsingSamplePeople = organizationOfficers.length === 0
+  const displayedOrganizationPeople = isUsingSamplePeople
+    ? fallbackOrganization.officers
+    : organizationOfficers
 
   return (
     <>
@@ -348,19 +353,15 @@ function About() {
               <h2 className="mt-2 text-3xl font-black text-navy-900">
                 Officers & Faculty
               </h2>
-              {organizationOfficers.length === 0 ? (
-                <>
-                  <p className="mt-4 text-sm leading-7 text-slate-600">
-                    No verified officer or faculty directory has been
-                    provided for the current academic year.
-                  </p>
-                  <p className="mt-5 text-xs font-extrabold tracking-[0.16em] text-slate-400 uppercase">
-                    Leadership records awaiting confirmation
-                  </p>
-                </>
-              ) : (
+              {isUsingSamplePeople && (
+                <p className="mt-4 rounded-2xl border border-blue-100 bg-brand-50/45 px-4 py-3 text-xs font-extrabold tracking-[0.12em] text-brand-600 uppercase">
+                  Sample preview - replace these with verified officers and
+                  faculty in the dashboard.
+                </p>
+              )}
+              {displayedOrganizationPeople.length > 0 && (
                 <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                  {organizationOfficers.map((officer) => (
+                  {displayedOrganizationPeople.map((officer) => (
                     <div
                       key={`${officer.position}-${officer.name}`}
                       className="rounded-2xl border border-slate-200 p-5"

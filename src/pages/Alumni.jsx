@@ -16,6 +16,7 @@ import { useMemo, useState } from 'react'
 import ContentSkeleton from '../components/ContentSkeleton'
 import EmptyState from '../components/EmptyState'
 import PageHero from '../components/PageHero'
+import { alumniProfiles as sampleAlumniProfiles } from '../data/alumni'
 import useAlumni from '../hooks/useAlumni'
 
 const profileDetails = [
@@ -55,19 +56,23 @@ function Alumni() {
   const { profiles, isLoading } = useAlumni()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedBatch, setSelectedBatch] = useState('All batches')
+  const isUsingSampleProfiles = !isLoading && profiles.length === 0
+  const displayedProfiles = isUsingSampleProfiles
+    ? sampleAlumniProfiles
+    : profiles
 
   const batches = useMemo(
     () =>
-      [...new Set(profiles.map((profile) => profile.batch))].sort(
+      [...new Set(displayedProfiles.map((profile) => profile.batch))].sort(
         (first, second) => second.localeCompare(first),
       ),
-    [profiles],
+    [displayedProfiles],
   )
 
   const filteredProfiles = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase()
 
-    return profiles.filter((profile) => {
+    return displayedProfiles.filter((profile) => {
       const matchesBatch =
         selectedBatch === 'All batches' || profile.batch === selectedBatch
       const matchesSearch =
@@ -80,11 +85,11 @@ function Alumni() {
 
       return matchesBatch && matchesSearch
     })
-  }, [profiles, searchTerm, selectedBatch])
+  }, [displayedProfiles, searchTerm, selectedBatch])
 
   const featuredProfiles = useMemo(
-    () => profiles.filter((profile) => profile.featured),
-    [profiles],
+    () => displayedProfiles.filter((profile) => profile.featured),
+    [displayedProfiles],
   )
 
   return (
@@ -144,7 +149,7 @@ function Alumni() {
               {[
                 {
                   label: 'Verified profiles',
-                  value: profiles.length,
+                  value: displayedProfiles.length,
                   icon: UsersRound,
                 },
                 {
@@ -178,6 +183,13 @@ function Alumni() {
                 </Motion.article>
               ))}
             </div>
+
+            {isUsingSampleProfiles && (
+              <p className="mt-5 rounded-2xl border border-blue-100 bg-brand-50/45 px-4 py-3 text-center text-xs font-extrabold tracking-[0.12em] text-brand-600 uppercase">
+                Sample preview - replace these with verified alumni profiles in
+                the dashboard.
+              </p>
+            )}
           </div>
         </section>
 
