@@ -24,30 +24,38 @@ export const organizationProfile = {
 export const organizationOfficers = [
   {
     id: 'sample-student-president',
+    person_type: 'officer',
     name: 'Sample Student President',
     position: 'President',
     academic_year: '2026-2027',
+    photo_path: null,
     sort_order: 10,
   },
   {
     id: 'sample-student-secretary',
+    person_type: 'officer',
     name: 'Sample Student Secretary',
     position: 'Secretary',
     academic_year: '2026-2027',
+    photo_path: null,
     sort_order: 20,
   },
   {
     id: 'sample-faculty-adviser',
+    person_type: 'faculty',
     name: 'Engr. Sample Faculty Adviser',
     position: 'Faculty Adviser',
     academic_year: '2026-2027',
+    photo_path: null,
     sort_order: 90,
   },
   {
     id: 'sample-program-mentor',
+    person_type: 'faculty',
     name: 'Engr. Sample Program Mentor',
     position: 'Program Mentor',
     academic_year: '2026-2027',
+    photo_path: null,
     sort_order: 100,
   },
 ]

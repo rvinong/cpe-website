@@ -5,6 +5,12 @@ import {
   organizationProfile,
   organizationStats,
 } from '../data/about'
+import {
+  mediaBucket,
+  removeMedia,
+  uploadMedia,
+  validateMediaFile,
+} from './media'
 import { isSupabaseConfigured, supabase } from './supabase'
 
 const profileColumns = [
@@ -42,9 +48,11 @@ const profileColumns = [
 
 const officerColumns = [
   'id',
+  'person_type',
   'name',
   'position',
   'academic_year',
+  'photo_path',
   'sort_order',
   'created_at',
   'updated_at',
@@ -64,8 +72,41 @@ export const fallbackOrganization = {
   profile: organizationProfile,
   membership: membershipDetails,
   stats: organizationStats,
-  officers: organizationOfficers,
+  officers: organizationOfficers.map(normalizeOrganizationPerson),
   milestones: historyMilestones,
+}
+
+export function getPersonInitials(name = '') {
+  const initials = name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join('')
+    .toUpperCase()
+
+  return initials || 'CP'
+}
+
+export function getOrganizationPersonPhotoUrl(path) {
+  if (!path || !supabase) return null
+  return supabase.storage.from(mediaBucket).getPublicUrl(path).data.publicUrl
+}
+
+export function normalizeOrganizationPerson(row) {
+  const personType =
+    row.person_type ||
+    (/adviser|advisor|faculty|professor|mentor/i.test(row.position || '')
+      ? 'faculty'
+      : 'officer')
+
+  return {
+    ...row,
+    person_type: personType,
+    personType,
+    photo: getOrganizationPersonPhotoUrl(row.photo_path),
+    initials: getPersonInitials(row.name),
+  }
 }
 
 export function normalizeOrganizationProfile(row) {
@@ -106,7 +147,9 @@ export function normalizeOrganizationProfile(row) {
 }
 
 export function isOrganizationSchemaMissing(error) {
-  return ['42P01', 'PGRST204', 'PGRST205'].includes(error?.code)
+  return ['42P01', '42703', 'PGRST204', 'PGRST205', '404'].includes(
+    error?.code,
+  )
 }
 
 export async function getOrganizationContent() {
@@ -143,7 +186,7 @@ export async function getOrganizationContent() {
   return {
     data: {
       ...normalized,
-      officers: officerResult.data,
+      officers: (officerResult.data || []).map(normalizeOrganizationPerson),
       milestones: milestoneResult.data,
     },
     error: null,
@@ -192,27 +235,29 @@ export async function saveOrganizationProfile(values) {
     .single()
 }
 
-function toOfficerPayload(values) {
+function toOfficerPayload(values, photoPath) {
   return {
+    person_type: values.personType || 'officer',
     name: values.name.trim(),
     position: values.position.trim(),
     academic_year: values.academicYear.trim(),
+    photo_path: photoPath,
     sort_order: Number(values.sortOrder) || 0,
   }
 }
 
-export async function createOfficer(values) {
+export async function createOfficer(values, photoPath) {
   return supabase
     .from('organization_officers')
-    .insert(toOfficerPayload(values))
+    .insert(toOfficerPayload(values, photoPath))
     .select(officerColumns)
     .single()
 }
 
-export async function updateOfficer(id, values) {
+export async function updateOfficer(id, values, photoPath) {
   return supabase
     .from('organization_officers')
-    .update(toOfficerPayload(values))
+    .update(toOfficerPayload(values, photoPath))
     .eq('id', id)
     .select(officerColumns)
     .single()
@@ -250,4 +295,16 @@ export async function updateMilestone(id, values) {
 
 export async function deleteMilestone(id) {
   return supabase.from('organization_milestones').delete().eq('id', id)
+}
+
+export function validateOrganizationPersonPhoto(file) {
+  return validateMediaFile(file)
+}
+
+export function uploadOrganizationPersonPhoto(file) {
+  return uploadMedia(file, 'people')
+}
+
+export function removeOrganizationPersonPhoto(path) {
+  return removeMedia(path)
 }

@@ -190,6 +190,14 @@ function AdminAlumni() {
       setError('Confirm publication consent before publishing this profile.')
       return
     }
+    if (
+      form.status === 'published' &&
+      !selectedFile &&
+      !editingItem?.photo_path
+    ) {
+      setError('Add a profile photo before publishing this alumni profile.')
+      return
+    }
 
     setIsSaving(true)
     let photoPath = editingItem?.photo_path || null
@@ -546,6 +554,10 @@ function AdminAlumni() {
                     className="mx-auto mt-4 size-36 rounded-2xl object-cover"
                   />
                 )}
+                <p className="mt-3 text-center text-xs font-bold text-slate-500">
+                  Profile photo is required before publishing. Use JPG, PNG, or
+                  WebP under 8 MB.
+                </p>
               </div>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">

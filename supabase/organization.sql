@@ -1,5 +1,24 @@
 -- Run this file in the Supabase SQL Editor after supabase/schema.sql.
 
+insert into storage.buckets (
+  id,
+  name,
+  public,
+  file_size_limit,
+  allowed_mime_types
+)
+values (
+  'organization-media',
+  'organization-media',
+  true,
+  8388608,
+  array['image/jpeg', 'image/png', 'image/webp']
+)
+on conflict (id) do update set
+  public = excluded.public,
+  file_size_limit = excluded.file_size_limit,
+  allowed_mime_types = excluded.allowed_mime_types;
+
 create table if not exists public.organization_profile (
   id smallint primary key default 1 check (id = 1),
   name text not null,
@@ -78,9 +97,12 @@ with check (
 
 create table if not exists public.organization_officers (
   id uuid primary key default gen_random_uuid(),
+  person_type text not null default 'officer'
+    check (person_type in ('officer', 'faculty')),
   name text not null,
   position text not null,
   academic_year text not null default '',
+  photo_path text,
   sort_order integer not null default 0,
   created_by uuid references public.profiles(id) on delete set null
     default auth.uid(),
@@ -88,8 +110,19 @@ create table if not exists public.organization_officers (
   updated_at timestamptz not null default now()
 );
 
+alter table public.organization_officers
+  add column if not exists person_type text not null default 'officer',
+  add column if not exists photo_path text;
+
+alter table public.organization_officers
+  drop constraint if exists organization_officers_person_type_check;
+
+alter table public.organization_officers
+  add constraint organization_officers_person_type_check
+  check (person_type in ('officer', 'faculty'));
+
 create index if not exists organization_officers_sort_idx
-  on public.organization_officers (sort_order, position, name);
+  on public.organization_officers (sort_order, person_type, position, name);
 
 drop trigger if exists set_organization_officers_updated_at
   on public.organization_officers;
@@ -115,7 +148,7 @@ for insert
 to authenticated
 with check (
   public.current_user_role() in ('admin', 'editor')
-  and created_by = auth.uid()
+  and created_by = (select auth.uid())
 );
 
 drop policy if exists "Admins and editors can update officers"
@@ -174,7 +207,7 @@ for insert
 to authenticated
 with check (
   public.current_user_role() in ('admin', 'editor')
-  and created_by = auth.uid()
+  and created_by = (select auth.uid())
 );
 
 drop policy if exists "Admins and editors can update milestones"
@@ -193,6 +226,43 @@ on public.organization_milestones
 for delete
 to authenticated
 using (public.current_user_role() in ('admin', 'editor'));
+
+drop policy if exists "Admins and editors can upload organization media"
+  on storage.objects;
+create policy "Admins and editors can upload organization media"
+on storage.objects
+for insert
+to authenticated
+with check (
+  bucket_id = 'organization-media'
+  and public.current_user_role() in ('admin', 'editor')
+);
+
+drop policy if exists "Admins and editors can update organization media"
+  on storage.objects;
+create policy "Admins and editors can update organization media"
+on storage.objects
+for update
+to authenticated
+using (
+  bucket_id = 'organization-media'
+  and public.current_user_role() in ('admin', 'editor')
+)
+with check (
+  bucket_id = 'organization-media'
+  and public.current_user_role() in ('admin', 'editor')
+);
+
+drop policy if exists "Admins and editors can delete organization media"
+  on storage.objects;
+create policy "Admins and editors can delete organization media"
+on storage.objects
+for delete
+to authenticated
+using (
+  bucket_id = 'organization-media'
+  and public.current_user_role() in ('admin', 'editor')
+);
 
 insert into public.organization_profile (
   id,

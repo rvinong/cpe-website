@@ -1,15 +1,18 @@
 import {
   Building2,
+  Camera,
   CirclePlus,
   Edit3,
   History,
+  ImageUp,
   LoaderCircle,
   Save,
   Trash2,
+  UserRound,
   UsersRound,
   X,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import useOrganization from '../context/useOrganization'
 import {
@@ -17,16 +20,21 @@ import {
   createOfficer,
   deleteMilestone,
   deleteOfficer,
+  getOrganizationPersonPhotoUrl,
   isOrganizationSchemaMissing,
+  removeOrganizationPersonPhoto,
   saveOrganizationProfile,
   updateMilestone,
   updateOfficer,
+  uploadOrganizationPersonPhoto,
+  validateOrganizationPersonPhoto,
 } from '../lib/organization'
 
 const inputClassName =
   'admin-field mt-2 placeholder:text-slate-400'
 
 const emptyOfficer = {
+  personType: 'officer',
   name: '',
   position: '',
   academicYear: '',
@@ -59,10 +67,27 @@ function AdminOrganization() {
   const [editingItem, setEditingItem] = useState(null)
   const [officerForm, setOfficerForm] = useState(emptyOfficer)
   const [milestoneForm, setMilestoneForm] = useState(emptyMilestone)
+  const [personPhotoFile, setPersonPhotoFile] = useState(null)
+  const [personPhotoPreview, setPersonPhotoPreview] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
   const needsSchema = isOrganizationSchemaMissing(contentError)
+
+  useEffect(
+    () => () => {
+      if (personPhotoPreview.startsWith('blob:')) {
+        URL.revokeObjectURL(personPhotoPreview)
+      }
+    },
+    [personPhotoPreview],
+  )
+
+  const clearPersonPhotoPreview = () => {
+    if (personPhotoPreview.startsWith('blob:')) {
+      URL.revokeObjectURL(personPhotoPreview)
+    }
+  }
 
   const handleProfileSubmit = async (event) => {
     event.preventDefault()
@@ -85,11 +110,13 @@ function AdminOrganization() {
   }
 
   const openOfficerEditor = (officer = null) => {
+    clearPersonPhotoPreview()
     setEditorType('officer')
     setEditingItem(officer)
     setOfficerForm(
       officer
         ? {
+            personType: officer.person_type || officer.personType || 'officer',
             name: officer.name,
             position: officer.position,
             academicYear: officer.academic_year,
@@ -97,11 +124,18 @@ function AdminOrganization() {
           }
         : emptyOfficer,
     )
+    setPersonPhotoFile(null)
+    setPersonPhotoPreview(
+      officer?.photo ||
+        getOrganizationPersonPhotoUrl(officer?.photo_path) ||
+        '',
+    )
     setError('')
     setSuccess('')
   }
 
   const openMilestoneEditor = (milestone = null) => {
+    clearPersonPhotoPreview()
     setEditorType('milestone')
     setEditingItem(milestone)
     setMilestoneForm(
@@ -114,16 +148,39 @@ function AdminOrganization() {
           }
         : emptyMilestone,
     )
+    setPersonPhotoFile(null)
+    setPersonPhotoPreview('')
     setError('')
     setSuccess('')
   }
 
   const closeEditor = () => {
     if (isSaving) return
+    clearPersonPhotoPreview()
     setEditorType(null)
     setEditingItem(null)
     setOfficerForm(emptyOfficer)
     setMilestoneForm(emptyMilestone)
+    setPersonPhotoFile(null)
+    setPersonPhotoPreview('')
+  }
+
+  const handlePersonPhotoChange = (event) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    const fileError = validateOrganizationPersonPhoto(file)
+    if (fileError) {
+      setError(fileError)
+      event.target.value = ''
+      return
+    }
+
+    clearPersonPhotoPreview()
+    setPersonPhotoFile(file)
+    setPersonPhotoPreview(URL.createObjectURL(file))
+    setError('')
+    event.target.value = ''
   }
 
   const handleOfficerSubmit = async (event) => {
@@ -131,27 +188,60 @@ function AdminOrganization() {
     setError('')
 
     if (!officerForm.name.trim() || !officerForm.position.trim()) {
-      setError('Officer name and position are required.')
+      setError('Name and position/title are required.')
+      return
+    }
+    if (!personPhotoFile && !editingItem?.photo_path) {
+      setError('Add a profile photo before saving this person.')
       return
     }
 
     setIsSaving(true)
+    let photoPath = editingItem?.photo_path || null
+    let uploadedPath = null
+
+    if (personPhotoFile) {
+      const { data, error: uploadError } =
+        await uploadOrganizationPersonPhoto(personPhotoFile)
+
+      if (uploadError) {
+        setError(uploadError.message)
+        setIsSaving(false)
+        return
+      }
+
+      uploadedPath = data.path
+      photoPath = data.path
+    }
+
     const result = editingItem
-      ? await updateOfficer(editingItem.id, officerForm)
-      : await createOfficer(officerForm)
+      ? await updateOfficer(editingItem.id, officerForm, photoPath)
+      : await createOfficer(officerForm, photoPath)
 
     if (result.error) {
+      if (uploadedPath) await removeOrganizationPersonPhoto(uploadedPath)
       setError(result.error.message)
       setIsSaving(false)
       return
     }
 
+    if (
+      uploadedPath &&
+      editingItem?.photo_path &&
+      editingItem.photo_path !== uploadedPath
+    ) {
+      await removeOrganizationPersonPhoto(editingItem.photo_path)
+    }
+
     await refresh()
-    setSuccess(editingItem ? 'Officer updated.' : 'Officer added.')
+    setSuccess(editingItem ? 'Person updated.' : 'Person added.')
+    clearPersonPhotoPreview()
     setIsSaving(false)
     setEditorType(null)
     setEditingItem(null)
     setOfficerForm(emptyOfficer)
+    setPersonPhotoFile(null)
+    setPersonPhotoPreview('')
   }
 
   const handleMilestoneSubmit = async (event) => {
@@ -196,8 +286,11 @@ function AdminOrganization() {
       setError(deleteError.message)
       return
     }
+    if (officer.photo_path) {
+      await removeOrganizationPersonPhoto(officer.photo_path)
+    }
     await refresh()
-    setSuccess('Officer removed.')
+    setSuccess('Person removed.')
   }
 
   const handleDeleteMilestone = async (milestone) => {
@@ -258,7 +351,7 @@ function AdminOrganization() {
       <div className="mt-7 grid gap-2 rounded-xl border border-slate-200 bg-white p-1.5 sm:grid-cols-3">
         {[
           ['profile', 'Profile & Contact', Building2],
-          ['officers', 'Officers', UsersRound],
+          ['officers', 'Officers & Faculty', UsersRound],
           ['history', 'History', History],
         ].map(([key, label, Icon]) => (
           <button
@@ -519,7 +612,7 @@ function AdminOrganization() {
             <div>
               <h3 className="font-black text-navy-900">
                 {activeTab === 'officers'
-                  ? 'Officer directory'
+                  ? 'Officers & faculty directory'
                   : 'Organization milestones'}
               </h3>
               <p className="mt-1 text-xs text-slate-500">
@@ -537,7 +630,7 @@ function AdminOrganization() {
               className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-4 py-2.5 text-xs font-extrabold text-white disabled:opacity-50"
             >
               <CirclePlus size={16} />
-              {activeTab === 'officers' ? 'Add officer' : 'Add milestone'}
+              {activeTab === 'officers' ? 'Add person' : 'Add milestone'}
             </button>
           </div>
 
@@ -556,14 +649,42 @@ function AdminOrganization() {
                 (item) => (
                   <article
                     key={item.id}
-                    className="grid gap-4 px-5 py-5 sm:grid-cols-[1fr_auto] sm:items-center sm:px-6"
+                    className={`grid gap-4 px-5 py-5 sm:items-center sm:px-6 ${
+                      activeTab === 'officers'
+                        ? 'sm:grid-cols-[64px_1fr_auto]'
+                        : 'sm:grid-cols-[1fr_auto]'
+                    }`}
                   >
+                    {activeTab === 'officers' && (
+                      item.photo ? (
+                        <img
+                          src={item.photo}
+                          alt=""
+                          loading="lazy"
+                          decoding="async"
+                          className="profile-image size-16 rounded-2xl object-cover"
+                        />
+                      ) : (
+                        <span className="grid size-16 place-items-center rounded-2xl bg-brand-50 text-lg font-black text-brand-600 ring-1 ring-blue-100">
+                          {item.initials}
+                        </span>
+                      )
+                    )}
                     <div>
-                      <p className="text-xs font-extrabold text-brand-600">
-                        {activeTab === 'officers'
-                          ? item.position
-                          : item.year}
-                      </p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-xs font-extrabold text-brand-600">
+                          {activeTab === 'officers'
+                            ? item.position
+                            : item.year}
+                        </p>
+                        {activeTab === 'officers' && (
+                          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-extrabold text-slate-500 uppercase">
+                            {item.person_type === 'faculty'
+                              ? 'Faculty'
+                              : 'Officer'}
+                          </span>
+                        )}
+                      </div>
                       <h4 className="mt-1 text-lg font-black text-navy-900">
                         {activeTab === 'officers' ? item.name : item.title}
                       </h4>
@@ -614,7 +735,7 @@ function AdminOrganization() {
           aria-modal="true"
           aria-label="Organization record editor"
         >
-          <div className="mx-auto my-8 max-w-xl rounded-3xl border border-slate-200 bg-white shadow-2xl">
+          <div className="mx-auto my-8 max-w-2xl rounded-3xl border border-slate-200 bg-white shadow-2xl">
             <div className="flex items-start justify-between border-b border-slate-200 px-5 py-5 sm:px-7">
               <div>
                 <p className="text-xs font-extrabold tracking-[0.16em] text-brand-600 uppercase">
@@ -622,7 +743,7 @@ function AdminOrganization() {
                 </p>
                 <h3 className="mt-1 text-2xl font-black text-navy-900">
                   {editingItem ? 'Update' : 'Add'}{' '}
-                  {editorType === 'officer' ? 'officer' : 'milestone'}
+                  {editorType === 'officer' ? 'person' : 'milestone'}
                 </h3>
               </div>
               <button
@@ -646,6 +767,22 @@ function AdminOrganization() {
               <div className="grid gap-5">
                 {editorType === 'officer' ? (
                   <>
+                    <label className="text-sm font-extrabold text-navy-900">
+                      Profile type
+                      <select
+                        value={officerForm.personType}
+                        onChange={(event) =>
+                          setOfficerForm((current) => ({
+                            ...current,
+                            personType: event.target.value,
+                          }))
+                        }
+                        className={inputClassName}
+                      >
+                        <option value="officer">Student officer</option>
+                        <option value="faculty">Faculty / adviser</option>
+                      </select>
+                    </label>
                     <label className="text-sm font-extrabold text-navy-900">
                       Full name
                       <input
@@ -688,6 +825,52 @@ function AdminOrganization() {
                         placeholder="2026-2027"
                       />
                     </label>
+
+                    <div className="rounded-2xl border border-dashed border-blue-200 bg-brand-50/35 p-5">
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                        {personPhotoPreview ? (
+                          <img
+                            src={personPhotoPreview}
+                            alt="Selected profile preview"
+                            className="profile-image size-24 rounded-2xl object-cover"
+                          />
+                        ) : (
+                          <span className="grid size-24 place-items-center rounded-2xl bg-white text-2xl font-black text-brand-600 ring-1 ring-blue-100">
+                            {officerForm.name
+                              .split(/\s+/)
+                              .filter(Boolean)
+                              .slice(0, 2)
+                              .map((part) => part[0])
+                              .join('')
+                              .toUpperCase() || <UserRound size={28} />}
+                          </span>
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-extrabold text-navy-900">
+                            Profile photo required
+                          </p>
+                          <p className="mt-1 text-xs leading-5 text-slate-500">
+                            Use a clear JPG, PNG, or WebP image under 8 MB.
+                          </p>
+                          <label className="mt-4 inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-extrabold text-brand-600 ring-1 ring-blue-100">
+                            {personPhotoPreview ? (
+                              <Camera size={17} />
+                            ) : (
+                              <ImageUp size={17} />
+                            )}
+                            {personPhotoPreview
+                              ? 'Change photo'
+                              : 'Choose photo'}
+                            <input
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp"
+                              onChange={handlePersonPhotoChange}
+                              className="sr-only"
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    </div>
                   </>
                 ) : (
                   <>

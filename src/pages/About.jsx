@@ -346,12 +346,12 @@ function About() {
                 Current administration
               </p>
               <h2 className="mt-2 text-3xl font-black text-navy-900">
-                Officers & Adviser
+                Officers & Faculty
               </h2>
               {organizationOfficers.length === 0 ? (
                 <>
                   <p className="mt-4 text-sm leading-7 text-slate-600">
-                    No verified officer or faculty adviser directory has been
+                    No verified officer or faculty directory has been
                     provided for the current academic year.
                   </p>
                   <p className="mt-5 text-xs font-extrabold tracking-[0.16em] text-slate-400 uppercase">
@@ -365,12 +365,39 @@ function About() {
                       key={`${officer.position}-${officer.name}`}
                       className="rounded-2xl border border-slate-200 p-5"
                     >
-                      <p className="font-extrabold text-navy-900">
-                        {officer.name}
-                      </p>
-                      <p className="mt-1 text-sm font-bold text-brand-600">
-                        {officer.position}
-                      </p>
+                      <div className="flex items-start gap-4">
+                        {officer.photo ? (
+                          <img
+                            src={officer.photo}
+                            alt=""
+                            loading="lazy"
+                            decoding="async"
+                            className="profile-image size-16 rounded-2xl object-cover"
+                          />
+                        ) : (
+                          <span className="grid size-16 shrink-0 place-items-center rounded-2xl bg-brand-50 text-lg font-black text-brand-600 ring-1 ring-blue-100">
+                            {officer.initials}
+                          </span>
+                        )}
+                        <div className="min-w-0">
+                          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-extrabold text-slate-500 uppercase">
+                            {officer.person_type === 'faculty'
+                              ? 'Faculty'
+                              : 'Officer'}
+                          </span>
+                          <p className="mt-3 font-extrabold text-navy-900">
+                            {officer.name}
+                          </p>
+                          <p className="mt-1 text-sm font-bold text-brand-600">
+                            {officer.position}
+                          </p>
+                          {officer.academic_year && (
+                            <p className="mt-1 text-xs font-bold text-slate-500">
+                              {officer.academic_year}
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
