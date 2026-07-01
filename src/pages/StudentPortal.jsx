@@ -191,7 +191,7 @@ function StudentPortal() {
             </div>
 
             {!user ? (
-              <div className="mt-10 rounded-3xl border border-blue-100 bg-brand-50/45 px-6 py-10 text-center sm:px-10">
+              <div className="mt-10 rounded-3xl border border-blue-300 bg-brand-50/45 px-6 py-10 text-center sm:px-10">
                 <LockKeyhole
                   size={30}
                   className="mx-auto text-brand-600"

@@ -453,7 +453,7 @@ function AdminUsers() {
               </div>
 
               {editingItem.id === user.id && (
-                <p className="mt-5 rounded-xl border border-blue-100 bg-brand-50/45 px-4 py-3 text-sm leading-6 text-slate-600">
+                <p className="mt-5 rounded-xl border border-blue-300 bg-brand-50/45 px-4 py-3 text-sm leading-6 text-slate-600">
                   Your own role and status are locked to prevent accidental
                   loss of administrator access.
                 </p>

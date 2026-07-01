@@ -341,7 +341,7 @@ function Gallery() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.3 }}
                   transition={{ duration: 0.45, delay: index * 0.06 }}
-                  className="flex items-center gap-4 rounded-2xl border border-blue-100 bg-brand-50/45 p-5"
+                  className="flex items-center gap-4 rounded-2xl border border-blue-300 bg-brand-50/45 p-5"
                 >
                   <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-white text-brand-600 shadow-sm ring-1 ring-blue-100">
                     <Icon size={21} aria-hidden="true" />

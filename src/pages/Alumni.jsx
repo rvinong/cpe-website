@@ -133,7 +133,7 @@ function Alumni() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.3 }}
                   transition={{ duration: 0.45, delay: index * 0.06 }}
-                  className="flex items-center gap-4 rounded-2xl border border-blue-100 bg-brand-50/45 p-5"
+                  className="flex items-center gap-4 rounded-2xl border border-blue-300 bg-brand-50/45 p-5"
                 >
                   <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-white text-brand-600 shadow-sm ring-1 ring-blue-100">
                     <Icon size={21} aria-hidden="true" />
@@ -149,7 +149,7 @@ function Alumni() {
             </div>
 
             {isUsingSampleProfiles && (
-              <p className="mt-5 rounded-2xl border border-blue-100 bg-brand-50/45 px-4 py-3 text-center text-xs font-extrabold tracking-[0.12em] text-brand-600 uppercase">
+              <p className="mt-5 rounded-2xl border border-blue-300 bg-brand-50/45 px-4 py-3 text-center text-xs font-extrabold tracking-[0.12em] text-brand-600 uppercase">
                 Sample preview - replace these with verified alumni profiles in
                 the dashboard.
               </p>
@@ -426,7 +426,7 @@ function Alumni() {
 
             <div className="grid gap-5 p-6 sm:p-8">
               {selectedProfile.history && (
-                <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5">
+                <div className="rounded-2xl border border-slate-300 bg-slate-50/70 p-5">
                   <p className="text-xs font-extrabold tracking-[0.16em] text-brand-600 uppercase">
                     Organization history
                   </p>
@@ -436,7 +436,7 @@ function Alumni() {
                 </div>
               )}
               {selectedProfile.highlight && (
-                <div className="rounded-2xl border border-blue-100 bg-brand-50/45 p-5">
+                <div className="rounded-2xl border border-blue-300 bg-brand-50/45 p-5">
                   <p className="text-xs font-extrabold tracking-[0.16em] text-brand-600 uppercase">
                     Spotlight note
                   </p>

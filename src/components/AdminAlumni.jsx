@@ -561,7 +561,7 @@ function AdminAlumni() {
               </div>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-blue-100 bg-brand-50/45 p-4">
+                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-blue-300 bg-brand-50/45 p-4">
                   <input
                     type="checkbox"
                     name="isFeatured"

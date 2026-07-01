@@ -614,7 +614,7 @@ function AdminDashboard() {
                 </div>
               </section>
 
-              <section className="mt-10 rounded-3xl border border-blue-100 bg-brand-50/45 p-6 sm:p-8">
+              <section className="mt-10 rounded-3xl border border-blue-300 bg-brand-50/45 p-6 sm:p-8">
                 <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-xs font-extrabold tracking-[0.18em] text-brand-600 uppercase">

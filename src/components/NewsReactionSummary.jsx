@@ -24,11 +24,11 @@ import {
 import ProfileAvatar from './ProfileAvatar'
 
 const reactionButtonStyles = {
-  like: 'text-brand-600 bg-brand-50 border-blue-100',
-  love: 'text-rose-600 bg-rose-50 border-rose-100',
-  celebrate: 'text-amber-600 bg-amber-50 border-amber-100',
-  wow: 'text-violet-600 bg-violet-50 border-violet-100',
-  support: 'text-emerald-600 bg-emerald-50 border-emerald-100',
+  like: 'text-brand-600 bg-brand-50 border-blue-300',
+  love: 'text-rose-600 bg-rose-50 border-rose-300',
+  celebrate: 'text-amber-600 bg-amber-50 border-amber-300',
+  wow: 'text-violet-600 bg-violet-50 border-violet-300',
+  support: 'text-emerald-600 bg-emerald-50 border-emerald-300',
 }
 
 const touchReactionActiveClass = 'reaction-touch-active'
@@ -836,7 +836,7 @@ function NewsReactionSummary({
                         return (
                           <div
                             key={`${member.reactionId}-${member.profile_id}-${member.reacted_at}`}
-                            className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/70 px-3 py-3 transition hover:border-brand-200 hover:bg-white"
+                            className="flex items-center gap-3 rounded-2xl border border-slate-300 bg-slate-50/70 px-3 py-3 transition hover:border-brand-200 hover:bg-white"
                           >
                             <span className="relative shrink-0">
                               <ProfileAvatar

@@ -19,13 +19,51 @@
 }
 
 :root {
-  --canvas: #f7f9fc;
-  --surface: #ffffff;
-  --surface-muted: #f0f4f9;
+  --color-brand: #155eef;
+  --color-brand-light: #eff6ff;
+  --color-brand-dark: #0f4fd6;
+  --color-canvas: #f7f9fc;
+  --color-surface: #ffffff;
+  --color-overlay: #f0f4f9;
+  --color-text-primary: #0b1f46;
+  --color-text-secondary: #4b5f78;
+  --color-text-muted: #7c8ca2;
+  --color-border: #dce5f0;
+  --color-border-strong: #9fb4d0;
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-sm:
+    0 2px 8px rgba(15, 23, 42, 0.05),
+    0 1px 2px rgba(15, 23, 42, 0.03);
+  --shadow-md:
+    0 4px 16px rgba(15, 23, 42, 0.07),
+    0 2px 4px rgba(15, 23, 42, 0.04);
+  --shadow-lg:
+    0 8px 24px rgba(15, 23, 42, 0.09),
+    0 4px 8px rgba(15, 23, 42, 0.05);
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --radius-full: 9999px;
+  --transition-fast: 100ms ease;
+  --transition-base: 180ms ease;
+  --transition-slow: 320ms ease;
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 15px;
+  --text-md: 17px;
+  --text-lg: 20px;
+  --text-xl: 24px;
+  --text-2xl: 30px;
+  --text-3xl: 40px;
+  --canvas: var(--color-canvas);
+  --surface: var(--color-surface);
+  --surface-muted: var(--color-overlay);
   --surface-raised: rgba(255, 255, 255, 0.88);
-  --text-strong: #0b1f46;
-  --text-body: #4b5f78;
-  --line: #dce5f0;
+  --text-strong: var(--color-text-primary);
+  --text-body: var(--color-text-secondary);
+  --line: var(--color-border);
   --brand-soft: rgba(21, 94, 239, 0.08);
   --brand-glow: rgba(21, 94, 239, 0.18);
   --accent-soft: rgba(249, 115, 22, 0.1);
@@ -50,8 +88,8 @@ body {
     radial-gradient(circle at 8% 0%, rgba(21, 94, 239, 0.055), transparent 25rem),
     var(--canvas);
   transition:
-    color 180ms ease,
-    background-color 180ms ease;
+    color var(--transition-base),
+    background-color var(--transition-base);
 }
 
 button,
@@ -65,6 +103,13 @@ textarea {
 button,
 a {
   -webkit-tap-highlight-color: transparent;
+  transition:
+    color var(--transition-base),
+    background-color var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-base),
+    opacity var(--transition-base);
 }
 
 ::selection {
@@ -208,7 +253,7 @@ a {
   border: 1px solid var(--line);
   border-radius: 1.5rem;
   background: var(--surface-raised);
-  box-shadow: 0 24px 70px -48px rgba(15, 23, 42, 0.42);
+  box-shadow: var(--shadow-sm);
   backdrop-filter: blur(16px);
 }
 
@@ -270,7 +315,7 @@ a {
   border-radius: 1.25rem;
   background: var(--surface-raised);
   padding: 1.25rem;
-  box-shadow: 0 20px 62px -46px rgba(15, 23, 42, 0.48);
+  box-shadow: var(--shadow-sm);
   backdrop-filter: blur(16px);
 }
 
@@ -852,13 +897,13 @@ a {
 
 .mobile-navigation-panel {
   background: var(--surface);
-  box-shadow: 0 28px 80px -36px rgba(15, 23, 42, 0.5);
+  box-shadow: var(--shadow-md);
 }
 
 .rounded-2xl.border.border-slate-200.bg-white,
 .rounded-3xl.border.border-slate-200.bg-white {
   background: var(--surface-raised);
-  box-shadow: 0 22px 60px -48px rgba(15, 23, 42, 0.42);
+  box-shadow: var(--shadow-sm);
 }
 
 [class~="bg-slate-50/70"] {
@@ -875,9 +920,9 @@ input:not([type="checkbox"]):not([type="radio"]),
 select,
 textarea {
   transition:
-    border-color 160ms ease,
-    box-shadow 160ms ease,
-    background-color 160ms ease;
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    background-color var(--transition-base);
 }
 
 button:active,
@@ -897,23 +942,23 @@ a:active {
   font-size: 0.875rem;
   font-weight: 800;
   transition:
-    transform 180ms ease,
-    border-color 180ms ease,
-    background-color 180ms ease,
-    color 180ms ease,
-    box-shadow 180ms ease;
+    transform var(--transition-base),
+    border-color var(--transition-base),
+    background-color var(--transition-base),
+    color var(--transition-base),
+    box-shadow var(--transition-base);
 }
 
 .primary-button {
   background: #155eef;
   color: white;
-  box-shadow: 0 14px 30px -14px rgba(21, 94, 239, 0.7);
+  box-shadow: none;
 }
 
 .primary-button:hover {
   transform: translateY(-2px);
   background: #0f4fd6;
-  box-shadow: 0 18px 34px -14px rgba(21, 94, 239, 0.78);
+  box-shadow: var(--shadow-xs);
 }
 
 .secondary-button {
@@ -936,16 +981,16 @@ a:active {
 .primary-button > svg,
 .secondary-button > svg,
 .motion-button > svg {
-  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform var(--transition-base);
 }
 
 .interactive-card {
   transform: translateZ(0);
   transition:
-    transform 280ms cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 240ms ease,
-    box-shadow 280ms ease,
-    background-color 240ms ease;
+    transform var(--transition-base),
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    background-color var(--transition-base);
   will-change: transform;
 }
 
@@ -957,9 +1002,9 @@ a:active {
   }
 
   .interactive-card:hover {
-    transform: translateY(-6px);
+    transform: translateY(-2px);
     border-color: #2e73f6;
-    box-shadow: 0 30px 78px -42px rgba(21, 94, 239, 0.4);
+    box-shadow: var(--shadow-md);
   }
 }
 
@@ -978,13 +1023,31 @@ textarea:focus-visible {
 }
 
 html.dark {
-  --canvas: #060d19;
-  --surface: #0b1729;
-  --surface-muted: #101d31;
+  --color-canvas: #060d19;
+  --color-surface: #0b1729;
+  --color-overlay: #101d31;
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #bfcee2;
+  --color-text-muted: #7d91ad;
+  --color-border: rgba(125, 158, 202, 0.18);
+  --color-border-strong: rgba(147, 197, 253, 0.34);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.18);
+  --shadow-sm:
+    0 2px 10px rgba(0, 0, 0, 0.22),
+    0 1px 2px rgba(0, 0, 0, 0.16);
+  --shadow-md:
+    0 8px 24px rgba(0, 0, 0, 0.26),
+    0 2px 5px rgba(0, 0, 0, 0.18);
+  --shadow-lg:
+    0 16px 40px rgba(0, 0, 0, 0.3),
+    0 4px 10px rgba(0, 0, 0, 0.18);
+  --canvas: var(--color-canvas);
+  --surface: var(--color-surface);
+  --surface-muted: var(--color-overlay);
   --surface-raised: rgba(12, 23, 40, 0.9);
-  --text-strong: #f8fafc;
-  --text-body: #bfcee2;
-  --line: rgba(125, 158, 202, 0.18);
+  --text-strong: var(--color-text-primary);
+  --text-body: var(--color-text-secondary);
+  --line: var(--color-border);
   --brand-soft: rgba(96, 165, 250, 0.16);
   --brand-glow: rgba(59, 130, 246, 0.26);
   --accent-soft: rgba(251, 146, 60, 0.15);
@@ -1043,7 +1106,7 @@ html.dark .surface-card {
   background:
     linear-gradient(145deg, rgba(15, 28, 48, 0.92), rgba(9, 18, 32, 0.88));
   box-shadow:
-    0 28px 90px -54px rgba(0, 0, 0, 0.85),
+    var(--shadow-sm),
     0 0 0 1px rgba(96, 165, 250, 0.035),
     inset 0 1px 0 rgba(255, 255, 255, 0.045);
 }

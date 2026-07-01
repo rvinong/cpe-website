@@ -484,7 +484,7 @@ function AdminActivityCenter({
                     key={id}
                     type="button"
                     onClick={() => onSelectSection(section)}
-                    className="group flex items-start gap-4 rounded-2xl border border-slate-200 bg-slate-50/70 p-4 text-left transition hover:-translate-y-0.5 hover:border-brand-300 hover:bg-white"
+                    className="group flex items-start gap-4 rounded-2xl border border-slate-300 bg-slate-50/70 p-4 text-left transition hover:-translate-y-0.5 hover:border-brand-300 hover:bg-white"
                   >
                     <span
                       className={`grid size-11 shrink-0 place-items-center rounded-xl text-sm font-black ring-1 ${getToneClass(
@@ -510,7 +510,7 @@ function AdminActivityCenter({
                 ),
               )
             ) : (
-              <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-5">
+              <div className="rounded-2xl border border-emerald-300 bg-emerald-50 p-5">
                 <div className="flex gap-3">
                   <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-emerald-600">
                     <CheckCircle2 size={19} aria-hidden="true" />

@@ -71,7 +71,7 @@ function PasswordField({
           onChange={onChange}
           placeholder={placeholder}
           autoComplete={autoComplete}
-          className="h-13 w-full rounded-xl border border-slate-200 bg-slate-50/70 pl-12 pr-12 text-sm text-navy-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-100"
+          className="h-13 w-full rounded-xl border border-slate-300 bg-slate-50/70 pl-12 pr-12 text-sm text-navy-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-100"
         />
         <button
           type="button"
@@ -514,7 +514,7 @@ function Account() {
               </div>
 
               {isLoading ? (
-                <div className="mt-8 rounded-2xl border border-blue-100 bg-brand-50/45 p-6 text-center text-sm font-bold text-brand-600">
+                <div className="mt-8 rounded-2xl border border-blue-300 bg-brand-50/45 p-6 text-center text-sm font-bold text-brand-600">
                   Checking your account session...
                 </div>
               ) : user ? (
@@ -583,7 +583,7 @@ function Account() {
                     ].map(({ label, value, icon: Icon }) => (
                       <article
                         key={label}
-                        className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5"
+                        className="rounded-2xl border border-slate-300 bg-slate-50/70 p-5"
                       >
                         <span className="grid size-10 place-items-center rounded-xl bg-brand-50 text-brand-600">
                           <Icon size={18} aria-hidden="true" />
@@ -682,7 +682,7 @@ function Account() {
                           disabled={!isApprovedMember || isSavingProfile}
                           placeholder="Add a nickname"
                           autoComplete="nickname"
-                          className="h-13 w-full rounded-xl border border-slate-200 bg-slate-50/70 px-4 text-sm text-navy-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-100 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="h-13 w-full rounded-xl border border-slate-300 bg-slate-50/70 px-4 text-sm text-navy-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-100 disabled:cursor-not-allowed disabled:opacity-60"
                         />
                       </label>
 
@@ -760,7 +760,7 @@ function Account() {
                             <Link
                               key={announcement.id}
                               to={`/announcements/${announcement.id}`}
-                              className="group rounded-xl border border-slate-200 bg-slate-50/70 p-4 transition hover:border-brand-300 hover:bg-white"
+                              className="group rounded-xl border border-slate-300 bg-slate-50/70 p-4 transition hover:border-brand-300 hover:bg-white"
                             >
                               <p className="text-xs font-bold text-brand-600">
                                 {announcement.category} - {announcement.date}
@@ -800,7 +800,7 @@ function Account() {
                             <Link
                               key={event.id}
                               to="/events"
-                              className="group rounded-xl border border-slate-200 bg-slate-50/70 p-4 transition hover:border-brand-300 hover:bg-white"
+                              className="group rounded-xl border border-slate-300 bg-slate-50/70 p-4 transition hover:border-brand-300 hover:bg-white"
                             >
                               <p className="text-xs font-bold text-brand-600">
                                 {event.date} - {event.time}
@@ -858,7 +858,7 @@ function Account() {
                         dashboardResources.map((resource) => (
                           <div
                             key={resource.id}
-                            className="rounded-xl border border-slate-200 bg-slate-50/70 p-4"
+                            className="rounded-xl border border-slate-300 bg-slate-50/70 p-4"
                           >
                             <p className="text-xs font-bold text-brand-600">
                               {resource.category}
@@ -902,7 +902,7 @@ function Account() {
                   </section>
 
                   {profile && (
-                    <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-blue-100 bg-brand-50/45 p-5">
+                    <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-blue-300 bg-brand-50/45 p-5">
                       <input
                         type="checkbox"
                         checked={profile.email_notifications ?? true}
@@ -954,7 +954,7 @@ function Account() {
                           onChange={updateField('fullName')}
                           placeholder="Enter your full name"
                           autoComplete="name"
-                          className="h-13 w-full rounded-xl border border-slate-200 bg-slate-50/70 pl-12 pr-4 text-sm text-navy-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-100"
+                          className="h-13 w-full rounded-xl border border-slate-300 bg-slate-50/70 pl-12 pr-4 text-sm text-navy-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-100"
                         />
                       </span>
                     </label>
@@ -977,7 +977,7 @@ function Account() {
                           onChange={updateField('studentNumber')}
                           placeholder="Enter your student number"
                           autoComplete="off"
-                          className="h-13 w-full rounded-xl border border-slate-200 bg-slate-50/70 pl-12 pr-4 text-sm text-navy-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-100"
+                          className="h-13 w-full rounded-xl border border-slate-300 bg-slate-50/70 pl-12 pr-4 text-sm text-navy-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-100"
                         />
                       </span>
                     </label>
@@ -1002,7 +1002,7 @@ function Account() {
                       onChange={updateField('email')}
                       placeholder="Enter your email address"
                       autoComplete="email"
-                      className="h-13 w-full rounded-xl border border-slate-200 bg-slate-50/70 pl-12 pr-4 text-sm text-navy-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-100"
+                      className="h-13 w-full rounded-xl border border-slate-300 bg-slate-50/70 pl-12 pr-4 text-sm text-navy-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-100"
                     />
                   </span>
                 </label>
@@ -1032,7 +1032,7 @@ function Account() {
                 )}
 
                 {activeMode === 'signup' && (
-                  <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-blue-100 bg-brand-50/45 p-4">
+                  <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-blue-300 bg-brand-50/45 p-4">
                     <input
                       type="checkbox"
                       checked={formData.emailNotifications}

@@ -123,7 +123,7 @@ function TransparencySnapshot() {
                   >
                     <Link
                       to="/internal-audit#reports"
-                      className="interactive-card block h-full rounded-3xl border border-slate-200 bg-white/85 p-5 shadow-[0_20px_60px_-48px_rgba(15,23,42,0.52)]"
+                      className="interactive-card block h-full rounded-3xl border border-slate-300 bg-white/85 p-5 shadow-[0_20px_60px_-48px_rgba(15,23,42,0.52)]"
                     >
                       <span
                         className={`grid size-12 place-items-center rounded-2xl ring-1 ${item.accent}`}

@@ -69,7 +69,7 @@ function AnnouncementDetails() {
           </Link>
 
           <article className="mt-7 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_30px_80px_-48px_rgba(15,23,42,0.5)]">
-            <div className="relative isolate overflow-hidden border-b border-blue-100 bg-gradient-to-br from-brand-50 via-white to-blue-100/60 px-6 py-12 sm:px-10 lg:px-14">
+            <div className="relative isolate overflow-hidden border-b border-blue-200 bg-gradient-to-br from-brand-50 to-white px-6 py-12 sm:px-10 lg:px-14">
               <div className="subtle-grid absolute inset-0 -z-10 opacity-60" />
               <span className="grid size-16 place-items-center rounded-2xl bg-white text-brand-600 shadow-lg shadow-blue-600/10 ring-1 ring-blue-100">
                 <Megaphone size={29} strokeWidth={1.7} aria-hidden="true" />

@@ -29,7 +29,7 @@ function AnnouncementsSection() {
           </div>
         ) : (
           <Reveal>
-            <div className="rounded-2xl border border-blue-100 bg-brand-50/55 px-6 py-10 text-center text-sm font-bold text-slate-600">
+            <div className="rounded-2xl border border-blue-300 bg-brand-50/55 px-6 py-10 text-center text-sm font-bold text-slate-600">
               No published announcements yet.
             </div>
           </Reveal>

@@ -44,7 +44,7 @@ function GlanceSection() {
                 decoding="async"
                 className="absolute inset-0 -z-20 h-full w-full object-cover opacity-25"
               />
-              <div className="absolute inset-0 -z-10 bg-gradient-to-br from-navy-950 via-navy-900/95 to-brand-700/85" />
+              <div className="absolute inset-0 -z-10 bg-gradient-to-br from-navy-950 to-brand-700/85" />
               <div className="absolute -top-24 right-0 -z-10 size-80 rounded-full bg-blue-400/15 blur-3xl" />
 
               <div className="max-w-3xl">

@@ -531,7 +531,7 @@ function AdminEvents() {
         </div>
 
         {!isLoading && items.length > 0 && (
-          <div className="border-b border-slate-200 bg-slate-50/70 px-5 py-5 sm:px-6">
+          <div className="border-b border-slate-300 bg-slate-50/70 px-5 py-5 sm:px-6">
             <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
               <label className="relative block">
                 <span className="sr-only">Search events</span>
@@ -913,7 +913,7 @@ function AdminEvents() {
                             required
                           />
                         </label>
-                        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-blue-100 bg-brand-50/45 p-4">
+                        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-blue-300 bg-brand-50/45 p-4">
                           <input
                             type="checkbox"
                             name="showInGallery"
@@ -954,7 +954,7 @@ function AdminEvents() {
                 </div>
               </div>
 
-              <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-xl border border-blue-100 bg-brand-50/45 p-4">
+              <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-xl border border-blue-300 bg-brand-50/45 p-4">
                 <input
                   type="checkbox"
                   name="isFeatured"

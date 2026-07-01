@@ -464,7 +464,7 @@ function AdminTeam() {
                 {currentMember?.email || user?.email}
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
-                <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-blue-100 bg-brand-50 px-4 py-2.5 text-xs font-extrabold text-brand-600">
+                <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-blue-300 bg-brand-50 px-4 py-2.5 text-xs font-extrabold text-brand-600">
                   <ImageUp size={16} />
                   Choose photo
                   <input

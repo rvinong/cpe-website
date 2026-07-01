@@ -362,7 +362,7 @@ function AdminAnalyticsPanel({
             ].map(([label, value, detail, Icon]) => (
               <div
                 key={label}
-                className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4"
+                className="rounded-2xl border border-slate-300 bg-slate-50/70 p-4"
               >
                 <Icon size={19} className="text-brand-600" aria-hidden="true" />
                 <p className="mt-3 text-xs font-extrabold tracking-wide text-slate-400 uppercase">
@@ -464,7 +464,7 @@ function AdminAnalyticsPanel({
                     key={label}
                     type="button"
                     onClick={() => onSelectSection('events')}
-                    className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 text-left transition hover:border-brand-300 hover:bg-white"
+                    className="rounded-2xl border border-slate-300 bg-slate-50/70 p-4 text-left transition hover:border-brand-300 hover:bg-white"
                   >
                     <p className="text-xs font-extrabold text-slate-400 uppercase">
                       {label}

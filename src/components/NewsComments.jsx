@@ -55,7 +55,7 @@ function CommentComposer({
           maxLength={maxNewsCommentLength + 1}
           rows={isReply ? 2 : 3}
           placeholder={placeholder}
-          className={`w-full resize-none rounded-[1.35rem] border border-slate-200 bg-slate-100/80 px-4 py-3 pr-14 text-sm font-semibold text-navy-900 outline-none transition placeholder:text-slate-400 focus:border-brand-300 focus:bg-white focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 ${
+          className={`w-full resize-none rounded-[1.35rem] border border-slate-300 bg-slate-100/80 px-4 py-3 pr-14 text-sm font-semibold text-navy-900 outline-none transition placeholder:text-slate-400 focus:border-brand-300 focus:bg-white focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 ${
             isReply ? 'min-h-16' : 'min-h-20'
           }`}
         />

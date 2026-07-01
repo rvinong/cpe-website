@@ -509,7 +509,7 @@ function AdminAnnouncements() {
                 </label>
               </div>
 
-              <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-xl border border-blue-100 bg-brand-50/45 p-4">
+              <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-xl border border-blue-300 bg-brand-50/45 p-4">
                 <input
                   type="checkbox"
                   name="isFeatured"

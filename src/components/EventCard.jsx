@@ -24,8 +24,8 @@ function EventCard({ event, compact = false }) {
       <div
         className={`h-1 ${
           event.timing === 'cancelled'
-            ? 'bg-gradient-to-r from-red-500 via-rose-400 to-orange-400'
-            : 'bg-gradient-to-r from-brand-600 via-blue-400 to-orange-400'
+            ? 'bg-gradient-to-r from-red-500 to-red-400'
+            : 'bg-gradient-to-r from-brand-700 to-brand-500'
         }`}
       />
       {event.image && (

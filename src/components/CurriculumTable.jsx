@@ -1,7 +1,7 @@
 function CurriculumTable({ term }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-      <div className="hidden grid-cols-[110px_minmax(260px,1fr)_145px_70px_minmax(210px,0.8fr)] gap-4 border-b border-slate-200 bg-slate-50 px-5 py-3 text-[11px] font-extrabold tracking-[0.12em] text-slate-500 uppercase lg:grid">
+      <div className="hidden grid-cols-[110px_minmax(260px,1fr)_145px_70px_minmax(210px,0.8fr)] gap-4 border-b border-slate-300 bg-slate-50 px-5 py-3 text-[11px] font-extrabold tracking-[0.12em] text-slate-500 uppercase lg:grid">
         <span>Code</span>
         <span>Course</span>
         <span>Hours</span>

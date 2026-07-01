@@ -166,7 +166,7 @@ function About() {
               <p className="mt-5 text-base leading-8 text-slate-600">
                 {organizationProfile.overview}
               </p>
-              <div className="mt-8 rounded-2xl border border-blue-100 bg-brand-50/55 p-5">
+              <div className="mt-8 rounded-2xl border border-blue-300 bg-brand-50/55 p-5">
                 <div className="flex items-start gap-4">
                   <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-white text-brand-600 shadow-sm ring-1 ring-blue-100">
                     <GraduationCap size={22} aria-hidden="true" />
@@ -354,7 +354,7 @@ function About() {
                 Officers & Faculty
               </h2>
               {isUsingSamplePeople && (
-                <p className="mt-4 rounded-2xl border border-blue-100 bg-brand-50/45 px-4 py-3 text-xs font-extrabold tracking-[0.12em] text-brand-600 uppercase">
+                <p className="mt-4 rounded-2xl border border-blue-300 bg-brand-50/45 px-4 py-3 text-xs font-extrabold tracking-[0.12em] text-brand-600 uppercase">
                   Sample preview - replace these with verified officers and
                   faculty in the dashboard.
                 </p>

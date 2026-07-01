@@ -482,7 +482,7 @@ function InternalAudit() {
                   </p>
 
                   <div className="mt-5 grid gap-3 text-sm text-slate-600 sm:grid-cols-2">
-                    <div className="rounded-2xl border border-slate-200 bg-white/70 p-4">
+                    <div className="rounded-2xl border border-slate-300 bg-white/70 p-4">
                       <p className="text-xs font-extrabold tracking-wide text-slate-400 uppercase">
                         Period
                       </p>
@@ -490,7 +490,7 @@ function InternalAudit() {
                         {report.period}
                       </p>
                     </div>
-                    <div className="rounded-2xl border border-slate-200 bg-white/70 p-4">
+                    <div className="rounded-2xl border border-slate-300 bg-white/70 p-4">
                       <p className="text-xs font-extrabold tracking-wide text-slate-400 uppercase">
                         Published
                       </p>
@@ -500,7 +500,7 @@ function InternalAudit() {
                     </div>
                     {report.type === 'liquidation' && (
                       <>
-                        <div className="rounded-2xl border border-slate-200 bg-white/70 p-4">
+                        <div className="rounded-2xl border border-slate-300 bg-white/70 p-4">
                           <p className="text-xs font-extrabold tracking-wide text-slate-400 uppercase">
                             Funds received
                           </p>
@@ -508,7 +508,7 @@ function InternalAudit() {
                             {report.fundsReceived}
                           </p>
                         </div>
-                        <div className="rounded-2xl border border-slate-200 bg-white/70 p-4">
+                        <div className="rounded-2xl border border-slate-300 bg-white/70 p-4">
                           <p className="text-xs font-extrabold tracking-wide text-slate-400 uppercase">
                             Balance
                           </p>
@@ -519,7 +519,7 @@ function InternalAudit() {
                       </>
                     )}
                     {report.resolutionNumber && (
-                      <div className="rounded-2xl border border-slate-200 bg-white/70 p-4 sm:col-span-2">
+                      <div className="rounded-2xl border border-slate-300 bg-white/70 p-4 sm:col-span-2">
                         <p className="text-xs font-extrabold tracking-wide text-slate-400 uppercase">
                           Resolution number
                         </p>
@@ -564,7 +564,7 @@ function InternalAudit() {
                       <button
                         type="button"
                         disabled
-                        className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-extrabold text-slate-400"
+                        className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-slate-50 px-4 py-2 text-xs font-extrabold text-slate-400"
                       >
                         <Filter size={14} aria-hidden="true" />
                         Awaiting PDF

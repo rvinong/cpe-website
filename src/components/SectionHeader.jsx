@@ -50,7 +50,7 @@ function SectionHeader({
           className={`motion-button hidden shrink-0 items-center gap-2 rounded-xl px-4 py-3 text-sm font-extrabold transition sm:flex ${
             light
               ? 'border border-white/15 bg-white/10 text-white hover:bg-white/15'
-              : 'border border-blue-100 bg-brand-50 text-brand-600 hover:border-brand-500 hover:bg-brand-600 hover:text-white'
+              : 'border border-blue-300 bg-brand-50 text-brand-600 hover:border-brand-500 hover:bg-brand-600 hover:text-white'
           }`}
         >
           {actionLabel}

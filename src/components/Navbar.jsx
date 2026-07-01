@@ -307,7 +307,7 @@ function Navbar() {
               </MotionLink>
               <Motion.div
                 variants={mobileItemVariants}
-                className="mt-3 flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3 sm:hidden"
+                className="mt-3 flex items-center justify-between rounded-xl border border-slate-300 bg-slate-50/70 px-4 py-3 sm:hidden"
               >
                 <span className="text-sm font-extrabold text-navy-900">
                   Appearance
