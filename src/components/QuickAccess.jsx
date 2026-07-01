@@ -50,7 +50,7 @@ function QuickAccess() {
                   className="quick-access-card surface-card group relative flex h-full min-h-52 flex-col overflow-hidden p-6 transition duration-300 hover:border-brand-500 hover:shadow-[0_28px_70px_-38px_rgba(21,94,239,0.5)] focus-visible:border-brand-500 focus-visible:ring-4 focus-visible:ring-brand-100"
                 >
                   <span className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-brand-500 to-transparent opacity-0 transition duration-500 group-hover:opacity-100" />
-                  <span className="quick-access-orb absolute -right-8 -top-8 size-28 rounded-full transition duration-500 group-hover:scale-150" />
+                  <span className="quick-access-orb absolute -right-8 -top-8 size-28 rounded-full transition duration-500" />
                   <span className="quick-access-ember absolute -bottom-10 left-6 h-16 w-28 rotate-[-12deg] rounded-full opacity-0 blur-2xl transition duration-500 group-hover:opacity-80" />
                   <span className="grid size-12 place-items-center rounded-xl bg-brand-50 text-brand-600 shadow-sm transition duration-300 group-hover:-translate-y-1 group-hover:bg-brand-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-blue-600/20">
                     <Icon size={23} strokeWidth={1.7} aria-hidden="true" />
