@@ -503,13 +503,13 @@ end;
 $$;
 
 revoke all on function public.get_news_reaction_summary(uuid)
-  from public;
+  from public, anon;
 revoke all on function public.set_news_reaction(uuid, text)
-  from public;
+  from public, anon;
 revoke all on function public.clear_news_reaction(uuid)
-  from public;
+  from public, anon;
 revoke all on function public.get_news_reaction_members(uuid, text)
-  from public;
+  from public, anon;
 
 grant execute on function public.get_news_reaction_summary(uuid)
   to anon, authenticated;
@@ -887,13 +887,13 @@ end;
 $$;
 
 revoke all on function public.get_news_comment_summary(uuid)
-  from public;
+  from public, anon;
 revoke all on function public.list_news_comments(uuid)
-  from public;
+  from public, anon;
 revoke all on function public.create_news_comment(uuid, uuid, text)
-  from public;
+  from public, anon;
 revoke all on function public.delete_news_comment(uuid)
-  from public;
+  from public, anon;
 
 grant execute on function public.get_news_comment_summary(uuid)
   to anon, authenticated;
