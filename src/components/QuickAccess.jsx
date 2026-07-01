@@ -44,10 +44,10 @@ function QuickAccess() {
                 <Motion.a
                   href={item.href}
                   aria-label={`Open ${item.title}`}
-                  whileHover={{ y: -7, scale: 1.015 }}
+                  whileHover={{ y: -10, scale: 1.055 }}
                   whileTap={{ scale: 0.985 }}
                   transition={springTransition}
-                  className="quick-access-card surface-card group relative flex h-full min-h-52 flex-col overflow-hidden p-6 transition duration-300 hover:border-brand-500 hover:shadow-[0_28px_70px_-38px_rgba(21,94,239,0.5)] focus-visible:border-brand-500 focus-visible:ring-4 focus-visible:ring-brand-100"
+                  className="quick-access-card surface-card group relative flex h-full min-h-52 origin-center flex-col overflow-hidden p-6 transition duration-300 will-change-transform hover:z-20 hover:border-brand-500 hover:shadow-[0_34px_82px_-38px_rgba(21,94,239,0.58)] focus-visible:z-20 focus-visible:border-brand-500 focus-visible:ring-4 focus-visible:ring-brand-100"
                 >
                   <span className="absolute inset-x-6 top-0 h-px bg-brand-500 opacity-0 transition duration-500 group-hover:opacity-100" />
                   <span className="quick-access-orb absolute -right-8 -top-8 size-28 rounded-full transition duration-500" />
