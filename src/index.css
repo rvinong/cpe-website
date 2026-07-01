@@ -212,7 +212,8 @@ a {
   backdrop-filter: blur(16px);
 }
 
-.quick-access-orb {
+.quick-access-orb,
+.brand-corner-orb {
   overflow: hidden;
   border: 1px solid rgba(147, 197, 253, 0.28);
   background:
@@ -223,7 +224,8 @@ a {
     0 24px 60px -44px rgba(21, 94, 239, 0.42);
 }
 
-.quick-access-orb::after {
+.quick-access-orb::after,
+.brand-corner-orb::after {
   position: absolute;
   right: 1.15rem;
   bottom: 1.25rem;
@@ -237,7 +239,8 @@ a {
   transition: opacity 240ms ease;
 }
 
-.quick-access-card:hover .quick-access-orb::after {
+.quick-access-card:hover .quick-access-orb::after,
+.group:hover .brand-corner-orb::after {
   opacity: 1;
 }
 
@@ -245,6 +248,21 @@ a {
   background:
     radial-gradient(circle at 28% 52%, rgba(249, 115, 22, 0.42), transparent 58%),
     radial-gradient(circle at 76% 48%, rgba(46, 115, 246, 0.24), transparent 60%);
+}
+
+.theme-ambient-orb,
+.theme-ambient-orb-secondary {
+  background:
+    radial-gradient(circle at 32% 30%, rgba(191, 219, 254, 0.82), transparent 54%),
+    radial-gradient(circle at 74% 76%, rgba(249, 115, 22, 0.18), transparent 46%),
+    linear-gradient(135deg, rgba(239, 246, 255, 0.82), rgba(219, 234, 254, 0.58));
+}
+
+.theme-ambient-orb-secondary {
+  background:
+    radial-gradient(circle at 35% 35%, rgba(219, 234, 254, 0.76), transparent 54%),
+    radial-gradient(circle at 72% 72%, rgba(46, 115, 246, 0.18), transparent 48%),
+    linear-gradient(135deg, rgba(239, 246, 255, 0.68), rgba(224, 242, 254, 0.52));
 }
 
 .filter-panel {
@@ -1030,7 +1048,8 @@ html.dark .surface-card {
     inset 0 1px 0 rgba(255, 255, 255, 0.045);
 }
 
-html.dark .quick-access-orb {
+html.dark .quick-access-orb,
+html.dark .brand-corner-orb {
   border-color: rgba(147, 197, 253, 0.22);
   background:
     radial-gradient(circle at 28% 28%, rgba(125, 211, 252, 0.78), transparent 24%),
@@ -1043,7 +1062,8 @@ html.dark .quick-access-orb {
     inset 0 -18px 32px rgba(2, 6, 23, 0.18);
 }
 
-html.dark .quick-access-orb::after {
+html.dark .quick-access-orb::after,
+html.dark .brand-corner-orb::after {
   background: rgba(251, 146, 60, 0.95);
   box-shadow:
     0 0 0 0.55rem rgba(251, 146, 60, 0.14),
@@ -1051,7 +1071,8 @@ html.dark .quick-access-orb::after {
   opacity: 0.92;
 }
 
-html.dark .quick-access-card:hover .quick-access-orb {
+html.dark .quick-access-card:hover .quick-access-orb,
+html.dark .group:hover .brand-corner-orb {
   box-shadow:
     0 0 42px rgba(37, 99, 235, 0.34),
     0 0 90px rgba(14, 165, 233, 0.18),
@@ -1063,6 +1084,20 @@ html.dark .quick-access-ember {
   background:
     radial-gradient(circle at 26% 52%, rgba(251, 146, 60, 0.58), transparent 58%),
     radial-gradient(circle at 76% 48%, rgba(59, 130, 246, 0.4), transparent 62%);
+}
+
+html.dark .theme-ambient-orb {
+  background:
+    radial-gradient(circle at 30% 30%, rgba(59, 130, 246, 0.46), transparent 54%),
+    radial-gradient(circle at 72% 76%, rgba(251, 146, 60, 0.2), transparent 48%),
+    linear-gradient(135deg, rgba(14, 42, 78, 0.62), rgba(8, 16, 29, 0.3));
+}
+
+html.dark .theme-ambient-orb-secondary {
+  background:
+    radial-gradient(circle at 28% 36%, rgba(14, 165, 233, 0.34), transparent 56%),
+    radial-gradient(circle at 74% 72%, rgba(59, 130, 246, 0.22), transparent 50%),
+    linear-gradient(135deg, rgba(15, 28, 48, 0.58), rgba(8, 16, 29, 0.25));
 }
 
 html.dark .filter-panel,

@@ -20,7 +20,7 @@ function EventCard({ event, compact = false }) {
 
   return (
     <article className="surface-card interactive-card group relative isolate flex h-full flex-col overflow-hidden">
-      <span className="absolute -right-12 -top-12 -z-10 size-32 rounded-full bg-brand-50/70 transition duration-500 group-hover:scale-125 group-hover:bg-brand-100/70" />
+      <span className="brand-corner-orb absolute -right-12 -top-12 -z-10 size-32 rounded-full transition duration-500 group-hover:scale-125" />
       <div
         className={`h-1 ${
           event.timing === 'cancelled'

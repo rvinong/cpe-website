@@ -449,8 +449,8 @@ function Account() {
       <main className="min-h-screen bg-slate-50 pt-[84px]">
         <section className="relative isolate overflow-hidden py-12 sm:py-16 lg:py-20">
           <div className="subtle-grid absolute inset-0 -z-20 opacity-60" />
-          <div className="absolute -right-24 -top-24 -z-10 size-80 rounded-full bg-brand-100/70 blur-3xl" />
-          <div className="absolute -bottom-28 -left-24 -z-10 size-80 rounded-full bg-blue-100/60 blur-3xl" />
+          <div className="theme-ambient-orb absolute -right-24 -top-24 -z-10 size-80 rounded-full blur-3xl" />
+          <div className="theme-ambient-orb-secondary absolute -bottom-28 -left-24 -z-10 size-80 rounded-full blur-3xl" />
 
           <div className="section-shell">
             <Motion.div

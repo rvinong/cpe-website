@@ -198,7 +198,7 @@ function Events() {
                         className="relative isolate overflow-hidden rounded-[2rem] border border-blue-100 bg-white p-6 shadow-[0_30px_80px_-48px_rgba(15,23,42,0.48)] sm:p-8 lg:p-10"
                       >
                         <div className="subtle-grid absolute inset-0 -z-20 opacity-30" />
-                        <div className="absolute -right-20 -top-24 -z-10 size-72 rounded-full bg-brand-100/70 blur-3xl" />
+                        <div className="theme-ambient-orb absolute -right-20 -top-24 -z-10 size-72 rounded-full blur-3xl" />
                         <div className="grid gap-8 lg:grid-cols-[1fr_20rem] lg:items-center">
                           <div>
                             <div className="inline-flex items-center gap-2 rounded-full bg-brand-50 px-3 py-1.5 text-xs font-extrabold text-brand-600">
