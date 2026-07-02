@@ -158,7 +158,7 @@ function NewsDetails() {
 
   return (
     <>
-      <main className="bg-slate-50 pb-24 pt-[120px] sm:pb-28 sm:pt-[136px]">
+      <main className="news-detail-page bg-slate-50 pb-24 pt-[120px] sm:pb-28 sm:pt-[136px]">
         <div className="section-shell">
           <Motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -171,10 +171,10 @@ function NewsDetails() {
               Back to News & Gallery
             </Link>
 
-            <article className="mt-7 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_30px_80px_-48px_rgba(15,23,42,0.5)]">
-              <div className="relative isolate overflow-hidden border-b border-blue-200 bg-gradient-to-br from-brand-50 to-white px-6 py-12 sm:px-10 lg:px-14">
+            <article className="news-detail-article mt-7 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_30px_80px_-48px_rgba(15,23,42,0.5)]">
+              <div className="news-detail-hero relative isolate overflow-hidden border-b border-blue-200 bg-gradient-to-br from-brand-50 to-white px-6 py-12 sm:px-10 lg:px-14">
                 <div className="subtle-grid absolute inset-0 -z-10 opacity-60" />
-                <span className="grid size-16 place-items-center rounded-2xl bg-white text-brand-600 shadow-lg shadow-blue-600/10 ring-1 ring-blue-100">
+                <span className="news-detail-icon grid size-16 place-items-center rounded-2xl bg-white text-brand-600 shadow-lg shadow-blue-600/10 ring-1 ring-blue-100">
                   <Newspaper size={29} strokeWidth={1.7} aria-hidden="true" />
                 </span>
                 <div className="mt-7 flex flex-wrap items-center gap-3 text-xs font-bold">
@@ -187,23 +187,23 @@ function NewsDetails() {
                       Featured story
                     </span>
                   )}
-                  <span className="inline-flex items-center gap-1.5 text-slate-500">
+                  <span className="news-detail-date inline-flex items-center gap-1.5 text-slate-500">
                     <CalendarDays size={15} aria-hidden="true" />
                     Published: {newsPost.date}
                   </span>
                 </div>
-                <h1 className="mt-5 text-3xl font-black tracking-[-0.04em] text-navy-900 sm:text-5xl sm:tracking-[-0.045em]">
+                <h1 className="news-detail-title mt-5 text-3xl font-black tracking-[-0.04em] text-navy-900 sm:text-5xl sm:tracking-[-0.045em]">
                   {newsPost.title}
                 </h1>
-                <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600">
+                <p className="news-detail-summary mt-5 max-w-2xl text-lg leading-8 text-slate-600">
                   {newsPost.summary}
                 </p>
               </div>
 
-              <div className="px-6 py-10 sm:px-10 sm:py-12 lg:px-14">
+              <div className="news-detail-content px-6 py-10 sm:px-10 sm:py-12 lg:px-14">
                 {images.length > 0 && (
                   <section aria-label="News story images">
-                    <div className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white">
+                    <div className="news-detail-image-frame relative overflow-hidden rounded-3xl border border-slate-200 bg-white">
                       <AnimatePresence
                         mode="wait"
                         initial={false}
@@ -323,7 +323,7 @@ function NewsDetails() {
                   </div>
                 )}
 
-                <div className="mt-10 space-y-6 text-base leading-8 text-slate-700">
+                <div className="news-detail-body mt-10 space-y-6 text-base leading-8 text-slate-700">
                   {bodyParagraphs.map((paragraph) => (
                     <p key={paragraph}>{paragraph}</p>
                   ))}
@@ -339,7 +339,7 @@ function NewsDetails() {
                   onReactionSummaryChange={updateReactionState}
                 />
 
-                <div className="mt-10 border-t border-slate-100 pt-8">
+                <div className="news-detail-footer mt-10 border-t border-slate-100 pt-8">
                   <Link to="/gallery#news" className="primary-button">
                     <ArrowLeft size={17} aria-hidden="true" />
                     Back to News & Gallery
