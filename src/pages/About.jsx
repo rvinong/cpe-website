@@ -106,6 +106,25 @@ function About() {
   const displayedOrganizationPeople = isUsingSamplePeople
     ? fallbackOrganization.officers
     : organizationOfficers
+  const overviewFacts = [
+    {
+      icon: ShieldCheck,
+      label: 'Official chapter',
+      value: 'ICpEP.SE-NwSSU',
+    },
+    {
+      icon: GraduationCap,
+      label: 'Built for',
+      value: 'BS Computer Engineering students',
+    },
+    {
+      icon: MapPin,
+      label: 'Home base',
+      value:
+        organizationProfile.campusAddress ||
+        'NwSSU Main Campus, Calbayog City',
+    },
+  ]
 
   return (
     <>
@@ -158,27 +177,60 @@ function About() {
               transition={{ duration: 0.55 }}
             >
               <p className="text-xs font-extrabold tracking-[0.2em] text-brand-600 uppercase">
-                Organization overview
+                Organization identity
               </p>
               <h2 className="mt-3 text-3xl font-black tracking-tight text-navy-900 sm:text-4xl">
-                A community for Computer Engineering students
+                The student chapter behind ICpEP Connect
               </h2>
-              <p className="mt-5 text-base leading-8 text-slate-600">
-                {organizationProfile.overview}
+              <p className="mt-5 max-w-2xl text-base leading-8 text-slate-600">
+                ICpEP Connect brings the organization closer to Computer
+                Engineering students through announcements, academic resources,
+                event records, alumni archives, and transparent student
+                services.
               </p>
-              <div className="mt-8 rounded-2xl border border-blue-300 bg-brand-50/55 p-5">
+              <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                {overviewFacts.map((fact) => {
+                  const Icon = fact.icon
+
+                  return (
+                    <div
+                      key={fact.label}
+                      className="surface-card p-4 shadow-none"
+                    >
+                      <span className="grid size-10 place-items-center rounded-xl bg-brand-50 text-brand-600 ring-1 ring-blue-100">
+                        <Icon size={20} aria-hidden="true" />
+                      </span>
+                      <p className="mt-4 text-[0.68rem] font-extrabold tracking-[0.16em] text-slate-400 uppercase">
+                        {fact.label}
+                      </p>
+                      <p className="mt-1 text-sm font-black leading-5 text-navy-900">
+                        {fact.value}
+                      </p>
+                    </div>
+                  )
+                })}
+              </div>
+              <details className="mt-5 rounded-2xl border border-blue-200 bg-brand-50/35 p-5">
+                <summary className="cursor-pointer text-sm font-extrabold text-brand-600">
+                  Read official organization description
+                </summary>
+                <p className="mt-4 text-sm leading-7 text-slate-600">
+                  {organizationProfile.overview}
+                </p>
+              </details>
+              <div className="mt-5 rounded-2xl border border-blue-300 bg-brand-50/55 p-5">
                 <div className="flex items-start gap-4">
                   <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-white text-brand-600 shadow-sm ring-1 ring-blue-100">
-                    <GraduationCap size={22} aria-hidden="true" />
+                    <Network size={22} aria-hidden="true" />
                   </span>
                   <div>
                     <h3 className="font-extrabold text-navy-900">
                       Student-centered portal
                     </h3>
                     <p className="mt-2 text-sm leading-6 text-slate-600">
-                      This website brings organization updates, academic
-                      resources, events, alumni records, and media archives
-                      into one accessible place.
+                      The website keeps the student community connected to
+                      official updates, learning materials, event documentation,
+                      and organization records.
                     </p>
                   </div>
                 </div>
