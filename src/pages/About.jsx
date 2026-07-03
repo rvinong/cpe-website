@@ -4,7 +4,6 @@ import {
   BriefcaseBusiness,
   Building2,
   ExternalLink,
-  FileCheck2,
   Flag,
   GraduationCap,
   Handshake,
@@ -15,7 +14,6 @@ import {
   Network,
   ShieldCheck,
   Target,
-  UserRoundCheck,
   UsersRound,
 } from 'lucide-react'
 import PageHero from '../components/PageHero'
@@ -66,41 +64,15 @@ const officialRecords = [
   },
 ]
 
-const membershipItems = [
-  {
-    icon: UserRoundCheck,
-    title: 'Eligibility',
-    key: 'eligibility',
-    emptyMessage: 'Official member eligibility guidelines are being collected.',
-  },
-  {
-    icon: FileCheck2,
-    title: 'Application process',
-    key: 'process',
-    emptyMessage: 'The confirmed registration process will be posted here.',
-  },
-  {
-    icon: ShieldCheck,
-    title: 'Requirements',
-    key: 'requirements',
-    emptyMessage: 'Membership requirements and policies are awaiting approval.',
-  },
-]
-
 function About() {
   const {
     profile: organizationProfile,
-    membership: membershipDetails,
     officers: organizationOfficers,
     milestones: historyMilestones,
   } = useOrganization()
   const populatedOfficialRecords = officialRecords.map((record) => ({
     ...record,
     value: organizationProfile[record.key],
-  }))
-  const populatedMembershipItems = membershipItems.map((item) => ({
-    ...item,
-    value: membershipDetails[item.key],
   }))
   const isUsingSamplePeople = organizationOfficers.length === 0
   const displayedOrganizationPeople = isUsingSamplePeople
@@ -132,7 +104,7 @@ function About() {
         <PageHero
           eyebrow="Who we are"
           title="About the Organization"
-          description={`Learn about the community, purpose, leadership, membership, and official records of the ${organizationProfile.name}.`}
+          description={`Learn about the community, purpose, leadership, and official records of the ${organizationProfile.name}.`}
           icon={Building2}
           accentIcon={Network}
         />
@@ -456,54 +428,6 @@ function About() {
                 </div>
               )}
             </Motion.article>
-          </div>
-        </section>
-
-        <section className="bg-slate-50/70 py-20 sm:py-24">
-          <div className="section-shell">
-            <Motion.div
-              initial={{ opacity: 0, y: 18 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.25 }}
-              transition={{ duration: 0.5 }}
-              className="mx-auto max-w-2xl text-center"
-            >
-              <p className="text-xs font-extrabold tracking-[0.2em] text-brand-600 uppercase">
-                Join the community
-              </p>
-              <h2 className="mt-3 text-3xl font-black tracking-tight text-navy-900 sm:text-4xl">
-                Membership
-              </h2>
-              <p className="mt-4 text-base leading-7 text-slate-600">
-                Official membership guidelines will be posted after they are
-                confirmed by the organization.
-              </p>
-            </Motion.div>
-
-            <div className="mt-10 grid gap-5 md:grid-cols-3">
-              {populatedMembershipItems.map(
-                ({ icon: Icon, title, value, emptyMessage }, index) => (
-                  <Motion.article
-                    key={title}
-                    initial={{ opacity: 0, y: 18 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.25 }}
-                    transition={{ duration: 0.5, delay: index * 0.07 }}
-                    className="rounded-2xl border border-slate-200 bg-white p-6"
-                  >
-                    <span className="grid size-12 place-items-center rounded-xl bg-brand-50 text-brand-600">
-                      <Icon size={22} aria-hidden="true" />
-                    </span>
-                    <h3 className="mt-5 text-lg font-extrabold text-navy-900">
-                      {title}
-                    </h3>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">
-                      {value || emptyMessage}
-                    </p>
-                  </Motion.article>
-                ),
-              )}
-            </div>
           </div>
         </section>
 

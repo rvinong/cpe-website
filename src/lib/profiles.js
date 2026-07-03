@@ -13,6 +13,7 @@ export async function updateAdminProfile(id, values) {
     target_id: id,
     target_full_name: values.fullName.trim(),
     target_student_number: values.studentNumber.trim() || null,
+    target_year_level: values.yearLevel || '',
     target_role: values.role,
     target_status: values.status,
   })

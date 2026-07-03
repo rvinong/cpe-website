@@ -2,6 +2,7 @@ import {
   CheckCircle2,
   Clock3,
   Edit3,
+  GraduationCap,
   LoaderCircle,
   Save,
   Search,
@@ -13,6 +14,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import AdminListSkeleton from './AdminListSkeleton'
 import useAuth from '../context/useAuth'
+import { getYearLevelLabel, yearLevelOptions } from '../data/yearLevels'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import {
   getAdminProfiles,
@@ -120,6 +122,7 @@ function AdminUsers() {
           item.full_name,
           item.email,
           item.student_number,
+          item.year_level,
           item.role,
           item.status,
         ]
@@ -137,6 +140,7 @@ function AdminUsers() {
     setForm({
       fullName: item.full_name,
       studentNumber: item.student_number || '',
+      yearLevel: item.year_level || '',
       role: item.role,
       status: item.status,
     })
@@ -171,7 +175,13 @@ function AdminUsers() {
     )
 
     if (updateError) {
-      setError(updateError.message)
+      const schemaMissing = isProfilesRpcMissing(updateError)
+      setNeedsSchema(schemaMissing)
+      setError(
+        schemaMissing
+          ? 'Run supabase/users.sql in the Supabase SQL Editor, then refresh this page.'
+          : updateError.message,
+      )
       setIsSaving(false)
       return
     }
@@ -255,7 +265,7 @@ function AdminUsers() {
               type="search"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="Search by name, email, student number, role, or status"
+              placeholder="Search by name, email, student number, year level, role, or status"
               className="admin-search-field"
             />
           </label>
@@ -341,6 +351,11 @@ function AdminUsers() {
                     <span className="rounded-full bg-brand-50 px-2.5 py-1 text-[10px] font-extrabold text-brand-600 uppercase">
                       {item.role}
                     </span>
+                    {item.year_level && (
+                      <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-extrabold text-blue-700 uppercase">
+                        {getYearLevelLabel(item.year_level)}
+                      </span>
+                    )}
                     {item.id === user.id && (
                       <span className="text-xs font-extrabold text-slate-400">
                         Your account
@@ -355,6 +370,10 @@ function AdminUsers() {
                   </p>
                   <p className="mt-1 text-xs text-slate-400">
                     {item.student_number || 'No student number'}
+                  </p>
+                  <p className="mt-1 flex items-center gap-1.5 text-xs font-bold text-slate-500">
+                    <GraduationCap size={14} aria-hidden="true" />
+                    {getYearLevelLabel(item.year_level)}
                   </p>
                 </div>
                 <button
@@ -421,6 +440,22 @@ function AdminUsers() {
                     onChange={updateField}
                     className={inputClassName}
                   />
+                </label>
+                <label className="text-sm font-extrabold text-navy-900">
+                  Year level
+                  <select
+                    name="yearLevel"
+                    value={form.yearLevel}
+                    onChange={updateField}
+                    className={inputClassName}
+                  >
+                    <option value="">Not set</option>
+                    {yearLevelOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
                 </label>
                 <label className="text-sm font-extrabold text-navy-900">
                   Role

@@ -1,5 +1,71 @@
 -- Run this file in the Supabase SQL Editor after supabase/schema.sql.
 
+alter table public.profiles
+  add column if not exists year_level text not null default '';
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'profiles_year_level_check'
+      and conrelid = 'public.profiles'::regclass
+  ) then
+    alter table public.profiles
+      add constraint profiles_year_level_check
+      check (
+        year_level in (
+          '',
+          '1st Year',
+          '2nd Year',
+          '3rd Year',
+          '4th Year',
+          'Irregular'
+        )
+      );
+  end if;
+end $$;
+
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.profiles (
+    id,
+    full_name,
+    student_number,
+    year_level,
+    email_notifications
+  )
+  values (
+    new.id,
+    coalesce(new.raw_user_meta_data ->> 'full_name', ''),
+    nullif(new.raw_user_meta_data ->> 'student_number', ''),
+    case
+      when coalesce(new.raw_user_meta_data ->> 'year_level', '') in (
+        '1st Year',
+        '2nd Year',
+        '3rd Year',
+        '4th Year',
+        'Irregular'
+      )
+      then coalesce(new.raw_user_meta_data ->> 'year_level', '')
+      else ''
+    end,
+    case
+      when lower(
+        coalesce(new.raw_user_meta_data ->> 'email_notifications', 'true')
+      ) = 'false' then false
+      else true
+    end
+  );
+  return new;
+end;
+$$;
+
 create or replace function public.current_user_role()
 returns public.app_role
 language sql
@@ -38,12 +104,14 @@ create trigger set_profiles_updated_at
   before update on public.profiles
   for each row execute procedure public.set_updated_at();
 
+drop function if exists public.admin_list_profiles();
 create or replace function public.admin_list_profiles()
 returns table (
   id uuid,
   email text,
   full_name text,
   student_number text,
+  year_level text,
   role public.app_role,
   status public.profile_status,
   created_at timestamptz,
@@ -66,6 +134,7 @@ begin
     users.email::text,
     profiles.full_name,
     profiles.student_number,
+    profiles.year_level,
     profiles.role,
     profiles.status,
     profiles.created_at,
@@ -76,10 +145,18 @@ begin
 end;
 $$;
 
+drop function if exists public.admin_update_profile(
+  uuid,
+  text,
+  text,
+  public.app_role,
+  public.profile_status
+);
 create or replace function public.admin_update_profile(
   target_id uuid,
   target_full_name text,
   target_student_number text,
+  target_year_level text,
   target_role public.app_role,
   target_status public.profile_status
 )
@@ -92,6 +169,7 @@ declare
   current_profile public.profiles;
   updated_profile public.profiles;
   active_admin_count integer;
+  clean_year_level text;
 begin
   if public.current_user_role()
     is distinct from 'admin'::public.app_role
@@ -132,10 +210,24 @@ begin
     end if;
   end if;
 
+  clean_year_level := trim(coalesce(target_year_level, ''));
+
+  if clean_year_level not in (
+    '',
+    '1st Year',
+    '2nd Year',
+    '3rd Year',
+    '4th Year',
+    'Irregular'
+  ) then
+    raise exception 'Invalid year level';
+  end if;
+
   update public.profiles
   set
     full_name = trim(coalesce(target_full_name, '')),
     student_number = nullif(trim(coalesce(target_student_number, '')), ''),
+    year_level = clean_year_level,
     role = target_role,
     status = target_status
   where id = target_id
@@ -152,6 +244,7 @@ revoke all on function public.admin_update_profile(
   uuid,
   text,
   text,
+  text,
   public.app_role,
   public.profile_status
 ) from public, anon;
@@ -160,6 +253,7 @@ grant execute on function public.current_user_role() to authenticated;
 grant execute on function public.admin_list_profiles() to authenticated;
 grant execute on function public.admin_update_profile(
   uuid,
+  text,
   text,
   text,
   public.app_role,

@@ -9,6 +9,7 @@ import {
   Clock3,
   Eye,
   EyeOff,
+  GraduationCap,
   LayoutDashboard,
   LockKeyhole,
   LogIn,
@@ -24,6 +25,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import ProfileAvatar from '../components/ProfileAvatar'
 import useAuth from '../context/useAuth'
+import { getYearLevelLabel, yearLevelOptions } from '../data/yearLevels'
 import { useAnnouncements } from '../hooks/useAnnouncements'
 import { useEvents } from '../hooks/useEvents'
 import {
@@ -114,6 +116,7 @@ function Account() {
   const [formData, setFormData] = useState({
     fullName: '',
     studentNumber: '',
+    yearLevel: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -367,6 +370,11 @@ function Account() {
       return
     }
 
+    if (activeMode === 'signup' && !formData.yearLevel) {
+      setMessage({ type: 'error', text: 'Please select your year level.' })
+      return
+    }
+
     setIsSubmitting(true)
     setMessage({ type: '', text: '' })
 
@@ -376,6 +384,7 @@ function Account() {
         password: formData.password,
         fullName: formData.fullName,
         studentNumber: formData.studentNumber,
+        yearLevel: formData.yearLevel,
         emailNotifications: formData.emailNotifications,
       })
 
@@ -563,7 +572,7 @@ function Account() {
                     </div>
                   </section>
 
-                  <section className="grid gap-4 sm:grid-cols-3">
+                  <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {[
                       {
                         label: 'Profile status',
@@ -574,6 +583,11 @@ function Account() {
                         label: 'Role',
                         value: profile?.role || 'Student',
                         icon: ShieldCheck,
+                      },
+                      {
+                        label: 'Year level',
+                        value: getYearLevelLabel(profile?.year_level),
+                        icon: GraduationCap,
                       },
                       {
                         label: 'Upcoming events',
@@ -979,6 +993,33 @@ function Account() {
                           autoComplete="off"
                           className="h-13 w-full rounded-xl border border-slate-300 bg-slate-50/70 pl-12 pr-4 text-sm text-navy-900 outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-100"
                         />
+                      </span>
+                    </label>
+
+                    <label htmlFor="account-year-level" className="block">
+                      <span className="mb-2 block text-xs font-extrabold tracking-wide text-slate-600 uppercase">
+                        Year level
+                      </span>
+                      <span className="relative block">
+                        <GraduationCap
+                          size={19}
+                          className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                          aria-hidden="true"
+                        />
+                        <select
+                          id="account-year-level"
+                          required
+                          value={formData.yearLevel}
+                          onChange={updateField('yearLevel')}
+                          className="h-13 w-full appearance-none rounded-xl border border-slate-300 bg-slate-50/70 pl-12 pr-4 text-sm text-navy-900 outline-none transition focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-100"
+                        >
+                          <option value="">Select your year level</option>
+                          {yearLevelOptions.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
                       </span>
                     </label>
                   </>

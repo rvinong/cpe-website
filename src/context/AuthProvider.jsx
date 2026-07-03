@@ -5,15 +5,18 @@ import AuthContext from './auth-context'
 const dashboardRoles = new Set(['admin', 'editor'])
 const configuredSiteUrl = import.meta.env.VITE_SITE_URL?.replace(/\/+$/, '')
 const profileColumns =
+  'id, full_name, nickname, student_number, year_level, role, status, email_notifications, avatar_path'
+const profileColumnsWithoutYearLevel =
   'id, full_name, nickname, student_number, role, status, email_notifications, avatar_path'
 const legacyProfileColumns =
   'id, full_name, student_number, role, status, email_notifications, avatar_path'
 
-function isNicknameColumnMissing(error) {
+function isProfileColumnMissing(error, column) {
+  const message = error?.message?.toLowerCase() || ''
+
   return (
-    error?.code === '42703' ||
-    error?.code === 'PGRST204' ||
-    error?.message?.toLowerCase().includes('nickname')
+    (error?.code === '42703' || error?.code === 'PGRST204') &&
+    message.includes(column)
   )
 }
 
@@ -41,7 +44,19 @@ function AuthProvider({ children }) {
       .eq('id', user.id)
       .maybeSingle()
 
-    if (error && isNicknameColumnMissing(error)) {
+    if (error && isProfileColumnMissing(error, 'year_level')) {
+      const fallbackResult = await supabase
+        .from('profiles')
+        .select(profileColumnsWithoutYearLevel)
+        .eq('id', user.id)
+        .maybeSingle()
+
+      data = fallbackResult.data
+      error = fallbackResult.error
+      if (data) data = { ...data, year_level: '' }
+    }
+
+    if (error && isProfileColumnMissing(error, 'nickname')) {
       const fallbackResult = await supabase
         .from('profiles')
         .select(legacyProfileColumns)
@@ -50,7 +65,7 @@ function AuthProvider({ children }) {
 
       data = fallbackResult.data
       error = fallbackResult.error
-      if (data) data = { ...data, nickname: '' }
+      if (data) data = { ...data, nickname: '', year_level: '' }
     }
 
     if (error) {
@@ -123,6 +138,7 @@ function AuthProvider({ children }) {
     password,
     fullName,
     studentNumber,
+    yearLevel,
     emailNotifications,
   }) => {
     if (!supabase) {
@@ -140,6 +156,7 @@ function AuthProvider({ children }) {
         data: {
           full_name: fullName,
           student_number: studentNumber,
+          year_level: yearLevel,
           email_notifications: emailNotifications,
         },
       },

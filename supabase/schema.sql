@@ -8,6 +8,8 @@ create table public.profiles (
   full_name text not null default '',
   nickname text not null default '',
   student_number text unique,
+  year_level text not null default ''
+    check (year_level in ('', '1st Year', '2nd Year', '3rd Year', '4th Year', 'Irregular')),
   role public.app_role not null default 'student',
   status public.profile_status not null default 'pending',
   email_notifications boolean not null default true,
@@ -42,12 +44,24 @@ begin
     id,
     full_name,
     student_number,
+    year_level,
     email_notifications
   )
   values (
     new.id,
     coalesce(new.raw_user_meta_data ->> 'full_name', ''),
     nullif(new.raw_user_meta_data ->> 'student_number', ''),
+    case
+      when coalesce(new.raw_user_meta_data ->> 'year_level', '') in (
+        '1st Year',
+        '2nd Year',
+        '3rd Year',
+        '4th Year',
+        'Irregular'
+      )
+      then coalesce(new.raw_user_meta_data ->> 'year_level', '')
+      else ''
+    end,
     case
       when lower(
         coalesce(new.raw_user_meta_data ->> 'email_notifications', 'true')
