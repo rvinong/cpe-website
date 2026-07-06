@@ -15,18 +15,18 @@ import SectionHeader from './SectionHeader'
 const yearbookHighlights = [
   {
     icon: GraduationCap,
-    label: 'Batch archive',
-    value: 'By year',
+    label: 'Batch list',
+    value: 'Sorted by year',
   },
   {
     icon: ShieldCheck,
-    label: 'Verified records',
-    value: 'Approved only',
+    label: 'Profile checks',
+    value: 'Reviewed first',
   },
   {
     icon: BriefcaseBusiness,
-    label: 'Career stories',
-    value: 'After campus',
+    label: 'Alumni updates',
+    value: 'Where they are now',
   },
 ]
 
@@ -37,24 +37,24 @@ function AlumniSection() {
   return (
     <section
       id="alumni"
-      className="relative isolate overflow-hidden bg-white py-24 dark:bg-[#07111f] sm:py-32"
+      className="relative isolate overflow-hidden bg-gradient-to-b from-white via-slate-50/75 to-white py-24 dark:bg-none dark:bg-[#07111f] sm:py-32"
     >
-      <div className="subtle-grid absolute inset-0 -z-20 opacity-60 dark:opacity-25" />
+      <div className="subtle-grid absolute inset-0 -z-20 opacity-35 dark:opacity-25" />
       <div className="absolute -left-24 top-24 -z-10 size-72 rounded-full bg-brand-500/10 blur-3xl dark:bg-brand-500/20" />
-      <div className="absolute -bottom-24 right-10 -z-10 size-80 rounded-full bg-orange-300/15 blur-3xl dark:bg-orange-500/10" />
+      <div className="absolute -bottom-24 right-10 -z-10 size-80 rounded-full bg-orange-300/10 blur-3xl dark:bg-orange-500/10" />
       <div className="section-shell">
         <Reveal>
           <SectionHeader
             eyebrow="Graduate archive"
             title="Alumni Yearbook Preview"
-            description="A growing digital archive for verified graduates, batches, and stories from the NwSSU Computer Engineering community."
+            description="A dedicated space for verified graduates, batch lists, and alumni updates from the NwSSU Computer Engineering community."
           />
         </Reveal>
 
         <Reveal delay={0.08} direction="right">
-          <div className="surface-card relative isolate overflow-hidden p-6 dark:border-blue-300/15 dark:bg-navy-950/80 sm:p-9 lg:p-12">
+          <div className="surface-card relative isolate overflow-hidden bg-white/95 p-6 shadow-[0_28px_80px_-52px_rgba(15,23,42,0.5)] dark:border-blue-300/15 dark:bg-navy-950/80 sm:p-9 lg:p-12">
             <div className="absolute -right-20 -top-24 -z-10 size-72 rounded-full bg-brand-500/10 blur-3xl dark:bg-blue-500/20" />
-            <div className="absolute -bottom-28 left-10 -z-10 size-72 rounded-full bg-orange-300/20 blur-3xl dark:bg-orange-500/10" />
+            <div className="absolute -bottom-28 left-10 -z-10 size-72 rounded-full bg-orange-300/15 blur-3xl dark:bg-orange-500/10" />
 
             <div className="grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr]">
               <div>
@@ -63,16 +63,15 @@ function AlumniSection() {
                   Digital archive
                 </span>
                 <h3 className="mt-5 text-3xl font-black tracking-tight text-navy-900 dark:text-white sm:text-4xl">
-                  Every batch, one shared history
+                  Find alumni by batch
                 </h3>
                 <p className="mt-4 max-w-xl text-base leading-7 text-slate-600 dark:text-slate-300">
-                  Alumni records are currently being collected and verified.
-                  Approved graduate profiles will be published in the
-                  yearbook as they become available.
+                  Names, photos, and batch details will be added here as soon
+                  as they are confirmed by the organization.
                 </p>
                 <p className="mt-5 max-w-xl rounded-2xl border border-blue-100 bg-white/80 p-4 text-sm font-bold leading-7 text-slate-600 shadow-sm shadow-blue-950/[0.03] dark:border-blue-300/15 dark:bg-white/[0.06] dark:text-blue-100">
-                  Preserving the people, projects, and milestones that shaped
-                  the CpE community.
+                  Only approved entries are shown, so the yearbook stays clear,
+                  accurate, and respectful to every graduate.
                 </p>
 
                 <div className="mt-6 grid gap-3 sm:grid-cols-3">
@@ -106,11 +105,12 @@ function AlumniSection() {
               </div>
 
               <div className="relative">
-                <div className="absolute -left-4 top-10 hidden h-32 w-5 rounded-full bg-brand-600/80 shadow-lg shadow-blue-600/20 lg:block" />
-                <div className="absolute -right-5 bottom-16 hidden h-24 w-24 rounded-[2rem] border border-orange-200 bg-orange-50/80 rotate-6 dark:border-orange-400/20 dark:bg-orange-500/10 lg:block" />
+                <div className="absolute -left-4 top-10 hidden h-32 w-5 rounded-full bg-brand-600/70 shadow-lg shadow-blue-600/15 dark:bg-brand-500/40 lg:block" />
+                <div className="absolute -right-5 bottom-16 hidden h-24 w-24 rounded-[2rem] border border-orange-100 bg-orange-50/70 rotate-6 dark:border-orange-400/20 dark:bg-orange-500/10 lg:block" />
 
-                <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-gradient-to-br from-white via-blue-50/65 to-orange-50/55 p-5 shadow-[0_30px_90px_-55px_rgba(15,23,42,0.65)] dark:border-blue-300/15 dark:bg-none dark:bg-[#0b1729] dark:shadow-[0_30px_90px_-55px_rgba(0,0,0,0.95)]">
-                  <div className="subtle-grid absolute inset-0 opacity-55 dark:opacity-20" />
+                <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_28px_70px_-48px_rgba(15,23,42,0.55)] dark:border-blue-300/15 dark:bg-[#0b1729] dark:shadow-[0_30px_90px_-55px_rgba(0,0,0,0.95)]">
+                  <div className="subtle-grid absolute inset-0 opacity-25 dark:opacity-20" />
+                  <div className="absolute right-0 top-0 h-28 w-28 rounded-bl-[4rem] bg-brand-50/90 dark:bg-blue-500/10" />
                   <div className="relative mb-5 flex items-center justify-between gap-4">
                     <div>
                       <p className="text-xs font-extrabold tracking-[0.2em] text-brand-600 uppercase dark:text-blue-200">
@@ -132,12 +132,12 @@ function AlumniSection() {
                       {previewProfiles.map((profile, index) => {
                         const rotation =
                           index % 4 === 0
-                            ? '-rotate-2'
+                            ? 'lg:-rotate-1'
                             : index % 4 === 1
-                              ? 'rotate-2'
+                              ? 'lg:rotate-1'
                               : index % 4 === 2
-                                ? 'rotate-1'
-                                : '-rotate-1'
+                                ? 'lg:rotate-1'
+                                : 'lg:-rotate-1'
 
                         return (
                           <article
@@ -197,18 +197,18 @@ function AlumniSection() {
                     </div>
                   )}
 
-                  <div className="relative mt-5 rounded-2xl border border-blue-100 bg-white/80 p-4 dark:border-blue-300/15 dark:bg-white/[0.055]">
+                  <div className="relative mt-5 rounded-2xl border border-blue-100 bg-brand-50/45 p-4 dark:border-blue-300/15 dark:bg-white/[0.055]">
                     <div className="flex items-center gap-3">
                       <span className="grid size-11 place-items-center rounded-xl bg-navy-900 text-white dark:bg-blue-500/20 dark:text-blue-100">
                         <BookOpen size={20} aria-hidden="true" />
                       </span>
                       <div>
                         <p className="text-sm font-black text-navy-900 dark:text-white">
-                          Modern archive, familiar memories
+                          Ready for real alumni photos
                         </p>
                         <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
-                          Built for verified graduate records, batch browsing,
-                          and future alumni stories.
+                          Once the official portraits are uploaded, this preview
+                          becomes a proper batch-by-batch yearbook.
                         </p>
                       </div>
                     </div>
