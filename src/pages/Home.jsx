@@ -11,13 +11,13 @@ function Home() {
   return (
     <main>
       <Hero />
-      <QuickAccess />
-      <GlanceSection />
-      <UpcomingEvents />
-      <FeaturedPrograms />
-      <TransparencySnapshot />
-      <AlumniSection />
       <NewsSection />
+      <QuickAccess />
+      <UpcomingEvents />
+      <TransparencySnapshot />
+      <FeaturedPrograms />
+      <GlanceSection />
+      <AlumniSection />
     </main>
   )
 }

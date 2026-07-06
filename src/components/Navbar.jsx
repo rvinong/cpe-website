@@ -18,12 +18,12 @@ const links = [
     label: 'Announcements',
     sectionId: 'announcements',
   },
-  { key: 'portal', label: 'Student Portal', sectionId: 'quick-access' },
-  { key: 'about', label: 'About', sectionId: 'about' },
-  { key: 'events', label: 'Events', sectionId: 'events' },
-  { key: 'alumni', label: 'Alumni', sectionId: 'alumni' },
   { key: 'gallery', label: 'News & Gallery', sectionId: 'news' },
+  { key: 'events', label: 'Events', sectionId: 'events' },
+  { key: 'portal', label: 'Student Portal', sectionId: 'quick-access' },
+  { key: 'alumni', label: 'Alumni', sectionId: 'alumni' },
   { key: 'audit', label: 'Internal Audit', sectionId: 'internal-audit' },
+  { key: 'about', label: 'About', sectionId: 'about' },
 ]
 
 const MotionLink = Motion.create(Link)
