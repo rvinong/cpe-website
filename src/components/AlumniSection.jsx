@@ -10,7 +10,6 @@ import {
 } from 'lucide-react'
 import useAlumni from '../hooks/useAlumni'
 import Reveal from './Reveal'
-import SectionHeader from './SectionHeader'
 
 const yearbookHighlights = [
   {
@@ -37,22 +36,29 @@ function AlumniSection() {
   return (
     <section
       id="alumni"
-      className="relative isolate overflow-hidden bg-gradient-to-b from-white via-slate-50/75 to-white py-24 dark:bg-none dark:bg-[#07111f] sm:py-32"
+      className="alumni-home-section relative isolate overflow-hidden py-24 sm:py-32"
     >
       <div className="subtle-grid absolute inset-0 -z-20 opacity-35 dark:opacity-25" />
       <div className="absolute -left-24 top-24 -z-10 size-72 rounded-full bg-brand-500/10 blur-3xl dark:bg-brand-500/20" />
       <div className="absolute -bottom-24 right-10 -z-10 size-80 rounded-full bg-orange-300/10 blur-3xl dark:bg-orange-500/10" />
       <div className="section-shell">
         <Reveal>
-          <SectionHeader
-            eyebrow="Graduate archive"
-            title="Alumni Yearbook Preview"
-            description="A dedicated space for verified graduates, batch lists, and alumni updates from the NwSSU Computer Engineering community."
-          />
+          <div className="mb-9 max-w-2xl sm:mb-12">
+            <p className="mb-4 text-[11px] font-extrabold tracking-[0.22em] text-brand-600 uppercase dark:text-blue-200">
+              Graduate archive
+            </p>
+            <h2 className="text-3xl font-black tracking-[-0.05em] text-navy-900 dark:text-white sm:text-5xl sm:tracking-[-0.055em]">
+              Alumni Yearbook Preview
+            </h2>
+            <p className="mt-5 text-base leading-7 text-slate-600 dark:text-slate-300">
+              A dedicated space for verified graduates, batch lists, and alumni
+              updates from the NwSSU Computer Engineering community.
+            </p>
+          </div>
         </Reveal>
 
         <Reveal delay={0.08} direction="right">
-          <div className="surface-card relative isolate overflow-hidden bg-white/95 p-6 shadow-[0_28px_80px_-52px_rgba(15,23,42,0.5)] dark:border-blue-300/15 dark:bg-navy-950/80 sm:p-9 lg:p-12">
+          <div className="alumni-home-shell relative isolate overflow-hidden p-6 sm:p-9 lg:p-12">
             <div className="absolute -right-20 -top-24 -z-10 size-72 rounded-full bg-brand-500/10 blur-3xl dark:bg-blue-500/20" />
             <div className="absolute -bottom-28 left-10 -z-10 size-72 rounded-full bg-orange-300/15 blur-3xl dark:bg-orange-500/10" />
 
@@ -78,7 +84,7 @@ function AlumniSection() {
                   {yearbookHighlights.map(({ icon: Icon, label, value }) => (
                     <div
                       key={label}
-                      className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 dark:border-blue-300/15 dark:bg-white/[0.055]"
+                      className="alumni-home-stat-card rounded-2xl p-4"
                     >
                       <span className="grid size-10 place-items-center rounded-xl bg-brand-50 text-brand-600 dark:bg-blue-400/10 dark:text-blue-200">
                         <Icon size={19} aria-hidden="true" />
@@ -108,9 +114,9 @@ function AlumniSection() {
                 <div className="absolute -left-4 top-10 hidden h-32 w-5 rounded-full bg-brand-600/70 shadow-lg shadow-blue-600/15 dark:bg-brand-500/40 lg:block" />
                 <div className="absolute -right-5 bottom-16 hidden h-24 w-24 rounded-[2rem] border border-orange-100 bg-orange-50/70 rotate-6 dark:border-orange-400/20 dark:bg-orange-500/10 lg:block" />
 
-                <div className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_28px_70px_-48px_rgba(15,23,42,0.55)] dark:border-blue-300/15 dark:bg-[#0b1729] dark:shadow-[0_30px_90px_-55px_rgba(0,0,0,0.95)]">
+                <div className="alumni-home-preview relative overflow-hidden rounded-[2rem] p-5">
                   <div className="subtle-grid absolute inset-0 opacity-25 dark:opacity-20" />
-                  <div className="absolute right-0 top-0 h-28 w-28 rounded-bl-[4rem] bg-brand-50/90 dark:bg-blue-500/10" />
+                  <div className="alumni-home-preview-corner absolute right-0 top-0 h-28 w-28 rounded-bl-[4rem]" />
                   <div className="relative mb-5 flex items-center justify-between gap-4">
                     <div>
                       <p className="text-xs font-extrabold tracking-[0.2em] text-brand-600 uppercase dark:text-blue-200">
@@ -142,7 +148,7 @@ function AlumniSection() {
                         return (
                           <article
                             key={profile.id}
-                            className={`group relative rounded-[1.35rem] border border-slate-200 bg-white p-3 shadow-[0_20px_55px_-38px_rgba(15,23,42,0.55)] transition duration-300 hover:z-10 hover:-translate-y-2 hover:rotate-0 hover:border-brand-400 dark:border-blue-300/15 dark:bg-[#101d31] dark:shadow-[0_20px_55px_-36px_rgba(0,0,0,0.9)] dark:hover:border-blue-300/40 ${rotation}`}
+                            className={`alumni-home-profile-card group relative rounded-[1.35rem] p-3 transition duration-300 hover:z-10 hover:-translate-y-2 hover:rotate-0 ${rotation}`}
                           >
                             <span className="absolute -right-2 top-4 z-10 rounded-l-full bg-orange-500 px-3 py-1 text-[0.62rem] font-black text-white shadow-md shadow-orange-500/20">
                               {profile.batch || 'TBA'}
@@ -170,7 +176,7 @@ function AlumniSection() {
                                 </div>
                               )}
                             </div>
-                            <div className="mt-3 rounded-xl bg-slate-50 px-3 py-2 dark:bg-white/[0.055]">
+                            <div className="alumni-home-profile-name mt-3 rounded-xl px-3 py-2">
                               <h4 className="truncate text-sm font-black text-navy-900 dark:text-white">
                                 {profile.name}
                               </h4>
@@ -183,7 +189,7 @@ function AlumniSection() {
                       })}
                     </div>
                   ) : (
-                    <div className="relative rounded-2xl border border-dashed border-blue-200 bg-white/80 p-8 text-center dark:border-blue-300/20 dark:bg-white/[0.055]">
+                    <div className="alumni-home-empty relative rounded-2xl p-8 text-center">
                       <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-brand-50 text-brand-600 dark:bg-blue-400/10 dark:text-blue-200">
                         <Images size={24} aria-hidden="true" />
                       </div>
@@ -197,7 +203,7 @@ function AlumniSection() {
                     </div>
                   )}
 
-                  <div className="relative mt-5 rounded-2xl border border-blue-100 bg-brand-50/45 p-4 dark:border-blue-300/15 dark:bg-white/[0.055]">
+                  <div className="alumni-home-preview-note relative mt-5 rounded-2xl p-4">
                     <div className="flex items-center gap-3">
                       <span className="grid size-11 place-items-center rounded-xl bg-navy-900 text-white dark:bg-blue-500/20 dark:text-blue-100">
                         <BookOpen size={20} aria-hidden="true" />
