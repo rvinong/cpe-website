@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { motion as Motion } from 'framer-motion'
 import {
   ArrowRight,
@@ -14,24 +15,41 @@ import Reveal from './Reveal'
 const yearbookHighlights = [
   {
     icon: GraduationCap,
-    label: 'Batch list',
-    value: 'Sorted by year',
+    label: 'Batch directory',
+    value: 'By graduation year',
   },
   {
     icon: ShieldCheck,
-    label: 'Profile checks',
-    value: 'Reviewed first',
+    label: 'Verified profiles',
+    value: 'Reviewed records',
   },
   {
     icon: BriefcaseBusiness,
-    label: 'Alumni updates',
-    value: 'Where they are now',
+    label: 'Approved details',
+    value: 'Official entries',
   },
 ]
 
+function getRandomPreviewProfiles(profiles) {
+  const randomizedProfiles = [...profiles]
+
+  for (let index = randomizedProfiles.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1))
+    const currentProfile = randomizedProfiles[index]
+
+    randomizedProfiles[index] = randomizedProfiles[randomIndex]
+    randomizedProfiles[randomIndex] = currentProfile
+  }
+
+  return randomizedProfiles.slice(0, 4)
+}
+
 function AlumniSection() {
   const { profiles, isLoading } = useAlumni()
-  const previewProfiles = profiles.slice(0, 4)
+  const previewProfiles = useMemo(
+    () => getRandomPreviewProfiles(profiles),
+    [profiles],
+  )
 
   return (
     <section
@@ -45,14 +63,14 @@ function AlumniSection() {
         <Reveal>
           <div className="mb-9 max-w-2xl sm:mb-12">
             <p className="alumni-home-eyebrow mb-4 text-[11px] font-extrabold tracking-[0.22em] uppercase">
-              Graduate archive
+              Alumni records
             </p>
             <h2 className="alumni-home-title text-3xl font-black tracking-[-0.05em] sm:text-5xl sm:tracking-[-0.055em]">
-              Alumni Yearbook Preview
+              Computer Engineering Alumni Directory
             </h2>
             <p className="alumni-home-copy mt-5 text-base leading-7">
-              A dedicated space for verified graduates, batch lists, and alumni
-              updates from the NwSSU Computer Engineering community.
+              An official directory for verified Computer Engineering graduates,
+              organized by batch and maintained with approved alumni information.
             </p>
           </div>
         </Reveal>
@@ -63,18 +81,18 @@ function AlumniSection() {
               <div>
                 <span className="alumni-home-badge inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-extrabold">
                   <BookOpen size={14} aria-hidden="true" />
-                  Digital archive
+                  Official alumni archive
                 </span>
                 <h3 className="alumni-home-subtitle mt-5 text-3xl font-black tracking-tight sm:text-4xl">
-                  Find alumni by batch
+                  Verified alumni profiles by batch
                 </h3>
                 <p className="alumni-home-copy mt-4 max-w-xl text-base leading-7">
-                  Names, photos, and batch details will be added here as soon
-                  as they are confirmed by the organization.
+                  Browse published alumni records by graduation year, including
+                  approved profile details submitted for the organization archive.
                 </p>
                 <p className="alumni-home-callout mt-5 max-w-xl rounded-2xl p-4 text-sm font-bold leading-7">
-                  Only approved entries are shown, so the yearbook stays clear,
-                  accurate, and respectful to every graduate.
+                  All entries are reviewed before publication to ensure accurate,
+                  respectful, and authorized alumni information.
                 </p>
 
                 <div className="mt-6 grid gap-3 sm:grid-cols-3">
@@ -102,7 +120,7 @@ function AlumniSection() {
                   whileTap={{ scale: 0.985 }}
                   className="primary-button mt-7"
                 >
-                  Open alumni yearbook
+                  View alumni directory
                   <ArrowRight size={17} aria-hidden="true" />
                 </Motion.a>
               </div>
@@ -113,12 +131,12 @@ function AlumniSection() {
                   <div className="relative mb-5 flex items-center justify-between gap-4">
                     <div>
                       <p className="alumni-home-preview-label text-xs font-extrabold tracking-[0.2em] uppercase">
-                        Yearbook spread
+                        Directory preview
                       </p>
                       <p className="alumni-home-preview-meta mt-1 text-sm font-bold">
                         {isLoading
                           ? 'Loading profiles...'
-                          : `${previewProfiles.length} preview profiles`}
+                          : `${previewProfiles.length} verified profiles`}
                       </p>
                     </div>
                     <span className="alumni-home-preview-icon grid size-12 place-items-center rounded-2xl">
@@ -203,11 +221,11 @@ function AlumniSection() {
                       </span>
                       <div>
                         <p className="alumni-home-note-title text-sm font-black">
-                          Ready for real alumni photos
+                          Official profiles will appear here
                         </p>
                         <p className="alumni-home-note-copy mt-1 text-xs leading-5">
-                          Once the official portraits are uploaded, this preview
-                          becomes a proper batch-by-batch yearbook.
+                          Published entries may include approved photos, batch
+                          information, and professional details when available.
                         </p>
                       </div>
                     </div>
