@@ -38,19 +38,19 @@ function AlumniSection() {
       id="alumni"
       className="alumni-home-section relative isolate overflow-hidden py-24 sm:py-32"
     >
-      <div className="subtle-grid absolute inset-0 -z-20 opacity-35 dark:opacity-25" />
-      <div className="absolute -left-24 top-24 -z-10 size-72 rounded-full bg-brand-500/10 blur-3xl dark:bg-brand-500/20" />
-      <div className="absolute -bottom-24 right-10 -z-10 size-80 rounded-full bg-orange-300/10 blur-3xl dark:bg-orange-500/10" />
+      <div className="subtle-grid absolute inset-0 -z-20 opacity-20 dark:opacity-20" />
+      <div className="alumni-home-glow alumni-home-glow-primary absolute -left-24 top-24 -z-10 size-72 rounded-full blur-3xl" />
+      <div className="alumni-home-glow alumni-home-glow-accent absolute -bottom-24 right-10 -z-10 size-80 rounded-full blur-3xl" />
       <div className="section-shell">
         <Reveal>
           <div className="mb-9 max-w-2xl sm:mb-12">
-            <p className="mb-4 text-[11px] font-extrabold tracking-[0.22em] text-brand-600 uppercase dark:text-blue-200">
+            <p className="alumni-home-eyebrow mb-4 text-[11px] font-extrabold tracking-[0.22em] uppercase">
               Graduate archive
             </p>
-            <h2 className="text-3xl font-black tracking-[-0.05em] text-navy-900 dark:text-white sm:text-5xl sm:tracking-[-0.055em]">
+            <h2 className="alumni-home-title text-3xl font-black tracking-[-0.05em] sm:text-5xl sm:tracking-[-0.055em]">
               Alumni Yearbook Preview
             </h2>
-            <p className="mt-5 text-base leading-7 text-slate-600 dark:text-slate-300">
+            <p className="alumni-home-copy mt-5 text-base leading-7">
               A dedicated space for verified graduates, batch lists, and alumni
               updates from the NwSSU Computer Engineering community.
             </p>
@@ -59,23 +59,20 @@ function AlumniSection() {
 
         <Reveal delay={0.08} direction="right">
           <div className="alumni-home-shell relative isolate overflow-hidden p-6 sm:p-9 lg:p-12">
-            <div className="absolute -right-20 -top-24 -z-10 size-72 rounded-full bg-brand-500/10 blur-3xl dark:bg-blue-500/20" />
-            <div className="absolute -bottom-28 left-10 -z-10 size-72 rounded-full bg-orange-300/15 blur-3xl dark:bg-orange-500/10" />
-
             <div className="grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr]">
               <div>
-                <span className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-brand-50 px-3 py-1.5 text-xs font-extrabold text-brand-600 dark:border-blue-300/20 dark:bg-blue-400/10 dark:text-blue-200">
+                <span className="alumni-home-badge inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-extrabold">
                   <BookOpen size={14} aria-hidden="true" />
                   Digital archive
                 </span>
-                <h3 className="mt-5 text-3xl font-black tracking-tight text-navy-900 dark:text-white sm:text-4xl">
+                <h3 className="alumni-home-subtitle mt-5 text-3xl font-black tracking-tight sm:text-4xl">
                   Find alumni by batch
                 </h3>
-                <p className="mt-4 max-w-xl text-base leading-7 text-slate-600 dark:text-slate-300">
+                <p className="alumni-home-copy mt-4 max-w-xl text-base leading-7">
                   Names, photos, and batch details will be added here as soon
                   as they are confirmed by the organization.
                 </p>
-                <p className="mt-5 max-w-xl rounded-2xl border border-blue-100 bg-white/80 p-4 text-sm font-bold leading-7 text-slate-600 shadow-sm shadow-blue-950/[0.03] dark:border-blue-300/15 dark:bg-white/[0.06] dark:text-blue-100">
+                <p className="alumni-home-callout mt-5 max-w-xl rounded-2xl p-4 text-sm font-bold leading-7">
                   Only approved entries are shown, so the yearbook stays clear,
                   accurate, and respectful to every graduate.
                 </p>
@@ -86,13 +83,13 @@ function AlumniSection() {
                       key={label}
                       className="alumni-home-stat-card rounded-2xl p-4"
                     >
-                      <span className="grid size-10 place-items-center rounded-xl bg-brand-50 text-brand-600 dark:bg-blue-400/10 dark:text-blue-200">
+                      <span className="alumni-home-stat-icon grid size-10 place-items-center rounded-xl">
                         <Icon size={19} aria-hidden="true" />
                       </span>
-                      <p className="mt-3 text-[0.68rem] font-extrabold tracking-[0.14em] text-slate-400 uppercase dark:text-slate-500">
+                      <p className="alumni-home-stat-label mt-3 text-[0.68rem] font-extrabold tracking-[0.14em] uppercase">
                         {label}
                       </p>
-                      <p className="mt-1 text-sm font-black text-navy-900 dark:text-white">
+                      <p className="alumni-home-stat-value mt-1 text-sm font-black">
                         {value}
                       </p>
                     </div>
@@ -111,24 +108,20 @@ function AlumniSection() {
               </div>
 
               <div className="relative">
-                <div className="absolute -left-4 top-10 hidden h-32 w-5 rounded-full bg-brand-600/70 shadow-lg shadow-blue-600/15 dark:bg-brand-500/40 lg:block" />
-                <div className="absolute -right-5 bottom-16 hidden h-24 w-24 rounded-[2rem] border border-orange-100 bg-orange-50/70 rotate-6 dark:border-orange-400/20 dark:bg-orange-500/10 lg:block" />
-
                 <div className="alumni-home-preview relative overflow-hidden rounded-[2rem] p-5">
-                  <div className="subtle-grid absolute inset-0 opacity-25 dark:opacity-20" />
                   <div className="alumni-home-preview-corner absolute right-0 top-0 h-28 w-28 rounded-bl-[4rem]" />
                   <div className="relative mb-5 flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-xs font-extrabold tracking-[0.2em] text-brand-600 uppercase dark:text-blue-200">
+                      <p className="alumni-home-preview-label text-xs font-extrabold tracking-[0.2em] uppercase">
                         Yearbook spread
                       </p>
-                      <p className="mt-1 text-sm font-bold text-slate-500 dark:text-slate-400">
+                      <p className="alumni-home-preview-meta mt-1 text-sm font-bold">
                         {isLoading
                           ? 'Loading profiles...'
                           : `${previewProfiles.length} preview profiles`}
                       </p>
                     </div>
-                    <span className="grid size-12 place-items-center rounded-2xl bg-white text-brand-600 shadow-sm ring-1 ring-blue-100 dark:bg-white/[0.08] dark:text-blue-200 dark:ring-blue-300/15">
+                    <span className="alumni-home-preview-icon grid size-12 place-items-center rounded-2xl">
                       <Sparkles size={20} aria-hidden="true" />
                     </span>
                   </div>
@@ -177,10 +170,10 @@ function AlumniSection() {
                               )}
                             </div>
                             <div className="alumni-home-profile-name mt-3 rounded-xl px-3 py-2">
-                              <h4 className="truncate text-sm font-black text-navy-900 dark:text-white">
+                              <h4 className="alumni-home-profile-title truncate text-sm font-black">
                                 {profile.name}
                               </h4>
-                              <p className="mt-0.5 truncate text-xs font-bold text-slate-500 dark:text-slate-400">
+                              <p className="alumni-home-profile-role mt-0.5 truncate text-xs font-bold">
                                 {profile.role || profile.professional_role || 'Graduate'}
                               </p>
                             </div>
@@ -190,13 +183,13 @@ function AlumniSection() {
                     </div>
                   ) : (
                     <div className="alumni-home-empty relative rounded-2xl p-8 text-center">
-                      <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-brand-50 text-brand-600 dark:bg-blue-400/10 dark:text-blue-200">
+                      <div className="alumni-home-empty-icon mx-auto grid size-14 place-items-center rounded-2xl">
                         <Images size={24} aria-hidden="true" />
                       </div>
-                      <h4 className="mt-4 text-sm font-black text-navy-900 dark:text-white">
+                      <h4 className="alumni-home-empty-title mt-4 text-sm font-black">
                         Alumni profiles are being prepared
                       </h4>
-                      <p className="mx-auto mt-2 max-w-xs text-xs leading-5 text-slate-500 dark:text-slate-400">
+                      <p className="alumni-home-empty-copy mx-auto mt-2 max-w-xs text-xs leading-5">
                         Verified graduate cards will appear here once the
                         archive is ready.
                       </p>
@@ -205,14 +198,14 @@ function AlumniSection() {
 
                   <div className="alumni-home-preview-note relative mt-5 rounded-2xl p-4">
                     <div className="flex items-center gap-3">
-                      <span className="grid size-11 place-items-center rounded-xl bg-navy-900 text-white dark:bg-blue-500/20 dark:text-blue-100">
+                      <span className="alumni-home-note-icon grid size-11 place-items-center rounded-xl">
                         <BookOpen size={20} aria-hidden="true" />
                       </span>
                       <div>
-                        <p className="text-sm font-black text-navy-900 dark:text-white">
+                        <p className="alumni-home-note-title text-sm font-black">
                           Ready for real alumni photos
                         </p>
-                        <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                        <p className="alumni-home-note-copy mt-1 text-xs leading-5">
                           Once the official portraits are uploaded, this preview
                           becomes a proper batch-by-batch yearbook.
                         </p>

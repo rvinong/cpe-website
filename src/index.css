@@ -259,43 +259,100 @@ a {
 
 .alumni-home-section {
   background:
-    radial-gradient(circle at 8% 16%, rgba(21, 94, 239, 0.08), transparent 24rem),
-    radial-gradient(circle at 92% 84%, rgba(249, 115, 22, 0.08), transparent 24rem),
-    linear-gradient(180deg, #ffffff 0%, #f8fbff 48%, #ffffff 100%);
+    radial-gradient(circle at 0% 0%, rgba(21, 94, 239, 0.08), transparent 30rem),
+    radial-gradient(circle at 100% 92%, rgba(249, 115, 22, 0.08), transparent 28rem),
+    linear-gradient(180deg, #ffffff 0%, #f8fbff 52%, #ffffff 100%);
+}
+
+.alumni-home-glow-primary {
+  background: rgba(21, 94, 239, 0.08);
+}
+
+.alumni-home-glow-accent {
+  background: rgba(249, 115, 22, 0.08);
+}
+
+.alumni-home-eyebrow,
+.alumni-home-preview-label {
+  color: #155eef;
+}
+
+.alumni-home-title,
+.alumni-home-subtitle,
+.alumni-home-stat-value,
+.alumni-home-profile-title,
+.alumni-home-empty-title,
+.alumni-home-note-title {
+  color: #07152f;
+}
+
+.alumni-home-copy,
+.alumni-home-preview-meta,
+.alumni-home-profile-role,
+.alumni-home-empty-copy,
+.alumni-home-note-copy {
+  color: #526783;
 }
 
 .alumni-home-shell {
   border: 1px solid rgba(196, 211, 232, 0.92);
   border-radius: 2rem;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 251, 255, 0.96)),
-    #ffffff;
+  background: #ffffff;
   box-shadow:
-    0 34px 90px -58px rgba(15, 23, 42, 0.54),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(18px);
+    0 26px 70px -54px rgba(15, 23, 42, 0.48),
+    inset 0 1px 0 rgba(255, 255, 255, 0.96);
+}
+
+.alumni-home-badge {
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: #155eef;
+}
+
+.alumni-home-callout {
+  border: 1px solid #dbeafe;
+  background: #f8fbff;
+  color: #405776;
+  box-shadow: 0 14px 40px -34px rgba(15, 23, 42, 0.32);
 }
 
 .alumni-home-stat-card {
   border: 1px solid rgba(210, 222, 238, 0.95);
-  background: rgba(248, 251, 255, 0.82);
+  background: #f8fbff;
   box-shadow: 0 16px 44px -36px rgba(15, 23, 42, 0.32);
 }
 
+.alumni-home-stat-icon,
+.alumni-home-empty-icon {
+  background: #eff6ff;
+  color: #155eef;
+}
+
+.alumni-home-stat-label {
+  color: #7c8ca2;
+}
+
 .alumni-home-preview {
-  border: 1px solid rgba(196, 211, 232, 0.95);
+  border: 1px solid #d7e3f4;
   background:
-    radial-gradient(circle at 100% 0%, rgba(219, 234, 254, 0.78), transparent 16rem),
-    #ffffff;
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(239, 246, 255, 0.72)),
+    #f8fbff;
   box-shadow:
-    0 30px 80px -52px rgba(15, 23, 42, 0.5),
+    0 24px 66px -48px rgba(15, 23, 42, 0.46),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
 
 .alumni-home-preview-corner {
   background:
-    radial-gradient(circle at 34% 30%, rgba(255, 255, 255, 0.94), transparent 38%),
-    linear-gradient(135deg, rgba(219, 234, 254, 0.95), rgba(239, 246, 255, 0.7));
+    radial-gradient(circle at 34% 30%, rgba(255, 255, 255, 0.96), transparent 38%),
+    linear-gradient(135deg, rgba(219, 234, 254, 0.88), rgba(239, 246, 255, 0.66));
+}
+
+.alumni-home-preview-icon {
+  border: 1px solid #dbeafe;
+  background: #ffffff;
+  color: #155eef;
+  box-shadow: 0 12px 34px -26px rgba(15, 23, 42, 0.38);
 }
 
 .alumni-home-profile-card {
@@ -319,7 +376,12 @@ a {
 
 .alumni-home-preview-note {
   border: 1px solid rgba(191, 219, 254, 0.95);
-  background: rgba(239, 246, 255, 0.72);
+  background: #eff6ff;
+}
+
+.alumni-home-note-icon {
+  background: #0b1f46;
+  color: #ffffff;
 }
 
 .quick-access-orb,
@@ -1178,19 +1240,62 @@ html.dark .surface-card {
 
 html.dark .alumni-home-section {
   background:
-    radial-gradient(circle at 8% 16%, rgba(59, 130, 246, 0.16), transparent 26rem),
-    radial-gradient(circle at 92% 86%, rgba(249, 115, 22, 0.11), transparent 24rem),
-    linear-gradient(180deg, #07111f 0%, #09182c 48%, #07111f 100%);
+    radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.14), transparent 30rem),
+    radial-gradient(circle at 100% 92%, rgba(249, 115, 22, 0.1), transparent 28rem),
+    linear-gradient(180deg, #07111f 0%, #09182c 52%, #07111f 100%);
+}
+
+html.dark .alumni-home-glow-primary {
+  background: rgba(59, 130, 246, 0.16);
+}
+
+html.dark .alumni-home-glow-accent {
+  background: rgba(249, 115, 22, 0.1);
+}
+
+html.dark .alumni-home-eyebrow,
+html.dark .alumni-home-preview-label {
+  color: #93c5fd;
+}
+
+html.dark .alumni-home-title,
+html.dark .alumni-home-subtitle,
+html.dark .alumni-home-stat-value,
+html.dark .alumni-home-profile-title,
+html.dark .alumni-home-empty-title,
+html.dark .alumni-home-note-title {
+  color: #f8fafc;
+}
+
+html.dark .alumni-home-copy,
+html.dark .alumni-home-preview-meta,
+html.dark .alumni-home-profile-role,
+html.dark .alumni-home-empty-copy,
+html.dark .alumni-home-note-copy {
+  color: #b8c7db;
 }
 
 html.dark .alumni-home-shell {
   border-color: rgba(147, 197, 253, 0.16);
   background:
-    linear-gradient(145deg, rgba(15, 28, 48, 0.92), rgba(9, 18, 32, 0.9)),
+    linear-gradient(145deg, rgba(15, 28, 48, 0.96), rgba(9, 18, 32, 0.94)),
     #07152f;
   box-shadow:
-    0 34px 90px -58px rgba(0, 0, 0, 0.95),
+    0 30px 86px -58px rgba(0, 0, 0, 0.95),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+html.dark .alumni-home-badge {
+  border-color: rgba(147, 197, 253, 0.2);
+  background: rgba(96, 165, 250, 0.12);
+  color: #bfdbfe;
+}
+
+html.dark .alumni-home-callout {
+  border-color: rgba(147, 197, 253, 0.16);
+  background: rgba(255, 255, 255, 0.055);
+  color: #d7e3f0;
+  box-shadow: none;
 }
 
 html.dark .alumni-home-stat-card {
@@ -1199,13 +1304,23 @@ html.dark .alumni-home-stat-card {
   box-shadow: none;
 }
 
+html.dark .alumni-home-stat-icon,
+html.dark .alumni-home-empty-icon {
+  background: rgba(96, 165, 250, 0.12);
+  color: #bfdbfe;
+}
+
+html.dark .alumni-home-stat-label {
+  color: #90a4bf;
+}
+
 html.dark .alumni-home-preview {
   border-color: rgba(147, 197, 253, 0.16);
   background:
-    radial-gradient(circle at 100% 0%, rgba(59, 130, 246, 0.16), transparent 16rem),
+    radial-gradient(circle at 100% 0%, rgba(59, 130, 246, 0.13), transparent 16rem),
     #0b1729;
   box-shadow:
-    0 30px 90px -55px rgba(0, 0, 0, 0.95),
+    0 26px 78px -55px rgba(0, 0, 0, 0.95),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
@@ -1213,6 +1328,13 @@ html.dark .alumni-home-preview-corner {
   background:
     radial-gradient(circle at 30% 30%, rgba(125, 211, 252, 0.35), transparent 34%),
     linear-gradient(135deg, rgba(37, 99, 235, 0.24), rgba(15, 23, 42, 0.26));
+}
+
+html.dark .alumni-home-preview-icon {
+  border-color: rgba(147, 197, 253, 0.16);
+  background: rgba(255, 255, 255, 0.07);
+  color: #bfdbfe;
+  box-shadow: none;
 }
 
 html.dark .alumni-home-profile-card {
@@ -1230,6 +1352,11 @@ html.dark .alumni-home-preview-note,
 html.dark .alumni-home-empty {
   border-color: rgba(147, 197, 253, 0.16);
   background: rgba(255, 255, 255, 0.055);
+}
+
+html.dark .alumni-home-note-icon {
+  background: rgba(96, 165, 250, 0.14);
+  color: #bfdbfe;
 }
 
 html.dark .alumni-home-empty {
