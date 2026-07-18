@@ -249,6 +249,122 @@ a {
   border-radius: 2.25rem;
 }
 
+.home-hero {
+  background: #f8fbff;
+}
+
+.home-hero-photo-tint {
+  background: rgba(255, 255, 255, 0.56);
+}
+
+.home-hero-radial {
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 0.93),
+    rgba(255, 255, 255, 0.78) 46%,
+    rgba(255, 255, 255, 0.26) 100%
+  );
+}
+
+.home-hero-fade {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.72),
+    rgba(255, 255, 255, 0.12) 42%,
+    rgba(255, 255, 255, 0.9)
+  );
+}
+
+.home-hero-badge {
+  border: 1px solid #bfdbfe;
+  background: rgba(255, 255, 255, 0.92);
+  color: #155eef;
+  box-shadow: 0 12px 34px -28px rgba(15, 23, 42, 0.42);
+  backdrop-filter: blur(14px);
+}
+
+.home-hero-title {
+  color: #07152f;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.38);
+}
+
+.home-hero-title-accent {
+  color: #155eef;
+}
+
+.home-hero-title-dot {
+  color: #f97316;
+}
+
+.home-hero-copy,
+.home-hero-member-line {
+  color: #405776;
+}
+
+.home-hero-member-count,
+.home-hero-trust-title,
+.home-hero-announcement-title {
+  color: #07152f;
+}
+
+.home-hero-trust-card {
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow:
+    0 18px 48px -38px rgba(15, 23, 42, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(16px);
+}
+
+.home-hero-trust-card:hover {
+  border-color: rgba(21, 94, 239, 0.32);
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 20px 52px -36px rgba(21, 94, 239, 0.42);
+}
+
+.home-hero-trust-icon {
+  background: #eff6ff;
+  color: #155eef;
+}
+
+.home-hero-trust-card:hover .home-hero-trust-icon {
+  background: #155eef;
+  color: #ffffff;
+}
+
+.home-hero-trust-copy,
+.home-hero-announcement-meta {
+  color: #64748b;
+}
+
+.home-hero-announcement {
+  border: 1px solid rgba(255, 255, 255, 0.84);
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow:
+    0 24px 70px -48px rgba(15, 23, 42, 0.58),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+}
+
+.home-hero-announcement-icon {
+  background: #0b1f46;
+  color: #fb923c;
+}
+
+.home-hero-announcement-label {
+  color: #155eef;
+}
+
+.home-hero-announcement-chip {
+  background: #f1f5f9;
+  color: #526783;
+}
+
+.home-hero-announcement-chip-primary {
+  background: #eff6ff;
+  color: #0f4fd6;
+}
+
 .surface-card {
   border: 1px solid var(--line);
   border-radius: 1.5rem;
@@ -1226,6 +1342,115 @@ html.dark .page-hero-mark {
 
 html.dark .page-hero-mark-ring {
   border-color: rgba(96, 165, 250, 0.24);
+}
+
+html.dark .home-hero {
+  background: #07111f;
+}
+
+html.dark .home-hero-photo-tint {
+  background: rgba(7, 17, 31, 0.72);
+}
+
+html.dark .home-hero-radial {
+  background: radial-gradient(
+    circle at center,
+    rgba(7, 17, 31, 0.92),
+    rgba(7, 17, 31, 0.78) 48%,
+    rgba(7, 17, 31, 0.5) 100%
+  );
+}
+
+html.dark .home-hero-fade {
+  background: linear-gradient(
+    180deg,
+    rgba(7, 17, 31, 0.84),
+    rgba(7, 17, 31, 0.16) 42%,
+    rgba(7, 17, 31, 0.94)
+  );
+}
+
+html.dark .home-hero-badge {
+  border-color: rgba(147, 197, 253, 0.2);
+  background: rgba(7, 21, 47, 0.78);
+  color: #bfdbfe;
+  box-shadow: 0 18px 52px -36px rgba(0, 0, 0, 0.72);
+}
+
+html.dark .home-hero-title {
+  color: #f8fafc;
+  text-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+}
+
+html.dark .home-hero-title-accent {
+  color: #93c5fd;
+}
+
+html.dark .home-hero-copy,
+html.dark .home-hero-member-line {
+  color: #d7e3f0;
+}
+
+html.dark .home-hero-member-count,
+html.dark .home-hero-trust-title,
+html.dark .home-hero-announcement-title {
+  color: #f8fafc;
+}
+
+html.dark .home-hero-trust-card {
+  border-color: rgba(147, 197, 253, 0.16);
+  background: rgba(7, 21, 47, 0.74);
+  box-shadow:
+    0 18px 48px -36px rgba(0, 0, 0, 0.82),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+html.dark .home-hero-trust-card:hover {
+  border-color: rgba(147, 197, 253, 0.36);
+  background: rgba(11, 31, 70, 0.82);
+  box-shadow: 0 20px 52px -34px rgba(37, 99, 235, 0.36);
+}
+
+html.dark .home-hero-trust-icon {
+  background: rgba(96, 165, 250, 0.12);
+  color: #bfdbfe;
+}
+
+html.dark .home-hero-trust-card:hover .home-hero-trust-icon {
+  background: rgba(46, 115, 246, 0.34);
+  color: #ffffff;
+}
+
+html.dark .home-hero-trust-copy,
+html.dark .home-hero-announcement-meta {
+  color: #a9bad0;
+}
+
+html.dark .home-hero-announcement {
+  border-color: rgba(147, 197, 253, 0.16);
+  background: rgba(7, 21, 47, 0.78);
+  box-shadow:
+    0 24px 70px -46px rgba(0, 0, 0, 0.88),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+html.dark .home-hero-announcement-icon {
+  background: rgba(96, 165, 250, 0.14);
+  color: #fdba74;
+}
+
+html.dark .home-hero-announcement-label {
+  color: #93c5fd;
+}
+
+html.dark .home-hero-announcement-chip {
+  background: rgba(255, 255, 255, 0.08);
+  color: #d7e3f0;
+}
+
+html.dark .home-hero-announcement-chip-primary {
+  background: rgba(96, 165, 250, 0.12);
+  color: #bfdbfe;
 }
 
 html.dark .surface-card {

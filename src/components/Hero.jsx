@@ -58,7 +58,7 @@ function Hero() {
   return (
     <section
       id="home"
-      className="relative isolate overflow-hidden bg-slate-100 pt-[84px]"
+      className="home-hero relative isolate overflow-hidden pt-[84px]"
     >
       <div className="absolute inset-x-0 bottom-0 top-[84px] -z-30 overflow-hidden">
         <Motion.img
@@ -80,9 +80,9 @@ function Hero() {
           }}
         />
       </div>
-      <div className="absolute inset-x-0 bottom-0 top-[84px] -z-20 bg-white/55 dark:bg-navy-950/70" />
-      <div className="absolute inset-x-0 bottom-0 top-[84px] -z-10 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.9),rgba(255,255,255,0.72)_46%,rgba(255,255,255,0.24)_100%)] dark:bg-[radial-gradient(circle_at_center,rgba(7,17,31,0.9),rgba(7,17,31,0.74)_48%,rgba(7,17,31,0.44)_100%)]" />
-      <div className="absolute inset-x-0 bottom-0 top-[84px] -z-10 bg-gradient-to-b from-white/70 via-transparent to-white/85 dark:from-navy-950/80 dark:via-transparent dark:to-navy-950/90" />
+      <div className="home-hero-photo-tint absolute inset-x-0 bottom-0 top-[84px] -z-20" />
+      <div className="home-hero-radial absolute inset-x-0 bottom-0 top-[84px] -z-10" />
+      <div className="home-hero-fade absolute inset-x-0 bottom-0 top-[84px] -z-10" />
       <div className="subtle-grid absolute inset-x-0 bottom-0 top-[84px] -z-10 opacity-25" />
 
       <div className="section-shell flex min-h-[720px] items-center justify-center pt-8 pb-16 sm:min-h-[760px] sm:pt-10 lg:pb-20">
@@ -91,7 +91,7 @@ function Hero() {
             initial={{ opacity: shouldReduceMotion ? 1 : 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: introDuration, ease: motionEase }}
-            className="mb-6 inline-flex max-w-full items-center gap-2 rounded-full border border-blue-200 bg-white/90 px-4 py-2 text-[10px] font-extrabold tracking-[0.16em] text-brand-600 uppercase shadow-sm backdrop-blur dark:border-blue-300/20 dark:bg-navy-950/75 dark:text-blue-200 sm:text-[11px] sm:tracking-[0.2em]"
+            className="home-hero-badge mb-6 inline-flex max-w-full items-center gap-2 rounded-full px-4 py-2 text-[10px] font-extrabold tracking-[0.16em] uppercase sm:text-[11px] sm:tracking-[0.2em]"
           >
             <CircuitBoard size={15} aria-hidden="true" />
             Official Computer Engineering Organization Portal
@@ -108,11 +108,11 @@ function Hero() {
               delay: shouldReduceMotion ? 0 : isCompactMotion ? 0.04 : 0.08,
               ease: motionEase,
             }}
-            className="max-w-5xl text-[clamp(3.35rem,8vw,7rem)] font-black leading-[0.88] tracking-[-0.075em] text-navy-900 dark:text-white"
+            className="home-hero-title max-w-5xl text-[clamp(3.35rem,8vw,7rem)] font-black leading-[0.88] tracking-[-0.075em]"
           >
             Welcome to{' '}
-            <span className="text-brand-600 dark:text-blue-300">ICpEP Connect</span>
-            <span className="text-orange-500">.</span>
+            <span className="home-hero-title-accent">ICpEP Connect</span>
+            <span className="home-hero-title-dot">.</span>
           </Motion.h1>
 
           <Motion.p
@@ -126,7 +126,7 @@ function Hero() {
               delay: shouldReduceMotion ? 0 : isCompactMotion ? 0.1 : 0.2,
               ease: motionEase,
             }}
-            className="mt-7 max-w-3xl text-base leading-8 text-slate-700 dark:text-slate-200 sm:text-lg"
+            className="home-hero-copy mt-7 max-w-3xl text-base leading-8 sm:text-lg"
           >
             Your central space for announcements, events, academic resources,
             alumni records, and official organization updates.
@@ -169,7 +169,7 @@ function Hero() {
               delay: shouldReduceMotion ? 0 : isCompactMotion ? 0.24 : 0.65,
               duration: shouldReduceMotion ? 0.01 : isCompactMotion ? 0.4 : 0.7,
             }}
-            className="mt-7 flex flex-col items-center gap-3 text-sm text-slate-600 dark:text-slate-300 sm:flex-row"
+            className="home-hero-member-line mt-7 flex flex-col items-center gap-3 text-sm sm:flex-row"
           >
             <span className="flex -space-x-2" aria-hidden="true">
               {['CP', 'ES', 'AI'].map((initials, index) => (
@@ -184,7 +184,7 @@ function Hero() {
               ))}
             </span>
             <span>
-              <strong className="font-extrabold text-navy-900 dark:text-white">
+              <strong className="home-hero-member-count font-extrabold">
                 {stats.members.value}
                 {stats.members.suffix}
               </strong>{' '}
@@ -211,15 +211,15 @@ function Hero() {
                 whileHover={{ y: -4, scale: 1.015 }}
                 whileTap={{ scale: 0.985 }}
                 transition={springTransition}
-                className="group rounded-2xl border border-white/80 bg-white/78 p-4 shadow-sm backdrop-blur transition hover:border-brand-200 hover:bg-white/95 hover:shadow-[0_18px_45px_-32px_rgba(21,94,239,0.45)] dark:border-blue-300/15 dark:bg-navy-950/70 dark:hover:border-blue-300/35 dark:hover:bg-navy-900/80"
+                className="home-hero-trust-card group rounded-2xl p-4 transition"
               >
-                <span className="mx-auto grid size-10 place-items-center rounded-xl bg-brand-50 text-brand-600 transition group-hover:-translate-y-0.5 group-hover:bg-brand-600 group-hover:text-white dark:bg-blue-400/10 dark:text-blue-200 dark:group-hover:bg-blue-500/25 dark:group-hover:text-white">
+                <span className="home-hero-trust-icon mx-auto grid size-10 place-items-center rounded-xl transition group-hover:-translate-y-0.5">
                   <Icon size={17} aria-hidden="true" />
                 </span>
-                <p className="mt-3 text-xs font-extrabold text-navy-900 dark:text-white">
+                <p className="home-hero-trust-title mt-3 text-xs font-extrabold">
                   {title}
                 </p>
-                <p className="mt-1 text-[11px] leading-5 text-slate-500 dark:text-slate-400">
+                <p className="home-hero-trust-copy mt-1 text-[11px] leading-5">
                   {detail}
                 </p>
               </Motion.div>
@@ -234,28 +234,28 @@ function Hero() {
               delay: shouldReduceMotion ? 0 : isCompactMotion ? 0.34 : 0.88,
               ease: motionEase,
             }}
-            className="mt-7 w-full max-w-2xl rounded-[1.75rem] border border-white/80 bg-white/82 p-4 text-left shadow-[0_24px_70px_-48px_rgba(15,23,42,0.58)] backdrop-blur dark:border-blue-300/15 dark:bg-navy-950/75"
+            className="home-hero-announcement mt-7 w-full max-w-2xl rounded-[1.75rem] p-4 text-left"
           >
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-              <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-navy-950 text-orange-400 dark:bg-blue-500/15 dark:text-orange-300">
+              <span className="home-hero-announcement-icon grid size-12 shrink-0 place-items-center rounded-2xl">
                 <Sparkles size={21} aria-hidden="true" />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-[10px] font-extrabold tracking-[0.2em] text-brand-600 uppercase dark:text-blue-200">
+                <p className="home-hero-announcement-label text-[10px] font-extrabold tracking-[0.2em] uppercase">
                   Latest announcement
                 </p>
-                <h2 className="mt-1 line-clamp-2 text-lg font-black leading-tight text-navy-900 dark:text-white">
+                <h2 className="home-hero-announcement-title mt-1 line-clamp-2 text-lg font-black leading-tight">
                   {latestAnnouncement?.title || 'Announcements will appear here.'}
                 </h2>
-                <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                <div className="home-hero-announcement-meta mt-2 flex flex-wrap items-center gap-2 text-[11px] font-bold">
                   {latestAnnouncement?.category && (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-1 text-brand-700 dark:bg-blue-400/10 dark:text-blue-200">
+                    <span className="home-hero-announcement-chip home-hero-announcement-chip-primary inline-flex items-center gap-1.5 rounded-full px-2.5 py-1">
                       <Megaphone size={13} aria-hidden="true" />
                       {latestAnnouncement.category}
                     </span>
                   )}
                   {latestAnnouncement?.date && (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-slate-600 dark:bg-white/10 dark:text-slate-300">
+                    <span className="home-hero-announcement-chip inline-flex items-center gap-1.5 rounded-full px-2.5 py-1">
                       <CalendarDays size={13} aria-hidden="true" />
                       {latestAnnouncement.date}
                     </span>
