@@ -34,6 +34,7 @@ import {
 import {
   createCommunityMessage,
   deleteCommunityMessage,
+  getCommunityMembers,
   getCommunityMessages,
   getFriendlyCommunityChatError,
   getStarterMessages,
@@ -61,6 +62,86 @@ function roleLabel(role) {
   return labels[role] || 'Member'
 }
 
+function findMention(value, cursorPosition) {
+  const beforeCursor = value.slice(0, cursorPosition)
+  const match = beforeCursor.match(/(^|\s)@([^\s@]*)$/)
+  if (!match) return null
+
+  return {
+    start: beforeCursor.length - match[0].length + match[1].length,
+    query: match[2],
+  }
+}
+
+function getMentionSuggestions(members, query, currentUserId) {
+  const normalizedQuery = String(query || '').trim().toLowerCase()
+
+  return members
+    .filter((member) => member.profileId !== currentUserId)
+    .filter((member) =>
+      String(member.fullName || 'Member')
+        .toLowerCase()
+        .includes(normalizedQuery),
+    )
+    .sort((first, second) => {
+      const firstName = String(first.fullName || 'Member').toLowerCase()
+      const secondName = String(second.fullName || 'Member').toLowerCase()
+      const firstStartsWithQuery = firstName.startsWith(normalizedQuery)
+      const secondStartsWithQuery = secondName.startsWith(normalizedQuery)
+
+      if (firstStartsWithQuery !== secondStartsWithQuery) {
+        return firstStartsWithQuery ? -1 : 1
+      }
+
+      return firstName.localeCompare(secondName)
+    })
+    .slice(0, 7)
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')
+}
+
+function renderMessageBody(body, members) {
+  const text = String(body || '')
+  const names = [
+    ...new Set(
+      (members || [])
+        .map((member) => String(member.fullName || '').trim())
+        .filter(Boolean),
+    ),
+  ].sort((first, second) => second.length - first.length)
+
+  if (!names.length) return text
+
+  const pattern = new RegExp(
+    '(^|\\s)@(' +
+      names.map(escapeRegExp).join('|') +
+      ')(?=\\s|$|[.,!?])',
+    'giu',
+  )
+  const parts = []
+  let lastIndex = 0
+
+  for (const match of text.matchAll(pattern)) {
+    const matchIndex = match.index ?? 0
+    const mentionStart = matchIndex + match[1].length
+    parts.push(text.slice(lastIndex, mentionStart))
+    parts.push(
+      <span
+        key={'mention-' + matchIndex}
+        className="community-message-mention"
+      >
+        {'@' + match[2]}
+      </span>,
+    )
+    lastIndex = mentionStart + match[2].length + 1
+  }
+
+  parts.push(text.slice(lastIndex))
+  return parts
+}
+
 function RoomButton({ active, onClick, room }) {
   const Icon = roomIcons[room.id] || MessageCircle
 
@@ -86,16 +167,32 @@ function RoomButton({ active, onClick, room }) {
 }
 
 function MessageComposer({
+  currentUserId,
   disabled,
   error,
   isSubmitting,
+  mentionMembers = [],
   onCancelReply,
   onSubmit,
   replyingTo,
 }) {
   const [body, setBody] = useState('')
+  const [mention, setMention] = useState(null)
+  const [activeMentionIndex, setActiveMentionIndex] = useState(0)
   const inputRef = useRef(null)
   const canSubmit = Boolean(body.trim()) && !disabled && !isSubmitting
+  const mentionSuggestions = useMemo(
+    () =>
+      getMentionSuggestions(
+        mentionMembers,
+        mention?.query || '',
+        currentUserId,
+      ),
+    [currentUserId, mention, mentionMembers],
+  )
+  const showMentionMenu = Boolean(
+    mention && (mentionSuggestions.length || mentionMembers.length),
+  )
 
   useEffect(() => {
     if (replyingTo) inputRef.current?.focus()
@@ -108,11 +205,68 @@ function MessageComposer({
     const didSubmit = await onSubmit(body, replyingTo?.id || null)
     if (didSubmit) {
       setBody('')
+      setMention(null)
+      setActiveMentionIndex(0)
       onCancelReply?.()
     }
   }
 
+  const handleMentionSelect = (member) => {
+    if (!mention) return
+
+    const cursorPosition = inputRef.current?.selectionStart ?? body.length
+    const beforeMention = body.slice(0, mention.start)
+    const afterCursor = body.slice(cursorPosition)
+    const mentionText = '@' + String(member.fullName || 'Member').trim() + ' '
+    const nextBody = beforeMention + mentionText + afterCursor
+    const nextCursorPosition = beforeMention.length + mentionText.length
+
+    setBody(nextBody)
+    setMention(null)
+    setActiveMentionIndex(0)
+    window.requestAnimationFrame(() => {
+      inputRef.current?.focus()
+      inputRef.current?.setSelectionRange(
+        nextCursorPosition,
+        nextCursorPosition,
+      )
+    })
+  }
+
   const handleKeyDown = (event) => {
+    if (showMentionMenu && mentionSuggestions.length) {
+      if (event.key === 'ArrowDown') {
+        event.preventDefault()
+        setActiveMentionIndex(
+          (current) => (current + 1) % mentionSuggestions.length,
+        )
+        return
+      }
+
+      if (event.key === 'ArrowUp') {
+        event.preventDefault()
+        setActiveMentionIndex(
+          (current) =>
+            (current - 1 + mentionSuggestions.length) %
+            mentionSuggestions.length,
+        )
+        return
+      }
+
+      if (event.key === 'Enter' || event.key === 'Tab') {
+        event.preventDefault()
+        handleMentionSelect(mentionSuggestions[activeMentionIndex])
+        return
+      }
+    }
+
+    if (event.key === 'Escape' && showMentionMenu) {
+      event.preventDefault()
+      setMention(null)
+      setActiveMentionIndex(0)
+      return
+    }
+
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault()
       event.currentTarget.form?.requestSubmit()
@@ -148,14 +302,80 @@ function MessageComposer({
           ref={inputRef}
           id="community-message-body"
           value={body}
-          onChange={(event) => setBody(event.target.value)}
+          onChange={(event) => {
+            const nextBody = event.target.value
+            const cursorPosition =
+              event.target.selectionStart ?? nextBody.length
+            setBody(nextBody)
+            setMention(findMention(nextBody, cursorPosition))
+            setActiveMentionIndex(0)
+          }}
           onKeyDown={handleKeyDown}
+          onBlur={() => setMention(null)}
           maxLength={maxCommunityMessageLength}
           rows="1"
           placeholder={replyingTo ? 'Write your reply...' : 'Message this room...'}
           disabled={disabled || isSubmitting}
+          aria-autocomplete="list"
+          aria-controls={showMentionMenu ? 'community-mention-list' : undefined}
+          aria-expanded={showMentionMenu}
+          aria-activedescendant={
+            showMentionMenu && mentionSuggestions[activeMentionIndex]
+              ? 'community-mention-option-' + activeMentionIndex
+              : undefined
+          }
           className="community-input community-chat-input resize-none"
         />
+        {showMentionMenu && (
+          <div
+            id="community-mention-list"
+            className="community-mention-menu"
+            role="listbox"
+            aria-label="Mention a member"
+          >
+            <p className="community-mention-menu-label">
+              {mention?.query ? 'Matching members' : 'Mention a member'}
+            </p>
+            {mentionSuggestions.length ? (
+              mentionSuggestions.map((member, index) => (
+                <button
+                  key={member.profileId}
+                  id={'community-mention-option-' + index}
+                  type="button"
+                  role="option"
+                  aria-selected={index === activeMentionIndex}
+                  className={
+                    'community-mention-option ' +
+                    (index === activeMentionIndex
+                      ? 'community-mention-option-active'
+                      : '')
+                  }
+                  onPointerDown={(event) => event.preventDefault()}
+                  onClick={() => handleMentionSelect(member)}
+                >
+                  <ProfileAvatar
+                    path={member.avatarPath}
+                    name={member.fullName}
+                    className="community-mention-avatar size-8 rounded-lg"
+                    textClassName="text-[0.65rem]"
+                  />
+                  <span className="community-mention-copy">
+                    <span className="community-mention-name">
+                      {member.fullName}
+                    </span>
+                    <span className="community-mention-role">
+                      {roleLabel(member.role)}
+                    </span>
+                  </span>
+                </button>
+              ))
+            ) : (
+              <p className="community-mention-empty">
+                No other approved members match.
+              </p>
+            )}
+          </div>
+        )}
         <button
           type="submit"
           disabled={!canSubmit}
@@ -174,10 +394,44 @@ function MessageComposer({
   )
 }
 
+function CommunityMessageAccess({ room, user }) {
+  const isStaffRoom = Boolean(room?.isStaffOnly)
+  const title = isStaffRoom
+    ? 'This room is restricted'
+    : user
+      ? 'Messages unlock after approval'
+      : 'Sign in to view messages'
+  const description = isStaffRoom
+    ? 'Only approved officers, editors, and administrators can view this room.'
+    : user
+      ? 'An administrator must approve your account before room messages become visible.'
+      : 'Public rooms are available to approved members of the community.'
+
+  return (
+    <div className="community-message-access" role="status">
+      <span className="community-message-access-icon">
+        <LockKeyhole size={23} aria-hidden="true" />
+      </span>
+      <p>{title}</p>
+      <span>{description}</span>
+      {!user && (
+        <Link
+          to="/account?mode=login&redirect=%2Fcommunity"
+          className="community-access-link"
+        >
+          Sign in
+          <ArrowRight size={13} aria-hidden="true" />
+        </Link>
+      )}
+    </div>
+  )
+}
+
 function MessageItem({
   canReply,
   currentUserId,
   message,
+  mentionMembers,
   onDelete,
   onReply,
   shouldReduceMotion,
@@ -211,10 +465,10 @@ function MessageItem({
                 <Reply size={12} aria-hidden="true" />
                 {message.replyTo.fullName}
               </span>
-              <p>{message.replyTo.body}</p>
+              <p>{renderMessageBody(message.replyTo.body, mentionMembers)}</p>
             </div>
           )}
-          <p>{message.body}</p>
+          <p>{renderMessageBody(message.body, mentionMembers)}</p>
         </div>
         {(canReply || message.canDelete || isOwnMessage) && (
           <div className="community-message-actions">
@@ -245,7 +499,7 @@ function MessageItem({
   )
 }
 
-function CommunityRoomInfo({ canSend, room }) {
+function CommunityRoomInfo({ canSend, canViewMessages, room }) {
   return (
     <aside className="community-room-info" aria-label="Room information">
       <div className="community-room-info-heading">
@@ -269,11 +523,15 @@ function CommunityRoomInfo({ canSend, room }) {
       <dl className="community-room-facts">
         <div>
           <dt><UsersRound size={14} aria-hidden="true" /> Visibility</dt>
-          <dd>Public room</dd>
+          <dd>{room?.isStaffOnly ? 'Approved staff only' : 'Approved members only'}</dd>
         </div>
         <div>
           <dt><Radio size={14} aria-hidden="true" /> Posting</dt>
           <dd>{canSend ? 'You can send messages' : 'Approved members only'}</dd>
+        </div>
+        <div>
+          <dt><MessageCircle size={14} aria-hidden="true" /> Reading</dt>
+          <dd>{canViewMessages ? 'Messages unlocked' : 'Approval required'}</dd>
         </div>
       </dl>
 
@@ -298,6 +556,7 @@ function Community() {
   const [isCreatingMessage, setIsCreatingMessage] = useState(false)
   const [communityError, setCommunityError] = useState('')
   const [chatError, setChatError] = useState('')
+  const [members, setMembers] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
   const [replyingTo, setReplyingTo] = useState(null)
   const messageListRef = useRef(null)
@@ -307,14 +566,17 @@ function Community() {
     [rooms, selectedRoomId],
   )
   const displayName = getDisplayName(profile, user, 'member')
-  const canSend = Boolean(
+  const canViewMessages = Boolean(
     user &&
       isApprovedMember &&
       selectedRoom &&
       (!selectedRoom.isStaffOnly || canAccessAdmin),
   )
+  const canSend = canViewMessages
   const isLoadingMessages = Boolean(
-    selectedRoom?.id && loadedMessagesRoomId !== selectedRoom.id,
+    canViewMessages &&
+      selectedRoom?.id &&
+      loadedMessagesRoomId !== selectedRoom.id,
   )
   const visibleMessages = useMemo(() => {
     const query = searchTerm.trim().toLowerCase()
@@ -326,7 +588,8 @@ function Community() {
       ),
     )
   }, [messages, searchTerm])
-  const isLiveChat = isConfigured && !chatError && !communityError
+  const isLiveChat =
+    canViewMessages && isConfigured && !chatError && !communityError
 
   const handleSelectRoom = (roomId) => {
     if (roomId === selectedRoomId) return
@@ -369,18 +632,21 @@ function Community() {
 
   useEffect(() => {
     if (!selectedRoom?.id) return undefined
+
+    if (!canViewMessages) return undefined
+
     let isMounted = true
 
     getCommunityMessages(selectedRoom.id)
       .then(({ data, error }) => {
         if (!isMounted) return
-        setMessages(error ? getStarterMessages(selectedRoom.id) : data || [])
+        setMessages(error ? [] : data || [])
         setChatError(error ? getFriendlyCommunityChatError(error) : '')
         setLoadedMessagesRoomId(selectedRoom.id)
       })
       .catch((error) => {
         if (!isMounted) return
-        setMessages(getStarterMessages(selectedRoom.id))
+        setMessages([])
         setChatError(getFriendlyCommunityChatError(error))
         setLoadedMessagesRoomId(selectedRoom.id)
       })
@@ -388,16 +654,25 @@ function Community() {
     return () => {
       isMounted = false
     }
-  }, [selectedRoom?.id])
+  }, [canViewMessages, selectedRoom?.id])
 
   useEffect(() => {
-    if (!isConfigured || !user || !selectedRoom?.id || chatError) return undefined
+    if (
+      !isConfigured ||
+      !canViewMessages ||
+      !selectedRoom?.id ||
+      chatError
+    ) {
+      return undefined
+    }
+
     let isMounted = true
 
     const refreshMessages = async () => {
       const { data, error } = await getCommunityMessages(selectedRoom.id)
       if (!isMounted) return
       if (error) {
+        setMessages([])
         setChatError(getFriendlyCommunityChatError(error))
         return
       }
@@ -411,7 +686,25 @@ function Community() {
         if (isMounted) setChatError(getFriendlyCommunityChatError(error))
       },
     )
-  }, [chatError, isConfigured, selectedRoom?.id, user])
+  }, [canViewMessages, chatError, isConfigured, selectedRoom?.id])
+
+  useEffect(() => {
+    if (!canViewMessages) return undefined
+
+    let isMounted = true
+
+    getCommunityMembers()
+      .then(({ data }) => {
+        if (isMounted) setMembers(data || [])
+      })
+      .catch(() => {
+        if (isMounted) setMembers([])
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [canViewMessages])
 
   useEffect(() => {
     const messageList = messageListRef.current
@@ -536,12 +829,21 @@ function Community() {
                     type="search"
                     value={searchTerm}
                     onChange={(event) => setSearchTerm(event.target.value)}
-                    placeholder="Search messages"
+                    placeholder={
+                      canViewMessages
+                        ? 'Search messages'
+                        : 'Available after approval'
+                    }
+                    disabled={!canViewMessages}
                   />
                 </label>
                 <span className={`community-live-status ${isLiveChat ? 'community-live-status-active' : ''}`}>
                   <Radio size={14} aria-hidden="true" />
-                  {isLiveChat ? 'Live chat' : 'Preview chat'}
+                  {isLiveChat
+                    ? 'Live chat'
+                    : canViewMessages
+                      ? 'Preview chat'
+                      : 'Members only'}
                 </span>
               </div>
 
@@ -576,8 +878,8 @@ function Community() {
                   <div className="community-sidebar-footer">
                     <CheckCircle2 size={16} aria-hidden="true" />
                     <p>
-                      <strong>Public by design</strong>
-                      Everyone can read. Approved members can send.
+                      <strong>Approved members only</strong>
+                      Approved accounts can read and send room messages.
                     </p>
                   </div>
                 </aside>
@@ -606,7 +908,12 @@ function Community() {
                     className="community-message-list"
                     aria-live="polite"
                   >
-                    {isLoadingMessages ? (
+                    {!canViewMessages ? (
+                      <CommunityMessageAccess
+                        room={selectedRoom}
+                        user={user}
+                      />
+                    ) : isLoadingMessages ? (
                       <div className="community-loading">Loading messages...</div>
                     ) : messages.length === 0 ? (
                       <div className="community-chat-empty">
@@ -631,6 +938,7 @@ function Community() {
                           canReply={canSend && isLiveChat}
                           currentUserId={user?.id}
                           message={message}
+                          mentionMembers={members}
                           onDelete={handleDeleteMessage}
                           onReply={setReplyingTo}
                           shouldReduceMotion={shouldReduceMotion}
@@ -643,8 +951,10 @@ function Community() {
                     {canSend ? (
                       <MessageComposer
                         key={selectedRoom?.id}
+                        currentUserId={user?.id}
                         error={chatError}
                         isSubmitting={isCreatingMessage}
+                        mentionMembers={members}
                         onCancelReply={() => setReplyingTo(null)}
                         onSubmit={handleCreateMessage}
                         replyingTo={replyingTo}
@@ -656,8 +966,8 @@ function Community() {
                           {selectedRoom?.isStaffOnly
                             ? 'This room is reserved for officers, editors, and administrators.'
                             : user
-                              ? 'Your account can send messages after an administrator approves it.'
-                              : 'Sign in with an approved account to send a message.'}
+                              ? 'Your account is pending approval. Messages and posting will unlock after an administrator approves it.'
+                              : 'Sign in with an approved account to view and send messages.'}
                         </p>
                         {!user && (
                           <Link
@@ -673,7 +983,11 @@ function Community() {
                   </div>
                 </section>
 
-                <CommunityRoomInfo canSend={canSend} room={selectedRoom} />
+                <CommunityRoomInfo
+                  canSend={canSend}
+                  canViewMessages={canViewMessages}
+                  room={selectedRoom}
+                />
               </div>
             </Reveal>
           </div>

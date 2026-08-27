@@ -1248,6 +1248,83 @@ a {
   position: relative;
 }
 
+.community-mention-menu {
+  position: absolute;
+  z-index: 20;
+  right: 0;
+  bottom: calc(100% + 0.55rem);
+  left: 0;
+  max-height: 17rem;
+  overflow-y: auto;
+  border: 1px solid #cbdcf3;
+  border-radius: 1rem;
+  background: #ffffff;
+  box-shadow: 0 18px 40px -24px rgba(15, 23, 42, 0.45);
+  padding: 0.45rem;
+}
+
+.community-mention-menu-label {
+  padding: 0.4rem 0.55rem 0.35rem;
+  color: #8092aa;
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.community-mention-option {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.6rem;
+  border: 1px solid transparent;
+  border-radius: 0.75rem;
+  background: transparent;
+  padding: 0.45rem 0.5rem;
+  text-align: left;
+  transition:
+    background-color var(--transition-base),
+    border-color var(--transition-base);
+}
+
+.community-mention-option:hover,
+.community-mention-option-active {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+
+.community-mention-avatar {
+  flex: 0 0 auto;
+}
+
+.community-mention-copy {
+  display: grid;
+  min-width: 0;
+  gap: 0.08rem;
+}
+
+.community-mention-name {
+  overflow: hidden;
+  color: var(--text-strong);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.community-mention-role {
+  color: #8092aa;
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+.community-mention-empty {
+  padding: 0.65rem 0.55rem;
+  color: #8092aa;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
 .community-chat-input {
   min-height: 3rem;
   max-height: 9rem;
@@ -1322,6 +1399,59 @@ a {
 
 .community-chat-access-note p {
   flex: 1 1 auto;
+}
+
+.community-message-access {
+  display: grid;
+  max-width: 27rem;
+  min-height: 17rem;
+  margin: auto;
+  place-content: center;
+  justify-items: center;
+  border: 1px dashed #bfdbfe;
+  border-radius: 1.25rem;
+  background: #f8fbff;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.community-message-access-icon {
+  display: grid;
+  width: 3.5rem;
+  height: 3.5rem;
+  place-items: center;
+  border: 1px solid #bfdbfe;
+  border-radius: 1.1rem;
+  background: #eff6ff;
+  color: #155eef;
+}
+
+.community-message-access p {
+  margin-top: 0.85rem;
+  color: var(--text-strong);
+  font-size: 0.85rem;
+  font-weight: 900;
+}
+
+.community-message-access > span:not(.community-message-access-icon) {
+  max-width: 22rem;
+  margin-top: 0.35rem;
+  color: #71849e;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.community-message-access .community-access-link {
+  margin-top: 0.9rem;
+}
+
+.community-message-mention {
+  border-radius: 0.3rem;
+  background: #dbeafe;
+  color: #0f4fd6;
+  font-weight: 900;
+  padding-inline: 0.18rem;
 }
 
 .community-access-link {
@@ -2902,6 +3032,31 @@ html.dark .community-chat-input {
   color: #f8fafc;
 }
 
+html.dark .community-mention-menu {
+  border-color: rgba(147, 197, 253, 0.22);
+  background: #0f2038;
+  box-shadow: 0 20px 46px -24px rgba(0, 0, 0, 0.85);
+}
+
+html.dark .community-mention-menu-label {
+  color: #90a4bf;
+}
+
+html.dark .community-mention-option:hover,
+html.dark .community-mention-option-active {
+  border-color: rgba(147, 197, 253, 0.28);
+  background: rgba(96, 165, 250, 0.12);
+}
+
+html.dark .community-mention-name {
+  color: #f8fafc;
+}
+
+html.dark .community-mention-role,
+html.dark .community-mention-empty {
+  color: #90a4bf;
+}
+
 html.dark .community-chat-input::placeholder {
   color: #90a4bf;
 }
@@ -2961,6 +3116,30 @@ html.dark .community-chat-access-note {
 html.dark .community-chat-access-note > svg,
 html.dark .community-access-link {
   color: #93c5fd;
+}
+
+html.dark .community-message-access {
+  border-color: rgba(147, 197, 253, 0.22);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+html.dark .community-message-access-icon {
+  border-color: rgba(147, 197, 253, 0.22);
+  background: rgba(96, 165, 250, 0.11);
+  color: #93c5fd;
+}
+
+html.dark .community-message-access p {
+  color: #f8fafc;
+}
+
+html.dark .community-message-access > span:not(.community-message-access-icon) {
+  color: #9fb1c8;
+}
+
+html.dark .community-message-mention {
+  background: rgba(96, 165, 250, 0.18);
+  color: #bfdbfe;
 }
 
 html.dark .community-chat-empty-icon {

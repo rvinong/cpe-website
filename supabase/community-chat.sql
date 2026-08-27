@@ -1,6 +1,6 @@
 -- Run after supabase/community.sql.
--- Room messages are public through the RPC below. Direct table reads stay limited
--- to authenticated Realtime subscribers so profile identity fields remain controlled.
+-- Room messages are available only to approved signed-in members. Direct table
+-- reads stay limited to approved authenticated Realtime subscribers.
 
 create table if not exists public.community_messages (
   id uuid primary key default gen_random_uuid(),
@@ -50,11 +50,17 @@ for select
 to authenticated
 using (
   deleted_at is null
+  and public.current_user_role() is not null
   and exists (
     select 1
     from public.community_rooms
     where community_rooms.id = community_messages.room_id
       and community_rooms.is_active
+      and not community_rooms.is_locked
+      and (
+        not community_rooms.is_staff_only
+        or public.current_user_role() in ('admin', 'editor')
+      )
   )
 );
 
@@ -84,6 +90,28 @@ security definer
 set search_path = public, pg_temp
 as $$
 begin
+  if auth.uid() is null then
+    raise exception 'Authentication required';
+  end if;
+
+  if public.current_user_role() is null then
+    raise exception 'Approved account required';
+  end if;
+
+  if not exists (
+    select 1
+    from public.community_rooms
+    where community_rooms.id = selected_room_id
+      and community_rooms.is_active
+      and not community_rooms.is_locked
+      and (
+        not community_rooms.is_staff_only
+        or public.current_user_role() in ('admin', 'editor')
+      )
+  ) then
+    raise exception 'Community room not found or unavailable';
+  end if;
+
   return query
   select
     community_messages.id,
@@ -135,6 +163,49 @@ begin
     and profiles.status = 'approved'
   order by community_messages.created_at asc, community_messages.id asc
   limit 200;
+end;
+$$;
+
+drop function if exists public.list_community_members();
+create or replace function public.list_community_members()
+returns table (
+  profile_id uuid,
+  display_name text,
+  avatar_path text,
+  role public.app_role
+)
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+begin
+  if auth.uid() is null then
+    raise exception 'Authentication required';
+  end if;
+
+  if public.current_user_role() is null then
+    raise exception 'Approved account required';
+  end if;
+
+  return query
+  select
+    profiles.id as profile_id,
+    coalesce(
+      nullif(trim(profiles.nickname), ''),
+      nullif(trim(profiles.full_name), ''),
+      'Member'
+    ) as display_name,
+    profiles.avatar_path,
+    profiles.role
+  from public.profiles
+  where profiles.status = 'approved'
+  order by lower(
+    coalesce(
+      nullif(trim(profiles.nickname), ''),
+      nullif(trim(profiles.full_name), ''),
+      'Member'
+    )
+  ), profiles.id;
 end;
 $$;
 
@@ -325,7 +396,9 @@ end;
 $$;
 
 revoke all on function public.list_community_messages(text)
-  from public;
+  from public, anon;
+revoke all on function public.list_community_members()
+  from public, anon;
 revoke all on function public.create_community_message(text, text, uuid)
   from public, anon;
 revoke all on function public.create_community_message(text, text)
@@ -334,7 +407,9 @@ revoke all on function public.delete_community_message(uuid)
   from public, anon;
 
 grant execute on function public.list_community_messages(text)
-  to anon, authenticated;
+  to authenticated;
+grant execute on function public.list_community_members()
+  to authenticated;
 grant execute on function public.create_community_message(text, text, uuid)
   to authenticated;
 grant execute on function public.create_community_message(text, text)

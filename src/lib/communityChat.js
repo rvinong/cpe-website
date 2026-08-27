@@ -81,6 +81,20 @@ export function normalizeCommunityMessage(row) {
   }
 }
 
+export function normalizeCommunityMember(row) {
+  return {
+    profileId: row.profile_id || row.profileId || row.id || '',
+    fullName:
+      row.display_name ||
+      row.full_name ||
+      row.fullName ||
+      row.nickname ||
+      'Member',
+    avatarPath: row.avatar_path || row.avatarPath || '',
+    role: row.role || 'student',
+  }
+}
+
 export function getStarterMessages(roomId) {
   return communityStarterMessages
     .filter((message) => message.roomId === roomId)
@@ -98,6 +112,17 @@ export async function getCommunityMessages(roomId) {
 
   return {
     data: error ? getStarterMessages(roomId) : (data || []).map(normalizeCommunityMessage),
+    error,
+  }
+}
+
+export async function getCommunityMembers() {
+  if (!isSupabaseConfigured) return { data: [], error: null }
+
+  const { data, error } = await supabase.rpc('list_community_members')
+
+  return {
+    data: error ? [] : (data || []).map(normalizeCommunityMember),
     error,
   }
 }
