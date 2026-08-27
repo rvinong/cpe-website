@@ -31,7 +31,10 @@ Run these files in the Supabase SQL Editor:
 7. `supabase/alumni.sql`
 8. `supabase/resources.sql`
 9. `supabase/team.sql`
-10. `supabase/email_notifications.sql`
+10. `supabase/account_profiles.sql`
+11. `supabase/email_notifications.sql`
+12. `supabase/community.sql`
+13. `supabase/community-chat.sql`
 
 See `SUPABASE_SETUP.md` for administrator setup and backend details.
 

@@ -5,16 +5,19 @@ import {
   BookOpen,
   CalendarDays,
   CheckCircle2,
+  Hash,
+  Info,
   LockKeyhole,
   MessageCircle,
   MessageSquareText,
-  Pin,
-  Plus,
+  Radio,
+  Search,
   Send,
   ShieldCheck,
+  Trash2,
   UsersRound,
 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import ProfileAvatar from '../components/ProfileAvatar'
 import Reveal from '../components/Reveal'
@@ -22,18 +25,18 @@ import useAuth from '../context/useAuth'
 import { communityRooms } from '../data/community'
 import { useMotionPreferences } from '../hooks/useMotionPreferences'
 import {
-  createCommunityComment,
-  createCommunityPost,
-  getCommunityComments,
-  getCommunityPosts,
   getCommunityRooms,
   getFriendlyCommunityError,
-  getStarterComments,
-  getStarterPosts,
-  maxCommunityCommentLength,
-  maxCommunityPostBodyLength,
-  maxCommunityPostTitleLength,
 } from '../lib/community'
+import {
+  createCommunityMessage,
+  deleteCommunityMessage,
+  getCommunityMessages,
+  getFriendlyCommunityChatError,
+  getStarterMessages,
+  maxCommunityMessageLength,
+  subscribeToCommunityMessages,
+} from '../lib/communityChat'
 import { getDisplayName } from '../lib/accountProfile'
 
 const roomIcons = {
@@ -55,128 +58,6 @@ function roleLabel(role) {
   return labels[role] || 'Member'
 }
 
-function PostComposer({ disabled, error, isSubmitting, onSubmit }) {
-  const [title, setTitle] = useState('')
-  const [body, setBody] = useState('')
-  const canSubmit =
-    title.trim() && body.trim() && !isSubmitting && !disabled
-
-  const handleSubmit = async (event) => {
-    event.preventDefault()
-    if (!canSubmit) return
-
-    const didSubmit = await onSubmit({ title, body })
-    if (didSubmit) {
-      setTitle('')
-      setBody('')
-    }
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="community-composer mt-5">
-      <div className="flex items-center gap-2">
-        <Plus size={16} className="text-brand-600" aria-hidden="true" />
-        <p className="text-sm font-extrabold text-navy-900">Start a discussion</p>
-      </div>
-      <div className="mt-3 grid gap-3">
-        <label className="sr-only" htmlFor="community-post-title">
-          Discussion title
-        </label>
-        <input
-          id="community-post-title"
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
-          maxLength={maxCommunityPostTitleLength}
-          placeholder="What would you like to discuss?"
-          disabled={disabled || isSubmitting}
-          className="community-input"
-        />
-        <label className="sr-only" htmlFor="community-post-body">
-          Discussion details
-        </label>
-        <textarea
-          id="community-post-body"
-          value={body}
-          onChange={(event) => setBody(event.target.value)}
-          maxLength={maxCommunityPostBodyLength}
-          rows="3"
-          placeholder="Add a little context for other members..."
-          disabled={disabled || isSubmitting}
-          className="community-input resize-none"
-        />
-      </div>
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-[11px] font-bold text-slate-500">
-          Keep posts respectful and useful to the community.
-        </p>
-        <button
-          type="submit"
-          disabled={!canSubmit}
-          className="inline-flex min-h-10 items-center gap-2 rounded-xl bg-brand-600 px-4 py-2 text-xs font-extrabold text-white shadow-[0_12px_28px_-16px_rgba(21,94,239,0.85)] transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:opacity-45"
-        >
-          {isSubmitting ? 'Posting...' : 'Post discussion'}
-          <Send size={14} aria-hidden="true" />
-        </button>
-      </div>
-      {error && (
-        <p className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800">
-          {error}
-        </p>
-      )}
-    </form>
-  )
-}
-
-function CommentComposer({ disabled, error, isSubmitting, onSubmit }) {
-  const [body, setBody] = useState('')
-  const canSubmit = body.trim() && !disabled && !isSubmitting
-
-  const handleSubmit = async (event) => {
-    event.preventDefault()
-    if (!canSubmit) return
-
-    const didSubmit = await onSubmit(body)
-    if (didSubmit) setBody('')
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="mt-5 border-t border-slate-200 pt-5">
-      <label className="sr-only" htmlFor="community-comment-body">
-        Reply to this discussion
-      </label>
-      <div className="relative">
-        <textarea
-          id="community-comment-body"
-          value={body}
-          onChange={(event) => setBody(event.target.value)}
-          maxLength={maxCommunityCommentLength}
-          rows="3"
-          placeholder="Add a reply..."
-          disabled={disabled || isSubmitting}
-          className="community-input resize-none pr-14"
-        />
-        <button
-          type="submit"
-          disabled={!canSubmit}
-          className="absolute bottom-3 right-3 grid size-9 place-items-center rounded-full bg-brand-600 text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300"
-          aria-label="Post reply"
-        >
-          <Send size={15} aria-hidden="true" />
-        </button>
-      </div>
-      <div className="mt-2 flex items-center justify-between gap-3 text-[11px] font-bold text-slate-500">
-        <span>{maxCommunityCommentLength - body.length} characters left</span>
-        {isSubmitting && <span className="text-brand-600">Posting...</span>}
-      </div>
-      {error && (
-        <p className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800">
-          {error}
-        </p>
-      )}
-    </form>
-  )
-}
-
 function RoomButton({ active, onClick, room }) {
   const Icon = roomIcons[room.id] || MessageCircle
 
@@ -187,104 +68,151 @@ function RoomButton({ active, onClick, room }) {
       aria-pressed={active}
       className={`community-room-button ${active ? 'community-room-button-active' : ''}`}
     >
-      <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-600">
+      <span className="community-room-icon">
         <Icon size={17} strokeWidth={1.8} aria-hidden="true" />
       </span>
-      <span className="min-w-0 text-left">
-        <span className="block truncate text-xs font-extrabold text-navy-900">
-          {room.title}
-        </span>
-        <span className="mt-0.5 block truncate text-[11px] font-semibold text-slate-500">
-          {room.isStaffOnly ? 'Staff notices' : room.description}
+      <span className="community-room-copy">
+        <span className="community-room-title">{room.title}</span>
+        <span className="community-room-description">
+          {room.isStaffOnly ? 'Staff-only notices' : room.shortTitle || 'Public room'}
         </span>
       </span>
+      {room.isStaffOnly && <LockKeyhole size={13} aria-hidden="true" />}
     </button>
   )
 }
 
-function PostCard({ active, onClick, post }) {
+function MessageComposer({ disabled, error, isSubmitting, onSubmit }) {
+  const [body, setBody] = useState('')
+  const canSubmit = Boolean(body.trim()) && !disabled && !isSubmitting
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+    if (!canSubmit) return
+
+    const didSubmit = await onSubmit(body)
+    if (didSubmit) setBody('')
+  }
+
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault()
+      event.currentTarget.form?.requestSubmit()
+    }
+  }
+
   return (
-    <Motion.button
-      type="button"
-      onClick={onClick}
-      aria-pressed={active}
-      whileHover={{ y: -2 }}
-      className={`community-post-card w-full text-left ${active ? 'community-post-card-active' : ''}`}
-    >
-      <div className="flex items-start gap-3">
-        <ProfileAvatar
-          path={post.avatarPath}
-          name={post.authorName}
-          className="size-10 rounded-xl"
-          textClassName="text-xs"
+    <form onSubmit={handleSubmit} className="community-chat-composer">
+      <label className="sr-only" htmlFor="community-message-body">
+        Write a message to this room
+      </label>
+      <div className="community-chat-input-wrap">
+        <textarea
+          id="community-message-body"
+          value={body}
+          onChange={(event) => setBody(event.target.value)}
+          onKeyDown={handleKeyDown}
+          maxLength={maxCommunityMessageLength}
+          rows="1"
+          placeholder="Message this room..."
+          disabled={disabled || isSubmitting}
+          className="community-input community-chat-input resize-none"
         />
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <p className="truncate text-xs font-extrabold text-navy-900">
-              {post.authorName}
-            </p>
-            <span className="text-[10px] font-bold text-slate-400">
-              {roleLabel(post.authorRole)}
-            </span>
-          </div>
-          <div className="mt-1 flex flex-wrap items-center gap-2">
-            {post.isPinned && (
-              <span className="inline-flex items-center gap-1 text-[10px] font-extrabold text-orange-600">
-                <Pin size={11} aria-hidden="true" />
-                Pinned
-              </span>
-            )}
-            <span className="text-[10px] font-bold text-slate-400">
-              {post.date || 'Recently'}
-            </span>
-          </div>
-        </div>
+        <button
+          type="submit"
+          disabled={!canSubmit}
+          className="community-chat-send"
+          aria-label="Send message"
+        >
+          <Send size={16} aria-hidden="true" />
+        </button>
       </div>
-      <h3 className="mt-4 text-base font-black tracking-tight text-navy-900">
-        {post.title}
-      </h3>
-      <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">
-        {post.body}
-      </p>
-      <div className="mt-4 flex items-center justify-between gap-3 border-t border-slate-200 pt-3 text-[11px] font-extrabold text-slate-500">
-        <span className="inline-flex items-center gap-1.5">
-          <MessageCircle size={14} aria-hidden="true" />
-          {post.commentCount} {post.commentCount === 1 ? 'reply' : 'replies'}
-        </span>
-        <span className="inline-flex items-center gap-1 text-brand-600">
-          Open thread
-          <ArrowRight size={13} aria-hidden="true" />
-        </span>
+      <div className="community-chat-composer-meta">
+        <span>Enter to send. Shift + Enter for a new line.</span>
+        <span>{maxCommunityMessageLength - body.length}</span>
       </div>
-    </Motion.button>
+      {error && <p className="community-form-error">{error}</p>}
+    </form>
   )
 }
 
-function CommentItem({ comment }) {
+function MessageItem({ currentUserId, message, onDelete, shouldReduceMotion }) {
+  const isOwnMessage = Boolean(currentUserId && message.profileId === currentUserId)
+
   return (
-    <article className="flex items-start gap-3">
+    <Motion.article
+      initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: shouldReduceMotion ? 0.01 : 0.2 }}
+      className={`community-message-row ${isOwnMessage ? 'community-message-row-own' : ''}`}
+    >
       <ProfileAvatar
-        path={comment.avatarPath}
-        name={comment.fullName}
-        className="size-8 rounded-full"
-        textClassName="text-[10px]"
+        path={message.avatarPath}
+        name={message.fullName}
+        className="community-message-avatar size-9 rounded-xl"
+        textClassName="text-xs"
       />
-      <div className="min-w-0 flex-1">
-        <div className="community-comment-bubble">
-          <div className="flex flex-wrap items-center gap-2">
-            <p className="text-xs font-extrabold text-navy-900">
-              {comment.fullName}
-            </p>
-            <span className="text-[10px] font-bold text-slate-400">
-              {comment.date || 'Recently'}
-            </span>
-          </div>
-          <p className="mt-1 whitespace-pre-wrap text-sm leading-6 text-slate-700">
-            {comment.body}
-          </p>
+      <div className="community-message-content">
+        <div className="community-message-meta">
+          <span className="community-message-author">{message.fullName}</span>
+          <span className="community-role-badge">{roleLabel(message.role)}</span>
+          <span className="community-message-time">{message.date || 'Recently'}</span>
+        </div>
+        <div className="community-message-bubble">
+          <p>{message.body}</p>
+        </div>
+        {(message.canDelete || isOwnMessage) && (
+          <button
+            type="button"
+            className="community-message-delete"
+            onClick={() => onDelete(message)}
+          >
+            <Trash2 size={12} aria-hidden="true" />
+            Remove
+          </button>
+        )}
+      </div>
+    </Motion.article>
+  )
+}
+
+function CommunityRoomInfo({ canSend, room }) {
+  return (
+    <aside className="community-room-info" aria-label="Room information">
+      <div className="community-room-info-heading">
+        <span className="community-room-info-icon">
+          <Info size={17} aria-hidden="true" />
+        </span>
+        <div>
+          <p className="community-room-info-kicker">Room details</p>
+          <h2>About this room</h2>
         </div>
       </div>
-    </article>
+
+      <div className="community-room-info-card">
+        <span className="community-room-info-hash" aria-hidden="true">
+          <Hash size={22} />
+        </span>
+        <h3>{room?.title || 'Community room'}</h3>
+        <p>{room?.description || 'Public messages for the CpE community.'}</p>
+      </div>
+
+      <dl className="community-room-facts">
+        <div>
+          <dt><UsersRound size={14} aria-hidden="true" /> Visibility</dt>
+          <dd>Public room</dd>
+        </div>
+        <div>
+          <dt><Radio size={14} aria-hidden="true" /> Posting</dt>
+          <dd>{canSend ? 'You can send messages' : 'Approved members only'}</dd>
+        </div>
+      </dl>
+
+      <div className="community-room-info-note">
+        <ShieldCheck size={15} aria-hidden="true" />
+        <p>Use official pages for confirmed announcements, schedules, and documents.</p>
+      </div>
+    </aside>
   )
 }
 
@@ -292,58 +220,49 @@ function Community() {
   const { user, profile, isApprovedMember, canAccessAdmin, isConfigured } = useAuth()
   const { shouldReduceMotion } = useMotionPreferences()
   const [rooms, setRooms] = useState(communityRooms)
-  const [selectedRoomId, setSelectedRoomId] = useState(communityRooms[0].id)
-  const [posts, setPosts] = useState(getStarterPosts(communityRooms[0].id))
-  const [selectedPostId, setSelectedPostId] = useState(
-    getStarterPosts(communityRooms[0].id)[0]?.id || '',
-  )
-  const [comments, setComments] = useState(
-    getStarterComments(getStarterPosts(communityRooms[0].id)[0]?.id),
+  const [selectedRoomId, setSelectedRoomId] = useState(communityRooms[0]?.id || '')
+  const [messages, setMessages] = useState(
+    getStarterMessages(communityRooms[0]?.id || ''),
   )
   const [isLoadingRooms, setIsLoadingRooms] = useState(true)
-  const [loadedPostsRoomId, setLoadedPostsRoomId] = useState('')
-  const [loadedCommentsPostId, setLoadedCommentsPostId] = useState('')
-  const [isCreatingPost, setIsCreatingPost] = useState(false)
-  const [isCreatingComment, setIsCreatingComment] = useState(false)
+  const [loadedMessagesRoomId, setLoadedMessagesRoomId] = useState('')
+  const [isCreatingMessage, setIsCreatingMessage] = useState(false)
   const [communityError, setCommunityError] = useState('')
-  const [postError, setPostError] = useState('')
-  const [commentError, setCommentError] = useState('')
+  const [chatError, setChatError] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
+  const messageListRef = useRef(null)
 
   const selectedRoom = useMemo(
     () => rooms.find((room) => room.id === selectedRoomId) || rooms[0],
     [rooms, selectedRoomId],
   )
-  const selectedPost = useMemo(
-    () => posts.find((post) => post.id === selectedPostId) || posts[0],
-    [posts, selectedPostId],
-  )
   const displayName = getDisplayName(profile, user, 'member')
-  const canPost =
+  const canSend =
     isApprovedMember &&
     Boolean(selectedRoom) &&
     (!selectedRoom.isStaffOnly || canAccessAdmin)
-  const isLoadingPosts = Boolean(
-    selectedRoom?.id && loadedPostsRoomId !== selectedRoom.id,
+  const isLoadingMessages = Boolean(
+    selectedRoom?.id && loadedMessagesRoomId !== selectedRoom.id,
   )
-  const isLoadingComments = Boolean(
-    selectedPost?.id && loadedCommentsPostId !== selectedPost.id,
-  )
+  const visibleMessages = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase()
+    if (!query) return messages
+
+    return messages.filter((message) =>
+      [message.body, message.fullName].some((value) =>
+        String(value || '').toLowerCase().includes(query),
+      ),
+    )
+  }, [messages, searchTerm])
+  const isLiveChat = isConfigured && !chatError && !communityError
 
   const handleSelectRoom = (roomId) => {
     if (roomId === selectedRoomId) return
     setSelectedRoomId(roomId)
-    setPosts([])
-    setSelectedPostId('')
-    setComments([])
-    setPostError('')
-    setCommentError('')
-  }
-
-  const handleSelectPost = (postId) => {
-    if (postId === selectedPostId) return
-    setSelectedPostId(postId)
-    setComments([])
-    setCommentError('')
+    setMessages([])
+    setLoadedMessagesRoomId('')
+    setChatError('')
+    setSearchTerm('')
   }
 
   useEffect(() => {
@@ -379,26 +298,18 @@ function Community() {
     if (!selectedRoom?.id) return undefined
     let isMounted = true
 
-    getCommunityPosts(selectedRoom.id)
+    getCommunityMessages(selectedRoom.id)
       .then(({ data, error }) => {
         if (!isMounted) return
-        const nextPosts = error ? getStarterPosts(selectedRoom.id) : data || []
-        setPosts(nextPosts)
-        setSelectedPostId((current) =>
-          nextPosts.some((post) => post.id === current)
-            ? current
-            : nextPosts[0]?.id || '',
-        )
-        if (error) setCommunityError(getFriendlyCommunityError(error))
-        setLoadedPostsRoomId(selectedRoom.id)
+        setMessages(error ? getStarterMessages(selectedRoom.id) : data || [])
+        setChatError(error ? getFriendlyCommunityChatError(error) : '')
+        setLoadedMessagesRoomId(selectedRoom.id)
       })
       .catch((error) => {
         if (!isMounted) return
-        const nextPosts = getStarterPosts(selectedRoom.id)
-        setPosts(nextPosts)
-        setSelectedPostId(nextPosts[0]?.id || '')
-        setCommunityError(getFriendlyCommunityError(error))
-        setLoadedPostsRoomId(selectedRoom.id)
+        setMessages(getStarterMessages(selectedRoom.id))
+        setChatError(getFriendlyCommunityChatError(error))
+        setLoadedMessagesRoomId(selectedRoom.id)
       })
 
     return () => {
@@ -407,335 +318,263 @@ function Community() {
   }, [selectedRoom?.id])
 
   useEffect(() => {
-    if (!selectedPost?.id) {
-      return undefined
-    }
-
+    if (!isConfigured || !user || !selectedRoom?.id || chatError) return undefined
     let isMounted = true
-    getCommunityComments(selectedPost.id)
-      .then(({ data, error }) => {
-        if (!isMounted) return
-        setComments(error ? getStarterComments(selectedPost.id) : data || [])
-        if (error) setCommunityError(getFriendlyCommunityError(error))
-        setLoadedCommentsPostId(selectedPost.id)
-      })
-      .catch((error) => {
-        if (!isMounted) return
-        setComments(getStarterComments(selectedPost.id))
-        setCommunityError(getFriendlyCommunityError(error))
-        setLoadedCommentsPostId(selectedPost.id)
-      })
 
-    return () => {
-      isMounted = false
+    const refreshMessages = async () => {
+      const { data, error } = await getCommunityMessages(selectedRoom.id)
+      if (!isMounted) return
+      if (error) {
+        setChatError(getFriendlyCommunityChatError(error))
+        return
+      }
+      setMessages(data || [])
     }
-  }, [selectedPost?.id])
 
-  const handleCreatePost = async ({ title, body }) => {
-    if (!canPost) return false
-    setPostError('')
-    setIsCreatingPost(true)
+    return subscribeToCommunityMessages(
+      selectedRoom.id,
+      refreshMessages,
+      (error) => {
+        if (isMounted) setChatError(getFriendlyCommunityChatError(error))
+      },
+    )
+  }, [chatError, isConfigured, selectedRoom?.id, user])
+
+  useEffect(() => {
+    const messageList = messageListRef.current
+    if (!messageList || searchTerm.trim()) return
+    messageList.scrollTop = messageList.scrollHeight
+  }, [messages, searchTerm, selectedRoom?.id])
+
+  const handleCreateMessage = async (body) => {
+    if (!canSend || !selectedRoom?.id) return false
+    setChatError('')
+    setIsCreatingMessage(true)
+
     let result
     try {
-      result = await createCommunityPost(selectedRoom.id, { title, body })
+      result = await createCommunityMessage(selectedRoom.id, body)
     } catch (error) {
-      setIsCreatingPost(false)
-      setPostError(getFriendlyCommunityError(error))
+      setIsCreatingMessage(false)
+      setChatError(getFriendlyCommunityChatError(error))
       return false
     }
+
+    setIsCreatingMessage(false)
     const { data, error } = result
-    setIsCreatingPost(false)
 
     if (error || !data) {
-      setPostError(
+      setChatError(
         error
-          ? getFriendlyCommunityError(error)
-          : 'The discussion could not be posted.',
+          ? getFriendlyCommunityChatError(error)
+          : 'The message could not be sent.',
       )
       return false
     }
 
-    const nextPost = {
-      ...data,
-      roomId: selectedRoom.id,
-      authorName: data.authorName || displayName,
-      authorRole: data.authorRole || profile?.role || 'student',
-    }
-    setPosts((current) => [nextPost, ...current])
-    setSelectedPostId(nextPost.id)
-    return true
-  }
-
-  const handleCreateComment = async (body) => {
-    if (!isApprovedMember || !selectedPost?.id) return false
-    setCommentError('')
-    setIsCreatingComment(true)
-    let result
-    try {
-      result = await createCommunityComment(selectedPost.id, body)
-    } catch (error) {
-      setIsCreatingComment(false)
-      setCommentError(getFriendlyCommunityError(error))
-      return false
-    }
-    const { data, error } = result
-    setIsCreatingComment(false)
-
-    if (error || !data) {
-      setCommentError(
-        error ? getFriendlyCommunityError(error) : 'The reply could not be posted.',
-      )
-      return false
-    }
-
-    setComments((current) => [...current, data])
-    setPosts((current) =>
-      current.map((post) =>
-        post.id === selectedPost.id
-          ? { ...post, commentCount: post.commentCount + 1 }
-          : post,
-      ),
+    setMessages((current) =>
+      current.some((message) => message.id === data.id)
+        ? current
+        : [...current, data],
     )
     return true
   }
 
+  const handleDeleteMessage = async (message) => {
+    if (!message.canDelete && message.profileId !== user?.id) return
+    if (
+      typeof window !== 'undefined' &&
+      !window.confirm('Remove this message from the room?')
+    ) {
+      return
+    }
+
+    const { error } = await deleteCommunityMessage(message.id)
+    if (error) {
+      setChatError(getFriendlyCommunityChatError(error))
+      return
+    }
+    setMessages((current) => current.filter((item) => item.id !== message.id))
+  }
+
+  const statusMessage = chatError || communityError
+
   return (
     <>
       <main className="pt-[84px]">
-        <section id="rooms" className="community-page-section scroll-mt-24 py-14 sm:py-20">
+        <section id="rooms" className="community-page-section scroll-mt-24 py-10 sm:py-14">
           <div className="section-shell">
-            <Reveal className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <p className="eyebrow">Organized conversations</p>
-                <h2 className="mt-3 text-3xl font-black tracking-tight text-navy-900 sm:text-4xl">
-                  Choose a room and join the thread
-                </h2>
-                <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
-                  Posts stay grouped by topic so useful questions and official
-                  answers are easier to find later.
-                </p>
-              </div>
-              <div className="community-member-chip">
-                <span className="grid size-8 place-items-center rounded-full bg-brand-50 text-brand-600">
-                  <UsersRound size={15} aria-hidden="true" />
-                </span>
-                <span>
-                  <span className="block text-[10px] font-black tracking-[0.14em] text-brand-600 uppercase">
-                    Your access
+            <Reveal className="community-workspace">
+              <header className="community-workspace-header">
+                <div className="community-workspace-identity">
+                  <span className="community-workspace-mark" aria-hidden="true">
+                    <MessageSquareText size={22} strokeWidth={1.8} />
                   </span>
-                  <span className="mt-0.5 block text-xs font-extrabold text-navy-900">
-                    {user ? (isApprovedMember ? displayName : 'Awaiting approval') : 'Guest reader'}
-                  </span>
-                </span>
-              </div>
-            </Reveal>
-
-            {communityError && (
-              <div className="community-notice mb-6" role="status">
-                <LockKeyhole size={18} className="shrink-0 text-orange-600" aria-hidden="true" />
-                <p>{communityError}</p>
-              </div>
-            )}
-
-            <div className="grid items-start gap-5 lg:grid-cols-[17rem_minmax(0,1fr)_22rem]">
-              <Reveal className="community-panel p-3 sm:p-4" delay={0.04}>
-                <div className="flex items-center justify-between gap-3 px-2 pb-3">
                   <div>
-                    <p className="text-[10px] font-black tracking-[0.16em] text-brand-600 uppercase">
-                      Rooms
-                    </p>
-                    <p className="mt-1 text-xs font-bold text-slate-500">
-                      {isLoadingRooms ? 'Loading rooms...' : `${rooms.length} spaces`}
-                    </p>
+                    <p className="community-workspace-kicker">Community Hub</p>
+                    <h1 className="community-workspace-title">Public room chat</h1>
                   </div>
-                  <MessageCircle size={18} className="text-brand-600" aria-hidden="true" />
                 </div>
-                <div className="grid gap-1.5">
-                  {rooms.map((room) => (
-                    <RoomButton
-                      key={room.id}
-                      room={room}
-                      active={room.id === selectedRoom?.id}
-                      onClick={() => handleSelectRoom(room.id)}
-                    />
-                  ))}
-                </div>
-                <div className="community-side-note mt-4">
-                  <CheckCircle2 size={15} className="shrink-0 text-emerald-600" aria-hidden="true" />
-                  <p>Members can post after account approval. Everyone can read public discussions.</p>
-                </div>
-              </Reveal>
-
-              <Reveal className="community-panel p-5 sm:p-6" delay={0.08}>
-                <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-200 pb-5">
-                  <div className="min-w-0">
-                    <p className="text-[10px] font-black tracking-[0.16em] text-brand-600 uppercase">
-                      {selectedRoom?.shortTitle || 'Community'} room
-                    </p>
-                    <h2 className="mt-2 text-2xl font-black tracking-tight text-navy-900">
-                      {selectedRoom?.title || 'Community room'}
-                    </h2>
-                    <p className="mt-2 max-w-xl text-sm leading-6 text-slate-600">
-                      {selectedRoom?.description}
-                    </p>
-                  </div>
-                  {selectedRoom?.isStaffOnly && (
-                    <span className="community-staff-badge inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-extrabold">
-                      <LockKeyhole size={13} aria-hidden="true" />
-                      Staff posting
-                    </span>
-                  )}
-                </div>
-
-                {canPost ? (
-                  <PostComposer
-                    error={postError}
-                    isSubmitting={isCreatingPost}
-                    onSubmit={handleCreatePost}
+                <div className="community-user-pill">
+                  <ProfileAvatar
+                    path={profile?.avatar_path || profile?.avatarPath || ''}
+                    name={displayName}
+                    className="size-9 rounded-xl"
+                    textClassName="text-xs"
                   />
-                ) : (
-                  <div className="community-access-note mt-5">
-                    <LockKeyhole size={18} className="shrink-0 text-brand-600" aria-hidden="true" />
-                    <p>
-                      {selectedRoom?.isStaffOnly
-                        ? 'This room is for officers, editors, and administrators. Members can still read the notices.'
-                        : user
-                          ? 'Your account can join discussions once an administrator approves it.'
-                          : 'Sign in with an approved account to start a discussion.'}
-                    </p>
-                    {!user && (
-                      <Link
-                        to="/account?mode=login&redirect=%2Fcommunity"
-                        className="shrink-0 text-xs font-extrabold text-brand-600 hover:text-brand-700"
-                      >
-                        Sign in
-                      </Link>
-                    )}
-                  </div>
-                )}
-
-                <div className="mt-6 flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-xs font-black tracking-[0.14em] text-navy-900 uppercase">
-                      Latest discussions
-                    </p>
-                    <p className="mt-1 text-xs font-bold text-slate-500">
-                      {posts.length} {posts.length === 1 ? 'conversation' : 'conversations'}
-                    </p>
-                  </div>
-                  <span className="text-[10px] font-extrabold text-slate-400">
-                    {isConfigured && !communityError ? 'Live room' : 'Preview content'}
+                  <span className="community-user-copy">
+                    <span className="community-user-name">
+                      {user ? displayName : 'Guest reader'}
+                    </span>
+                    <span className="community-user-status">
+                      {user ? (isApprovedMember ? 'Approved member' : 'Awaiting approval') : 'Read-only access'}
+                    </span>
                   </span>
                 </div>
+              </header>
 
-                <div className="mt-4 grid gap-3">
-                  {isLoadingPosts ? (
-                    <div className="community-loading">Loading discussions...</div>
-                  ) : posts.length === 0 ? (
-                    <div className="community-empty">
-                      <MessageCircle size={25} className="mx-auto text-brand-600" aria-hidden="true" />
-                      <p className="mt-3 text-sm font-extrabold text-navy-900">
-                        No discussions in this room yet.
-                      </p>
-                      <p className="mt-1 text-xs leading-5 text-slate-500">
-                        Approved members can start the first conversation.
+              <div className="community-workspace-toolbar">
+                <div className="community-current-room">
+                  <span className="community-current-room-icon" aria-hidden="true">#</span>
+                  <span className="community-current-room-copy">
+                    <span className="community-current-room-name">
+                      {selectedRoom?.shortTitle || 'Community'}
+                    </span>
+                    <span className="community-current-room-description">
+                      {selectedRoom?.isStaffOnly ? 'Staff notices' : 'Public room chat'}
+                    </span>
+                  </span>
+                </div>
+                <label className="community-search">
+                  <Search size={16} aria-hidden="true" />
+                  <span className="sr-only">Search messages in this room</span>
+                  <input
+                    type="search"
+                    value={searchTerm}
+                    onChange={(event) => setSearchTerm(event.target.value)}
+                    placeholder="Search messages"
+                  />
+                </label>
+                <span className={`community-live-status ${isLiveChat ? 'community-live-status-active' : ''}`}>
+                  <Radio size={14} aria-hidden="true" />
+                  {isLiveChat ? 'Live chat' : 'Preview chat'}
+                </span>
+              </div>
+
+              {statusMessage && (
+                <div className="community-notice" role="status">
+                  <LockKeyhole size={18} className="shrink-0 text-orange-600" aria-hidden="true" />
+                  <p>{statusMessage}</p>
+                </div>
+              )}
+
+              <div className="community-workspace-body">
+                <aside className="community-room-sidebar" aria-label="Community rooms">
+                  <div className="community-sidebar-heading">
+                    <div>
+                      <p className="community-sidebar-kicker">Channels</p>
+                      <p className="community-sidebar-count">
+                        {isLoadingRooms ? 'Loading rooms...' : `${rooms.length} rooms`}
                       </p>
                     </div>
-                  ) : (
-                    posts.map((post, index) => (
-                      <Motion.div
-                        key={post.id}
-                        initial={shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: shouldReduceMotion ? 0.01 : 0.25, delay: index * 0.035 }}
-                      >
-                        <PostCard
-                          post={post}
-                          active={post.id === selectedPost?.id}
-                          onClick={() => handleSelectPost(post.id)}
-                        />
-                      </Motion.div>
-                    ))
-                  )}
-                </div>
-              </Reveal>
-
-              <Reveal className="community-panel p-5 sm:p-6" delay={0.12}>
-                {selectedPost ? (
-                  <>
-                    <div className="flex items-start gap-3">
-                      <ProfileAvatar
-                        path={selectedPost.avatarPath}
-                        name={selectedPost.authorName}
-                        className="size-10 rounded-xl"
-                        textClassName="text-xs"
+                    <Hash size={19} aria-hidden="true" />
+                  </div>
+                  <div className="community-room-list">
+                    {rooms.map((room) => (
+                      <RoomButton
+                        key={room.id}
+                        room={room}
+                        active={room.id === selectedRoom?.id}
+                        onClick={() => handleSelectRoom(room.id)}
                       />
+                    ))}
+                  </div>
+                  <div className="community-sidebar-footer">
+                    <CheckCircle2 size={16} aria-hidden="true" />
+                    <p>
+                      <strong>Public by design</strong>
+                      Everyone can read. Approved members can send.
+                    </p>
+                  </div>
+                </aside>
+
+                <section className="community-chat-panel" aria-labelledby="community-chat-title">
+                  <header className="community-chat-header">
+                    <div className="community-chat-room-heading">
+                      <span className="community-chat-hash" aria-hidden="true">#</span>
                       <div className="min-w-0">
-                        <p className="text-[10px] font-black tracking-[0.16em] text-brand-600 uppercase">
-                          Discussion thread
-                        </p>
-                        <p className="mt-1 text-xs font-extrabold text-navy-900">
-                          {selectedPost.authorName}
-                        </p>
-                        <p className="mt-0.5 text-[10px] font-bold text-slate-400">
-                          {selectedPost.date || 'Recently'}
-                        </p>
+                        <h2 id="community-chat-title">
+                          {selectedRoom?.title || 'Community room'}
+                        </h2>
+                        <p>{selectedRoom?.description}</p>
                       </div>
                     </div>
-                    <h2 className="mt-5 text-xl font-black tracking-tight text-navy-900">
-                      {selectedPost.title}
-                    </h2>
-                    <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-slate-600">
-                      {selectedPost.body}
-                    </p>
+                    {selectedRoom?.isStaffOnly && (
+                      <span className="community-staff-badge">
+                        <LockKeyhole size={12} aria-hidden="true" />
+                        Staff only
+                      </span>
+                    )}
+                  </header>
 
-                    <div className="mt-6 flex items-center justify-between gap-3 border-y border-slate-200 py-3">
-                      <p className="inline-flex items-center gap-1.5 text-xs font-extrabold text-slate-500">
-                        <MessageCircle size={15} aria-hidden="true" />
-                        {comments.length} {comments.length === 1 ? 'reply' : 'replies'}
-                      </p>
-                      {selectedPost.isPinned && (
-                        <p className="inline-flex items-center gap-1 text-[10px] font-extrabold text-orange-600">
-                          <Pin size={12} aria-hidden="true" />
-                          Pinned
-                        </p>
-                      )}
-                    </div>
+                  <div
+                    ref={messageListRef}
+                    className="community-message-list"
+                    aria-live="polite"
+                  >
+                    {isLoadingMessages ? (
+                      <div className="community-loading">Loading messages...</div>
+                    ) : messages.length === 0 ? (
+                      <div className="community-chat-empty">
+                        <span className="community-chat-empty-icon">
+                          <MessageCircle size={24} aria-hidden="true" />
+                        </span>
+                        <p>No messages in this room yet.</p>
+                        <span>Start the public conversation below.</span>
+                      </div>
+                    ) : visibleMessages.length === 0 ? (
+                      <div className="community-chat-empty">
+                        <span className="community-chat-empty-icon">
+                          <Search size={24} aria-hidden="true" />
+                        </span>
+                        <p>No matching messages</p>
+                        <span>Try another word or clear the search.</span>
+                      </div>
+                    ) : (
+                      visibleMessages.map((message) => (
+                        <MessageItem
+                          key={message.id}
+                          currentUserId={user?.id}
+                          message={message}
+                          onDelete={handleDeleteMessage}
+                          shouldReduceMotion={shouldReduceMotion}
+                        />
+                      ))
+                    )}
+                  </div>
 
-                    <div className="mt-5 space-y-4">
-                      {isLoadingComments ? (
-                        <div className="community-loading">Loading replies...</div>
-                      ) : comments.length === 0 ? (
-                        <div className="community-empty py-7">
-                          <MessageCircle size={23} className="mx-auto text-brand-600" aria-hidden="true" />
-                          <p className="mt-2 text-xs font-extrabold text-navy-900">
-                            No replies yet.
-                          </p>
-                        </div>
-                      ) : (
-                        comments.map((comment) => (
-                          <CommentItem key={comment.id} comment={comment} />
-                        ))
-                      )}
-                    </div>
-
-                    {isApprovedMember ? (
-                      <CommentComposer
-                        error={commentError}
-                        isSubmitting={isCreatingComment}
-                        onSubmit={handleCreateComment}
+                  <div className="community-chat-footer">
+                    {canSend ? (
+                      <MessageComposer
+                        key={selectedRoom?.id}
+                        error={chatError}
+                        isSubmitting={isCreatingMessage}
+                        onSubmit={handleCreateMessage}
                       />
                     ) : (
-                      <div className="community-reply-note mt-5">
+                      <div className="community-chat-access-note">
+                        <LockKeyhole size={17} aria-hidden="true" />
                         <p>
-                          {user
-                            ? 'Account approval is required before you can reply.'
-                            : 'Sign in with an approved account to reply.'}
+                          {selectedRoom?.isStaffOnly
+                            ? 'This room is reserved for officers, editors, and administrators.'
+                            : user
+                              ? 'Your account can send messages after an administrator approves it.'
+                              : 'Sign in with an approved account to send a message.'}
                         </p>
                         {!user && (
                           <Link
                             to="/account?mode=login&redirect=%2Fcommunity"
-                            className="inline-flex items-center gap-1 text-xs font-extrabold text-brand-600"
+                            className="community-access-link"
                           >
                             Sign in
                             <ArrowRight size={13} aria-hidden="true" />
@@ -743,23 +582,14 @@ function Community() {
                         )}
                       </div>
                     )}
-                  </>
-                ) : (
-                  <div className="community-empty min-h-72">
-                    <MessageSquareText size={28} className="mx-auto text-brand-600" aria-hidden="true" />
-                    <p className="mt-3 text-sm font-extrabold text-navy-900">
-                      Select a discussion
-                    </p>
-                    <p className="mt-1 max-w-xs text-xs leading-5 text-slate-500">
-                      Open a post to read the full conversation and add a reply.
-                    </p>
                   </div>
-                )}
-              </Reveal>
-            </div>
+                </section>
+
+                <CommunityRoomInfo canSend={canSend} room={selectedRoom} />
+              </div>
+            </Reveal>
           </div>
         </section>
-
       </main>
     </>
   )

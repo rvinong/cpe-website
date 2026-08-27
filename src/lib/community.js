@@ -39,7 +39,7 @@ export function isCommunitySchemaMissing(error) {
 
 export function getFriendlyCommunityError(error) {
   if (isCommunitySchemaMissing(error)) {
-    return 'The Community Hub is ready in the interface. Run supabase/community.sql in the Supabase SQL Editor to enable live rooms and posting.'
+    return 'The Community Hub is ready in the interface. Run supabase/community.sql in the Supabase SQL Editor to enable the room directory.'
   }
 
   return error?.message || 'Community content could not be loaded right now.'
