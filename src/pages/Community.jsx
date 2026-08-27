@@ -307,10 +307,12 @@ function Community() {
     [rooms, selectedRoomId],
   )
   const displayName = getDisplayName(profile, user, 'member')
-  const canSend =
-    isApprovedMember &&
-    Boolean(selectedRoom) &&
-    (!selectedRoom.isStaffOnly || canAccessAdmin)
+  const canSend = Boolean(
+    user &&
+      isApprovedMember &&
+      selectedRoom &&
+      (!selectedRoom.isStaffOnly || canAccessAdmin),
+  )
   const isLoadingMessages = Boolean(
     selectedRoom?.id && loadedMessagesRoomId !== selectedRoom.id,
   )
@@ -648,7 +650,7 @@ function Community() {
                         replyingTo={replyingTo}
                       />
                     ) : (
-                      <div className="community-chat-access-note">
+                      <div className="community-chat-access-note" role="status">
                         <LockKeyhole size={17} aria-hidden="true" />
                         <p>
                           {selectedRoom?.isStaffOnly

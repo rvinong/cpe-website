@@ -33,6 +33,12 @@ export function isCommunityChatSchemaMissing(error) {
 }
 
 export function getFriendlyCommunityChatError(error) {
+  const message = error?.message?.toLowerCase() || ''
+
+  if (message.includes('approved account required')) {
+    return 'Messaging is locked until an administrator approves your account.'
+  }
+
   if (isCommunityChatSchemaMissing(error)) {
     return 'Room chat preview is active. Run supabase/community-chat.sql in the Supabase SQL Editor to enable live messages.'
   }
