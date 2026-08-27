@@ -1,6 +1,7 @@
 import { motion as Motion } from 'framer-motion'
 import {
   ArrowRight,
+  ArrowLeft,
   BadgeCheck,
   BookOpen,
   CalendarDays,
@@ -404,6 +405,11 @@ function Community() {
       <main className="pt-[84px]">
         <section id="rooms" className="community-page-section scroll-mt-24 py-10 sm:py-14">
           <div className="section-shell">
+            <Link to="/" className="secondary-button mb-5">
+              <ArrowLeft size={17} aria-hidden="true" />
+              Back to Homepage
+            </Link>
+
             <Reveal className="community-workspace">
               <header className="community-workspace-header">
                 <div className="community-workspace-identity">
