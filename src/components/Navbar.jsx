@@ -36,7 +36,7 @@ function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const displayedActiveKey =
-    pathname === '/account'
+    pathname === '/account' || pathname === '/community'
       ? null
       : pathname.startsWith('/announcements')
       ? 'announcements'

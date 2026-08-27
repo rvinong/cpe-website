@@ -6,7 +6,7 @@ import { lazy, Suspense, useEffect } from 'react'
 import { Route, Routes } from 'react-router-dom'
 import { useLocation } from 'react-router-dom'
 import AdminRoute from './components/AdminRoute'
-import ByteAssistant from './components/ByteAssistant'
+import CommunityLauncher from './components/CommunityLauncher'
 import Footer from './components/Footer'
 import Navbar from './components/Navbar'
 import { useMotionPreferences } from './hooks/useMotionPreferences'
@@ -18,6 +18,7 @@ const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
 const AnnouncementDetails = lazy(() => import('./pages/AnnouncementDetails'))
 const Announcements = lazy(() => import('./pages/Announcements'))
 const Alumni = lazy(() => import('./pages/Alumni'))
+const Community = lazy(() => import('./pages/Community'))
 const Events = lazy(() => import('./pages/Events'))
 const Gallery = lazy(() => import('./pages/Gallery'))
 const Home = lazy(() => import('./pages/Home'))
@@ -158,6 +159,7 @@ function App() {
                     element={<AnnouncementDetails />}
                   />
                   <Route path="/alumni" element={<Alumni />} />
+                  <Route path="/community" element={<Community />} />
                   <Route path="/events" element={<Events />} />
                   <Route path="/gallery" element={<Gallery />} />
                   <Route path="/gallery/news/:slug" element={<NewsDetails />} />
@@ -169,7 +171,7 @@ function App() {
             </Motion.div>
           </AnimatePresence>
           <Footer />
-          <ByteAssistant />
+          <CommunityLauncher />
         </>
       )}
     </>

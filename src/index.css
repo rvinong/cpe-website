@@ -373,6 +373,208 @@ a {
   backdrop-filter: blur(16px);
 }
 
+.community-page-section {
+  background:
+    radial-gradient(circle at 8% 0%, rgba(21, 94, 239, 0.06), transparent 26rem),
+    linear-gradient(180deg, #f8fbff 0%, #ffffff 58%, #f7f9fc 100%);
+}
+
+.community-launcher {
+  border: 1px solid #bfdbfe;
+  background: rgba(255, 255, 255, 0.95);
+  color: #0b1f46;
+}
+
+.community-launcher:hover {
+  border-color: #60a5fa;
+  color: #0f4fd6;
+}
+
+.community-panel {
+  border: 1px solid var(--line);
+  border-radius: 1.5rem;
+  background: var(--surface-raised);
+  box-shadow:
+    0 22px 65px -48px rgba(15, 23, 42, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(16px);
+}
+
+.community-member-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  background: var(--surface-raised);
+  padding: 0.55rem 0.75rem;
+  box-shadow: var(--shadow-xs);
+}
+
+.community-notice,
+.community-access-note,
+.community-side-note,
+.community-reply-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.community-notice {
+  border: 1px solid #fed7aa;
+  background: #fff7ed;
+  color: #9a3412;
+  padding: 0.85rem 1rem;
+}
+
+.community-access-note {
+  align-items: center;
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: #405776;
+  padding: 0.85rem 1rem;
+}
+
+.community-side-note {
+  border: 1px solid #d1fae5;
+  background: #ecfdf5;
+  color: #166534;
+  padding: 0.75rem;
+}
+
+.community-reply-note {
+  display: block;
+  border: 1px solid #dbeafe;
+  background: #f8fbff;
+  color: #526783;
+  padding: 0.8rem;
+}
+
+.community-staff-badge {
+  border: 1px solid #fed7aa;
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.community-composer {
+  border: 1px solid #bfdbfe;
+  border-radius: 1.25rem;
+  background: linear-gradient(145deg, #f8fbff, #eff6ff);
+  padding: 1rem;
+}
+
+.community-input {
+  width: 100%;
+  min-height: 3rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.86);
+  color: var(--text-strong);
+  padding: 0.75rem 0.9rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.5;
+  outline: none;
+  transition:
+    border-color var(--transition-base),
+    background-color var(--transition-base),
+    box-shadow var(--transition-base);
+}
+
+.community-input::placeholder {
+  color: #94a3b8;
+}
+
+.community-input:focus {
+  border-color: #2e73f6;
+  background: #ffffff;
+  box-shadow: 0 0 0 4px rgba(21, 94, 239, 0.11);
+}
+
+.community-input:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.community-input.pr-14 {
+  padding-right: 3.5rem;
+}
+
+.community-room-button {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.7rem;
+  border: 1px solid transparent;
+  border-radius: 1rem;
+  background: transparent;
+  padding: 0.65rem;
+  text-align: left;
+}
+
+.community-room-button:hover {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+
+.community-room-button-active {
+  border-color: #93c5fd;
+  background: #eff6ff;
+  box-shadow: 0 12px 28px -24px rgba(21, 94, 239, 0.62);
+}
+
+.community-post-card {
+  display: block;
+  border: 1px solid var(--line);
+  border-radius: 1.2rem;
+  background: var(--surface);
+  padding: 1rem;
+  box-shadow: var(--shadow-xs);
+}
+
+.community-post-card:hover,
+.community-post-card-active {
+  border-color: #93c5fd;
+  box-shadow: 0 18px 42px -30px rgba(21, 94, 239, 0.4);
+}
+
+.community-post-card-active {
+  background: #f8fbff;
+}
+
+.community-comment-bubble {
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  background: #f8fafc;
+  padding: 0.7rem 0.8rem;
+}
+
+.community-loading,
+.community-empty {
+  border: 1px dashed #bfdbfe;
+  border-radius: 1.1rem;
+  background: rgba(248, 251, 255, 0.75);
+  padding: 1.25rem;
+  text-align: center;
+}
+
+.community-loading {
+  color: #526783;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.community-guideline-card {
+  border: 1px solid rgba(147, 197, 253, 0.16);
+  border-radius: 1.2rem;
+  background: rgba(255, 255, 255, 0.055);
+  padding: 1.1rem;
+}
+
 .alumni-home-section {
   background:
     radial-gradient(circle at 0% 0%, rgba(21, 94, 239, 0.08), transparent 30rem),
@@ -1461,6 +1663,131 @@ html.dark .surface-card {
     var(--shadow-sm),
     0 0 0 1px rgba(96, 165, 250, 0.035),
     inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
+html.dark .community-page-section {
+  background:
+    radial-gradient(circle at 8% 0%, rgba(59, 130, 246, 0.14), transparent 28rem),
+    radial-gradient(circle at 92% 94%, rgba(249, 115, 22, 0.08), transparent 24rem),
+    linear-gradient(180deg, #07111f 0%, #09182c 58%, #07111f 100%);
+}
+
+html.dark .community-launcher {
+  border-color: rgba(147, 197, 253, 0.24);
+  background: rgba(11, 23, 41, 0.95);
+  color: #f8fafc;
+}
+
+html.dark .community-launcher:hover {
+  border-color: rgba(96, 165, 250, 0.72);
+  color: #bfdbfe;
+}
+
+html.dark .community-panel {
+  border-color: rgba(147, 197, 253, 0.16);
+  background:
+    linear-gradient(145deg, rgba(15, 28, 48, 0.96), rgba(9, 18, 32, 0.92)),
+    #0b1729;
+  box-shadow:
+    0 26px 70px -52px rgba(0, 0, 0, 0.92),
+    inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
+html.dark .community-member-chip {
+  border-color: rgba(147, 197, 253, 0.16);
+  background: rgba(255, 255, 255, 0.055);
+  box-shadow: none;
+}
+
+html.dark .community-notice {
+  border-color: rgba(251, 146, 60, 0.28);
+  background: rgba(124, 45, 18, 0.24);
+  color: #fdba74;
+}
+
+html.dark .community-access-note {
+  border-color: rgba(147, 197, 253, 0.2);
+  background: rgba(96, 165, 250, 0.1);
+  color: #c9d8ea;
+}
+
+html.dark .community-side-note {
+  border-color: rgba(52, 211, 153, 0.2);
+  background: rgba(16, 185, 129, 0.09);
+  color: #a7f3d0;
+}
+
+html.dark .community-reply-note {
+  border-color: rgba(147, 197, 253, 0.16);
+  background: rgba(255, 255, 255, 0.055);
+  color: #bfcee2;
+}
+
+html.dark .community-staff-badge {
+  border-color: rgba(251, 146, 60, 0.28);
+  background: rgba(124, 45, 18, 0.24);
+  color: #fdba74;
+}
+
+html.dark .community-composer {
+  border-color: rgba(147, 197, 253, 0.2);
+  background:
+    linear-gradient(145deg, rgba(37, 99, 235, 0.13), rgba(12, 23, 40, 0.76)),
+    #0b1729;
+}
+
+html.dark .community-input {
+  border-color: rgba(125, 158, 202, 0.24);
+  background: rgba(8, 16, 29, 0.72);
+}
+
+html.dark .community-input::placeholder {
+  color: #90a4bf;
+}
+
+html.dark .community-input:focus {
+  border-color: rgba(96, 165, 250, 0.72);
+  background: rgba(10, 20, 36, 0.94);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.16);
+}
+
+html.dark .community-room-button:hover,
+html.dark .community-room-button-active {
+  border-color: rgba(147, 197, 253, 0.3);
+  background: rgba(96, 165, 250, 0.1);
+  box-shadow: none;
+}
+
+html.dark .community-post-card {
+  background: rgba(8, 16, 29, 0.54);
+  box-shadow: none;
+}
+
+html.dark .community-post-card:hover,
+html.dark .community-post-card-active {
+  border-color: rgba(147, 197, 253, 0.4);
+  background: rgba(96, 165, 250, 0.08);
+  box-shadow: 0 18px 42px -30px rgba(37, 99, 235, 0.38);
+}
+
+html.dark .community-comment-bubble {
+  border-color: rgba(147, 197, 253, 0.14);
+  background: rgba(255, 255, 255, 0.055);
+}
+
+html.dark .community-loading,
+html.dark .community-empty {
+  border-color: rgba(147, 197, 253, 0.24);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+html.dark .community-loading {
+  color: #bfcee2;
+}
+
+html.dark .community-guideline-card {
+  border-color: rgba(147, 197, 253, 0.16);
+  background: rgba(255, 255, 255, 0.055);
 }
 
 html.dark .alumni-home-section {

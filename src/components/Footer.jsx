@@ -22,6 +22,7 @@ const quickLinks = [
   'Curriculum',
   'Alumni',
   'News & Gallery',
+  'Community Hub',
   'Internal Audit',
   'About',
 ]
@@ -43,6 +44,7 @@ const quickLinkHrefs = {
   Curriculum: '/student-portal#curriculum',
   Alumni: '/alumni',
   'News & Gallery': '/gallery',
+  'Community Hub': '/community',
   'Internal Audit': '/internal-audit',
   About: '/about',
 }
