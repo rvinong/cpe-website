@@ -16,7 +16,6 @@ import {
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import PageHero from '../components/PageHero'
 import ProfileAvatar from '../components/ProfileAvatar'
 import Reveal from '../components/Reveal'
 import useAuth from '../context/useAuth'
@@ -503,24 +502,6 @@ function Community() {
   return (
     <>
       <main className="pt-[84px]">
-        <PageHero
-          eyebrow="Public member rooms"
-          title="Community Hub"
-          description="Join topic-based rooms for questions, event discussions, resource requests, and verified organization notices."
-          actions={
-            <>
-              <a href="#rooms" className="primary-button">
-                <MessageCircle size={18} aria-hidden="true" />
-                Browse rooms
-              </a>
-              <Link to="/account" className="secondary-button">
-                <ShieldCheck size={18} aria-hidden="true" />
-                Account access
-              </Link>
-            </>
-          }
-        />
-
         <section id="rooms" className="community-page-section scroll-mt-24 py-14 sm:py-20">
           <div className="section-shell">
             <Reveal className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -779,39 +760,6 @@ function Community() {
           </div>
         </section>
 
-        <section className="bg-navy-950 py-16 sm:py-20">
-          <div className="section-shell">
-            <Reveal className="mx-auto max-w-2xl text-center">
-              <p className="text-xs font-extrabold tracking-[0.2em] text-blue-300 uppercase">
-                Community guidelines
-              </p>
-              <h2 className="mt-3 text-3xl font-black tracking-tight text-white sm:text-4xl">
-                Keep the hub useful for everyone
-              </h2>
-              <p className="mt-4 text-sm leading-7 text-slate-300 sm:text-base">
-                Use the room that matches your topic, share accurate information,
-                and keep personal or sensitive details out of public discussions.
-              </p>
-            </Reveal>
-            <div className="mt-9 grid gap-4 sm:grid-cols-3">
-              {[
-                ['Post with context', 'Clear titles help classmates find answers later.', MessageSquareText],
-                ['Keep it respectful', 'Disagree with ideas without targeting people.', UsersRound],
-                ['Use official pages', 'Check announcements and events for verified details.', ShieldCheck],
-              ].map(([title, description, Icon], index) => (
-                <Reveal key={title} delay={index * 0.06}>
-                  <article className="community-guideline-card h-full">
-                    <span className="grid size-10 place-items-center rounded-xl bg-blue-400/10 text-blue-200">
-                      <Icon size={18} aria-hidden="true" />
-                    </span>
-                    <h3 className="mt-4 text-sm font-extrabold text-white">{title}</h3>
-                    <p className="mt-2 text-xs leading-5 text-slate-400">{description}</p>
-                  </article>
-                </Reveal>
-              ))}
-            </div>
-          </div>
-        </section>
       </main>
     </>
   )
