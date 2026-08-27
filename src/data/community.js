@@ -148,7 +148,7 @@ export const communityStarterThreads = [
     roomId: 'announcements-qa',
     title: 'Clarify announcement details here',
     body:
-      'When an announcement needs extra explanation, students can ask in this room instead of repeating the same question privately.',
+      'When an announcement needs extra explanation, students can ask in this public room and keep the answer available for everyone.',
     authorName: 'Announcement Editor',
     authorRole: 'editor',
     avatarPath: '',
@@ -159,7 +159,7 @@ export const communityStarterThreads = [
       {
         id: 'starter-announcements-clarify-1',
         authorName: 'CpE Member',
-        body: 'This is useful for deadlines and document requirements.',
+        body: 'This public room is useful for deadlines and document requirements.',
         createdAt: 'Preview',
       },
     ],

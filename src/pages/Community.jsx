@@ -504,11 +504,9 @@ function Community() {
     <>
       <main className="pt-[84px]">
         <PageHero
-          eyebrow="Member conversations"
+          eyebrow="Public member rooms"
           title="Community Hub"
-          description="Find the right room for questions, event conversations, resource requests, and verified organization notices."
-          icon={MessageSquareText}
-          accentIcon={UsersRound}
+          description="Join topic-based rooms for questions, event discussions, resource requests, and verified organization notices."
           actions={
             <>
               <a href="#rooms" className="primary-button">
