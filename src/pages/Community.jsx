@@ -39,6 +39,7 @@ import {
   getFriendlyCommunityChatError,
   getStarterMessages,
   maxCommunityMessageLength,
+  notifyCommunityMentions,
   subscribeToCommunityMessages,
 } from '../lib/communityChat'
 import { getDisplayName } from '../lib/accountProfile'
@@ -50,6 +51,16 @@ const roomIcons = {
   'announcements-qa': MessageSquareText,
   'resource-requests': ShieldCheck,
   'officer-notices': BadgeCheck,
+}
+
+function getInitialRoomId() {
+  const fallbackRoomId = communityRooms[0]?.id || ''
+  if (typeof window === 'undefined') return fallbackRoomId
+
+  const requestedRoomId = new URLSearchParams(window.location.search).get('room')
+  return communityRooms.some((room) => room.id === requestedRoomId)
+    ? requestedRoomId
+    : fallbackRoomId
 }
 
 function roleLabel(role) {
@@ -100,6 +111,16 @@ function getMentionSuggestions(members, query, currentUserId) {
 
 function escapeRegExp(value) {
   return value.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')
+}
+
+function hasMentionToken(value, memberName) {
+  const name = String(memberName || '').trim()
+  if (!name) return false
+
+  return new RegExp(
+    '(^|\\s)@' + escapeRegExp(name) + '(?=\\s|$|[.,!?])',
+    'iu',
+  ).test(String(value || ''))
 }
 
 function renderMessageBody(body, members) {
@@ -177,6 +198,7 @@ function MessageComposer({
   replyingTo,
 }) {
   const [body, setBody] = useState('')
+  const [selectedMentions, setSelectedMentions] = useState([])
   const [mention, setMention] = useState(null)
   const [activeMentionIndex, setActiveMentionIndex] = useState(0)
   const inputRef = useRef(null)
@@ -202,9 +224,14 @@ function MessageComposer({
     event.preventDefault()
     if (!canSubmit) return
 
-    const didSubmit = await onSubmit(body, replyingTo?.id || null)
+    const didSubmit = await onSubmit(
+      body,
+      replyingTo?.id || null,
+      selectedMentions.map((member) => member.profileId),
+    )
     if (didSubmit) {
       setBody('')
+      setSelectedMentions([])
       setMention(null)
       setActiveMentionIndex(0)
       onCancelReply?.()
@@ -222,6 +249,14 @@ function MessageComposer({
     const nextCursorPosition = beforeMention.length + mentionText.length
 
     setBody(nextBody)
+    setSelectedMentions((current) => [
+      ...current.filter(
+        (selectedMember) =>
+          selectedMember.profileId !== member.profileId &&
+          hasMentionToken(nextBody, selectedMember.fullName),
+      ),
+      member,
+    ])
     setMention(null)
     setActiveMentionIndex(0)
     window.requestAnimationFrame(() => {
@@ -307,6 +342,11 @@ function MessageComposer({
             const cursorPosition =
               event.target.selectionStart ?? nextBody.length
             setBody(nextBody)
+            setSelectedMentions((current) =>
+              current.filter((member) =>
+                hasMentionToken(nextBody, member.fullName),
+              ),
+            )
             setMention(findMention(nextBody, cursorPosition))
             setActiveMentionIndex(0)
           }}
@@ -386,7 +426,10 @@ function MessageComposer({
         </button>
       </div>
       <div className="community-chat-composer-meta">
-        <span>Enter to send. Shift + Enter for a new line.</span>
+        <span>
+          Enter to send. Shift + Enter for a new line. Mentioned members may
+          receive an email.
+        </span>
         <span>{maxCommunityMessageLength - body.length}</span>
       </div>
       {error && <p className="community-form-error">{error}</p>}
@@ -444,6 +487,7 @@ function MessageItem({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: shouldReduceMotion ? 0.01 : 0.2 }}
       className={`community-message-row ${isOwnMessage ? 'community-message-row-own' : ''}`}
+      id={`community-message-${message.id}`}
       data-message-id={message.id}
     >
       <ProfileAvatar
@@ -547,7 +591,7 @@ function Community() {
   const { user, profile, isApprovedMember, canAccessAdmin, isConfigured } = useAuth()
   const { shouldReduceMotion } = useMotionPreferences()
   const [rooms, setRooms] = useState(communityRooms)
-  const [selectedRoomId, setSelectedRoomId] = useState(communityRooms[0]?.id || '')
+  const [selectedRoomId, setSelectedRoomId] = useState(getInitialRoomId)
   const [messages, setMessages] = useState(
     getStarterMessages(communityRooms[0]?.id || ''),
   )
@@ -712,7 +756,11 @@ function Community() {
     messageList.scrollTop = messageList.scrollHeight
   }, [messages, searchTerm, selectedRoom?.id])
 
-  const handleCreateMessage = async (body, replyToMessageId) => {
+  const handleCreateMessage = async (
+    body,
+    replyToMessageId,
+    mentionedProfileIds = [],
+  ) => {
     if (!canSend || !selectedRoom?.id) return false
     setChatError('')
     setIsCreatingMessage(true)
@@ -723,6 +771,7 @@ function Community() {
         selectedRoom.id,
         body,
         replyToMessageId,
+        mentionedProfileIds,
       )
     } catch (error) {
       setIsCreatingMessage(false)
@@ -747,6 +796,22 @@ function Community() {
         ? current
         : [...current, data],
     )
+
+    if (mentionedProfileIds.length > 0) {
+      try {
+        const notificationResult = await notifyCommunityMentions(data.id)
+        if (notificationResult.error) {
+          setChatError(
+            'Message sent, but the mention email could not be delivered.',
+          )
+        }
+      } catch {
+        setChatError(
+          'Message sent, but the mention email could not be delivered.',
+        )
+      }
+    }
+
     setReplyingTo(null)
     return true
   }

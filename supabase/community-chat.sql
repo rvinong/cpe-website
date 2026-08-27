@@ -29,6 +29,48 @@ create index if not exists community_messages_reply_target_idx
   on public.community_messages (reply_to_message_id)
   where reply_to_message_id is not null;
 
+create table if not exists public.community_message_mentions (
+  id uuid primary key default gen_random_uuid(),
+  message_id uuid not null
+    references public.community_messages(id) on delete cascade,
+  mentioned_profile_id uuid not null
+    references public.profiles(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  unique (message_id, mentioned_profile_id)
+);
+
+create index if not exists community_message_mentions_profile_idx
+  on public.community_message_mentions (mentioned_profile_id, created_at desc);
+
+create index if not exists community_message_mentions_message_idx
+  on public.community_message_mentions (message_id);
+
+create table if not exists public.community_mention_notification_log (
+  id bigint generated always as identity primary key,
+  message_id uuid not null
+    references public.community_messages(id) on delete cascade,
+  mentioned_profile_id uuid not null
+    references public.profiles(id) on delete cascade,
+  status text not null default 'pending'
+    check (status in ('pending', 'sent', 'failed')),
+  attempts integer not null default 0
+    check (attempts >= 0),
+  last_error text,
+  sent_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (message_id, mentioned_profile_id)
+);
+
+create index if not exists community_mention_notification_log_status_idx
+  on public.community_mention_notification_log (status, created_at);
+
+drop trigger if exists set_community_mention_notification_log_updated_at
+  on public.community_mention_notification_log;
+create trigger set_community_mention_notification_log_updated_at
+  before update on public.community_mention_notification_log
+  for each row execute procedure public.set_updated_at();
+
 drop trigger if exists set_community_messages_updated_at
   on public.community_messages;
 create trigger set_community_messages_updated_at
@@ -36,11 +78,20 @@ create trigger set_community_messages_updated_at
   for each row execute procedure public.set_updated_at();
 
 alter table public.community_messages enable row level security;
+alter table public.community_message_mentions enable row level security;
+alter table public.community_mention_notification_log enable row level security;
 
 revoke all on table public.community_messages
   from public, anon, authenticated;
 grant select on table public.community_messages
   to authenticated;
+
+-- Mention identities and delivery state are accessed only by protected
+-- functions and the notification Edge Function using its server key.
+revoke all on table public.community_message_mentions
+  from public, anon, authenticated;
+revoke all on table public.community_mention_notification_log
+  from public, anon, authenticated;
 
 drop policy if exists "Authenticated users can receive room messages"
   on public.community_messages;
@@ -209,12 +260,14 @@ begin
 end;
 $$;
 
+drop function if exists public.create_community_message(text, text, uuid, uuid[]);
 drop function if exists public.create_community_message(text, text, uuid);
 drop function if exists public.create_community_message(text, text);
 create or replace function public.create_community_message(
   selected_room_id text,
   message_body text,
-  selected_reply_to_message_id uuid
+  selected_reply_to_message_id uuid,
+  selected_mentioned_profile_ids uuid[]
 )
 returns table (
   id uuid,
@@ -242,6 +295,7 @@ declare
   inserted_message_id uuid;
   room_is_staff_only boolean;
   reply_room_id text;
+  requested_mention_count integer;
 begin
   if auth.uid() is null then
     raise exception 'Authentication required';
@@ -277,6 +331,27 @@ begin
     raise exception 'Message must be 1000 characters or fewer';
   end if;
 
+  requested_mention_count := cardinality(
+    coalesce(selected_mentioned_profile_ids, '{}'::uuid[])
+  );
+
+  if requested_mention_count > 20 then
+    raise exception 'A message can mention at most 20 members';
+  end if;
+
+  if exists (
+    select 1
+    from unnest(
+      coalesce(selected_mentioned_profile_ids, '{}'::uuid[])
+    ) as requested(profile_id)
+    left join public.profiles as mentioned_profiles
+      on mentioned_profiles.id = requested.profile_id
+    where mentioned_profiles.id is null
+      or mentioned_profiles.status <> 'approved'
+  ) then
+    raise exception 'Mentions must target approved members';
+  end if;
+
   if selected_reply_to_message_id is not null then
     select community_messages.room_id
     into reply_room_id
@@ -310,10 +385,62 @@ begin
   )
   returning community_messages.id into inserted_message_id;
 
+  insert into public.community_message_mentions (
+    message_id,
+    mentioned_profile_id
+  )
+  select
+    inserted_message_id,
+    requested.profile_id
+  from unnest(
+    coalesce(selected_mentioned_profile_ids, '{}'::uuid[])
+  ) as requested(profile_id)
+  where requested.profile_id <> auth.uid()
+  on conflict (message_id, mentioned_profile_id) do nothing;
+
   return query
   select message_row.*
   from public.list_community_messages(selected_room_id) as message_row
   where message_row.id = inserted_message_id;
+end;
+$$;
+
+-- Keep the original three-argument call working for older clients.
+create or replace function public.create_community_message(
+  selected_room_id text,
+  message_body text,
+  selected_reply_to_message_id uuid
+)
+returns table (
+  id uuid,
+  room_id text,
+  profile_id uuid,
+  full_name text,
+  avatar_path text,
+  role public.app_role,
+  body text,
+  reply_to_message_id uuid,
+  reply_to_full_name text,
+  reply_to_avatar_path text,
+  reply_to_body text,
+  reply_to_created_at timestamptz,
+  created_at timestamptz,
+  updated_at timestamptz,
+  can_delete boolean
+)
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+begin
+  return query
+  select message_row.*
+  from public.create_community_message(
+    selected_room_id,
+    message_body,
+    selected_reply_to_message_id,
+    '{}'::uuid[]
+  ) as message_row;
 end;
 $$;
 
@@ -349,7 +476,8 @@ begin
   from public.create_community_message(
     selected_room_id,
     message_body,
-    null::uuid
+    null::uuid,
+    '{}'::uuid[]
   ) as message_row;
 end;
 $$;
@@ -401,6 +529,8 @@ revoke all on function public.list_community_members()
   from public, anon;
 revoke all on function public.create_community_message(text, text, uuid)
   from public, anon;
+revoke all on function public.create_community_message(text, text, uuid, uuid[])
+  from public, anon;
 revoke all on function public.create_community_message(text, text)
   from public, anon;
 revoke all on function public.delete_community_message(uuid)
@@ -411,6 +541,8 @@ grant execute on function public.list_community_messages(text)
 grant execute on function public.list_community_members()
   to authenticated;
 grant execute on function public.create_community_message(text, text, uuid)
+  to authenticated;
+grant execute on function public.create_community_message(text, text, uuid, uuid[])
   to authenticated;
 grant execute on function public.create_community_message(text, text)
   to authenticated;

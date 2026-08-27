@@ -165,7 +165,23 @@ assignment workflow. Administrators can assign and manage editor tasks, while
 editors can update the status of work assigned to them. Refresh `/admin`, then
 open **Team**.
 
-## 13. Enable email notifications
+## 13. Enable community chat and mention notifications
+
+Run:
+
+```text
+supabase/community.sql
+supabase/community-chat.sql
+```
+
+The chat tables keep member mentions as profile IDs rather than email
+addresses. Approved members can read and send messages; pending accounts stay
+locked out of the room messages. Deploy the
+`send-community-mention-notification` Edge Function with JWT verification
+enabled. It uses the same Resend secrets listed below and sends one email to
+each approved mentioned member who has email notifications enabled.
+
+## 14. Enable email notifications
 
 Run:
 
@@ -216,3 +232,4 @@ Implemented:
 - Staff directory with private profile photos
 - Administrator task assignment and editor task status updates
 - Opt-in email notifications for newly published news and announcements
+- Approved-member community chat with profile-ID mention notifications

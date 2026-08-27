@@ -2,6 +2,7 @@ import { communityStarterMessages } from '../data/communityChat'
 import { isSupabaseConfigured, supabase } from './supabase'
 
 export const maxCommunityMessageLength = 1000
+export const maxCommunityMentionCount = 20
 
 const dateFormatter = new Intl.DateTimeFormat('en-US', {
   month: 'short',
@@ -140,10 +141,32 @@ function validateMessage(value) {
   return { cleanValue, error: null }
 }
 
-export async function createCommunityMessage(roomId, body, replyToMessageId = null) {
+export async function createCommunityMessage(
+  roomId,
+  body,
+  replyToMessageId = null,
+  mentionedProfileIds = [],
+) {
   const messageResult = validateMessage(body)
 
   if (messageResult instanceof Error) return { data: null, error: messageResult }
+
+  const mentionIds = [
+    ...new Set(
+      (Array.isArray(mentionedProfileIds) ? mentionedProfileIds : []).filter(
+        Boolean,
+      ),
+    ),
+  ]
+
+  if (mentionIds.length > maxCommunityMentionCount) {
+    return {
+      data: null,
+      error: new Error(
+        `A message can mention at most ${maxCommunityMentionCount} members.`,
+      ),
+    }
+  }
 
   if (!supabase) {
     return {
@@ -156,6 +179,7 @@ export async function createCommunityMessage(roomId, body, replyToMessageId = nu
     selected_room_id: roomId,
     message_body: messageResult.cleanValue,
     selected_reply_to_message_id: replyToMessageId,
+    selected_mentioned_profile_ids: mentionIds,
   })
   const row = Array.isArray(result.data) ? result.data[0] : result.data
 
@@ -163,6 +187,26 @@ export async function createCommunityMessage(roomId, body, replyToMessageId = nu
     data: row ? normalizeCommunityMessage(row) : null,
     error: result.error,
   }
+}
+
+export async function notifyCommunityMentions(messageId) {
+  if (!supabase || !messageId) {
+    return { data: null, error: null }
+  }
+
+  const result = await supabase.functions.invoke(
+    'send-community-mention-notification',
+    {
+      body: { messageId },
+    },
+  )
+
+  if (result.error) return result
+  if (result.data?.error) {
+    return { data: null, error: new Error(result.data.error) }
+  }
+
+  return result
 }
 
 export async function deleteCommunityMessage(messageId) {
