@@ -1106,18 +1106,59 @@ a {
   overflow-wrap: anywhere;
 }
 
+.community-message-reply-quote {
+  margin: -0.1rem -0.15rem 0.55rem;
+  border-left: 3px solid #60a5fa;
+  border-radius: 0.35rem;
+  background: rgba(219, 234, 254, 0.65);
+  padding: 0.38rem 0.55rem;
+}
+
+.community-message-row-own .community-message-reply-quote {
+  border-left-color: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.community-message-row-own .community-message-reply-quote span,
+.community-message-row-own .community-message-reply-quote p {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.community-message-reply-quote p {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.community-message-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 0.3rem;
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.community-message-row-own .community-message-actions {
+  justify-content: flex-end;
+}
+
+.community-message-reply,
 .community-message-delete {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  margin-top: 0.3rem;
   border: 0;
   background: transparent;
-  color: #94a3b8;
+  color: #6b7f98;
   font-size: 0.62rem;
   font-weight: 800;
-  opacity: 0;
-  transition: color var(--transition-base), opacity var(--transition-base);
+  transition: color var(--transition-base);
+}
+
+.community-message-reply:hover,
+.community-message-reply:focus-visible {
+  color: #155eef;
 }
 
 .community-message-delete:hover,
@@ -1125,8 +1166,8 @@ a {
   color: #dc2626;
 }
 
-.community-message-row:hover .community-message-delete,
-.community-message-row:focus-within .community-message-delete {
+.community-message-row:hover .community-message-actions,
+.community-message-row:focus-within .community-message-actions {
   opacity: 1;
 }
 
@@ -1138,6 +1179,69 @@ a {
 
 .community-chat-composer {
   width: 100%;
+}
+
+.community-reply-context {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
+  border: 1px solid #bfdbfe;
+  border-left: 3px solid #155eef;
+  border-radius: 0.8rem;
+  background: #eff6ff;
+  padding: 0.55rem 0.65rem;
+}
+
+.community-reply-context-copy {
+  min-width: 0;
+}
+
+.community-reply-context-label,
+.community-message-reply-quote span {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #155eef;
+  font-size: 0.64rem;
+  font-weight: 900;
+}
+
+.community-reply-context-copy p,
+.community-message-reply-quote p {
+  display: -webkit-box;
+  overflow: hidden;
+  margin-top: 0.2rem;
+  color: #526783;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.4;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.community-reply-context-close {
+  display: grid;
+  width: 1.8rem;
+  height: 1.8rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid #bfdbfe;
+  border-radius: 0.6rem;
+  background: #ffffff;
+  color: #6b7f98;
+  transition:
+    border-color var(--transition-base),
+    background-color var(--transition-base),
+    color var(--transition-base);
+}
+
+.community-reply-context-close:hover,
+.community-reply-context-close:focus-visible {
+  border-color: #60a5fa;
+  background: #dbeafe;
+  color: #155eef;
 }
 
 .community-chat-input-wrap {
@@ -2761,6 +2865,28 @@ html.dark .community-message-row-own .community-message-bubble {
   color: #ffffff;
 }
 
+html.dark .community-message-reply-quote {
+  border-color: #93c5fd;
+  background: rgba(8, 16, 29, 0.28);
+}
+
+html.dark .community-message-reply-quote span {
+  color: #bfdbfe;
+}
+
+html.dark .community-message-reply-quote p {
+  color: #d7e3f0;
+}
+
+html.dark .community-message-reply {
+  color: #9fb1c8;
+}
+
+html.dark .community-message-reply:hover,
+html.dark .community-message-reply:focus-visible {
+  color: #bfdbfe;
+}
+
 html.dark .community-message-delete {
   color: #8296b1;
 }
@@ -2784,6 +2910,33 @@ html.dark .community-chat-input:focus {
   border-color: rgba(96, 165, 250, 0.72);
   background: rgba(10, 20, 36, 0.94);
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.16);
+}
+
+html.dark .community-reply-context {
+  border-color: rgba(147, 197, 253, 0.24);
+  border-left-color: #60a5fa;
+  background: rgba(96, 165, 250, 0.1);
+}
+
+html.dark .community-reply-context-label {
+  color: #bfdbfe;
+}
+
+html.dark .community-reply-context-copy p {
+  color: #c9d8ea;
+}
+
+html.dark .community-reply-context-close {
+  border-color: rgba(147, 197, 253, 0.22);
+  background: rgba(255, 255, 255, 0.07);
+  color: #9fb1c8;
+}
+
+html.dark .community-reply-context-close:hover,
+html.dark .community-reply-context-close:focus-visible {
+  border-color: rgba(147, 197, 253, 0.5);
+  background: rgba(96, 165, 250, 0.18);
+  color: #bfdbfe;
 }
 
 html.dark .community-chat-send {
@@ -3788,7 +3941,7 @@ html.dark .news-detail-footer {
     max-width: 96%;
   }
 
-  .community-message-delete {
+  .community-message-actions {
     opacity: 1;
   }
 

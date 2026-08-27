@@ -41,6 +41,9 @@ export function getFriendlyCommunityChatError(error) {
 }
 
 export function normalizeCommunityMessage(row) {
+  const replyToMessageId =
+    row.reply_to_message_id || row.replyToMessageId || null
+
   return {
     id: row.id,
     roomId: row.room_id || row.roomId,
@@ -53,6 +56,21 @@ export function normalizeCommunityMessage(row) {
     createdAt: row.created_at || row.createdAt || '',
     updatedAt: row.updated_at || row.updatedAt || row.created_at || '',
     date: formatDate(row.created_at || row.createdAt),
+    replyToMessageId,
+    replyTo: replyToMessageId
+      ? {
+          id: replyToMessageId,
+          fullName:
+            row.reply_to_full_name || row.replyToFullName || 'Member',
+          avatarPath: row.reply_to_avatar_path || row.replyToAvatarPath || '',
+          body:
+            row.reply_to_body ||
+            row.replyToBody ||
+            'Original message unavailable.',
+          createdAt:
+            row.reply_to_created_at || row.replyToCreatedAt || '',
+        }
+      : null,
     canDelete: Boolean(row.can_delete ?? row.canDelete),
   }
 }
@@ -91,7 +109,7 @@ function validateMessage(value) {
   return { cleanValue, error: null }
 }
 
-export async function createCommunityMessage(roomId, body) {
+export async function createCommunityMessage(roomId, body, replyToMessageId = null) {
   const messageResult = validateMessage(body)
 
   if (messageResult instanceof Error) return { data: null, error: messageResult }
@@ -106,6 +124,7 @@ export async function createCommunityMessage(roomId, body) {
   const result = await supabase.rpc('create_community_message', {
     selected_room_id: roomId,
     message_body: messageResult.cleanValue,
+    selected_reply_to_message_id: replyToMessageId,
   })
   const row = Array.isArray(result.data) ? result.data[0] : result.data
 

@@ -1,7 +1,7 @@
 import { motion as Motion } from 'framer-motion'
 import {
-  ArrowRight,
   ArrowLeft,
+  ArrowRight,
   BadgeCheck,
   BookOpen,
   CalendarDays,
@@ -12,11 +12,13 @@ import {
   MessageCircle,
   MessageSquareText,
   Radio,
+  Reply,
   Search,
   Send,
   ShieldCheck,
   Trash2,
   UsersRound,
+  X,
 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -83,16 +85,31 @@ function RoomButton({ active, onClick, room }) {
   )
 }
 
-function MessageComposer({ disabled, error, isSubmitting, onSubmit }) {
+function MessageComposer({
+  disabled,
+  error,
+  isSubmitting,
+  onCancelReply,
+  onSubmit,
+  replyingTo,
+}) {
   const [body, setBody] = useState('')
+  const inputRef = useRef(null)
   const canSubmit = Boolean(body.trim()) && !disabled && !isSubmitting
+
+  useEffect(() => {
+    if (replyingTo) inputRef.current?.focus()
+  }, [replyingTo])
 
   const handleSubmit = async (event) => {
     event.preventDefault()
     if (!canSubmit) return
 
-    const didSubmit = await onSubmit(body)
-    if (didSubmit) setBody('')
+    const didSubmit = await onSubmit(body, replyingTo?.id || null)
+    if (didSubmit) {
+      setBody('')
+      onCancelReply?.()
+    }
   }
 
   const handleKeyDown = (event) => {
@@ -104,18 +121,38 @@ function MessageComposer({ disabled, error, isSubmitting, onSubmit }) {
 
   return (
     <form onSubmit={handleSubmit} className="community-chat-composer">
+      {replyingTo && (
+        <div className="community-reply-context">
+          <div className="community-reply-context-copy">
+            <span className="community-reply-context-label">
+              <Reply size={13} aria-hidden="true" />
+              Replying to {replyingTo.fullName}
+            </span>
+            <p>{replyingTo.body}</p>
+          </div>
+          <button
+            type="button"
+            className="community-reply-context-close"
+            onClick={onCancelReply}
+            aria-label="Cancel reply"
+          >
+            <X size={15} aria-hidden="true" />
+          </button>
+        </div>
+      )}
       <label className="sr-only" htmlFor="community-message-body">
         Write a message to this room
       </label>
       <div className="community-chat-input-wrap">
         <textarea
+          ref={inputRef}
           id="community-message-body"
           value={body}
           onChange={(event) => setBody(event.target.value)}
           onKeyDown={handleKeyDown}
           maxLength={maxCommunityMessageLength}
           rows="1"
-          placeholder="Message this room..."
+          placeholder={replyingTo ? 'Write your reply...' : 'Message this room...'}
           disabled={disabled || isSubmitting}
           className="community-input community-chat-input resize-none"
         />
@@ -137,7 +174,14 @@ function MessageComposer({ disabled, error, isSubmitting, onSubmit }) {
   )
 }
 
-function MessageItem({ currentUserId, message, onDelete, shouldReduceMotion }) {
+function MessageItem({
+  canReply,
+  currentUserId,
+  message,
+  onDelete,
+  onReply,
+  shouldReduceMotion,
+}) {
   const isOwnMessage = Boolean(currentUserId && message.profileId === currentUserId)
 
   return (
@@ -146,6 +190,7 @@ function MessageItem({ currentUserId, message, onDelete, shouldReduceMotion }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: shouldReduceMotion ? 0.01 : 0.2 }}
       className={`community-message-row ${isOwnMessage ? 'community-message-row-own' : ''}`}
+      data-message-id={message.id}
     >
       <ProfileAvatar
         path={message.avatarPath}
@@ -160,17 +205,40 @@ function MessageItem({ currentUserId, message, onDelete, shouldReduceMotion }) {
           <span className="community-message-time">{message.date || 'Recently'}</span>
         </div>
         <div className="community-message-bubble">
+          {message.replyTo && (
+            <div className="community-message-reply-quote">
+              <span>
+                <Reply size={12} aria-hidden="true" />
+                {message.replyTo.fullName}
+              </span>
+              <p>{message.replyTo.body}</p>
+            </div>
+          )}
           <p>{message.body}</p>
         </div>
-        {(message.canDelete || isOwnMessage) && (
-          <button
-            type="button"
-            className="community-message-delete"
-            onClick={() => onDelete(message)}
-          >
-            <Trash2 size={12} aria-hidden="true" />
-            Remove
-          </button>
+        {(canReply || message.canDelete || isOwnMessage) && (
+          <div className="community-message-actions">
+            {canReply && (
+              <button
+                type="button"
+                className="community-message-reply"
+                onClick={() => onReply(message)}
+              >
+                <Reply size={12} aria-hidden="true" />
+                Reply
+              </button>
+            )}
+            {(message.canDelete || isOwnMessage) && (
+              <button
+                type="button"
+                className="community-message-delete"
+                onClick={() => onDelete(message)}
+              >
+                <Trash2 size={12} aria-hidden="true" />
+                Remove
+              </button>
+            )}
+          </div>
         )}
       </div>
     </Motion.article>
@@ -231,6 +299,7 @@ function Community() {
   const [communityError, setCommunityError] = useState('')
   const [chatError, setChatError] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
+  const [replyingTo, setReplyingTo] = useState(null)
   const messageListRef = useRef(null)
 
   const selectedRoom = useMemo(
@@ -264,6 +333,7 @@ function Community() {
     setLoadedMessagesRoomId('')
     setChatError('')
     setSearchTerm('')
+    setReplyingTo(null)
   }
 
   useEffect(() => {
@@ -347,14 +417,18 @@ function Community() {
     messageList.scrollTop = messageList.scrollHeight
   }, [messages, searchTerm, selectedRoom?.id])
 
-  const handleCreateMessage = async (body) => {
+  const handleCreateMessage = async (body, replyToMessageId) => {
     if (!canSend || !selectedRoom?.id) return false
     setChatError('')
     setIsCreatingMessage(true)
 
     let result
     try {
-      result = await createCommunityMessage(selectedRoom.id, body)
+      result = await createCommunityMessage(
+        selectedRoom.id,
+        body,
+        replyToMessageId,
+      )
     } catch (error) {
       setIsCreatingMessage(false)
       setChatError(getFriendlyCommunityChatError(error))
@@ -378,6 +452,7 @@ function Community() {
         ? current
         : [...current, data],
     )
+    setReplyingTo(null)
     return true
   }
 
@@ -395,6 +470,7 @@ function Community() {
       setChatError(getFriendlyCommunityChatError(error))
       return
     }
+    if (replyingTo?.id === message.id) setReplyingTo(null)
     setMessages((current) => current.filter((item) => item.id !== message.id))
   }
 
@@ -550,9 +626,11 @@ function Community() {
                       visibleMessages.map((message) => (
                         <MessageItem
                           key={message.id}
+                          canReply={canSend && isLiveChat}
                           currentUserId={user?.id}
                           message={message}
                           onDelete={handleDeleteMessage}
+                          onReply={setReplyingTo}
                           shouldReduceMotion={shouldReduceMotion}
                         />
                       ))
@@ -565,7 +643,9 @@ function Community() {
                         key={selectedRoom?.id}
                         error={chatError}
                         isSubmitting={isCreatingMessage}
+                        onCancelReply={() => setReplyingTo(null)}
                         onSubmit={handleCreateMessage}
+                        replyingTo={replyingTo}
                       />
                     ) : (
                       <div className="community-chat-access-note">

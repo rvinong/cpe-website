@@ -7,11 +7,16 @@ create table if not exists public.community_messages (
   room_id text not null references public.community_rooms(id) on delete restrict,
   user_id uuid not null references public.profiles(id) on delete cascade,
   body text not null check (char_length(trim(body)) between 1 and 1000),
+  reply_to_message_id uuid references public.community_messages(id) on delete set null,
   deleted_at timestamptz,
   deleted_by uuid references public.profiles(id) on delete set null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.community_messages
+  add column if not exists reply_to_message_id uuid
+  references public.community_messages(id) on delete set null;
 
 create index if not exists community_messages_room_order_idx
   on public.community_messages (room_id, created_at, id)
@@ -19,6 +24,10 @@ create index if not exists community_messages_room_order_idx
 
 create index if not exists community_messages_user_idx
   on public.community_messages (user_id);
+
+create index if not exists community_messages_reply_target_idx
+  on public.community_messages (reply_to_message_id)
+  where reply_to_message_id is not null;
 
 drop trigger if exists set_community_messages_updated_at
   on public.community_messages;
@@ -61,6 +70,11 @@ returns table (
   avatar_path text,
   role public.app_role,
   body text,
+  reply_to_message_id uuid,
+  reply_to_full_name text,
+  reply_to_avatar_path text,
+  reply_to_body text,
+  reply_to_created_at timestamptz,
   created_at timestamptz,
   updated_at timestamptz,
   can_delete boolean
@@ -83,6 +97,21 @@ begin
     profiles.avatar_path,
     profiles.role,
     community_messages.body,
+    community_messages.reply_to_message_id,
+    case
+      when reply_profiles.id is not null then coalesce(
+        nullif(trim(reply_profiles.nickname), ''),
+        nullif(trim(reply_profiles.full_name), ''),
+        'Member'
+      )
+    end as reply_to_full_name,
+    reply_profiles.avatar_path as reply_to_avatar_path,
+    case
+      when reply_profiles.id is not null then reply_target.body
+    end as reply_to_body,
+    case
+      when reply_profiles.id is not null then reply_target.created_at
+    end as reply_to_created_at,
     community_messages.created_at,
     community_messages.updated_at,
     (
@@ -94,6 +123,12 @@ begin
     on community_rooms.id = community_messages.room_id
   join public.profiles
     on profiles.id = community_messages.user_id
+  left join public.community_messages as reply_target
+    on reply_target.id = community_messages.reply_to_message_id
+    and reply_target.deleted_at is null
+  left join public.profiles as reply_profiles
+    on reply_profiles.id = reply_target.user_id
+    and reply_profiles.status = 'approved'
   where community_messages.room_id = selected_room_id
     and community_rooms.is_active
     and community_messages.deleted_at is null
@@ -103,10 +138,12 @@ begin
 end;
 $$;
 
+drop function if exists public.create_community_message(text, text, uuid);
 drop function if exists public.create_community_message(text, text);
 create or replace function public.create_community_message(
   selected_room_id text,
-  message_body text
+  message_body text,
+  selected_reply_to_message_id uuid
 )
 returns table (
   id uuid,
@@ -116,6 +153,11 @@ returns table (
   avatar_path text,
   role public.app_role,
   body text,
+  reply_to_message_id uuid,
+  reply_to_full_name text,
+  reply_to_avatar_path text,
+  reply_to_body text,
+  reply_to_created_at timestamptz,
   created_at timestamptz,
   updated_at timestamptz,
   can_delete boolean
@@ -128,6 +170,7 @@ declare
   clean_body text;
   inserted_message_id uuid;
   room_is_staff_only boolean;
+  reply_room_id text;
 begin
   if auth.uid() is null then
     raise exception 'Authentication required';
@@ -163,14 +206,80 @@ begin
     raise exception 'Message must be 1000 characters or fewer';
   end if;
 
-  insert into public.community_messages (room_id, user_id, body)
-  values (selected_room_id, auth.uid(), clean_body)
+  if selected_reply_to_message_id is not null then
+    select community_messages.room_id
+    into reply_room_id
+    from public.community_messages
+    join public.profiles
+      on profiles.id = community_messages.user_id
+      and profiles.status = 'approved'
+    where community_messages.id = selected_reply_to_message_id
+      and community_messages.deleted_at is null;
+
+    if reply_room_id is null then
+      raise exception 'The message you are replying to is no longer available';
+    end if;
+
+    if reply_room_id <> selected_room_id then
+      raise exception 'You can only reply to messages in this room';
+    end if;
+  end if;
+
+  insert into public.community_messages (
+    room_id,
+    user_id,
+    body,
+    reply_to_message_id
+  )
+  values (
+    selected_room_id,
+    auth.uid(),
+    clean_body,
+    selected_reply_to_message_id
+  )
   returning community_messages.id into inserted_message_id;
 
   return query
   select message_row.*
   from public.list_community_messages(selected_room_id) as message_row
   where message_row.id = inserted_message_id;
+end;
+$$;
+
+-- Keep the original two-argument call working for older clients.
+create or replace function public.create_community_message(
+  selected_room_id text,
+  message_body text
+)
+returns table (
+  id uuid,
+  room_id text,
+  profile_id uuid,
+  full_name text,
+  avatar_path text,
+  role public.app_role,
+  body text,
+  reply_to_message_id uuid,
+  reply_to_full_name text,
+  reply_to_avatar_path text,
+  reply_to_body text,
+  reply_to_created_at timestamptz,
+  created_at timestamptz,
+  updated_at timestamptz,
+  can_delete boolean
+)
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+begin
+  return query
+  select message_row.*
+  from public.create_community_message(
+    selected_room_id,
+    message_body,
+    null::uuid
+  ) as message_row;
 end;
 $$;
 
@@ -217,6 +326,8 @@ $$;
 
 revoke all on function public.list_community_messages(text)
   from public;
+revoke all on function public.create_community_message(text, text, uuid)
+  from public, anon;
 revoke all on function public.create_community_message(text, text)
   from public, anon;
 revoke all on function public.delete_community_message(uuid)
@@ -224,6 +335,8 @@ revoke all on function public.delete_community_message(uuid)
 
 grant execute on function public.list_community_messages(text)
   to anon, authenticated;
+grant execute on function public.create_community_message(text, text, uuid)
+  to authenticated;
 grant execute on function public.create_community_message(text, text)
   to authenticated;
 grant execute on function public.delete_community_message(uuid)
