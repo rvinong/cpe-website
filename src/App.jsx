@@ -120,6 +120,7 @@ function App() {
   const { isCompactMotion, shouldReduceMotion } = useMotionPreferences()
   const routeMotion = getRouteMotion(isCompactMotion, shouldReduceMotion)
   const isAdminRoute = location.pathname === '/admin'
+  const isCommunityRoute = location.pathname === '/community'
 
   return (
     <>
@@ -170,8 +171,8 @@ function App() {
               </Suspense>
             </Motion.div>
           </AnimatePresence>
-          <Footer />
-          <CommunityLauncher />
+          {!isCommunityRoute && <Footer />}
+          {!isCommunityRoute && <CommunityLauncher />}
         </>
       )}
     </>

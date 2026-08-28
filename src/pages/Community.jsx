@@ -543,9 +543,13 @@ function MessageItem({
   )
 }
 
-function CommunityRoomInfo({ canSend, canViewMessages, room }) {
+function CommunityRoomInfo({ canSend, canViewMessages, className = '', room }) {
   return (
-    <aside className="community-room-info" aria-label="Room information">
+    <aside
+      id="community-room-info"
+      className={`community-room-info ${className}`.trim()}
+      aria-label="Room information"
+    >
       <div className="community-room-info-heading">
         <span className="community-room-info-icon">
           <Info size={17} aria-hidden="true" />
@@ -603,6 +607,7 @@ function Community() {
   const [members, setMembers] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
   const [replyingTo, setReplyingTo] = useState(null)
+  const [isRoomInfoOpen, setIsRoomInfoOpen] = useState(false)
   const messageListRef = useRef(null)
 
   const selectedRoom = useMemo(
@@ -643,6 +648,7 @@ function Community() {
     setChatError('')
     setSearchTerm('')
     setReplyingTo(null)
+    setIsRoomInfoOpen(false)
   }
 
   useEffect(() => {
@@ -838,13 +844,16 @@ function Community() {
 
   return (
     <>
-      <main className="pt-[84px]">
-        <section id="rooms" className="community-page-section scroll-mt-24 py-10 sm:py-14">
-          <div className="section-shell">
-            <Link to="/" className="secondary-button mb-5">
-              <ArrowLeft size={17} aria-hidden="true" />
-              Back to Homepage
-            </Link>
+      <main className="community-page pt-[84px]">
+        <section id="rooms" className="community-page-section community-page-section-workspace scroll-mt-24">
+          <div className="section-shell community-page-shell">
+            <div className="community-page-topbar">
+              <Link to="/" className="secondary-button community-back-link">
+                <ArrowLeft size={17} aria-hidden="true" />
+                Back to Homepage
+              </Link>
+              <p>Choose a room to join the conversation.</p>
+            </div>
 
             <Reveal className="community-workspace">
               <header className="community-workspace-header">
@@ -960,12 +969,24 @@ function Community() {
                         <p>{selectedRoom?.description}</p>
                       </div>
                     </div>
-                    {selectedRoom?.isStaffOnly && (
-                      <span className="community-staff-badge">
-                        <LockKeyhole size={12} aria-hidden="true" />
-                        Staff only
-                      </span>
-                    )}
+                    <div className="community-chat-header-actions">
+                      {selectedRoom?.isStaffOnly && (
+                        <span className="community-staff-badge">
+                          <LockKeyhole size={12} aria-hidden="true" />
+                          Staff only
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        className="community-room-info-toggle"
+                        aria-controls="community-room-info"
+                        aria-expanded={isRoomInfoOpen}
+                        onClick={() => setIsRoomInfoOpen((current) => !current)}
+                      >
+                        <Info size={14} aria-hidden="true" />
+                        Details
+                      </button>
+                    </div>
                   </header>
 
                   <div
@@ -1051,6 +1072,7 @@ function Community() {
                 <CommunityRoomInfo
                   canSend={canSend}
                   canViewMessages={canViewMessages}
+                  className={isRoomInfoOpen ? 'community-room-info-open' : ''}
                   room={selectedRoom}
                 />
               </div>
