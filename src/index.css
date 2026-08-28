@@ -4010,6 +4010,309 @@ html.dark .news-detail-footer {
   }
 }
 
+/* Community message attachments */
+.community-selected-attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 0.55rem;
+}
+
+.community-selected-attachment {
+  display: flex;
+  max-width: min(100%, 18rem);
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid #cbdcf3;
+  border-radius: 0.7rem;
+  background: #f8fbff;
+  padding: 0.35rem 0.4rem;
+}
+
+.community-selected-attachment-preview,
+.community-selected-attachment-icon {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 0.5rem;
+  background: #e7f0ff;
+  color: #155eef;
+}
+
+.community-selected-attachment-preview {
+  object-fit: cover;
+}
+
+.community-selected-attachment-copy {
+  display: grid;
+  min-width: 0;
+  gap: 0.08rem;
+}
+
+.community-selected-attachment-name {
+  overflow: hidden;
+  color: var(--text-strong);
+  font-size: 0.65rem;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.community-selected-attachment-size {
+  color: #8092aa;
+  font-size: 0.58rem;
+  font-weight: 700;
+}
+
+.community-selected-attachment-remove {
+  display: grid;
+  width: 1.65rem;
+  height: 1.65rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0;
+  border-radius: 0.45rem;
+  background: transparent;
+  color: #8092aa;
+}
+
+.community-selected-attachment-remove:hover,
+.community-selected-attachment-remove:focus-visible {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.community-composer-tools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 0.5rem;
+}
+
+.community-attachment-input {
+  display: none;
+}
+
+.community-attachment-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid #cbdcf3;
+  border-radius: 0.6rem;
+  background: #ffffff;
+  color: #526783;
+  padding: 0.38rem 0.55rem;
+  font-size: 0.62rem;
+  font-weight: 850;
+  transition:
+    border-color var(--transition-base),
+    background-color var(--transition-base),
+    color var(--transition-base),
+    transform var(--transition-base);
+}
+
+.community-attachment-button:hover:not(:disabled),
+.community-attachment-button:focus-visible:not(:disabled) {
+  border-color: #93c5fd;
+  background: #eff6ff;
+  color: #155eef;
+  transform: translateY(-1px);
+}
+
+.community-attachment-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.community-attachment-limit {
+  color: #8294ab;
+  font-size: 0.6rem;
+  font-weight: 700;
+}
+
+.community-message-attachments {
+  display: grid;
+  max-width: min(100%, 25rem);
+  gap: 0.45rem;
+  margin-top: 0.6rem;
+}
+
+.community-message-image-link {
+  display: grid;
+  gap: 0.3rem;
+  overflow: hidden;
+  border: 1px solid #cbdcf3;
+  border-radius: 0.7rem;
+  background: #ffffff;
+  color: #526783;
+  padding: 0.3rem;
+}
+
+.community-message-image-link:hover,
+.community-message-image-link:focus-visible {
+  border-color: #60a5fa;
+}
+
+.community-message-image {
+  width: 100%;
+  max-height: 18rem;
+  border-radius: 0.5rem;
+  object-fit: cover;
+}
+
+.community-message-image-link > span {
+  overflow: hidden;
+  padding: 0 0.25rem 0.15rem;
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.community-message-file {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  border: 1px solid #cbdcf3;
+  border-radius: 0.7rem;
+  background: #ffffff;
+  color: #155eef;
+  padding: 0.55rem 0.65rem;
+}
+
+.community-message-file:hover,
+.community-message-file:focus-visible {
+  border-color: #60a5fa;
+  background: #eff6ff;
+}
+
+.community-message-file > span {
+  display: grid;
+  min-width: 0;
+  gap: 0.1rem;
+}
+
+.community-message-file strong,
+.community-message-file small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.community-message-file strong {
+  color: var(--text-strong);
+  font-size: 0.64rem;
+  font-weight: 850;
+}
+
+.community-message-file small {
+  color: #8092aa;
+  font-size: 0.57rem;
+  font-weight: 700;
+}
+
+.community-message-file-unavailable {
+  color: #8092aa;
+  cursor: not-allowed;
+}
+
+.community-message-row-own .community-message-image-link,
+.community-message-row-own .community-message-file {
+  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.community-message-row-own .community-message-image-link > span,
+.community-message-row-own .community-message-file strong {
+  color: #ffffff;
+}
+
+.community-message-row-own .community-message-file small {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+html.dark .community-selected-attachment {
+  border-color: rgba(147, 197, 253, 0.22);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+html.dark .community-selected-attachment-preview,
+html.dark .community-selected-attachment-icon {
+  background: rgba(96, 165, 250, 0.14);
+  color: #93c5fd;
+}
+
+html.dark .community-selected-attachment-name,
+html.dark .community-message-file strong {
+  color: #f8fafc;
+}
+
+html.dark .community-selected-attachment-size,
+html.dark .community-attachment-limit,
+html.dark .community-message-file small {
+  color: #90a4bf;
+}
+
+html.dark .community-selected-attachment-remove {
+  color: #90a4bf;
+}
+
+html.dark .community-selected-attachment-remove:hover,
+html.dark .community-selected-attachment-remove:focus-visible {
+  background: rgba(248, 113, 113, 0.16);
+  color: #fca5a5;
+}
+
+html.dark .community-attachment-button {
+  border-color: rgba(147, 197, 253, 0.22);
+  background: rgba(255, 255, 255, 0.05);
+  color: #c9d8ea;
+}
+
+html.dark .community-attachment-button:hover:not(:disabled),
+html.dark .community-attachment-button:focus-visible:not(:disabled) {
+  border-color: rgba(147, 197, 253, 0.52);
+  background: rgba(96, 165, 250, 0.13);
+  color: #bfdbfe;
+}
+
+html.dark .community-message-image-link,
+html.dark .community-message-file {
+  border-color: rgba(147, 197, 253, 0.2);
+  background: rgba(255, 255, 255, 0.055);
+  color: #bfdbfe;
+}
+
+html.dark .community-message-image-link:hover,
+html.dark .community-message-image-link:focus-visible,
+html.dark .community-message-file:hover,
+html.dark .community-message-file:focus-visible {
+  border-color: rgba(147, 197, 253, 0.55);
+  background: rgba(96, 165, 250, 0.12);
+}
+
+html.dark .community-message-file-unavailable {
+  color: #90a4bf;
+}
+
+@media (max-width: 767px) {
+  .community-selected-attachment {
+    max-width: 100%;
+  }
+
+  .community-attachment-button {
+    flex: 0 0 auto;
+  }
+
+  .community-message-attachments {
+    max-width: 100%;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .robot-character,
   .robot-character *,

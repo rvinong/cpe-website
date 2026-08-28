@@ -6,11 +6,14 @@ import {
   BookOpen,
   CalendarDays,
   CheckCircle2,
+  FileText,
   Hash,
   Info,
+  ImagePlus,
   LockKeyhole,
   MessageCircle,
   MessageSquareText,
+  Paperclip,
   Radio,
   Reply,
   Search,
@@ -34,13 +37,19 @@ import {
 import {
   createCommunityMessage,
   deleteCommunityMessage,
+  communityAttachmentAccept,
+  formatCommunityAttachmentSize,
+  getCommunityAttachmentError,
   getCommunityMembers,
   getCommunityMessages,
   getFriendlyCommunityChatError,
   getStarterMessages,
   maxCommunityMessageLength,
+  maxCommunityAttachmentCount,
+  maxCommunityAttachmentSize,
   notifyCommunityMentions,
   subscribeToCommunityMessages,
+  uploadCommunityMessageAttachments,
 } from '../lib/communityChat'
 import { getDisplayName } from '../lib/accountProfile'
 
@@ -199,9 +208,13 @@ function MessageComposer({
 }) {
   const [body, setBody] = useState('')
   const [selectedMentions, setSelectedMentions] = useState([])
+  const [selectedFiles, setSelectedFiles] = useState([])
+  const [attachmentError, setAttachmentError] = useState('')
   const [mention, setMention] = useState(null)
   const [activeMentionIndex, setActiveMentionIndex] = useState(0)
   const inputRef = useRef(null)
+  const fileInputRef = useRef(null)
+  const selectedFilesRef = useRef([])
   const canSubmit = Boolean(body.trim()) && !disabled && !isSubmitting
   const mentionSuggestions = useMemo(
     () =>
@@ -220,6 +233,82 @@ function MessageComposer({
     if (replyingTo) inputRef.current?.focus()
   }, [replyingTo])
 
+  useEffect(() => {
+    selectedFilesRef.current = selectedFiles
+  }, [selectedFiles])
+
+  useEffect(
+    () => () => {
+      selectedFilesRef.current.forEach((selectedFile) => {
+        if (selectedFile.previewUrl) {
+          globalThis.URL?.revokeObjectURL(selectedFile.previewUrl)
+        }
+      })
+    },
+    [],
+  )
+
+  const clearSelectedFiles = () => {
+    selectedFiles.forEach((selectedFile) => {
+      if (selectedFile.previewUrl) {
+        globalThis.URL?.revokeObjectURL(selectedFile.previewUrl)
+      }
+    })
+    setSelectedFiles([])
+  }
+
+  const handleFileChange = (event) => {
+    const incomingFiles = Array.from(event.target.files || [])
+    event.target.value = ''
+    if (!incomingFiles.length) return
+
+    const existingKeys = new Set(
+      selectedFiles.map(
+        (selectedFile) =>
+          `${selectedFile.file.name}:${selectedFile.file.size}:${selectedFile.file.lastModified}`,
+      ),
+    )
+    const uniqueIncomingFiles = incomingFiles.filter((file) => {
+      const fileKey = `${file.name}:${file.size}:${file.lastModified}`
+      if (existingKeys.has(fileKey)) return false
+      existingKeys.add(fileKey)
+      return true
+    })
+    const nextFiles = [
+      ...selectedFiles.map((selectedFile) => selectedFile.file),
+      ...uniqueIncomingFiles,
+    ]
+    const validationError = getCommunityAttachmentError(nextFiles)
+
+    if (validationError) {
+      setAttachmentError(validationError.message)
+      return
+    }
+
+    setSelectedFiles((current) => [
+      ...current,
+      ...uniqueIncomingFiles.map((file, index) => ({
+        id: `${file.name}-${file.size}-${file.lastModified}-${index}`,
+        file,
+        previewUrl:
+          String(file.type || '').startsWith('image/') &&
+          globalThis.URL?.createObjectURL
+            ? globalThis.URL.createObjectURL(file)
+            : '',
+      })),
+    ])
+    setAttachmentError('')
+  }
+
+  const handleRemoveFile = (fileId) => {
+    const selectedFile = selectedFiles.find((item) => item.id === fileId)
+    if (selectedFile?.previewUrl) {
+      globalThis.URL?.revokeObjectURL(selectedFile.previewUrl)
+    }
+    setSelectedFiles((current) => current.filter((item) => item.id !== fileId))
+    setAttachmentError('')
+  }
+
   const handleSubmit = async (event) => {
     event.preventDefault()
     if (!canSubmit) return
@@ -228,10 +317,13 @@ function MessageComposer({
       body,
       replyingTo?.id || null,
       selectedMentions.map((member) => member.profileId),
+      selectedFiles.map((selectedFile) => selectedFile.file),
     )
     if (didSubmit) {
       setBody('')
       setSelectedMentions([])
+      clearSelectedFiles()
+      setAttachmentError('')
       setMention(null)
       setActiveMentionIndex(0)
       onCancelReply?.()
@@ -327,6 +419,51 @@ function MessageComposer({
           >
             <X size={15} aria-hidden="true" />
           </button>
+        </div>
+      )}
+      {selectedFiles.length > 0 && (
+        <div className="community-selected-attachments" aria-label="Selected attachments">
+          {selectedFiles.map((selectedFile) => {
+            const isImage = String(selectedFile.file.type || '').startsWith(
+              'image/',
+            )
+
+            return (
+              <div className="community-selected-attachment" key={selectedFile.id}>
+                {selectedFile.previewUrl && isImage ? (
+                  <img
+                    src={selectedFile.previewUrl}
+                    alt=""
+                    className="community-selected-attachment-preview"
+                  />
+                ) : (
+                  <span className="community-selected-attachment-icon">
+                    {isImage ? (
+                      <ImagePlus size={15} aria-hidden="true" />
+                    ) : (
+                      <FileText size={15} aria-hidden="true" />
+                    )}
+                  </span>
+                )}
+                <span className="community-selected-attachment-copy">
+                  <span className="community-selected-attachment-name">
+                    {selectedFile.file.name}
+                  </span>
+                  <span className="community-selected-attachment-size">
+                    {formatCommunityAttachmentSize(selectedFile.file.size)}
+                  </span>
+                </span>
+                <button
+                  type="button"
+                  className="community-selected-attachment-remove"
+                  onClick={() => handleRemoveFile(selectedFile.id)}
+                  aria-label={`Remove ${selectedFile.file.name}`}
+                >
+                  <X size={14} aria-hidden="true" />
+                </button>
+              </div>
+            )
+          })}
         </div>
       )}
       <label className="sr-only" htmlFor="community-message-body">
@@ -425,6 +562,30 @@ function MessageComposer({
           <Send size={16} aria-hidden="true" />
         </button>
       </div>
+      <div className="community-composer-tools">
+        <input
+          ref={fileInputRef}
+          type="file"
+          className="community-attachment-input"
+          accept={communityAttachmentAccept}
+          multiple
+          onChange={handleFileChange}
+          disabled={disabled || isSubmitting}
+        />
+        <button
+          type="button"
+          className="community-attachment-button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={disabled || isSubmitting}
+        >
+          <Paperclip size={14} aria-hidden="true" />
+          Add file or image
+        </button>
+        <span className="community-attachment-limit">
+          {selectedFiles.length}/{maxCommunityAttachmentCount} files, up to{' '}
+          {maxCommunityAttachmentSize / (1024 * 1024)} MB each
+        </span>
+      </div>
       <div className="community-chat-composer-meta">
         <span>
           Enter to send. Shift + Enter for a new line. Mentioned members may
@@ -432,6 +593,11 @@ function MessageComposer({
         </span>
         <span>{maxCommunityMessageLength - body.length}</span>
       </div>
+      {attachmentError && (
+        <p className="community-form-error" role="alert">
+          {attachmentError}
+        </p>
+      )}
       {error && <p className="community-form-error">{error}</p>}
     </form>
   )
@@ -513,6 +679,74 @@ function MessageItem({
             </div>
           )}
           <p>{renderMessageBody(message.body, mentionMembers)}</p>
+          {message.attachments?.length > 0 && (
+            <div className="community-message-attachments">
+              {message.attachments.map((attachment) => {
+                const isImage = String(attachment.mimeType || '').startsWith(
+                  'image/',
+                )
+                const attachmentSize = formatCommunityAttachmentSize(
+                  attachment.sizeBytes,
+                )
+                const attachmentLabel = `${attachment.fileName}${
+                  attachmentSize ? `, ${attachmentSize}` : ''
+                }`
+
+                if (attachment.url && isImage) {
+                  return (
+                    <a
+                      key={attachment.id || attachment.storagePath}
+                      href={attachment.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="community-message-image-link"
+                      aria-label={`Open ${attachmentLabel}`}
+                    >
+                      <img
+                        src={attachment.url}
+                        alt={attachment.fileName}
+                        className="community-message-image"
+                        loading="lazy"
+                      />
+                      <span>{attachment.fileName}</span>
+                    </a>
+                  )
+                }
+
+                if (attachment.url) {
+                  return (
+                    <a
+                      key={attachment.id || attachment.storagePath}
+                      href={attachment.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      download={attachment.fileName}
+                      className="community-message-file"
+                    >
+                      <FileText size={16} aria-hidden="true" />
+                      <span>
+                        <strong>{attachment.fileName}</strong>
+                        {attachmentSize && <small>{attachmentSize}</small>}
+                      </span>
+                    </a>
+                  )
+                }
+
+                return (
+                  <div
+                    key={attachment.id || attachment.storagePath}
+                    className="community-message-file community-message-file-unavailable"
+                  >
+                    <FileText size={16} aria-hidden="true" />
+                    <span>
+                      <strong>{attachment.fileName}</strong>
+                      <small>Attachment unavailable</small>
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          )}
         </div>
         {(canReply || message.canDelete || isOwnMessage) && (
           <div className="community-message-actions">
@@ -604,6 +838,7 @@ function Community() {
   const [isCreatingMessage, setIsCreatingMessage] = useState(false)
   const [communityError, setCommunityError] = useState('')
   const [chatError, setChatError] = useState('')
+  const [chatNotice, setChatNotice] = useState('')
   const [members, setMembers] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
   const [replyingTo, setReplyingTo] = useState(null)
@@ -646,6 +881,7 @@ function Community() {
     setMessages([])
     setLoadedMessagesRoomId('')
     setChatError('')
+    setChatNotice('')
     setSearchTerm('')
     setReplyingTo(null)
     setIsRoomInfoOpen(false)
@@ -766,9 +1002,11 @@ function Community() {
     body,
     replyToMessageId,
     mentionedProfileIds = [],
+    files = [],
   ) => {
     if (!canSend || !selectedRoom?.id) return false
     setChatError('')
+    setChatNotice('')
     setIsCreatingMessage(true)
 
     let result
@@ -785,10 +1023,10 @@ function Community() {
       return false
     }
 
-    setIsCreatingMessage(false)
     const { data, error } = result
 
     if (error || !data) {
+      setIsCreatingMessage(false)
       setChatError(
         error
           ? getFriendlyCommunityChatError(error)
@@ -803,21 +1041,54 @@ function Community() {
         : [...current, data],
     )
 
+    let deliveryNotice = ''
+
+    if (files.length > 0) {
+      let attachmentResult
+      try {
+        attachmentResult = await uploadCommunityMessageAttachments(data.id, files)
+      } catch {
+        attachmentResult = {
+          error: new Error('Attachment upload failed.'),
+        }
+      }
+
+      if (attachmentResult.error) {
+        deliveryNotice =
+          'Message sent, but the attachment could not be uploaded. Check the file type and size, then try again.'
+      } else {
+        try {
+          const refreshedMessages = await getCommunityMessages(selectedRoom.id)
+          if (refreshedMessages.error) {
+            deliveryNotice =
+              'Message sent, but the attachment could not be displayed yet. Refresh the room to try again.'
+          } else {
+            setMessages(refreshedMessages.data || [])
+          }
+        } catch {
+          deliveryNotice =
+            'Message sent, but the attachment could not be displayed yet. Refresh the room to try again.'
+        }
+      }
+    }
+
     if (mentionedProfileIds.length > 0) {
       try {
         const notificationResult = await notifyCommunityMentions(data.id)
         if (notificationResult.error) {
-          setChatError(
-            'Message sent, but the mention email could not be delivered.',
-          )
+          deliveryNotice = deliveryNotice
+            ? `${deliveryNotice} The mention email could not be delivered.`
+            : 'Message sent, but the mention email could not be delivered.'
         }
       } catch {
-        setChatError(
-          'Message sent, but the mention email could not be delivered.',
-        )
+        deliveryNotice = deliveryNotice
+          ? `${deliveryNotice} The mention email could not be delivered.`
+          : 'Message sent, but the mention email could not be delivered.'
       }
     }
 
+    setIsCreatingMessage(false)
+    setChatNotice(deliveryNotice)
     setReplyingTo(null)
     return true
   }
@@ -831,7 +1102,10 @@ function Community() {
       return
     }
 
-    const { error } = await deleteCommunityMessage(message.id)
+    const { error } = await deleteCommunityMessage(
+      message.id,
+      message.attachments,
+    )
     if (error) {
       setChatError(getFriendlyCommunityChatError(error))
       return
@@ -1038,7 +1312,7 @@ function Community() {
                       <MessageComposer
                         key={selectedRoom?.id}
                         currentUserId={user?.id}
-                        error={chatError}
+                        error={chatError || chatNotice}
                         isSubmitting={isCreatingMessage}
                         mentionMembers={members}
                         onCancelReply={() => setReplyingTo(null)}
