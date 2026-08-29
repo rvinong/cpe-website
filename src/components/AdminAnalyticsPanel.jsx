@@ -277,8 +277,8 @@ function AdminAnalyticsPanel({
   )
 
   return (
-    <section className="mt-6">
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <section className="mt-4">
+      <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-extrabold tracking-[0.18em] text-brand-600 uppercase">
             Dashboard analytics
@@ -297,7 +297,7 @@ function AdminAnalyticsPanel({
         </span>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-[0.82fr_1.18fr]">
+      <div className="grid gap-3 xl:grid-cols-[0.82fr_1.18fr]">
         <article className="surface-card overflow-hidden p-0">
           <div className="relative isolate overflow-hidden bg-navy-950 p-5 text-white">
             <div className="subtle-grid absolute inset-0 -z-20 opacity-10" />
@@ -379,7 +379,7 @@ function AdminAnalyticsPanel({
           </div>
         </article>
 
-        <div className="grid gap-5">
+        <div className="grid gap-3">
           <article className="surface-card p-5">
             <div className="flex items-center justify-between gap-4">
               <div>
@@ -522,7 +522,7 @@ function AdminAnalyticsPanel({
         </div>
       </div>
 
-      <article className="surface-card mt-4 p-5">
+      <article className="surface-card mt-3 p-5">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-extrabold tracking-[0.18em] text-brand-600 uppercase">

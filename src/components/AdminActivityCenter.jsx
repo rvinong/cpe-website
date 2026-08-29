@@ -428,7 +428,7 @@ function AdminActivityCenter({
   }, [activityData, activities.length, attentionItems.length, role])
 
   return (
-    <section className="mt-6">
+    <section className="mt-4">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {metrics.map(([label, value, detail]) => (
           <article
@@ -446,7 +446,7 @@ function AdminActivityCenter({
         ))}
       </div>
 
-      <div className="mt-4 grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
+      <div className="mt-3 grid gap-3 xl:grid-cols-[0.9fr_1.1fr]">
         <article className="surface-card overflow-hidden p-0">
           <div className="border-b border-slate-100 p-4">
             <div className="flex items-start justify-between gap-4">

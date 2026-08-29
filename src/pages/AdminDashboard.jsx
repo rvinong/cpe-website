@@ -526,7 +526,7 @@ function AdminDashboard() {
                 role={profile?.role}
               />
 
-              <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <section className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 {[
                   ['Connection', 'Supabase', 'Configured'],
                   ['Session', user ? 'Active' : 'None', user?.email],
@@ -550,7 +550,7 @@ function AdminDashboard() {
                 ))}
               </section>
 
-              <section className="mt-6">
+              <section className="mt-5">
                 <div className="max-w-2xl">
                   <p className="text-xs font-extrabold tracking-[0.18em] text-brand-600 uppercase">
                     Management modules
@@ -614,7 +614,7 @@ function AdminDashboard() {
                 </div>
               </section>
 
-              <section className="mt-6 rounded-3xl border border-blue-300 bg-brand-50/45 p-4 sm:p-5">
+              <section className="mt-5 rounded-3xl border border-blue-300 bg-brand-50/45 p-4 sm:p-5">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-xs font-extrabold tracking-[0.18em] text-brand-600 uppercase">
@@ -638,7 +638,7 @@ function AdminDashboard() {
                 </div>
               </section>
 
-              <p className="mt-4 min-h-5 text-center text-sm font-bold text-red-600">
+              <p className="mt-3 min-h-5 text-center text-sm font-bold text-red-600">
                 {message}
               </p>
             </div>
