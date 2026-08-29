@@ -7684,7 +7684,8 @@ html.dark .community-room-info {
 /* Keep public audit records aligned even when their fields have different lengths. */
 .audit-report-card-title {
   display: -webkit-box;
-  min-height: 6rem;
+  height: 7.5rem;
+  min-height: 7.5rem;
   overflow: hidden;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
@@ -7692,6 +7693,7 @@ html.dark .community-room-info {
 
 .audit-report-card-summary {
   display: -webkit-box;
+  height: 7rem;
   min-height: 7rem;
   overflow: hidden;
   -webkit-box-orient: vertical;
@@ -7699,8 +7701,10 @@ html.dark .community-room-info {
 }
 
 .audit-report-card-details {
-  min-height: 9.25rem;
+  height: 9.5rem;
+  min-height: 9.5rem;
   align-content: start;
+  overflow: hidden;
 }
 
 .audit-report-card-field {
@@ -7708,7 +7712,9 @@ html.dark .community-room-info {
 }
 
 .audit-report-card-highlights {
+  height: 7rem;
   min-height: 7rem;
+  overflow: hidden;
 }
 
 .audit-report-card-footer {
@@ -7730,6 +7736,7 @@ html.dark .community-room-info {
   .audit-report-card-title,
   .audit-report-card-summary {
     display: block;
+    height: auto;
     min-height: 0;
     overflow: visible;
   }
@@ -7737,6 +7744,8 @@ html.dark .community-room-info {
   .audit-report-card-details,
   .audit-report-card-highlights,
   .audit-report-card-footer {
+    height: auto;
     min-height: 0;
+    overflow: visible;
   }
 }
