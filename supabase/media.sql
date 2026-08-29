@@ -30,6 +30,7 @@ create table if not exists public.news_posts (
   summary text not null,
   body text not null,
   image_path text,
+  card_image_path text,
   image_alt text not null default '',
   status text not null default 'draft'
     check (status in ('draft', 'published', 'archived')),
@@ -40,6 +41,14 @@ create table if not exists public.news_posts (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.news_posts
+  add column if not exists card_image_path text;
+
+update public.news_posts
+set card_image_path = image_path
+where card_image_path is null
+  and image_path is not null;
 
 create index if not exists news_posts_public_listing_idx
   on public.news_posts (status, is_featured desc, published_at desc);
@@ -98,6 +107,7 @@ create table if not exists public.news_post_images (
   id uuid primary key default gen_random_uuid(),
   news_post_id uuid not null references public.news_posts(id) on delete cascade,
   image_path text not null unique,
+  card_image_path text,
   alt_text text not null default '',
   caption text not null default '',
   sort_order integer not null default 0,
@@ -106,6 +116,13 @@ create table if not exists public.news_post_images (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.news_post_images
+  add column if not exists card_image_path text;
+
+update public.news_post_images
+set card_image_path = image_path
+where card_image_path is null;
 
 create index if not exists news_post_images_post_order_idx
   on public.news_post_images (news_post_id, sort_order, created_at);
@@ -174,6 +191,7 @@ using (public.current_user_role() in ('admin', 'editor'));
 insert into public.news_post_images (
   news_post_id,
   image_path,
+  card_image_path,
   alt_text,
   sort_order,
   created_by
@@ -181,6 +199,7 @@ insert into public.news_post_images (
 select
   news_posts.id,
   news_posts.image_path,
+  coalesce(news_posts.card_image_path, news_posts.image_path),
   news_posts.image_alt,
   0,
   news_posts.created_by
@@ -911,6 +930,7 @@ create table if not exists public.gallery_photos (
   description text not null default '',
   alt_text text not null,
   image_path text not null unique,
+  card_image_path text,
   captured_on date not null,
   status text not null default 'draft'
     check (status in ('draft', 'published', 'archived')),
@@ -920,6 +940,13 @@ create table if not exists public.gallery_photos (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.gallery_photos
+  add column if not exists card_image_path text;
+
+update public.gallery_photos
+set card_image_path = image_path
+where card_image_path is null;
 
 create index if not exists gallery_photos_public_listing_idx
   on public.gallery_photos (status, captured_on desc, sort_order, created_at);

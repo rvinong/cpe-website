@@ -12,6 +12,7 @@ create table if not exists public.events (
   ends_at timestamptz,
   registration_url text,
   image_path text,
+  card_image_path text,
   image_alt text not null default '',
   show_in_gallery boolean not null default true,
   status text not null default 'draft'
@@ -27,8 +28,14 @@ create table if not exists public.events (
 
 alter table public.events
   add column if not exists image_path text,
+  add column if not exists card_image_path text,
   add column if not exists image_alt text not null default '',
   add column if not exists show_in_gallery boolean not null default true;
+
+update public.events
+set card_image_path = image_path
+where card_image_path is null
+  and image_path is not null;
 
 create index if not exists events_public_listing_idx
   on public.events (status, is_featured desc, starts_at);

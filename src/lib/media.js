@@ -22,6 +22,23 @@ const baseNewsColumns = [
   'summary',
   'body',
   'image_path',
+  'card_image_path',
+  'image_alt',
+  'status',
+  'is_featured',
+  'published_at',
+  'created_at',
+  'updated_at',
+].join(', ')
+
+const legacyBaseNewsColumns = [
+  'id',
+  'slug',
+  'title',
+  'category',
+  'summary',
+  'body',
+  'image_path',
   'image_alt',
   'status',
   'is_featured',
@@ -31,6 +48,17 @@ const baseNewsColumns = [
 ].join(', ')
 
 const newsImageColumns = [
+  'news_post_id',
+  'id',
+  'image_path',
+  'card_image_path',
+  'alt_text',
+  'caption',
+  'sort_order',
+  'created_at',
+].join(', ')
+
+const legacyNewsImageColumns = [
   'news_post_id',
   'id',
   'image_path',
@@ -47,6 +75,21 @@ const galleryColumns = [
   'description',
   'alt_text',
   'image_path',
+  'card_image_path',
+  'captured_on',
+  'status',
+  'sort_order',
+  'created_at',
+  'updated_at',
+].join(', ')
+
+const legacyGalleryColumns = [
+  'id',
+  'album',
+  'category',
+  'description',
+  'alt_text',
+  'image_path',
   'captured_on',
   'status',
   'sort_order',
@@ -55,6 +98,23 @@ const galleryColumns = [
 ].join(', ')
 
 const eventGalleryColumns = [
+  'id',
+  'slug',
+  'title',
+  'category',
+  'summary',
+  'description',
+  'starts_at',
+  'image_path',
+  'card_image_path',
+  'image_alt',
+  'status',
+  'published_at',
+  'show_in_gallery',
+  'created_at',
+].join(', ')
+
+const legacyEventGalleryColumns = [
   'id',
   'slug',
   'title',
@@ -164,6 +224,7 @@ function normalizeNewsImages(row) {
     images.push({
       id: `legacy-${row.id}`,
       image_path: row.image_path,
+      card_image_path: row.card_image_path || row.image_path,
       alt_text: row.image_alt || '',
       caption: '',
       sort_order: 0,
@@ -175,8 +236,12 @@ function normalizeNewsImages(row) {
     ...image,
     sort_order: Number(image.sort_order) || index,
     imagePath: image.image_path,
+    cardImagePath: image.card_image_path || image.image_path,
     altText: image.alt_text || '',
     image: getPublicImageUrl(image.image_path),
+    cardImage: getPublicImageUrl(
+      image.card_image_path || image.image_path,
+    ),
   }))
 }
 
@@ -190,6 +255,11 @@ export function normalizeNewsPost(row, reactionSummary) {
     date: dateFormatter.format(new Date(row.published_at || row.created_at)),
     images,
     image: coverImage?.image || getPublicImageUrl(row.image_path),
+    cardImage:
+      coverImage?.cardImage ||
+      getPublicImageUrl(row.card_image_path || row.image_path),
+    cardImagePath:
+      coverImage?.cardImagePath || row.card_image_path || row.image_path,
     imageAlt: coverImage?.altText || row.image_alt,
     isFeatured: row.is_featured,
     reactions,
@@ -233,6 +303,8 @@ export function normalizeGalleryPhoto(row) {
     sourceLabel: 'Gallery upload',
     groupId: `gallery-${row.album || row.id}`,
     image: getPublicImageUrl(row.image_path),
+    cardImagePath: row.card_image_path || row.image_path,
+    cardImage: getPublicImageUrl(row.card_image_path || row.image_path),
     alt: row.alt_text,
     date: dateFormatter.format(capturedOn),
     year: capturedOn.getFullYear(),
@@ -264,6 +336,8 @@ export function normalizeEventGalleryPhoto(row) {
     updated_at: row.created_at,
     eventSlug: row.slug,
     image: getPublicImageUrl(row.image_path),
+    cardImagePath: row.card_image_path || row.image_path,
+    cardImage: getPublicImageUrl(row.card_image_path || row.image_path),
     alt: row.image_alt || `${row.title} event photo`,
     date: dateFormatter.format(safeDate),
     year: safeDate.getFullYear(),
@@ -299,6 +373,8 @@ export function normalizeNewsGalleryPhotos(row) {
       updated_at: row.updated_at,
       newsSlug: row.slug,
       image: image.image,
+      card_image_path: image.cardImagePath,
+      cardImage: image.cardImage,
       alt: altText,
       date: dateFormatter.format(safeDate),
       year: safeDate.getFullYear(),
@@ -317,6 +393,37 @@ export function isMediaSchemaMissing(error) {
     'PGRST205',
     '404',
   ].includes(error?.code)
+}
+
+export function isCardImageColumnMissing(error) {
+  const message = [error?.message, error?.details, error?.hint]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase()
+
+  return (
+    ['42703', 'PGRST204'].includes(error?.code) &&
+    message.includes('card_image_path')
+  )
+}
+
+async function withLegacyMediaColumns(primaryQuery, legacyQuery) {
+  const primaryResult = await primaryQuery
+  if (!isCardImageColumnMissing(primaryResult.error)) return primaryResult
+  return legacyQuery
+}
+
+function withoutCardImagePath(payload) {
+  const legacyPayload = { ...payload }
+  delete legacyPayload.card_image_path
+  return legacyPayload
+}
+
+function hasDistinctCardImages(images = []) {
+  return images.some(
+    (image) =>
+      image.cardImagePath && image.cardImagePath !== image.imagePath,
+  )
 }
 
 function isNewsImagesUnavailable(error) {
@@ -468,11 +575,18 @@ async function hydrateNewsCommentSummaries(posts) {
 }
 
 async function getAdminNewsPostById(id) {
-  const { data, error } = await supabase
-    .from('news_posts')
-    .select(baseNewsColumns)
-    .eq('id', id)
-    .single()
+  const { data, error } = await withLegacyMediaColumns(
+    supabase
+      .from('news_posts')
+      .select(baseNewsColumns)
+      .eq('id', id)
+      .single(),
+    supabase
+      .from('news_posts')
+      .select(legacyBaseNewsColumns)
+      .eq('id', id)
+      .single(),
+  )
 
   if (error || !data) return { data: null, error }
 
@@ -484,12 +598,20 @@ async function attachNewsImages(posts) {
   if (!posts?.length) return posts
 
   const ids = posts.map((post) => post.id)
-  const { data, error } = await supabase
-    .from('news_post_images')
-    .select(newsImageColumns)
-    .in('news_post_id', ids)
-    .order('sort_order', { ascending: true })
-    .order('created_at', { ascending: true })
+  const { data, error } = await withLegacyMediaColumns(
+    supabase
+      .from('news_post_images')
+      .select(newsImageColumns)
+      .in('news_post_id', ids)
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: true }),
+    supabase
+      .from('news_post_images')
+      .select(legacyNewsImageColumns)
+      .in('news_post_id', ids)
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: true }),
+  )
 
   if (error) return posts
 
@@ -522,7 +644,20 @@ export async function getPublicNews(limit) {
 
   if (limit) query = query.limit(limit)
 
-  const { data, error } = await query
+  let legacyQuery = supabase
+    .from('news_posts')
+    .select(legacyBaseNewsColumns)
+    .eq('status', 'published')
+    .lte('published_at', new Date().toISOString())
+    .order('is_featured', { ascending: false })
+    .order('published_at', { ascending: false })
+
+  if (limit) legacyQuery = legacyQuery.limit(limit)
+
+  const { data, error } = await withLegacyMediaColumns(
+    query,
+    legacyQuery,
+  )
   if (error) return { data: null, error }
 
   const rows = await attachNewsImages(data || [])
@@ -539,13 +674,22 @@ export async function getPublicNewsBySlug(slug) {
     return { data: null, error: new Error('Supabase is not configured.') }
   }
 
-  const { data, error } = await supabase
-    .from('news_posts')
-    .select(baseNewsColumns)
-    .eq('slug', slug)
-    .eq('status', 'published')
-    .lte('published_at', new Date().toISOString())
-    .maybeSingle()
+  const { data, error } = await withLegacyMediaColumns(
+    supabase
+      .from('news_posts')
+      .select(baseNewsColumns)
+      .eq('slug', slug)
+      .eq('status', 'published')
+      .lte('published_at', new Date().toISOString())
+      .maybeSingle(),
+    supabase
+      .from('news_posts')
+      .select(legacyBaseNewsColumns)
+      .eq('slug', slug)
+      .eq('status', 'published')
+      .lte('published_at', new Date().toISOString())
+      .maybeSingle(),
+  )
 
   if (error || !data) return { data: null, error }
 
@@ -563,26 +707,52 @@ export async function getPublicGalleryPhotos() {
   }
 
   const [galleryResult, eventResult, newsResult] = await Promise.all([
-    supabase
-      .from('gallery_photos')
-      .select(galleryColumns)
-      .eq('status', 'published')
-      .order('captured_on', { ascending: false })
-      .order('sort_order', { ascending: true }),
-    supabase
-      .from('events')
-      .select(eventGalleryColumns)
-      .in('status', ['published', 'cancelled'])
-      .eq('show_in_gallery', true)
-      .not('image_path', 'is', null)
-      .lte('published_at', new Date().toISOString())
-      .order('starts_at', { ascending: false }),
-    supabase
-      .from('news_posts')
-      .select(baseNewsColumns)
-      .eq('status', 'published')
-      .lte('published_at', new Date().toISOString())
-      .order('published_at', { ascending: false }),
+    withLegacyMediaColumns(
+      supabase
+        .from('gallery_photos')
+        .select(galleryColumns)
+        .eq('status', 'published')
+        .order('captured_on', { ascending: false })
+        .order('sort_order', { ascending: true }),
+      supabase
+        .from('gallery_photos')
+        .select(legacyGalleryColumns)
+        .eq('status', 'published')
+        .order('captured_on', { ascending: false })
+        .order('sort_order', { ascending: true }),
+    ),
+    withLegacyMediaColumns(
+      supabase
+        .from('events')
+        .select(eventGalleryColumns)
+        .in('status', ['published', 'cancelled'])
+        .eq('show_in_gallery', true)
+        .not('image_path', 'is', null)
+        .lte('published_at', new Date().toISOString())
+        .order('starts_at', { ascending: false }),
+      supabase
+        .from('events')
+        .select(legacyEventGalleryColumns)
+        .in('status', ['published', 'cancelled'])
+        .eq('show_in_gallery', true)
+        .not('image_path', 'is', null)
+        .lte('published_at', new Date().toISOString())
+        .order('starts_at', { ascending: false }),
+    ),
+    withLegacyMediaColumns(
+      supabase
+        .from('news_posts')
+        .select(baseNewsColumns)
+        .eq('status', 'published')
+        .lte('published_at', new Date().toISOString())
+        .order('published_at', { ascending: false }),
+      supabase
+        .from('news_posts')
+        .select(legacyBaseNewsColumns)
+        .eq('status', 'published')
+        .lte('published_at', new Date().toISOString())
+        .order('published_at', { ascending: false }),
+    ),
   ])
 
   if (galleryResult.error) {
@@ -609,10 +779,16 @@ export async function getPublicGalleryPhotos() {
 }
 
 export async function getAdminNews() {
-  const { data, error } = await supabase
-    .from('news_posts')
-    .select(baseNewsColumns)
-    .order('updated_at', { ascending: false })
+  const { data, error } = await withLegacyMediaColumns(
+    supabase
+      .from('news_posts')
+      .select(baseNewsColumns)
+      .order('updated_at', { ascending: false }),
+    supabase
+      .from('news_posts')
+      .select(legacyBaseNewsColumns)
+      .order('updated_at', { ascending: false }),
+  )
 
   if (error) return { data: null, error }
 
@@ -621,25 +797,45 @@ export async function getAdminNews() {
 }
 
 export async function getAdminGalleryPhotos() {
-  return supabase
-    .from('gallery_photos')
-    .select(galleryColumns)
-    .order('captured_on', { ascending: false })
-    .order('sort_order', { ascending: true })
+  return withLegacyMediaColumns(
+    supabase
+      .from('gallery_photos')
+      .select(galleryColumns)
+      .order('captured_on', { ascending: false })
+      .order('sort_order', { ascending: true }),
+    supabase
+      .from('gallery_photos')
+      .select(legacyGalleryColumns)
+      .order('captured_on', { ascending: false })
+      .order('sort_order', { ascending: true }),
+  )
 }
 
 export async function getAdminGalleryArchivePhotos() {
   const [galleryResult, newsResult, eventResult] = await Promise.all([
     getAdminGalleryPhotos(),
-    supabase
-      .from('news_posts')
-      .select(baseNewsColumns)
-      .order('updated_at', { ascending: false }),
-    supabase
-      .from('events')
-      .select(eventGalleryColumns)
-      .not('image_path', 'is', null)
-      .order('starts_at', { ascending: false }),
+    withLegacyMediaColumns(
+      supabase
+        .from('news_posts')
+        .select(baseNewsColumns)
+        .order('updated_at', { ascending: false }),
+      supabase
+        .from('news_posts')
+        .select(legacyBaseNewsColumns)
+        .order('updated_at', { ascending: false }),
+    ),
+    withLegacyMediaColumns(
+      supabase
+        .from('events')
+        .select(eventGalleryColumns)
+        .not('image_path', 'is', null)
+        .order('starts_at', { ascending: false }),
+      supabase
+        .from('events')
+        .select(legacyEventGalleryColumns)
+        .not('image_path', 'is', null)
+        .order('starts_at', { ascending: false }),
+    ),
   ])
 
   if (galleryResult.error) {
@@ -696,6 +892,8 @@ function toNewsPayload(values, coverImage, publishedAt) {
     summary: values.summary.trim(),
     body: values.body.trim(),
     image_path: coverImage?.imagePath || null,
+    card_image_path:
+      coverImage?.cardImagePath || coverImage?.imagePath || null,
     image_alt: coverImage?.altText?.trim() || '',
     status: values.status,
     is_featured: values.isFeatured,
@@ -710,6 +908,7 @@ function toNewsImagePayload(newsPostId, image, index) {
   return {
     news_post_id: newsPostId,
     image_path: image.imagePath,
+    card_image_path: image.cardImagePath || image.imagePath,
     alt_text: image.altText.trim(),
     caption: image.caption?.trim() || '',
     sort_order: index,
@@ -738,6 +937,14 @@ async function replaceNewsImages(newsPostId, images) {
 
   const insertResult = await supabase.from('news_post_images').insert(payload)
 
+  if (isCardImageColumnMissing(insertResult.error)) {
+    if (hasDistinctCardImages(images)) return insertResult
+
+    return supabase
+      .from('news_post_images')
+      .insert(payload.map(withoutCardImagePath))
+  }
+
   if (
     insertResult.error &&
     isNewsImagesUnavailable(insertResult.error) &&
@@ -752,15 +959,26 @@ async function replaceNewsImages(newsPostId, images) {
 export async function createNewsPost(values, images = [], publishedAt = null) {
   const slug = await createAvailableNewsSlug(values.title)
   const coverImage = images[0] || null
+  const payload = {
+    ...toNewsPayload(values, coverImage, publishedAt),
+    slug,
+  }
 
-  const insertResult = await supabase
+  let insertResult = await supabase
     .from('news_posts')
-    .insert({
-      ...toNewsPayload(values, coverImage, publishedAt),
-      slug,
-    })
+    .insert(payload)
     .select(baseNewsColumns)
     .single()
+
+  if (isCardImageColumnMissing(insertResult.error)) {
+    if (hasDistinctCardImages(images)) return insertResult
+
+    insertResult = await supabase
+      .from('news_posts')
+      .insert(withoutCardImagePath(payload))
+      .select(legacyBaseNewsColumns)
+      .single()
+  }
 
   if (insertResult.error) return insertResult
 
@@ -780,12 +998,24 @@ export async function updateNewsPost(
   publishedAt,
 ) {
   const coverImage = images[0] || null
-  const updateResult = await supabase
+  const payload = toNewsPayload(values, coverImage, publishedAt)
+  let updateResult = await supabase
     .from('news_posts')
-    .update(toNewsPayload(values, coverImage, publishedAt))
+    .update(payload)
     .eq('id', id)
     .select(baseNewsColumns)
     .single()
+
+  if (isCardImageColumnMissing(updateResult.error)) {
+    if (hasDistinctCardImages(images)) return updateResult
+
+    updateResult = await supabase
+      .from('news_posts')
+      .update(withoutCardImagePath(payload))
+      .eq('id', id)
+      .select(legacyBaseNewsColumns)
+      .single()
+  }
 
   if (updateResult.error) return updateResult
 
@@ -876,33 +1106,64 @@ export async function deleteNewsComment(commentId) {
   }
 }
 
-function toGalleryPayload(values, imagePath) {
+function toGalleryPayload(values, imagePath, cardImagePath) {
   return {
     album: values.album.trim(),
     category: values.category,
     description: values.description.trim(),
     alt_text: values.altText.trim(),
     image_path: imagePath,
+    card_image_path: cardImagePath || imagePath,
     captured_on: values.capturedOn,
     status: values.status,
     sort_order: Number(values.sortOrder) || 0,
   }
 }
 
-export async function createGalleryPhoto(values, imagePath) {
+export async function createGalleryPhoto(
+  values,
+  imagePath,
+  cardImagePath = null,
+) {
+  const payload = toGalleryPayload(values, imagePath, cardImagePath)
+  const insertResult = await supabase
+    .from('gallery_photos')
+    .insert(payload)
+    .select(galleryColumns)
+    .single()
+
+  if (!isCardImageColumnMissing(insertResult.error)) return insertResult
+  if (cardImagePath && cardImagePath !== imagePath) return insertResult
+
   return supabase
     .from('gallery_photos')
-    .insert(toGalleryPayload(values, imagePath))
-    .select(galleryColumns)
+    .insert(withoutCardImagePath(payload))
+    .select(legacyGalleryColumns)
     .single()
 }
 
-export async function updateGalleryPhoto(id, values, imagePath) {
-  return supabase
+export async function updateGalleryPhoto(
+  id,
+  values,
+  imagePath,
+  cardImagePath = null,
+) {
+  const payload = toGalleryPayload(values, imagePath, cardImagePath)
+  const updateResult = await supabase
     .from('gallery_photos')
-    .update(toGalleryPayload(values, imagePath))
+    .update(payload)
     .eq('id', id)
     .select(galleryColumns)
+    .single()
+
+  if (!isCardImageColumnMissing(updateResult.error)) return updateResult
+  if (cardImagePath && cardImagePath !== imagePath) return updateResult
+
+  return supabase
+    .from('gallery_photos')
+    .update(withoutCardImagePath(payload))
+    .eq('id', id)
+    .select(legacyGalleryColumns)
     .single()
 }
 

@@ -1,7 +1,30 @@
 import { isSupabaseConfigured, supabase } from './supabase'
-import { mediaBucket } from './media'
+import { isCardImageColumnMissing, mediaBucket } from './media'
 
 const eventColumns = [
+  'id',
+  'slug',
+  'title',
+  'category',
+  'summary',
+  'description',
+  'venue',
+  'starts_at',
+  'ends_at',
+  'registration_url',
+  'image_path',
+  'card_image_path',
+  'image_alt',
+  'show_in_gallery',
+  'status',
+  'is_featured',
+  'published_at',
+  'created_by',
+  'created_at',
+  'updated_at',
+].join(', ')
+
+const legacyEventColumns = [
   'id',
   'slug',
   'title',
@@ -43,6 +66,18 @@ function getPublicEventImageUrl(path) {
   return supabase.storage.from(mediaBucket).getPublicUrl(path).data.publicUrl
 }
 
+async function withLegacyEventColumns(primaryQuery, legacyQuery) {
+  const primaryResult = await primaryQuery
+  if (!isCardImageColumnMissing(primaryResult.error)) return primaryResult
+  return legacyQuery
+}
+
+function withoutCardImagePath(payload) {
+  const legacyPayload = { ...payload }
+  delete legacyPayload.card_image_path
+  return legacyPayload
+}
+
 export const eventCategories = [
   'Academic',
   'Competition',
@@ -77,6 +112,8 @@ export function normalizeEvent(row) {
       ? `${timeFormatter.format(startsAt)} - ${timeFormatter.format(endsAt)}`
       : timeFormatter.format(startsAt),
     image: getPublicEventImageUrl(row.image_path),
+    cardImagePath: row.card_image_path || row.image_path,
+    cardImage: getPublicEventImageUrl(row.card_image_path || row.image_path),
     imageAlt: row.image_alt || `${row.title} event photo`,
     isFeatured: row.is_featured,
     showInGallery: row.show_in_gallery,
@@ -93,13 +130,22 @@ export async function getPublicEvents() {
     return { data: null, error: new Error('Supabase is not configured.') }
   }
 
-  const { data, error } = await supabase
-    .from('events')
-    .select(eventColumns)
-    .in('status', ['published', 'cancelled'])
-    .lte('published_at', new Date().toISOString())
-    .order('is_featured', { ascending: false })
-    .order('starts_at', { ascending: true })
+  const { data, error } = await withLegacyEventColumns(
+    supabase
+      .from('events')
+      .select(eventColumns)
+      .in('status', ['published', 'cancelled'])
+      .lte('published_at', new Date().toISOString())
+      .order('is_featured', { ascending: false })
+      .order('starts_at', { ascending: true }),
+    supabase
+      .from('events')
+      .select(legacyEventColumns)
+      .in('status', ['published', 'cancelled'])
+      .lte('published_at', new Date().toISOString())
+      .order('is_featured', { ascending: false })
+      .order('starts_at', { ascending: true }),
+  )
 
   return {
     data: data?.map(normalizeEvent) ?? null,
@@ -108,10 +154,16 @@ export async function getPublicEvents() {
 }
 
 export async function getAdminEvents() {
-  const { data, error } = await supabase
-    .from('events')
-    .select(eventColumns)
-    .order('starts_at', { ascending: false })
+  const { data, error } = await withLegacyEventColumns(
+    supabase
+      .from('events')
+      .select(eventColumns)
+      .order('starts_at', { ascending: false }),
+    supabase
+      .from('events')
+      .select(legacyEventColumns)
+      .order('starts_at', { ascending: false }),
+  )
 
   return { data: data ?? null, error }
 }
@@ -137,7 +189,7 @@ async function createAvailableSlug(title) {
   return `${baseSlug}-${Date.now().toString(36).slice(-6)}`
 }
 
-function toEventPayload(values, imagePath, publishedAt) {
+function toEventPayload(values, imagePath, publishedAt, cardImagePath) {
   const isPublic = ['published', 'cancelled'].includes(values.status)
 
   return {
@@ -152,6 +204,7 @@ function toEventPayload(values, imagePath, publishedAt) {
       : null,
     registration_url: values.registrationUrl.trim() || null,
     image_path: imagePath || null,
+    card_image_path: cardImagePath || imagePath || null,
     image_alt: values.imageAlt?.trim() || '',
     show_in_gallery: Boolean(values.showInGallery),
     status: values.status,
@@ -162,25 +215,56 @@ function toEventPayload(values, imagePath, publishedAt) {
   }
 }
 
-export async function createEvent(values, imagePath = null) {
+export async function createEvent(
+  values,
+  imagePath = null,
+  cardImagePath = null,
+) {
   const slug = await createAvailableSlug(values.title)
+  const payload = {
+    ...toEventPayload(values, imagePath, null, cardImagePath),
+    slug,
+  }
+
+  const insertResult = await supabase
+    .from('events')
+    .insert(payload)
+    .select(eventColumns)
+    .single()
+
+  if (!isCardImageColumnMissing(insertResult.error)) return insertResult
+  if (cardImagePath && cardImagePath !== imagePath) return insertResult
 
   return supabase
     .from('events')
-    .insert({
-      ...toEventPayload(values, imagePath, null),
-      slug,
-    })
-    .select(eventColumns)
+    .insert(withoutCardImagePath(payload))
+    .select(legacyEventColumns)
     .single()
 }
 
-export async function updateEvent(id, values, imagePath, publishedAt) {
-  return supabase
+export async function updateEvent(
+  id,
+  values,
+  imagePath,
+  publishedAt,
+  cardImagePath = null,
+) {
+  const payload = toEventPayload(values, imagePath, publishedAt, cardImagePath)
+  const updateResult = await supabase
     .from('events')
-    .update(toEventPayload(values, imagePath, publishedAt))
+    .update(payload)
     .eq('id', id)
     .select(eventColumns)
+    .single()
+
+  if (!isCardImageColumnMissing(updateResult.error)) return updateResult
+  if (cardImagePath && cardImagePath !== imagePath) return updateResult
+
+  return supabase
+    .from('events')
+    .update(withoutCardImagePath(payload))
+    .eq('id', id)
+    .select(legacyEventColumns)
     .single()
 }
 

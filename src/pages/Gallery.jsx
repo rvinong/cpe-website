@@ -415,7 +415,7 @@ function Gallery() {
                         <AnimatePresence mode="wait" initial={false}>
                           <Motion.img
                             key={photo.id}
-                            src={photo.image}
+                            src={photo.cardImage || photo.image}
                             alt={photo.alt}
                             loading="lazy"
                             decoding="async"

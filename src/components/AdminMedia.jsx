@@ -89,8 +89,14 @@ function revokePreviewUrl(url) {
   if (url?.startsWith('blob:')) URL.revokeObjectURL(url)
 }
 
+function revokePreviewUrls(...urls) {
+  ;[...new Set(urls.filter(Boolean))].forEach(revokePreviewUrl)
+}
+
 function toNewsImageDraft(image) {
   const imagePath = image.imagePath || image.image_path || ''
+  const cardImagePath =
+    image.cardImagePath || image.card_image_path || imagePath
 
   return {
     localId: image.id?.startsWith?.('legacy-')
@@ -98,9 +104,13 @@ function toNewsImageDraft(image) {
       : image.id || crypto.randomUUID(),
     id: image.id?.startsWith?.('legacy-') ? null : image.id,
     imagePath,
+    cardImagePath,
     previewUrl: image.image || getImageUrl(imagePath),
+    cardPreviewUrl:
+      image.cardImage || getImageUrl(cardImagePath),
     altText: image.altText || image.alt_text || '',
     file: null,
+    cardFile: null,
   }
 }
 
@@ -110,9 +120,12 @@ function getNewsImagePaths(item) {
   item?.images?.forEach((image) => {
     const imagePath = image.imagePath || image.image_path
     if (imagePath) paths.add(imagePath)
+    const cardImagePath = image.cardImagePath || image.card_image_path
+    if (cardImagePath) paths.add(cardImagePath)
   })
 
   if (item?.image_path) paths.add(item.image_path)
+  if (item?.card_image_path) paths.add(item.card_image_path)
 
   return [...paths]
 }
@@ -146,7 +159,9 @@ function AdminMedia() {
   const [newsImageDrafts, setNewsImageDrafts] = useState([])
   const [photoForm, setPhotoForm] = useState(emptyPhotoForm)
   const [selectedFile, setSelectedFile] = useState(null)
+  const [cardFile, setCardFile] = useState(null)
   const [previewUrl, setPreviewUrl] = useState('')
+  const [cardPreviewUrl, setCardPreviewUrl] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [needsSchema, setNeedsSchema] = useState(false)
@@ -204,10 +219,13 @@ function AdminMedia() {
   }, [])
 
   useEffect(
-    () => () => {
-      if (previewUrl.startsWith('blob:')) URL.revokeObjectURL(previewUrl)
-    },
+    () => () => revokePreviewUrl(previewUrl),
     [previewUrl],
+  )
+
+  useEffect(
+    () => () => revokePreviewUrl(cardPreviewUrl),
+    [cardPreviewUrl],
   )
 
   const counts = useMemo(
@@ -223,15 +241,19 @@ function AdminMedia() {
   )
 
   const resetEditor = () => {
-    revokePreviewUrl(previewUrl)
-    newsImageDrafts.forEach((image) => revokePreviewUrl(image.previewUrl))
+    revokePreviewUrls(previewUrl, cardPreviewUrl)
+    newsImageDrafts.forEach((image) =>
+      revokePreviewUrls(image.previewUrl, image.cardPreviewUrl),
+    )
     setEditorType(null)
     setEditingItem(null)
     setNewsForm(emptyNewsForm)
     setNewsImageDrafts([])
     setPhotoForm(emptyPhotoForm)
     setSelectedFile(null)
+    setCardFile(null)
     setPreviewUrl('')
+    setCardPreviewUrl('')
   }
 
   const openNewsEditor = (item = null) => {
@@ -254,6 +276,8 @@ function AdminMedia() {
     setNewsImageDrafts(item?.images?.map(toNewsImageDraft) || [])
     setPreviewUrl('')
     setSelectedFile(null)
+    setCardFile(null)
+    setCardPreviewUrl('')
     setError('')
     setSuccess('')
   }
@@ -275,7 +299,11 @@ function AdminMedia() {
         : emptyPhotoForm,
     )
     setPreviewUrl(getImageUrl(item?.image_path))
+    setCardPreviewUrl(
+      getImageUrl(item?.card_image_path || item?.image_path),
+    )
     setSelectedFile(null)
+    setCardFile(null)
     setError('')
     setSuccess('')
   }
@@ -303,18 +331,22 @@ function AdminMedia() {
       return
     }
 
-    if (previewUrl.startsWith('blob:')) URL.revokeObjectURL(previewUrl)
+    revokePreviewUrls(previewUrl, cardPreviewUrl)
+    const originalPreviewUrl = file ? URL.createObjectURL(file) : ''
+    const nextCardPreviewUrl = file ? URL.createObjectURL(file) : ''
     setSelectedFile(file)
-    setPreviewUrl(file ? URL.createObjectURL(file) : '')
+    setCardFile(null)
+    setPreviewUrl(originalPreviewUrl)
+    setCardPreviewUrl(nextCardPreviewUrl)
     setError('')
   }
 
   const applyPhotoCrop = ({ file, previewUrl: croppedPreviewUrl }) => {
     if (!croppedPreviewUrl) return
 
-    revokePreviewUrl(previewUrl)
-    setSelectedFile(file)
-    setPreviewUrl(croppedPreviewUrl)
+    revokePreviewUrl(cardPreviewUrl)
+    setCardFile(file)
+    setCardPreviewUrl(croppedPreviewUrl)
     setError('')
   }
 
@@ -335,14 +367,21 @@ function AdminMedia() {
       return
     }
 
-    const drafts = files.map((file) => ({
-      localId: crypto.randomUUID(),
-      id: null,
-      imagePath: '',
-      previewUrl: URL.createObjectURL(file),
-      altText: '',
-      file,
-    }))
+    const drafts = files.map((file) => {
+      const originalPreviewUrl = URL.createObjectURL(file)
+
+      return {
+        localId: crypto.randomUUID(),
+        id: null,
+        imagePath: '',
+        cardImagePath: '',
+        previewUrl: originalPreviewUrl,
+        cardPreviewUrl: originalPreviewUrl,
+        altText: '',
+        file,
+        cardFile: null,
+      }
+    })
 
     setNewsImageDrafts((current) => [...current, ...drafts])
     setError('')
@@ -371,14 +410,16 @@ function AdminMedia() {
         return current
       }
 
-      revokePreviewUrl(currentImage.previewUrl)
+      if (currentImage.cardPreviewUrl !== currentImage.previewUrl) {
+        revokePreviewUrl(currentImage.cardPreviewUrl)
+      }
       return current.map((image) =>
         image.localId === localId
           ? {
               ...image,
-              imagePath: '',
-              previewUrl: croppedPreviewUrl,
-              file,
+              cardImagePath: '',
+              cardPreviewUrl: croppedPreviewUrl,
+              cardFile: file,
             }
           : image,
       )
@@ -405,7 +446,7 @@ function AdminMedia() {
   const removeNewsImageDraft = (localId) => {
     setNewsImageDrafts((current) => {
       const image = current.find((item) => item.localId === localId)
-      revokePreviewUrl(image?.previewUrl)
+      revokePreviewUrls(image?.previewUrl, image?.cardPreviewUrl)
       return current.filter((item) => item.localId !== localId)
     })
   }
@@ -448,6 +489,7 @@ function AdminMedia() {
 
     for (const image of newsImageDrafts) {
       let imagePath = image.imagePath
+      let cardImagePath = image.cardImagePath || imagePath
 
       if (image.file) {
         const uploadResult = await uploadMedia(image.file, 'news')
@@ -462,8 +504,24 @@ function AdminMedia() {
         uploadedPaths.push(imagePath)
       }
 
+      if (image.cardFile) {
+        const uploadResult = await uploadMedia(image.cardFile, 'news')
+        if (uploadResult.error) {
+          await Promise.all(uploadedPaths.map((path) => removeMedia(path)))
+          setError(uploadResult.error.message)
+          setIsSaving(false)
+          return
+        }
+
+        cardImagePath = uploadResult.data.path
+        uploadedPaths.push(cardImagePath)
+      } else if (image.file) {
+        cardImagePath = imagePath
+      }
+
       preparedImages.push({
         imagePath,
+        cardImagePath,
         altText: image.altText,
       })
     }
@@ -491,9 +549,14 @@ function AdminMedia() {
     }
 
     if (editingItem) {
-      const savedPaths = new Set(preparedImages.map((image) => image.imagePath))
+      const savedPaths = new Set(
+        preparedImages.flatMap((image) => [
+          image.imagePath,
+          image.cardImagePath,
+        ]),
+      )
       const deletedPaths = getNewsImagePaths(editingItem).filter(
-        (path) => !savedPaths.has(path),
+        (path) => path && !savedPaths.has(path),
       )
       await Promise.all(deletedPaths.map((path) => removeMedia(path)))
     }
@@ -541,7 +604,9 @@ function AdminMedia() {
     }
 
     setIsSaving(true)
+    const uploadedPaths = []
     let uploadedPath = null
+    let uploadedCardPath = null
 
     if (selectedFile) {
       const uploadResult = await uploadMedia(selectedFile, 'gallery')
@@ -551,23 +616,55 @@ function AdminMedia() {
         return
       }
       uploadedPath = uploadResult.data.path
+      uploadedPaths.push(uploadedPath)
     }
 
-    const imagePath = uploadedPath || editingItem.image_path
+    if (cardFile) {
+      const uploadResult = await uploadMedia(cardFile, 'gallery')
+      if (uploadResult.error) {
+        await Promise.all(uploadedPaths.map((path) => removeMedia(path)))
+        setError(uploadResult.error.message)
+        setIsSaving(false)
+        return
+      }
+      uploadedCardPath = uploadResult.data.path
+      uploadedPaths.push(uploadedCardPath)
+    }
+
+    const imagePath =
+      uploadedPath || (previewUrl ? editingItem?.image_path : null)
+    const cardImagePath =
+      uploadedCardPath ||
+      (cardPreviewUrl
+        ? editingItem?.card_image_path || imagePath
+        : null)
     const result = editingItem
-      ? await updateGalleryPhoto(editingItem.id, photoForm, imagePath)
-      : await createGalleryPhoto(photoForm, imagePath)
+      ? await updateGalleryPhoto(
+          editingItem.id,
+          photoForm,
+          imagePath,
+          cardImagePath,
+        )
+      : await createGalleryPhoto(photoForm, imagePath, cardImagePath)
 
     if (result.error) {
-      if (uploadedPath) await removeMedia(uploadedPath)
+      await Promise.all(uploadedPaths.map((path) => removeMedia(path)))
       setError(result.error.message)
       setNeedsSchema(isMediaSchemaMissing(result.error))
       setIsSaving(false)
       return
     }
 
-    if (uploadedPath && editingItem?.image_path) {
-      await removeMedia(editingItem.image_path)
+    if (editingItem) {
+      const oldPaths = new Set([
+        editingItem.image_path,
+        editingItem.card_image_path,
+      ])
+      const savedPaths = new Set([imagePath, cardImagePath])
+      const pathsToRemove = [...oldPaths].filter(
+        (path) => path && !savedPaths.has(path),
+      )
+      await Promise.all(pathsToRemove.map((path) => removeMedia(path)))
     }
 
     if (
@@ -604,7 +701,11 @@ function AdminMedia() {
       setError(deleteError.message)
       return
     }
-    await removeMedia(item.image_path)
+    await Promise.all(
+      [...new Set([item.image_path, item.card_image_path])]
+        .filter(Boolean)
+        .map((path) => removeMedia(path)),
+    )
     setSuccess('Gallery photo deleted.')
     await loadMedia()
   }
@@ -754,7 +855,11 @@ function AdminMedia() {
               >
                 {item.image_path ? (
                   <img
-                    src={item.image || getImageUrl(item.image_path)}
+                    src={
+                      item.cardImage ||
+                      item.image ||
+                      getImageUrl(item.card_image_path || item.image_path)
+                    }
                     alt=""
                     loading="lazy"
                     decoding="async"
@@ -1123,7 +1228,7 @@ function AdminMedia() {
                         >
                           <div>
                             <img
-                              src={image.previewUrl}
+                              src={image.cardPreviewUrl || image.previewUrl}
                               alt=""
                               className="aspect-[4/3] w-full rounded-xl bg-slate-100 object-cover"
                             />
@@ -1247,8 +1352,10 @@ function AdminMedia() {
                 kind={editorType === 'news' ? 'news' : 'gallery'}
                 image={
                   editorType === 'news'
-                    ? newsImageDrafts[0]?.previewUrl || ''
-                    : previewUrl
+                    ? newsImageDrafts[0]?.cardPreviewUrl ||
+                      newsImageDrafts[0]?.previewUrl ||
+                      ''
+                    : cardPreviewUrl || previewUrl
                 }
                 imageCount={
                   editorType === 'news'

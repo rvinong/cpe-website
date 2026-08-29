@@ -14,13 +14,13 @@ function NewsCard({ article, compact = false }) {
 
   const cardContent = (
     <>
-      {article.image && compact && article.slug && (
+      {(article.cardImage || article.image) && compact && article.slug && (
         <Link
           to={storyHref}
           className="media-frame news-card-media"
         >
           <img
-            src={article.image}
+            src={article.cardImage || article.image}
             alt={article.imageAlt || ''}
             loading="lazy"
             decoding="async"
@@ -28,10 +28,10 @@ function NewsCard({ article, compact = false }) {
           />
         </Link>
       )}
-      {article.image && (!compact || !article.slug) && (
+      {(article.cardImage || article.image) && (!compact || !article.slug) && (
         <div className="media-frame news-card-media">
           <img
-            src={article.image}
+            src={article.cardImage || article.image}
             alt={article.imageAlt || ''}
             loading="lazy"
             decoding="async"

@@ -128,6 +128,10 @@ function revokePreviewUrl(url) {
   if (url?.startsWith('blob:')) URL.revokeObjectURL(url)
 }
 
+function revokePreviewUrls(...urls) {
+  ;[...new Set(urls.filter(Boolean))].forEach(revokePreviewUrl)
+}
+
 function getTimingLabel(item) {
   const timing = getEventTiming(item)
 
@@ -144,7 +148,9 @@ function AdminEvents() {
   const [editingItem, setEditingItem] = useState(null)
   const [form, setForm] = useState(emptyForm)
   const [selectedFile, setSelectedFile] = useState(null)
+  const [cardFile, setCardFile] = useState(null)
   const [previewUrl, setPreviewUrl] = useState('')
+  const [cardPreviewUrl, setCardPreviewUrl] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedStatus, setSelectedStatus] = useState('all')
   const [selectedTiming, setSelectedTiming] = useState('all')
@@ -200,6 +206,13 @@ function AdminEvents() {
     [previewUrl],
   )
 
+  useEffect(
+    () => () => {
+      revokePreviewUrl(cardPreviewUrl)
+    },
+    [cardPreviewUrl],
+  )
+
   const counts = useMemo(
     () => ({
       all: items.length,
@@ -247,18 +260,20 @@ function AdminEvents() {
   }, [items, searchTerm, selectedStatus, selectedTiming])
 
   const openCreateEditor = () => {
-    revokePreviewUrl(previewUrl)
+    revokePreviewUrls(previewUrl, cardPreviewUrl)
     setEditingItem(null)
     setForm(emptyForm)
     setSelectedFile(null)
+    setCardFile(null)
     setPreviewUrl('')
+    setCardPreviewUrl('')
     setError('')
     setSuccess('')
     setIsEditorOpen(true)
   }
 
   const openEditEditor = (item) => {
-    revokePreviewUrl(previewUrl)
+    revokePreviewUrls(previewUrl, cardPreviewUrl)
     setEditingItem(item)
     setForm({
       title: item.title,
@@ -275,7 +290,11 @@ function AdminEvents() {
       isFeatured: item.is_featured,
     })
     setSelectedFile(null)
+    setCardFile(null)
     setPreviewUrl(getImageUrl(item.image_path))
+    setCardPreviewUrl(
+      getImageUrl(item.card_image_path || item.image_path),
+    )
     setError('')
     setSuccess('')
     setIsEditorOpen(true)
@@ -283,12 +302,14 @@ function AdminEvents() {
 
   const closeEditor = () => {
     if (isSaving) return
-    revokePreviewUrl(previewUrl)
+    revokePreviewUrls(previewUrl, cardPreviewUrl)
     setIsEditorOpen(false)
     setEditingItem(null)
     setForm(emptyForm)
     setSelectedFile(null)
+    setCardFile(null)
     setPreviewUrl('')
+    setCardPreviewUrl('')
   }
 
   const updateField = (event) => {
@@ -309,9 +330,13 @@ function AdminEvents() {
       return
     }
 
-    revokePreviewUrl(previewUrl)
+    revokePreviewUrls(previewUrl, cardPreviewUrl)
+    const originalPreviewUrl = file ? URL.createObjectURL(file) : ''
+    const nextCardPreviewUrl = file ? URL.createObjectURL(file) : ''
     setSelectedFile(file)
-    setPreviewUrl(file ? URL.createObjectURL(file) : '')
+    setCardFile(null)
+    setPreviewUrl(originalPreviewUrl)
+    setCardPreviewUrl(nextCardPreviewUrl)
     setForm((current) => ({
       ...current,
       showInGallery: file ? current.showInGallery : false,
@@ -323,16 +348,18 @@ function AdminEvents() {
   const applyEventPhotoCrop = ({ file, previewUrl: croppedPreviewUrl }) => {
     if (!croppedPreviewUrl) return
 
-    revokePreviewUrl(previewUrl)
-    setSelectedFile(file)
-    setPreviewUrl(croppedPreviewUrl)
+    revokePreviewUrl(cardPreviewUrl)
+    setCardFile(file)
+    setCardPreviewUrl(croppedPreviewUrl)
     setError('')
   }
 
   const clearEventImage = () => {
-    revokePreviewUrl(previewUrl)
+    revokePreviewUrls(previewUrl, cardPreviewUrl)
     setSelectedFile(null)
+    setCardFile(null)
     setPreviewUrl('')
+    setCardPreviewUrl('')
     setForm((current) => ({
       ...current,
       imageAlt: '',
@@ -369,7 +396,9 @@ function AdminEvents() {
     }
 
     setIsSaving(true)
+    const uploadedPaths = []
     let uploadedPath = null
+    let uploadedCardPath = null
 
     if (selectedFile) {
       const uploadResult = await uploadMedia(selectedFile, 'events')
@@ -380,29 +409,57 @@ function AdminEvents() {
       }
 
       uploadedPath = uploadResult.data.path
+      uploadedPaths.push(uploadedPath)
+    }
+
+    if (cardFile) {
+      const uploadResult = await uploadMedia(cardFile, 'events')
+      if (uploadResult.error) {
+        await Promise.all(uploadedPaths.map((path) => removeMedia(path)))
+        setError(uploadResult.error.message)
+        setIsSaving(false)
+        return
+      }
+
+      uploadedCardPath = uploadResult.data.path
+      uploadedPaths.push(uploadedCardPath)
     }
 
     const imagePath =
       uploadedPath || (previewUrl ? editingItem?.image_path : null)
+    const cardImagePath =
+      uploadedCardPath ||
+      (cardPreviewUrl
+        ? editingItem?.card_image_path || imagePath
+        : null)
     const result = editingItem
       ? await updateEvent(
           editingItem.id,
           form,
           imagePath,
           editingItem.published_at,
+          cardImagePath,
         )
-      : await createEvent(form, imagePath)
+      : await createEvent(form, imagePath, cardImagePath)
 
     if (result.error) {
-      if (uploadedPath) await removeMedia(uploadedPath)
+      await Promise.all(uploadedPaths.map((path) => removeMedia(path)))
       setError(result.error.message)
       setNeedsSchema(isEventsTableMissing(result.error))
       setIsSaving(false)
       return
     }
 
-    if (editingItem?.image_path && editingItem.image_path !== imagePath) {
-      await removeMedia(editingItem.image_path)
+    if (editingItem) {
+      const oldPaths = new Set([
+        editingItem.image_path,
+        editingItem.card_image_path,
+      ])
+      const savedPaths = new Set([imagePath, cardImagePath])
+      const pathsToRemove = [...oldPaths].filter(
+        (path) => path && !savedPaths.has(path),
+      )
+      await Promise.all(pathsToRemove.map((path) => removeMedia(path)))
     }
 
     if (
@@ -418,12 +475,14 @@ function AdminEvents() {
         : 'Event created successfully.',
     )
     setIsSaving(false)
-    revokePreviewUrl(previewUrl)
+    revokePreviewUrls(previewUrl, cardPreviewUrl)
     setIsEditorOpen(false)
     setEditingItem(null)
     setForm(emptyForm)
     setSelectedFile(null)
+    setCardFile(null)
     setPreviewUrl('')
+    setCardPreviewUrl('')
     await loadEvents()
   }
 
@@ -443,7 +502,11 @@ function AdminEvents() {
       return
     }
 
-    if (item.image_path) await removeMedia(item.image_path)
+    await Promise.all(
+      [...new Set([item.image_path, item.card_image_path])]
+        .filter(Boolean)
+        .map((path) => removeMedia(path)),
+    )
 
     setSuccess('Event deleted.')
     await loadEvents()
@@ -977,8 +1040,8 @@ function AdminEvents() {
               <div className="sm:col-span-2">
                 <PublishedPhotoPreview
                   kind="event"
-                  image={previewUrl}
-                  imageCount={previewUrl ? 1 : 0}
+                  image={cardPreviewUrl || previewUrl}
+                  imageCount={cardPreviewUrl || previewUrl ? 1 : 0}
                   title={form.title}
                   category={form.category}
                   date={form.startsAt}

@@ -235,10 +235,14 @@ function Events() {
                               )}
                           </div>
                           <div className="grid gap-4">
-                            {highlightedEvent.image && (
+                            {(highlightedEvent.cardImage ||
+                              highlightedEvent.image) && (
                               <div className="media-frame aspect-[4/3] rounded-3xl">
                                 <img
-                                  src={highlightedEvent.image}
+                                  src={
+                                    highlightedEvent.cardImage ||
+                                    highlightedEvent.image
+                                  }
                                   alt={highlightedEvent.imageAlt || ''}
                                   loading="lazy"
                                   decoding="async"

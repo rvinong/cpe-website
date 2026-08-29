@@ -28,10 +28,10 @@ function EventCard({ event, compact = false }) {
             : 'bg-gradient-to-r from-brand-700 to-brand-500'
         }`}
       />
-      {event.image && (
+      {(event.cardImage || event.image) && (
         <div className={compact ? 'media-frame h-48' : 'media-frame h-56'}>
           <img
-            src={event.image}
+            src={event.cardImage || event.image}
             alt={event.imageAlt || ''}
             loading="lazy"
             decoding="async"

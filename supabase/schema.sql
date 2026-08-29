@@ -360,6 +360,7 @@ create table public.events (
   ends_at timestamptz,
   registration_url text,
   image_path text,
+  card_image_path text,
   image_alt text not null default '',
   show_in_gallery boolean not null default true,
   status text not null default 'draft'
