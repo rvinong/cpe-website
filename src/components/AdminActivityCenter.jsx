@@ -428,17 +428,17 @@ function AdminActivityCenter({
   }, [activityData, activities.length, attentionItems.length, role])
 
   return (
-    <section className="mt-8">
+    <section className="mt-6">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {metrics.map(([label, value, detail]) => (
           <article
             key={label}
-            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_18px_50px_-38px_rgba(15,23,42,0.35)]"
+            className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_18px_50px_-38px_rgba(15,23,42,0.35)]"
           >
             <p className="text-xs font-extrabold tracking-wide text-slate-400 uppercase">
               {label}
             </p>
-            <p className="mt-3 text-2xl font-black text-navy-900">
+            <p className="mt-2 text-2xl font-black text-navy-900">
               {isLoading ? '...' : value}
             </p>
             <p className="mt-1 text-xs text-slate-500">{detail}</p>
@@ -446,9 +446,9 @@ function AdminActivityCenter({
         ))}
       </div>
 
-      <div className="mt-5 grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
+      <div className="mt-4 grid gap-4 xl:grid-cols-[0.9fr_1.1fr]">
         <article className="surface-card overflow-hidden p-0">
-          <div className="border-b border-slate-100 p-6">
+          <div className="border-b border-slate-100 p-4">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-extrabold tracking-[0.18em] text-brand-600 uppercase">
@@ -462,14 +462,14 @@ function AdminActivityCenter({
                 <Sparkles size={22} aria-hidden="true" />
               </span>
             </div>
-            <p className="mt-3 text-sm leading-6 text-slate-600">
+            <p className="mt-2 text-sm leading-6 text-slate-600">
               A quick scan of tasks, drafts, and upcoming event pressure points.
             </p>
           </div>
 
-          <div className="grid gap-3 p-5">
+          <div className="grid gap-3 p-4">
             {isLoading ? (
-              <div className="flex items-center justify-center gap-2 rounded-2xl bg-brand-50/45 p-6 text-sm font-extrabold text-brand-600">
+              <div className="flex items-center justify-center gap-2 rounded-2xl bg-brand-50/45 p-5 text-sm font-extrabold text-brand-600">
                 <LoaderCircle
                   size={18}
                   className="animate-spin"
@@ -484,7 +484,7 @@ function AdminActivityCenter({
                     key={id}
                     type="button"
                     onClick={() => onSelectSection(section)}
-                    className="group flex items-start gap-4 rounded-2xl border border-slate-300 bg-slate-50/70 p-4 text-left transition hover:-translate-y-0.5 hover:border-brand-300 hover:bg-white"
+                    className="group flex items-start gap-3 rounded-2xl border border-slate-300 bg-slate-50/70 p-3 text-left transition hover:-translate-y-0.5 hover:border-brand-300 hover:bg-white"
                   >
                     <span
                       className={`grid size-11 shrink-0 place-items-center rounded-xl text-sm font-black ring-1 ${getToneClass(
@@ -510,7 +510,7 @@ function AdminActivityCenter({
                 ),
               )
             ) : (
-              <div className="rounded-2xl border border-emerald-300 bg-emerald-50 p-5">
+              <div className="rounded-2xl border border-emerald-300 bg-emerald-50 p-4">
                 <div className="flex gap-3">
                   <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-emerald-600">
                     <CheckCircle2 size={19} aria-hidden="true" />
@@ -536,7 +536,7 @@ function AdminActivityCenter({
         </article>
 
         <article className="surface-card overflow-hidden p-0">
-          <div className="border-b border-slate-100 p-6">
+          <div className="border-b border-slate-100 p-4">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-extrabold tracking-[0.18em] text-brand-600 uppercase">
@@ -550,14 +550,14 @@ function AdminActivityCenter({
                 <Radio size={22} aria-hidden="true" />
               </span>
             </div>
-            <p className="mt-3 text-sm leading-6 text-slate-600">
+            <p className="mt-2 text-sm leading-6 text-slate-600">
               A shared pulse of content updates and team task movement.
             </p>
           </div>
 
-          <div className="grid gap-1 p-5">
+          <div className="grid gap-1 p-4">
             {isLoading ? (
-              <div className="flex items-center justify-center gap-2 rounded-2xl bg-brand-50/45 p-6 text-sm font-extrabold text-brand-600">
+              <div className="flex items-center justify-center gap-2 rounded-2xl bg-brand-50/45 p-5 text-sm font-extrabold text-brand-600">
                 <LoaderCircle
                   size={18}
                   className="animate-spin"
@@ -606,7 +606,7 @@ function AdminActivityCenter({
                 ),
               )
             ) : (
-              <div className="rounded-2xl border border-dashed border-blue-200 bg-brand-50/35 p-6 text-center">
+              <div className="rounded-2xl border border-dashed border-blue-200 bg-brand-50/35 p-5 text-center">
                 <p className="text-sm font-black text-navy-900">
                   No recent activity yet
                 </p>

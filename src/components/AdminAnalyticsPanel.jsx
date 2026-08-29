@@ -277,8 +277,8 @@ function AdminAnalyticsPanel({
   )
 
   return (
-    <section className="mt-8">
-      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <section className="mt-6">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-extrabold tracking-[0.18em] text-brand-600 uppercase">
             Dashboard analytics
@@ -297,9 +297,9 @@ function AdminAnalyticsPanel({
         </span>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-[0.82fr_1.18fr]">
+      <div className="grid gap-4 xl:grid-cols-[0.82fr_1.18fr]">
         <article className="surface-card overflow-hidden p-0">
-          <div className="relative isolate overflow-hidden bg-navy-950 p-6 text-white">
+          <div className="relative isolate overflow-hidden bg-navy-950 p-5 text-white">
             <div className="subtle-grid absolute inset-0 -z-20 opacity-10" />
             <div className="absolute -right-16 -top-20 -z-10 size-56 rounded-full bg-brand-600/25 blur-3xl" />
             <div className="flex items-start justify-between gap-4">
@@ -307,7 +307,7 @@ function AdminAnalyticsPanel({
                 <p className="text-xs font-extrabold tracking-[0.18em] text-blue-300 uppercase">
                   Health score
                 </p>
-                <div className="mt-4 flex items-end gap-3">
+                <div className="mt-3 flex items-end gap-3">
                   <span className="text-5xl font-black tracking-tight">
                     {isLoading ? '...' : analytics.healthScore}
                   </span>
@@ -315,7 +315,7 @@ function AdminAnalyticsPanel({
                     / 100
                   </span>
                 </div>
-                <p className="mt-3 text-sm leading-6 text-slate-300">
+                <p className="mt-2 text-sm leading-6 text-slate-300">
                   {isLoading
                     ? 'Analyzing dashboard signals...'
                     : `${analytics.healthLabel} based on publishing, tasks, events, and freshness.`}
@@ -325,7 +325,7 @@ function AdminAnalyticsPanel({
                 <Gauge size={26} aria-hidden="true" />
               </span>
             </div>
-            <div className="mt-7 h-3 overflow-hidden rounded-full bg-white/10">
+            <div className="mt-5 h-3 overflow-hidden rounded-full bg-white/10">
               <div
                 className="h-full rounded-full bg-gradient-to-r from-blue-300 to-brand-500 transition-all duration-700"
                 style={{ width: `${isLoading ? 0 : analytics.healthScore}%` }}
@@ -333,7 +333,7 @@ function AdminAnalyticsPanel({
             </div>
           </div>
 
-          <div className="grid gap-3 p-5 sm:grid-cols-2">
+          <div className="grid gap-3 p-4 sm:grid-cols-2">
             {[
               [
                 'Published rate',
@@ -362,10 +362,10 @@ function AdminAnalyticsPanel({
             ].map(([label, value, detail, Icon]) => (
               <div
                 key={label}
-                className="rounded-2xl border border-slate-300 bg-slate-50/70 p-4"
+                className="rounded-2xl border border-slate-300 bg-slate-50/70 p-3"
               >
                 <Icon size={19} className="text-brand-600" aria-hidden="true" />
-                <p className="mt-3 text-xs font-extrabold tracking-wide text-slate-400 uppercase">
+                <p className="mt-2 text-xs font-extrabold tracking-wide text-slate-400 uppercase">
                   {label}
                 </p>
                 <p className="mt-1 text-2xl font-black text-navy-900">
@@ -380,7 +380,7 @@ function AdminAnalyticsPanel({
         </article>
 
         <div className="grid gap-5">
-          <article className="surface-card p-6">
+          <article className="surface-card p-5">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <p className="text-xs font-extrabold tracking-[0.18em] text-brand-600 uppercase">
@@ -395,9 +395,9 @@ function AdminAnalyticsPanel({
               </span>
             </div>
 
-            <div className="mt-6 grid gap-4">
+            <div className="mt-4 grid gap-3">
               {isLoading ? (
-                <div className="flex items-center justify-center gap-2 rounded-2xl bg-brand-50/45 p-6 text-sm font-extrabold text-brand-600">
+                <div className="flex items-center justify-center gap-2 rounded-2xl bg-brand-50/45 p-5 text-sm font-extrabold text-brand-600">
                   <LoaderCircle
                     size={18}
                     className="animate-spin"
@@ -445,8 +445,8 @@ function AdminAnalyticsPanel({
             </div>
           </article>
 
-          <div className="grid gap-5 lg:grid-cols-2">
-            <article className="surface-card p-6">
+          <div className="grid gap-4 lg:grid-cols-2">
+            <article className="surface-card p-5">
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-xs font-extrabold tracking-[0.18em] text-brand-600 uppercase">
@@ -458,13 +458,13 @@ function AdminAnalyticsPanel({
                 </div>
                 <CalendarDays size={23} className="text-brand-600" />
               </div>
-              <div className="mt-5 grid grid-cols-2 gap-3">
+              <div className="mt-4 grid grid-cols-2 gap-3">
                 {eventPipeline.map(([label, value, detail]) => (
                   <button
                     key={label}
                     type="button"
                     onClick={() => onSelectSection('events')}
-                    className="rounded-2xl border border-slate-300 bg-slate-50/70 p-4 text-left transition hover:border-brand-300 hover:bg-white"
+                    className="rounded-2xl border border-slate-300 bg-slate-50/70 p-3 text-left transition hover:border-brand-300 hover:bg-white"
                   >
                     <p className="text-xs font-extrabold text-slate-400 uppercase">
                       {label}
@@ -478,7 +478,7 @@ function AdminAnalyticsPanel({
               </div>
             </article>
 
-            <article className="surface-card p-6">
+            <article className="surface-card p-5">
               <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="text-xs font-extrabold tracking-[0.18em] text-brand-600 uppercase">
@@ -490,7 +490,7 @@ function AdminAnalyticsPanel({
                 </div>
                 <Clock3 size={23} className="text-brand-600" />
               </div>
-              <div className="mt-5 grid gap-3">
+              <div className="mt-4 grid gap-3">
                 {taskWorkload.map(({ count, label, percent, status }) => (
                   <button
                     key={status}
@@ -522,7 +522,7 @@ function AdminAnalyticsPanel({
         </div>
       </div>
 
-      <article className="surface-card mt-5 p-6">
+      <article className="surface-card mt-4 p-5">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-extrabold tracking-[0.18em] text-brand-600 uppercase">
@@ -536,9 +536,9 @@ function AdminAnalyticsPanel({
             Updated from live dashboard records
           </span>
         </div>
-        <div className="mt-5 grid gap-3 md:grid-cols-2">
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
           {isLoading ? (
-            <div className="rounded-2xl bg-brand-50/45 p-5 text-sm font-extrabold text-brand-600 md:col-span-2">
+            <div className="rounded-2xl bg-brand-50/45 p-4 text-sm font-extrabold text-brand-600 md:col-span-2">
               Reading analytics insights...
             </div>
           ) : (
@@ -547,7 +547,7 @@ function AdminAnalyticsPanel({
                 key={title}
                 type="button"
                 onClick={() => onSelectSection(section)}
-                className={`rounded-2xl border p-5 text-left transition hover:-translate-y-0.5 ${getInsightTone(
+                className={`rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 ${getInsightTone(
                   tone,
                 )}`}
               >
