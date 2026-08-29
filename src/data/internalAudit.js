@@ -1,3 +1,8 @@
+// Keep legacy records visible after Accomplishment Report was merged into Activities.
+export function getInternalAuditCategoryId(type) {
+  return type === 'accomplishment' ? 'activity' : type
+}
+
 export const internalAuditCategories = [
   {
     id: 'project_proposal',
@@ -5,13 +10,6 @@ export const internalAuditCategories = [
     shortLabel: 'Proposals',
     description:
       'Approved project proposals, implementation plans, objectives, and committee responsibilities.',
-  },
-  {
-    id: 'accomplishment',
-    label: 'Accomplishment Report',
-    shortLabel: 'Accomplishments',
-    description:
-      'Records of completed programs, activities, initiatives, and organization outputs.',
   },
   {
     id: 'activity',

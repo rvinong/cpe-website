@@ -6,7 +6,6 @@ import {
   ClipboardList,
   Download,
   Edit3,
-  FileCheck2,
   FileText,
   LoaderCircle,
   ReceiptText,
@@ -19,7 +18,10 @@ import {
   X,
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { internalAuditCategories } from '../data/internalAudit'
+import {
+  getInternalAuditCategoryId,
+  internalAuditCategories,
+} from '../data/internalAudit'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import {
   createAuditReport,
@@ -62,7 +64,6 @@ const statusStyles = {
 
 const typeIcons = {
   project_proposal: ClipboardList,
-  accomplishment: FileCheck2,
   activity: CalendarCheck,
   liquidation: ReceiptText,
   resolution: FileText,
@@ -90,9 +91,10 @@ function toDateTimeInput(value) {
 }
 
 function getTypeLabel(type) {
+  const categoryId = getInternalAuditCategoryId(type)
   return (
-    internalAuditCategories.find((category) => category.id === type)?.label ||
-    type
+    internalAuditCategories.find((category) => category.id === categoryId)
+      ?.label || categoryId
   )
 }
 
@@ -176,8 +178,9 @@ function AdminInternalAudit() {
     const normalizedSearch = searchTerm.trim().toLowerCase()
 
     return items.filter((item) => {
+      const categoryId = getInternalAuditCategoryId(item.report_type)
       const matchesType =
-        selectedType === 'all' || item.report_type === selectedType
+        selectedType === 'all' || categoryId === selectedType
       const matchesStatus =
         selectedStatus === 'all' || item.status === selectedStatus
       const matchesSearch =
@@ -206,7 +209,7 @@ function AdminInternalAudit() {
       item
         ? {
             title: item.title,
-            reportType: item.report_type,
+            reportType: getInternalAuditCategoryId(item.report_type),
             period: item.period,
             summary: item.summary,
             preparedBy: item.prepared_by,
@@ -382,8 +385,8 @@ function AdminInternalAudit() {
           </h2>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
             Upload and publish approved project proposals, activity records,
-            accomplishment reports, liquidation reports, and resolutions for the
-            public transparency archive.
+            liquidation reports, and resolutions for the public transparency
+            archive.
           </p>
         </div>
         <button
@@ -535,7 +538,8 @@ function AdminInternalAudit() {
         ) : (
           <div className="divide-y divide-slate-200">
             {filteredItems.map((item) => {
-              const Icon = typeIcons[item.report_type] || FileText
+              const categoryId = getInternalAuditCategoryId(item.report_type)
+              const Icon = typeIcons[categoryId] || FileText
 
               return (
                 <article

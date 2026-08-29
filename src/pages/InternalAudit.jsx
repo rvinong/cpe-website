@@ -6,7 +6,6 @@ import {
   ClipboardCheck,
   Download,
   Eye,
-  FileCheck2,
   FileText,
   Filter,
   ReceiptText,
@@ -17,7 +16,10 @@ import {
 import { useEffect, useMemo, useState } from 'react'
 import ContentSkeleton from '../components/ContentSkeleton'
 import PageHero from '../components/PageHero'
-import { internalAuditCategories } from '../data/internalAudit'
+import {
+  getInternalAuditCategoryId,
+  internalAuditCategories,
+} from '../data/internalAudit'
 import {
   createAuditReportDownload,
   getPublicAuditReports,
@@ -25,7 +27,6 @@ import {
 
 const categoryIcons = {
   project_proposal: ClipboardCheck,
-  accomplishment: FileCheck2,
   activity: CalendarDays,
   liquidation: ReceiptText,
   resolution: FileText,
@@ -35,10 +36,6 @@ const categoryStyles = {
   project_proposal: {
     icon: 'bg-violet-50 text-violet-600 ring-violet-100',
     badge: 'bg-violet-50 text-violet-600 ring-violet-100',
-  },
-  accomplishment: {
-    icon: 'bg-brand-50 text-brand-600 ring-blue-100',
-    badge: 'bg-brand-50 text-brand-700 ring-blue-100',
   },
   activity: {
     icon: 'bg-amber-50 text-amber-600 ring-amber-100',
@@ -55,7 +52,8 @@ const categoryStyles = {
 }
 
 function getCategory(documentType) {
-  return internalAuditCategories.find((category) => category.id === documentType)
+  const categoryId = getInternalAuditCategoryId(documentType)
+  return internalAuditCategories.find((category) => category.id === categoryId)
 }
 
 function InternalAudit() {
@@ -86,8 +84,9 @@ function InternalAudit() {
 
     return reports.filter((report) => {
       const category = getCategory(report.type)
+      const categoryId = getInternalAuditCategoryId(report.type)
       const matchesCategory =
-        selectedCategory === 'All' || report.type === selectedCategory
+        selectedCategory === 'All' || categoryId === selectedCategory
       const matchesSearch =
         !normalizedSearch ||
         [
@@ -149,7 +148,10 @@ function InternalAudit() {
       label: 'Activities',
       value: isLoading
         ? '...'
-        : reports.filter((report) => report.type === 'activity').length,
+        : reports.filter(
+            (report) =>
+              getInternalAuditCategoryId(report.type) === 'activity',
+          ).length,
       description: 'Documented organization activities',
       icon: CalendarDays,
     },
@@ -166,7 +168,7 @@ function InternalAudit() {
       <PageHero
         eyebrow="Organization accountability"
         title="Organizational Internal Audit"
-        description="Access approved project proposals, activity records, accomplishment reports, liquidation reports, resolutions, and transparency records from the organization."
+        description="Access approved project proposals, activity records, liquidation reports, resolutions, and transparency records from the organization."
         icon={ShieldCheck}
         accentIcon={ClipboardCheck}
         actions={
@@ -300,7 +302,8 @@ function InternalAudit() {
               {internalAuditCategories.map((category, index) => {
                 const Icon = categoryIcons[category.id]
                 const count = reports.filter(
-                  (report) => report.type === category.id,
+                  (report) =>
+                    getInternalAuditCategoryId(report.type) === category.id,
                 ).length
 
                 return (
@@ -360,9 +363,9 @@ function InternalAudit() {
               Reports and Records
             </h2>
             <p className="mt-4 text-base leading-7 text-slate-600">
-              Use this archive for approved project proposals, activity
-              records, accomplishment reports, liquidation reports, and
-              resolutions. Only approved public records appear in this archive.
+              Use this archive for approved project proposals, activity records,
+              liquidation reports, and resolutions. Only approved public records
+              appear in this archive.
             </p>
           </Motion.div>
 
@@ -439,16 +442,17 @@ function InternalAudit() {
               </span>
               <h3 className="empty-state-title">No reports found</h3>
               <p className="empty-state-description">
-                Published project proposals, activity records, accomplishment
-                reports, liquidation reports, and resolutions will appear here
-                after they are approved.
+                Published project proposals, activity records, liquidation
+                reports, and resolutions will appear here after they are
+                approved.
               </p>
             </div>
           ) : (
           <div className="mt-10 grid gap-6 lg:grid-cols-2">
             {filteredReports.map((report, index) => {
-              const category = getCategory(report.type)
-              const Icon = categoryIcons[report.type]
+              const categoryId = getInternalAuditCategoryId(report.type)
+              const category = getCategory(categoryId)
+              const Icon = categoryIcons[categoryId]
 
               return (
                 <Motion.article
@@ -463,7 +467,7 @@ function InternalAudit() {
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <span
                       className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-extrabold ring-1 ring-inset ${
-                        categoryStyles[report.type].badge
+                        categoryStyles[categoryId].badge
                       }`}
                     >
                       <Icon size={15} aria-hidden="true" />

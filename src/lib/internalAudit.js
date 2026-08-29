@@ -1,4 +1,5 @@
 import {
+  getInternalAuditCategoryId,
   internalAuditReports as fallbackAuditReports,
 } from '../data/internalAudit'
 import { isSupabaseConfigured, supabase } from './supabase'
@@ -92,10 +93,13 @@ export function formatAuditFileSize(bytes) {
 }
 
 export function normalizeAuditReport(row) {
+  const categoryId = getInternalAuditCategoryId(row.report_type || row.type)
+
   return {
     ...row,
-    type: row.report_type || row.type,
-    reportType: row.report_type || row.type,
+    report_type: categoryId,
+    type: categoryId,
+    reportType: categoryId,
     preparedBy: row.prepared_by || row.preparedBy || '',
     reviewedBy: row.reviewed_by || row.reviewedBy || '',
     approvedBy: row.approved_by || row.approvedBy || '',
@@ -192,7 +196,7 @@ function toAuditReportPayload(values, file, currentPublishedAt = null) {
 
   return {
     title: values.title.trim(),
-    report_type: values.reportType,
+    report_type: getInternalAuditCategoryId(values.reportType),
     period: values.period.trim(),
     summary: values.summary.trim(),
     prepared_by: values.preparedBy.trim(),
@@ -247,10 +251,18 @@ export async function getPublicAuditReports() {
 }
 
 export async function getAdminAuditReports() {
-  return supabase
+  const result = await supabase
     .from('audit_reports')
     .select(auditReportColumns)
     .order('updated_at', { ascending: false })
+
+  return {
+    ...result,
+    data: (result.data || []).map((row) => ({
+      ...row,
+      report_type: getInternalAuditCategoryId(row.report_type),
+    })),
+  }
 }
 
 export async function createAuditReport(values, file) {
