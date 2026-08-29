@@ -17,6 +17,8 @@ import { Link } from 'react-router-dom'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import AdminListSkeleton from './AdminListSkeleton'
 import { signalBytePublished } from '../lib/byteAssistant'
+import PhotoCropEditor from './PhotoCropEditor'
+import PublishedPhotoPreview from './PublishedPhotoPreview'
 import {
   createGalleryPhoto,
   createNewsPost,
@@ -307,6 +309,15 @@ function AdminMedia() {
     setError('')
   }
 
+  const applyPhotoCrop = ({ file, previewUrl: croppedPreviewUrl }) => {
+    if (!croppedPreviewUrl) return
+
+    revokePreviewUrl(previewUrl)
+    setSelectedFile(file)
+    setPreviewUrl(croppedPreviewUrl)
+    setError('')
+  }
+
   const handleNewsFilesChange = (event) => {
     const files = Array.from(event.target.files || [])
     if (files.length === 0) return
@@ -344,6 +355,35 @@ function AdminMedia() {
         image.localId === localId ? { ...image, [field]: value } : image,
       ),
     )
+  }
+
+  const applyNewsImageCrop = (
+    localId,
+    { file, previewUrl: croppedPreviewUrl },
+  ) => {
+    if (!croppedPreviewUrl) return
+
+    setNewsImageDrafts((current) => {
+      const currentImage = current.find((image) => image.localId === localId)
+
+      if (!currentImage) {
+        revokePreviewUrl(croppedPreviewUrl)
+        return current
+      }
+
+      revokePreviewUrl(currentImage.previewUrl)
+      return current.map((image) =>
+        image.localId === localId
+          ? {
+              ...image,
+              imagePath: '',
+              previewUrl: croppedPreviewUrl,
+              file,
+            }
+          : image,
+      )
+    })
+    setError('')
   }
 
   const moveNewsImage = (localId, direction) => {
@@ -1092,6 +1132,23 @@ function AdminMedia() {
                                 Cover
                               </span>
                             )}
+                            <PhotoCropEditor
+                              image={image.previewUrl}
+                              sourceFile={image.file}
+                              aspectRatio={16 / 7}
+                              title={
+                                index === 0
+                                  ? 'Adjust cover framing'
+                                  : 'Adjust story photo framing'
+                              }
+                              label={
+                                index === 0 ? 'Edit cover crop' : 'Edit crop'
+                              }
+                              fileName={image.file?.name || image.imagePath}
+                              onApply={(result) =>
+                                applyNewsImageCrop(image.localId, result)
+                              }
+                            />
                           </div>
 
                           <div className="grid gap-3">
@@ -1164,14 +1221,65 @@ function AdminMedia() {
                     JPG, PNG, or WebP. Maximum 8 MB.
                   </p>
                   {previewUrl && (
-                    <img
-                      src={previewUrl}
-                      alt="Selected upload preview"
-                      className="mx-auto mt-4 max-h-64 rounded-xl object-contain"
-                    />
+                    <>
+                      <img
+                        src={previewUrl}
+                        alt="Selected upload preview"
+                        className="mx-auto mt-4 max-h-64 rounded-xl object-contain"
+                      />
+                      <div className="mt-3 flex justify-center">
+                        <PhotoCropEditor
+                          image={previewUrl}
+                          sourceFile={selectedFile}
+                          aspectRatio={4 / 3}
+                          title="Adjust gallery photo framing"
+                          label="Edit crop"
+                          fileName={selectedFile?.name || photoForm.album}
+                          onApply={applyPhotoCrop}
+                        />
+                      </div>
+                    </>
                   )}
                 </div>
               )}
+
+              <PublishedPhotoPreview
+                kind={editorType === 'news' ? 'news' : 'gallery'}
+                image={
+                  editorType === 'news'
+                    ? newsImageDrafts[0]?.previewUrl || ''
+                    : previewUrl
+                }
+                imageCount={
+                  editorType === 'news'
+                    ? newsImageDrafts.length
+                    : previewUrl
+                      ? 1
+                      : 0
+                }
+                title={
+                  editorType === 'news' ? newsForm.title : photoForm.album
+                }
+                category={
+                  editorType === 'news'
+                    ? newsForm.category
+                    : photoForm.category
+                }
+                date={
+                  editorType === 'news'
+                    ? newsForm.publishedAt
+                    : photoForm.capturedOn
+                }
+                summary={
+                  editorType === 'news'
+                    ? newsForm.summary
+                    : photoForm.description
+                }
+                description={
+                  editorType === 'gallery' ? photoForm.description : ''
+                }
+                isFeatured={editorType === 'news' && newsForm.isFeatured}
+              />
 
               {editorType === 'news' && (
                 <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-xl border border-blue-300 bg-brand-50/45 p-4">

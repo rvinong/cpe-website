@@ -31,6 +31,7 @@ import {
   uploadOrganizationPersonPhoto,
   validateOrganizationPersonPhoto,
 } from '../lib/organization'
+import PublishedPhotoPreview from './PublishedPhotoPreview'
 
 const inputClassName =
   'admin-field mt-2 placeholder:text-slate-400'
@@ -158,7 +159,9 @@ function AdminOrganization() {
   const needsSchema = isOrganizationSchemaMissing(contentError)
   const positionOptions = organizationPositionOptions[officerForm.personType]
   const availablePositionOptions =
-    officerForm.position && !positionOptions.includes(officerForm.position)
+    officerForm.personType === 'faculty'
+      ? positionOptions
+      : officerForm.position && !positionOptions.includes(officerForm.position)
       ? [officerForm.position, ...positionOptions]
       : positionOptions
 
@@ -204,9 +207,14 @@ function AdminOrganization() {
     setOfficerForm(
       officer
         ? {
-            personType: officer.person_type || officer.personType || 'officer',
+            personType:
+              officer.person_type || officer.personType || 'officer',
             name: officer.name,
-            position: officer.position,
+            position:
+              (officer.person_type || officer.personType) === 'faculty' &&
+              String(officer.position || '').trim().toLowerCase() === 'adviser'
+                ? 'Faculty'
+                : officer.position,
             academicYear: officer.academic_year,
           }
         : emptyOfficer,
@@ -859,6 +867,7 @@ function AdminOrganization() {
                           setOfficerForm((current) => ({
                             ...current,
                             personType: event.target.value,
+                            position: '',
                           }))
                         }
                         className={inputClassName}
@@ -956,6 +965,19 @@ function AdminOrganization() {
                         </div>
                       </div>
                     </div>
+
+                    <PublishedPhotoPreview
+                      kind="profile"
+                      image={personPhotoPreview}
+                      name={officerForm.name}
+                      role={officerForm.position}
+                      academicYear={officerForm.academicYear}
+                      profileLabel={
+                        officerForm.personType === 'faculty'
+                          ? 'Faculty'
+                          : 'Officer'
+                      }
+                    />
                   </>
                 ) : (
                   <>

@@ -17,7 +17,7 @@ function NewsCard({ article, compact = false }) {
       {article.image && compact && article.slug && (
         <Link
           to={storyHref}
-          className={`media-frame ${compact ? 'h-52' : 'h-60'}`}
+          className="media-frame news-card-media"
         >
           <img
             src={article.image}
@@ -29,7 +29,7 @@ function NewsCard({ article, compact = false }) {
         </Link>
       )}
       {article.image && (!compact || !article.slug) && (
-        <div className={`media-frame ${compact ? 'h-52' : 'h-60'}`}>
+        <div className="media-frame news-card-media">
           <img
             src={article.image}
             alt={article.imageAlt || ''}

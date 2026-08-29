@@ -23,6 +23,8 @@ import { Link } from 'react-router-dom'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import AdminListSkeleton from './AdminListSkeleton'
 import { signalBytePublished } from '../lib/byteAssistant'
+import PhotoCropEditor from './PhotoCropEditor'
+import PublishedPhotoPreview from './PublishedPhotoPreview'
 import {
   createEvent,
   deleteEvent,
@@ -316,6 +318,15 @@ function AdminEvents() {
     }))
     setError('')
     event.target.value = ''
+  }
+
+  const applyEventPhotoCrop = ({ file, previewUrl: croppedPreviewUrl }) => {
+    if (!croppedPreviewUrl) return
+
+    revokePreviewUrl(previewUrl)
+    setSelectedFile(file)
+    setPreviewUrl(croppedPreviewUrl)
+    setError('')
   }
 
   const clearEventImage = () => {
@@ -913,6 +924,15 @@ function AdminEvents() {
                             required
                           />
                         </label>
+                        <PhotoCropEditor
+                          image={previewUrl}
+                          sourceFile={selectedFile}
+                          aspectRatio={16 / 8}
+                          title="Adjust event photo framing"
+                          label="Edit crop"
+                          fileName={selectedFile?.name || form.title}
+                          onApply={applyEventPhotoCrop}
+                        />
                         <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-blue-300 bg-brand-50/45 p-4">
                           <input
                             type="checkbox"
@@ -952,6 +972,30 @@ function AdminEvents() {
                     </div>
                   )}
                 </div>
+              </div>
+
+              <div className="sm:col-span-2">
+                <PublishedPhotoPreview
+                  kind="event"
+                  image={previewUrl}
+                  imageCount={previewUrl ? 1 : 0}
+                  title={form.title}
+                  category={form.category}
+                  date={form.startsAt}
+                  time={
+                    form.startsAt
+                      ? new Date(form.startsAt).toLocaleTimeString('en-US', {
+                          hour: 'numeric',
+                          minute: '2-digit',
+                        })
+                      : ''
+                  }
+                  summary={form.summary}
+                  description={form.description}
+                  venue={form.venue}
+                  status={form.status}
+                  isFeatured={form.isFeatured}
+                />
               </div>
 
               <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-xl border border-blue-300 bg-brand-50/45 p-4">

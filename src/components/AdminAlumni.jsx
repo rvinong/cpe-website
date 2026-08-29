@@ -14,6 +14,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import AdminListSkeleton from './AdminListSkeleton'
 import { signalBytePublished } from '../lib/byteAssistant'
+import PublishedPhotoPreview from './PublishedPhotoPreview'
 import {
   createAlumniProfile,
   deleteAlumniProfile,
@@ -546,6 +547,16 @@ function AdminAlumni() {
                   WebP under 8 MB.
                 </p>
               </div>
+
+              <PublishedPhotoPreview
+                kind="profile"
+                image={previewUrl}
+                name={form.name}
+                role={form.role}
+                organization={form.organization}
+                batch={form.batch}
+                profileLabel="Alumni"
+              />
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-blue-300 bg-brand-50/45 p-4">

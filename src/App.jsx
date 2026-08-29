@@ -9,6 +9,7 @@ import AdminRoute from './components/AdminRoute'
 import CommunityLauncher from './components/CommunityLauncher'
 import Footer from './components/Footer'
 import Navbar from './components/Navbar'
+import NotificationPopup from './components/NotificationPopup'
 import { useMotionPreferences } from './hooks/useMotionPreferences'
 import { getRouteMotion } from './lib/motion'
 
@@ -124,6 +125,7 @@ function App() {
 
   return (
     <>
+      <NotificationPopup />
       <ScrollToRoute />
       {isAdminRoute ? (
         <Suspense fallback={<RouteLoading admin />}>

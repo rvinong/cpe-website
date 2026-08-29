@@ -19,7 +19,7 @@ export const officerPositionOptions = [
   '1st Year Representative',
 ]
 
-export const facultyPositionOptions = ['Adviser']
+export const facultyPositionOptions = ['Program Chairperson', 'Faculty']
 
 export const organizationPositionOptions = {
   officer: officerPositionOptions,
