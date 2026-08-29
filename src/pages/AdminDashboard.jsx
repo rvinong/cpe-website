@@ -550,12 +550,12 @@ function AdminDashboard() {
                 ))}
               </section>
 
-              <section className="mt-8">
+              <section className="mt-6">
                 <div className="max-w-2xl">
                   <p className="text-xs font-extrabold tracking-[0.18em] text-brand-600 uppercase">
                     Management modules
                   </p>
-                  <h2 className="mt-2 text-3xl font-black text-navy-900">
+                  <h2 className="mt-2 text-2xl font-black text-navy-900 sm:text-3xl">
                     Content control center
                   </h2>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
@@ -564,7 +564,7 @@ function AdminDashboard() {
                   </p>
                 </div>
 
-                <div className="mt-5 grid gap-4 md:grid-cols-2">
+                <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {contentModules.map(
                     ({
                       title,
@@ -577,20 +577,20 @@ function AdminDashboard() {
                     }) => (
                       <article
                         key={title}
-                        className="surface-card interactive-card group p-4"
+                        className="surface-card interactive-card group flex flex-col p-3.5"
                       >
-                        <div className="flex items-start justify-between gap-4">
-                          <span className="grid size-11 place-items-center rounded-xl bg-brand-50 text-brand-600 transition group-hover:bg-brand-600 group-hover:text-white">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="grid size-10 place-items-center rounded-xl bg-brand-50 text-brand-600 transition group-hover:bg-brand-600 group-hover:text-white">
                             <Icon size={22} aria-hidden="true" />
                           </span>
-                          <span className="rounded-full bg-brand-50 px-3 py-1.5 text-[10px] font-extrabold tracking-wide text-brand-600 uppercase">
+                          <span className="rounded-full bg-brand-50 px-2.5 py-1 text-[10px] font-extrabold tracking-wide text-brand-600 uppercase">
                             {status}
                           </span>
                         </div>
-                        <h3 className="mt-4 text-xl font-black text-navy-900">
+                        <h3 className="mt-3 text-lg font-black text-navy-900">
                           {title}
                         </h3>
-                        <p className="mt-2 text-sm leading-6 text-slate-600">
+                        <p className="mt-1 text-xs leading-5 text-slate-600">
                           {description}
                         </p>
                         {section && (
@@ -601,7 +601,7 @@ function AdminDashboard() {
                               Boolean(requiredRole) &&
                               profile?.role !== requiredRole
                             }
-                            className="mt-4 inline-flex items-center justify-center rounded-xl bg-brand-600 px-4 py-2.5 text-xs font-extrabold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+                            className="mt-3 inline-flex items-center justify-center self-start rounded-xl bg-brand-600 px-3 py-2 text-[11px] font-extrabold text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300"
                           >
                             {requiredRole && profile?.role !== requiredRole
                               ? 'Administrator required'
@@ -614,16 +614,16 @@ function AdminDashboard() {
                 </div>
               </section>
 
-              <section className="mt-8 rounded-3xl border border-blue-300 bg-brand-50/45 p-5 sm:p-6">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <section className="mt-6 rounded-3xl border border-blue-300 bg-brand-50/45 p-4 sm:p-5">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-xs font-extrabold tracking-[0.18em] text-brand-600 uppercase">
                       Security checkpoint
                     </p>
-                    <h2 className="mt-2 text-2xl font-black text-navy-900">
+                    <h2 className="mt-2 text-xl font-black text-navy-900">
                       Dashboard access is role protected
                     </h2>
-                    <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+                    <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-600">
                       Public users cannot open this route. Supabase Row Level
                       Security remains the final authority for every database
                       operation.
@@ -631,7 +631,7 @@ function AdminDashboard() {
                   </div>
                   <a
                     href="/"
-                    className="inline-flex shrink-0 items-center justify-center rounded-xl bg-brand-600 px-4 py-2.5 text-sm font-extrabold text-white transition hover:bg-brand-700"
+                    className="inline-flex shrink-0 items-center justify-center rounded-xl bg-brand-600 px-4 py-2 text-xs font-extrabold text-white transition hover:bg-brand-700"
                   >
                     View public site
                   </a>
