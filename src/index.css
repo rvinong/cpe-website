@@ -1508,6 +1508,10 @@ a {
   gap: 0.6rem;
 }
 
+.community-room-info-close {
+  margin-left: auto;
+}
+
 .community-room-info-icon {
   display: grid;
   width: 2.25rem;
@@ -5835,6 +5839,20 @@ html.dark .account-save-action-saved {
   padding: 0.85rem 1.15rem;
 }
 
+.community-workspace-header-actions {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.community-mobile-room-toggle,
+.community-mobile-panel-heading,
+.community-mobile-scrim,
+.community-room-info-close {
+  display: none;
+}
+
 .community-workspace-toolbar {
   padding: 0.65rem 1.15rem;
 }
@@ -7062,6 +7080,603 @@ html.dark .photo-crop-cancel:hover:not(:disabled) {
   .photo-crop-reset,
   .photo-crop-cancel,
   .photo-crop-apply {
+    transition: none;
+  }
+}
+
+/* Mobile community chat: keep the conversation and composer in one viewport. */
+@media (max-width: 767px) {
+  .community-page {
+    overflow: hidden;
+  }
+
+  .community-page-section-workspace {
+    height: calc(100dvh - 84px);
+    min-height: 0;
+    padding: 0.4rem 0 0.5rem;
+  }
+
+  .community-page-shell {
+    width: calc(100% - 0.75rem);
+    height: 100%;
+  }
+
+  .community-page-topbar {
+    min-height: 2rem;
+    margin: 0 0.1rem 0.35rem;
+  }
+
+  .community-back-link {
+    min-height: 2rem;
+    padding: 0.45rem 0.6rem;
+  }
+
+  .community-back-link-label {
+    display: none;
+  }
+
+  .community-workspace {
+    min-height: 0;
+    border-radius: 1.1rem;
+  }
+
+  .community-workspace-header {
+    align-items: center;
+    flex-direction: row;
+    gap: 0.5rem;
+    padding: 0.55rem 0.7rem;
+  }
+
+  .community-workspace-identity {
+    min-width: 0;
+    flex: 1 1 auto;
+    gap: 0.5rem;
+  }
+
+  .community-workspace-mark {
+    width: 2rem;
+    height: 2rem;
+    flex: 0 0 auto;
+  }
+
+  .community-workspace-kicker {
+    font-size: 0.54rem;
+    letter-spacing: 0.12em;
+  }
+
+  .community-workspace-title {
+    overflow: hidden;
+    font-size: 0.92rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .community-workspace-header-actions {
+    flex: 0 0 auto;
+    gap: 0.35rem;
+  }
+
+  .community-user-pill {
+    width: auto;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    box-shadow: none;
+  }
+
+  .community-user-pill > :first-child {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .community-user-copy {
+    display: none;
+  }
+
+  .community-mobile-room-toggle {
+    display: inline-flex;
+    min-height: 2rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    border: 1px solid var(--line);
+    border-radius: 0.65rem;
+    background: var(--brand-soft);
+    color: var(--color-brand-dark);
+    padding: 0.4rem 0.55rem;
+    font-size: 0.62rem;
+    font-weight: 900;
+    white-space: nowrap;
+  }
+
+  .community-mobile-room-toggle:focus-visible,
+  .community-mobile-panel-close:focus-visible,
+  .community-mobile-scrim:focus-visible,
+  .community-room-info-close:focus-visible {
+    outline: 2px solid #60a5fa;
+    outline-offset: 2px;
+  }
+
+  .community-workspace-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.7rem;
+  }
+
+  .community-current-room {
+    display: none;
+  }
+
+  .community-search {
+    min-width: 0;
+    min-height: 2.2rem;
+    flex: 1 1 auto;
+  }
+
+  .community-search input {
+    min-width: 0;
+  }
+
+  .community-live-status {
+    min-width: 0;
+    max-width: 5.8rem;
+    min-height: 2.2rem;
+    flex: 0 0 auto;
+    overflow: hidden;
+    padding-inline: 0.5rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .community-notice {
+    margin: 0.45rem 0.7rem 0;
+    padding: 0.55rem 0.6rem;
+    font-size: 0.64rem;
+  }
+
+  .community-workspace-body {
+    position: relative;
+    display: flex;
+    min-height: 0;
+    flex: 1 1 0;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .community-mobile-scrim {
+    position: absolute;
+    z-index: 35;
+    inset: 0;
+    display: block;
+    border: 0;
+    background: rgba(7, 21, 47, 0.28);
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .community-room-sidebar {
+    position: absolute;
+    z-index: 40;
+    inset: 0 auto 0 0;
+    display: flex;
+    width: min(86vw, 20rem);
+    max-width: calc(100% - 0.75rem);
+    height: 100%;
+    min-height: 0;
+    border-right: 1px solid var(--line);
+    border-bottom: 0;
+    border-radius: 0 1.1rem 1.1rem 0;
+    padding: 0.75rem;
+    box-shadow: 18px 0 48px -34px rgba(15, 23, 42, 0.55);
+    transform: translateX(-105%);
+    transition:
+      transform 180ms ease,
+      visibility 180ms ease;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .community-room-sidebar-open {
+    transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .community-mobile-panel-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.15rem 0.15rem 0.8rem;
+  }
+
+  .community-mobile-panel-heading p {
+    color: var(--text-strong);
+    font-size: 0.78rem;
+    font-weight: 900;
+  }
+
+  .community-mobile-panel-heading span {
+    display: block;
+    margin-top: 0.2rem;
+    color: var(--text-body);
+    font-size: 0.62rem;
+    line-height: 1.4;
+  }
+
+  .community-mobile-panel-close,
+  .community-room-info-close {
+    display: grid;
+    width: 2.1rem;
+    height: 2.1rem;
+    flex: 0 0 auto;
+    place-items: center;
+    border: 1px solid var(--line);
+    border-radius: 0.65rem;
+    background: var(--surface);
+    color: var(--text-body);
+  }
+
+  .community-sidebar-heading {
+    display: none;
+  }
+
+  .community-room-list {
+    display: grid;
+    min-height: 0;
+    max-height: none;
+    flex: 1 1 auto;
+    gap: 0.25rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 0.1rem 0.05rem;
+  }
+
+  .community-room-button {
+    min-width: 0;
+    flex: 0 0 auto;
+    padding: 0.6rem;
+  }
+
+  .community-room-button-active::before {
+    top: 0.5rem;
+    bottom: 0.5rem;
+    left: -0.76rem;
+  }
+
+  .community-sidebar-footer {
+    display: flex;
+    margin: 0.75rem 0.2rem 0;
+    padding: 0.75rem 0.1rem 0;
+  }
+
+  .community-chat-panel {
+    width: 100%;
+    min-height: 0;
+    flex: 1 1 0;
+  }
+
+  .community-chat-header {
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.7rem;
+  }
+
+  .community-chat-room-heading {
+    min-width: 0;
+    flex: 1 1 auto;
+    gap: 0.45rem;
+  }
+
+  .community-chat-hash {
+    width: 1.85rem;
+    height: 1.85rem;
+    font-size: 1.1rem;
+  }
+
+  .community-chat-header h2 {
+    font-size: 0.84rem;
+  }
+
+  .community-chat-header p {
+    display: none;
+  }
+
+  .community-chat-header-actions {
+    gap: 0.3rem;
+  }
+
+  .community-staff-badge {
+    max-width: 4.8rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .community-room-info-toggle {
+    display: inline-flex;
+    min-height: 2rem;
+    padding: 0.38rem 0.5rem;
+    font-size: 0.6rem;
+  }
+
+  .community-message-list {
+    min-height: 0;
+    max-height: none;
+    flex: 1 1 0;
+    gap: 0.7rem;
+    padding: 0.7rem;
+    overscroll-behavior: contain;
+  }
+
+  .community-message-row {
+    max-width: 100%;
+    gap: 0.45rem;
+  }
+
+  .community-message-avatar {
+    width: 2rem;
+    height: 2rem;
+    flex: 0 0 auto;
+  }
+
+  .community-message-content {
+    min-width: 0;
+    max-width: calc(100% - 2.45rem);
+  }
+
+  .community-message-meta {
+    gap: 0.25rem 0.35rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .community-message-author {
+    font-size: 0.64rem;
+  }
+
+  .community-role-badge {
+    padding: 0.12rem 0.25rem;
+    font-size: 0.5rem;
+  }
+
+  .community-message-time {
+    font-size: 0.56rem;
+  }
+
+  .community-message-bubble {
+    padding: 0.55rem 0.65rem;
+    font-size: 0.76rem;
+    line-height: 1.5;
+  }
+
+  .community-message-actions {
+    gap: 0.4rem;
+    margin-top: 0.22rem;
+    opacity: 1;
+  }
+
+  .community-message-reply,
+  .community-message-delete {
+    font-size: 0.58rem;
+  }
+
+  .community-message-access,
+  .community-chat-empty {
+    min-height: 11rem;
+  }
+
+  .community-message-access {
+    max-width: 21rem;
+    padding: 1rem;
+  }
+
+  .community-chat-footer {
+    padding: 0.5rem 0.65rem calc(0.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .community-reply-context {
+    margin-bottom: 0.45rem;
+    padding: 0.45rem 0.55rem;
+  }
+
+  .community-reply-context-copy p {
+    -webkit-line-clamp: 1;
+  }
+
+  .community-selected-attachments {
+    flex-wrap: nowrap;
+    margin-bottom: 0.45rem;
+    overflow-x: auto;
+    padding-bottom: 0.1rem;
+    scrollbar-width: none;
+  }
+
+  .community-selected-attachments::-webkit-scrollbar {
+    display: none;
+  }
+
+  .community-selected-attachment {
+    max-width: 13rem;
+    flex: 0 0 auto;
+  }
+
+  .community-chat-input {
+    min-height: 2.6rem;
+    max-height: 7rem;
+    padding: 0.58rem 2.85rem 0.58rem 0.7rem;
+    font-size: 0.77rem;
+    line-height: 1.4;
+  }
+
+  .community-chat-send {
+    right: 0.4rem;
+    bottom: 0.35rem;
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 0.6rem;
+  }
+
+  .community-composer-tools {
+    flex-wrap: nowrap;
+    gap: 0.4rem;
+    margin-top: 0.4rem;
+  }
+
+  .community-attachment-button {
+    width: 2.1rem;
+    height: 2.1rem;
+    flex: 0 0 auto;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .community-attachment-label {
+    display: none;
+  }
+
+  .community-attachment-limit {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .community-chat-composer-meta {
+    justify-content: flex-end;
+    margin-top: 0.2rem;
+  }
+
+  .community-chat-composer-meta span:first-child {
+    display: none;
+  }
+
+  .community-form-error {
+    margin-top: 0.4rem;
+    padding: 0.45rem 0.55rem;
+    font-size: 0.62rem;
+  }
+
+  .community-mention-menu {
+    max-height: min(15rem, 45dvh);
+    border-radius: 0.85rem;
+  }
+
+  .community-room-info {
+    position: absolute;
+    z-index: 50;
+    inset: 0;
+    display: none;
+    max-height: none;
+    overflow-y: auto;
+    border: 0;
+    border-radius: 0;
+    padding: 0.85rem;
+    background: var(--surface-raised);
+    box-shadow: -18px 0 48px -34px rgba(15, 23, 42, 0.55);
+  }
+
+  .community-room-info.community-room-info-open {
+    display: block;
+  }
+
+  .community-room-info-heading {
+    align-items: center;
+  }
+
+  .community-room-info-card,
+  .community-room-facts,
+  .community-room-info-note {
+    margin-top: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .community-workspace-title {
+    font-size: 0.86rem;
+  }
+
+  .community-user-pill > :first-child {
+    width: 1.85rem;
+    height: 1.85rem;
+  }
+
+  .community-mobile-room-toggle {
+    width: 2rem;
+    padding-inline: 0;
+  }
+
+  .community-mobile-room-toggle span {
+    display: none;
+  }
+
+  .community-room-info-toggle {
+    width: 2rem;
+    justify-content: center;
+    padding-inline: 0;
+    font-size: 0;
+  }
+
+  .community-message-content {
+    max-width: calc(100% - 2.35rem);
+  }
+}
+
+html.dark .community-mobile-room-toggle {
+  border-color: rgba(147, 197, 253, 0.22);
+  background: rgba(96, 165, 250, 0.12);
+  color: #bfdbfe;
+}
+
+html.dark .community-mobile-room-toggle:hover,
+html.dark .community-mobile-room-toggle:focus-visible {
+  border-color: rgba(147, 197, 253, 0.48);
+  background: rgba(96, 165, 250, 0.2);
+  color: #f8fafc;
+}
+
+html.dark .community-mobile-scrim {
+  background: rgba(2, 8, 23, 0.68);
+}
+
+html.dark .community-room-sidebar {
+  border-color: rgba(147, 197, 253, 0.18);
+  background: #09182c;
+  box-shadow: 18px 0 58px -30px rgba(0, 0, 0, 0.9);
+}
+
+html.dark .community-mobile-panel-heading p {
+  color: #f8fafc;
+}
+
+html.dark .community-mobile-panel-heading span {
+  color: #9fb1c8;
+}
+
+html.dark .community-mobile-panel-close,
+html.dark .community-room-info-close {
+  border-color: rgba(147, 197, 253, 0.22);
+  background: rgba(255, 255, 255, 0.06);
+  color: #bfcee2;
+}
+
+html.dark .community-mobile-panel-close:hover,
+html.dark .community-mobile-panel-close:focus-visible,
+html.dark .community-room-info-close:hover,
+html.dark .community-room-info-close:focus-visible {
+  border-color: rgba(147, 197, 253, 0.48);
+  background: rgba(96, 165, 250, 0.14);
+  color: #f8fafc;
+}
+
+html.dark .community-room-info {
+  border-color: rgba(147, 197, 253, 0.16);
+  background: #0b1729;
+  box-shadow: -18px 0 58px -30px rgba(0, 0, 0, 0.9);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .community-room-sidebar {
     transition: none;
   }
 }

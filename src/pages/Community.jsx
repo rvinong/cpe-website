@@ -11,6 +11,7 @@ import {
   Info,
   ImagePlus,
   LockKeyhole,
+  Menu,
   MessageCircle,
   MessageSquareText,
   Paperclip,
@@ -577,9 +578,10 @@ function MessageComposer({
           className="community-attachment-button"
           onClick={() => fileInputRef.current?.click()}
           disabled={disabled || isSubmitting}
+          aria-label="Add file or image"
         >
           <Paperclip size={14} aria-hidden="true" />
-          Add file or image
+          <span className="community-attachment-label">Add file or image</span>
         </button>
         <span className="community-attachment-limit">
           {selectedFiles.length}/{maxCommunityAttachmentCount} files, up to{' '}
@@ -777,7 +779,13 @@ function MessageItem({
   )
 }
 
-function CommunityRoomInfo({ canSend, canViewMessages, className = '', room }) {
+function CommunityRoomInfo({
+  canSend,
+  canViewMessages,
+  className = '',
+  onClose,
+  room,
+}) {
   return (
     <aside
       id="community-room-info"
@@ -792,6 +800,16 @@ function CommunityRoomInfo({ canSend, canViewMessages, className = '', room }) {
           <p className="community-room-info-kicker">Room details</p>
           <h2>About this room</h2>
         </div>
+        {onClose && (
+          <button
+            type="button"
+            className="community-room-info-close"
+            onClick={onClose}
+            aria-label="Close room details"
+          >
+            <X size={16} aria-hidden="true" />
+          </button>
+        )}
       </div>
 
       <div className="community-room-info-card">
@@ -842,6 +860,7 @@ function Community() {
   const [members, setMembers] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
   const [replyingTo, setReplyingTo] = useState(null)
+  const [isMobileRoomsOpen, setIsMobileRoomsOpen] = useState(false)
   const [isRoomInfoOpen, setIsRoomInfoOpen] = useState(false)
   const messageListRef = useRef(null)
 
@@ -876,6 +895,7 @@ function Community() {
     canViewMessages && isConfigured && !chatError && !communityError
 
   const handleSelectRoom = (roomId) => {
+    setIsMobileRoomsOpen(false)
     if (roomId === selectedRoomId) return
     setSelectedRoomId(roomId)
     setMessages([])
@@ -886,6 +906,19 @@ function Community() {
     setReplyingTo(null)
     setIsRoomInfoOpen(false)
   }
+
+  useEffect(() => {
+    if (!isMobileRoomsOpen && !isRoomInfoOpen) return undefined
+
+    const handleEscape = (event) => {
+      if (event.key !== 'Escape') return
+      setIsMobileRoomsOpen(false)
+      setIsRoomInfoOpen(false)
+    }
+
+    window.addEventListener('keydown', handleEscape)
+    return () => window.removeEventListener('keydown', handleEscape)
+  }, [isMobileRoomsOpen, isRoomInfoOpen])
 
   useEffect(() => {
     let isMounted = true
@@ -1124,7 +1157,7 @@ function Community() {
             <div className="community-page-topbar">
               <Link to="/" className="secondary-button community-back-link">
                 <ArrowLeft size={17} aria-hidden="true" />
-                Back to Homepage
+                <span className="community-back-link-label">Back to Homepage</span>
               </Link>
               <p>Choose a room to join the conversation.</p>
             </div>
@@ -1140,21 +1173,36 @@ function Community() {
                     <h1 className="community-workspace-title">Public room chat</h1>
                   </div>
                 </div>
-                <div className="community-user-pill">
-                  <ProfileAvatar
-                    path={profile?.avatar_path || profile?.avatarPath || ''}
-                    name={displayName}
-                    className="size-9 rounded-xl"
-                    textClassName="text-xs"
-                  />
-                  <span className="community-user-copy">
-                    <span className="community-user-name">
-                      {user ? displayName : 'Guest reader'}
+                <div className="community-workspace-header-actions">
+                  <div className="community-user-pill">
+                    <ProfileAvatar
+                      path={profile?.avatar_path || profile?.avatarPath || ''}
+                      name={displayName}
+                      className="size-9 rounded-xl"
+                      textClassName="text-xs"
+                    />
+                    <span className="community-user-copy">
+                      <span className="community-user-name">
+                        {user ? displayName : 'Guest reader'}
+                      </span>
+                      <span className="community-user-status">
+                        {user ? (isApprovedMember ? 'Approved member' : 'Awaiting approval') : 'Read-only access'}
+                      </span>
                     </span>
-                    <span className="community-user-status">
-                      {user ? (isApprovedMember ? 'Approved member' : 'Awaiting approval') : 'Read-only access'}
-                    </span>
-                  </span>
+                  </div>
+                  <button
+                    type="button"
+                    className="community-mobile-room-toggle"
+                    aria-controls="community-room-sidebar"
+                    aria-expanded={isMobileRoomsOpen}
+                    onClick={() => {
+                      setIsRoomInfoOpen(false)
+                      setIsMobileRoomsOpen((current) => !current)
+                    }}
+                  >
+                    <Menu size={16} aria-hidden="true" />
+                    <span>Rooms</span>
+                  </button>
                 </div>
               </header>
 
@@ -1203,7 +1251,33 @@ function Community() {
               )}
 
               <div className="community-workspace-body">
-                <aside className="community-room-sidebar" aria-label="Community rooms">
+                {isMobileRoomsOpen && (
+                  <button
+                    type="button"
+                    className="community-mobile-scrim"
+                    onClick={() => setIsMobileRoomsOpen(false)}
+                    aria-label="Close community rooms"
+                  />
+                )}
+                <aside
+                  id="community-room-sidebar"
+                  className={`community-room-sidebar ${isMobileRoomsOpen ? 'community-room-sidebar-open' : ''}`}
+                  aria-label="Community rooms"
+                >
+                  <div className="community-mobile-panel-heading">
+                    <div>
+                      <p>Community rooms</p>
+                      <span>Choose where to continue the conversation.</span>
+                    </div>
+                    <button
+                      type="button"
+                      className="community-mobile-panel-close"
+                      onClick={() => setIsMobileRoomsOpen(false)}
+                      aria-label="Close community rooms"
+                    >
+                      <X size={17} aria-hidden="true" />
+                    </button>
+                  </div>
                   <div className="community-sidebar-heading">
                     <div>
                       <p className="community-sidebar-kicker">Channels</p>
@@ -1255,7 +1329,10 @@ function Community() {
                         className="community-room-info-toggle"
                         aria-controls="community-room-info"
                         aria-expanded={isRoomInfoOpen}
-                        onClick={() => setIsRoomInfoOpen((current) => !current)}
+                        onClick={() => {
+                          setIsMobileRoomsOpen(false)
+                          setIsRoomInfoOpen((current) => !current)
+                        }}
                       >
                         <Info size={14} aria-hidden="true" />
                         Details
@@ -1347,6 +1424,7 @@ function Community() {
                   canSend={canSend}
                   canViewMessages={canViewMessages}
                   className={isRoomInfoOpen ? 'community-room-info-open' : ''}
+                  onClose={() => setIsRoomInfoOpen(false)}
                   room={selectedRoom}
                 />
               </div>
