@@ -458,7 +458,7 @@ function InternalAudit() {
                   whileHover={{ y: -5 }}
                   viewport={{ once: true, amount: 0.18 }}
                   transition={{ duration: 0.5, delay: (index % 2) * 0.05 }}
-                  className="surface-card interactive-card flex h-full flex-col p-6 sm:p-7"
+                  className="surface-card interactive-card audit-report-card flex h-full flex-col p-6 sm:p-7"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <span
@@ -474,15 +474,18 @@ function InternalAudit() {
                     </span>
                   </div>
 
-                  <h3 className="mt-5 text-2xl font-black tracking-tight text-navy-900">
+                  <h3
+                    className="audit-report-card-title mt-5 text-2xl font-black tracking-tight text-navy-900"
+                    title={report.title}
+                  >
                     {report.title}
                   </h3>
-                  <p className="mt-3 text-sm leading-7 text-slate-600">
+                  <p className="audit-report-card-summary mt-3 text-sm leading-7 text-slate-600">
                     {report.summary}
                   </p>
 
-                  <div className="mt-5 grid gap-3 text-sm text-slate-600 sm:grid-cols-2">
-                    <div className="rounded-2xl border border-slate-300 bg-white/70 p-4">
+                  <div className="audit-report-card-details mt-5 grid gap-3 text-sm text-slate-600 sm:grid-cols-2">
+                    <div className="audit-report-card-field rounded-2xl border border-slate-300 bg-white/70 p-4">
                       <p className="text-xs font-extrabold tracking-wide text-slate-400 uppercase">
                         Period
                       </p>
@@ -490,7 +493,7 @@ function InternalAudit() {
                         {report.period}
                       </p>
                     </div>
-                    <div className="rounded-2xl border border-slate-300 bg-white/70 p-4">
+                    <div className="audit-report-card-field rounded-2xl border border-slate-300 bg-white/70 p-4">
                       <p className="text-xs font-extrabold tracking-wide text-slate-400 uppercase">
                         Published
                       </p>
@@ -500,7 +503,7 @@ function InternalAudit() {
                     </div>
                     {report.type === 'liquidation' && (
                       <>
-                        <div className="rounded-2xl border border-slate-300 bg-white/70 p-4">
+                        <div className="audit-report-card-field rounded-2xl border border-slate-300 bg-white/70 p-4">
                           <p className="text-xs font-extrabold tracking-wide text-slate-400 uppercase">
                             Funds received
                           </p>
@@ -508,7 +511,7 @@ function InternalAudit() {
                             {report.fundsReceived}
                           </p>
                         </div>
-                        <div className="rounded-2xl border border-slate-300 bg-white/70 p-4">
+                        <div className="audit-report-card-field rounded-2xl border border-slate-300 bg-white/70 p-4">
                           <p className="text-xs font-extrabold tracking-wide text-slate-400 uppercase">
                             Balance
                           </p>
@@ -519,7 +522,7 @@ function InternalAudit() {
                       </>
                     )}
                     {report.resolutionNumber && (
-                      <div className="rounded-2xl border border-slate-300 bg-white/70 p-4 sm:col-span-2">
+                      <div className="audit-report-card-field audit-report-card-field-wide rounded-2xl border border-slate-300 bg-white/70 p-4 sm:col-span-2">
                         <p className="text-xs font-extrabold tracking-wide text-slate-400 uppercase">
                           Resolution number
                         </p>
@@ -530,7 +533,7 @@ function InternalAudit() {
                     )}
                   </div>
 
-                  <ul className="mt-5 space-y-2 border-t border-slate-100 pt-5">
+                  <ul className="audit-report-card-highlights mt-5 space-y-2 border-t border-slate-100 pt-5">
                     {report.highlights.map((highlight) => (
                       <li
                         key={highlight}
@@ -546,8 +549,8 @@ function InternalAudit() {
                     ))}
                   </ul>
 
-                  <div className="mt-auto flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-xs font-bold text-slate-500">
+                  <div className="audit-report-card-footer mt-auto flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="audit-report-card-byline text-xs font-bold text-slate-500">
                       Prepared by {report.preparedBy} - reviewed by{' '}
                       {report.reviewedBy}
                     </p>

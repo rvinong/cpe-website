@@ -7680,3 +7680,63 @@ html.dark .community-room-info {
     transition: none;
   }
 }
+
+/* Keep public audit records aligned even when their fields have different lengths. */
+.audit-report-card-title {
+  display: -webkit-box;
+  min-height: 6rem;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.audit-report-card-summary {
+  display: -webkit-box;
+  min-height: 7rem;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+}
+
+.audit-report-card-details {
+  min-height: 9.25rem;
+  align-content: start;
+}
+
+.audit-report-card-field {
+  min-height: 4.25rem;
+}
+
+.audit-report-card-highlights {
+  min-height: 7rem;
+}
+
+.audit-report-card-footer {
+  min-height: 3rem;
+}
+
+.audit-report-card-byline {
+  min-width: 0;
+  line-height: 1.45;
+}
+
+@media (min-width: 640px) {
+  .audit-report-card-byline {
+    max-width: calc(100% - 8rem);
+  }
+}
+
+@media (max-width: 639px) {
+  .audit-report-card-title,
+  .audit-report-card-summary {
+    display: block;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .audit-report-card-details,
+  .audit-report-card-highlights,
+  .audit-report-card-footer {
+    min-height: 0;
+  }
+}
