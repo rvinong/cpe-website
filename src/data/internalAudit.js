@@ -18,7 +18,7 @@ export const internalAuditCategories = [
     label: 'Activities',
     shortLabel: 'Activities',
     description:
-      'Approved activity records, event documentation, and implementation summaries.',
+      'Records of completed programs, activities, initiatives and organization outputs.',
   },
   {
     id: 'liquidation',
