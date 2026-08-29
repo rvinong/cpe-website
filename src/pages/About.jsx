@@ -17,6 +17,7 @@ import {
   UsersRound,
 } from 'lucide-react'
 import PageHero from '../components/PageHero'
+import RobotEasterEgg from '../components/RobotEasterEgg'
 import useOrganization from '../context/useOrganization'
 import { fallbackOrganization } from '../lib/organization'
 
@@ -158,8 +159,13 @@ function About() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, amount: 0.25 }}
               transition={{ duration: 0.55 }}
-              className="relative mx-auto aspect-square w-full max-w-md overflow-hidden rounded-[2rem] bg-navy-950 p-8 shadow-[0_30px_80px_-45px_rgba(7,21,47,0.75)]"
+              className="robot-easter-egg-host relative mx-auto aspect-square w-full max-w-md overflow-hidden rounded-[2rem] bg-navy-950 p-8 shadow-[0_30px_80px_-45px_rgba(7,21,47,0.75)]"
             >
+              <RobotEasterEgg
+                variant="scout"
+                size={52}
+                className="bottom-5 right-5"
+              />
               <div className="subtle-grid absolute inset-0 opacity-10" />
               <div className="absolute -right-20 -top-20 size-64 rounded-full bg-brand-600/30 blur-3xl" />
               <div className="relative flex h-full flex-col items-center justify-center text-center">

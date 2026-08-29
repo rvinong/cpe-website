@@ -11,6 +11,7 @@ import { motion as Motion } from 'framer-motion'
 import { quickAccessItems } from '../data/quickAccess'
 import { springTransition } from '../lib/motion'
 import Reveal from './Reveal'
+import RobotEasterEgg from './RobotEasterEgg'
 import SectionHeader from './SectionHeader'
 
 const iconMap = {
@@ -38,6 +39,8 @@ function QuickAccess() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           {quickAccessItems.map((item, index) => {
             const Icon = iconMap[item.icon]
+            const robotVariant =
+              index === 0 ? 'scout' : index === 4 ? 'archive' : null
 
             return (
               <Reveal key={item.title} delay={index * 0.055}>
@@ -46,18 +49,33 @@ function QuickAccess() {
                   aria-label={`Open ${item.title}`}
                   whileTap={{ scale: 0.985 }}
                   transition={springTransition}
-                  className="quick-access-card surface-card group relative flex h-full min-h-52 flex-col overflow-hidden p-6 transition duration-300 hover:border-brand-500 hover:shadow-[0_28px_70px_-38px_rgba(21,94,239,0.5)] focus-visible:border-brand-500 focus-visible:ring-4 focus-visible:ring-brand-100"
-                >
-                  <span className="absolute inset-x-6 top-0 h-px bg-brand-500 opacity-0 transition duration-500 group-hover:opacity-100" />
+                className="quick-access-card robot-easter-egg-host surface-card group relative flex h-full min-h-52 flex-col overflow-hidden p-6 transition duration-300 hover:border-brand-500 hover:shadow-[0_28px_70px_-38px_rgba(21,94,239,0.5)] focus-visible:border-brand-500 focus-visible:ring-4 focus-visible:ring-brand-100"
+              >
+                {robotVariant && (
+                  <RobotEasterEgg
+                    variant={robotVariant}
+                    size={42}
+                    className="bottom-3 right-4"
+                  />
+                )}
+                <span className="absolute inset-x-6 top-0 h-px bg-brand-500 opacity-0 transition duration-500 group-hover:opacity-100" />
                   <span className="quick-access-orb absolute -right-8 -top-8 size-28 origin-top-right rounded-full transition duration-500 group-hover:-translate-x-2 group-hover:translate-y-2 group-hover:scale-125" />
                   <span className="quick-access-ember absolute -bottom-10 left-6 h-16 w-28 rotate-[-12deg] rounded-full opacity-0 blur-2xl transition duration-500 group-hover:opacity-80" />
                   <span className="grid size-12 place-items-center rounded-xl bg-brand-50 text-brand-600 shadow-sm transition duration-300 group-hover:-translate-y-1 group-hover:bg-brand-600 group-hover:text-white group-hover:shadow-lg group-hover:shadow-blue-600/20">
                     <Icon size={23} strokeWidth={1.7} aria-hidden="true" />
                   </span>
-                  <h3 className="relative mt-6 text-base font-extrabold text-navy-900">
+                  <h3
+                    className={`relative mt-6 text-base font-extrabold text-navy-900 ${
+                      robotVariant ? 'pr-10' : ''
+                    }`}
+                  >
                     {item.title}
                   </h3>
-                  <p className="relative mt-2 text-sm leading-6 text-slate-500">
+                  <p
+                    className={`relative mt-2 text-sm leading-6 text-slate-500 ${
+                      robotVariant ? 'pr-10' : ''
+                    }`}
+                  >
                     {item.description}
                   </p>
                   <span className="relative mt-auto inline-flex items-center gap-1 pt-5 text-xs font-extrabold text-brand-600 opacity-0 transition duration-300 group-hover:translate-x-1 group-hover:opacity-100 group-focus-visible:translate-x-1 group-focus-visible:opacity-100">

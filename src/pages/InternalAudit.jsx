@@ -16,6 +16,7 @@ import {
 import { useEffect, useMemo, useState } from 'react'
 import ContentSkeleton from '../components/ContentSkeleton'
 import PageHero from '../components/PageHero'
+import RobotEasterEgg from '../components/RobotEasterEgg'
 import {
   getInternalAuditCategoryId,
   internalAuditCategories,
@@ -314,8 +315,15 @@ function InternalAudit() {
                     whileHover={{ y: -4 }}
                     viewport={{ once: true, amount: 0.25 }}
                     transition={{ duration: 0.5, delay: index * 0.06 }}
-                    className="surface-card interactive-card p-6"
+                    className="robot-easter-egg-host surface-card interactive-card relative isolate overflow-hidden p-6"
                   >
+                    {category.id === 'activity' && (
+                      <RobotEasterEgg
+                        variant="circuit"
+                        size={46}
+                        className="bottom-3 right-4"
+                      />
+                    )}
                     <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                       <div className="flex gap-4">
                         <span
@@ -329,7 +337,11 @@ function InternalAudit() {
                           <h3 className="text-xl font-black text-navy-900">
                             {category.label}
                           </h3>
-                          <p className="mt-2 text-sm leading-6 text-slate-600">
+                          <p
+                            className={`mt-2 text-sm leading-6 text-slate-600 ${
+                              category.id === 'activity' ? 'pr-14' : ''
+                            }`}
+                          >
                             {category.description}
                           </p>
                         </div>

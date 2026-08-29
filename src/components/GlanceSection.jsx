@@ -8,7 +8,7 @@ import {
 import useOrganization from '../context/useOrganization'
 import AnimatedCounter from './AnimatedCounter'
 import Reveal from './Reveal'
-import PixelPals from './PixelPals'
+import RobotEasterEgg from './RobotEasterEgg'
 
 const iconMap = {
   award: Award,
@@ -35,8 +35,12 @@ function GlanceSection() {
       <div className="section-shell">
         <Reveal direction="left">
           <div className="relative pt-4 sm:pt-6">
-            <PixelPals />
-            <div className="relative isolate overflow-hidden rounded-[2.5rem] bg-navy-950 px-6 py-14 shadow-[0_34px_80px_-40px_rgba(7,21,47,0.85)] sm:px-10 lg:px-14 lg:py-18">
+            <div className="robot-easter-egg-host relative isolate overflow-hidden rounded-[2.5rem] bg-navy-950 px-6 py-14 shadow-[0_34px_80px_-40px_rgba(7,21,47,0.85)] sm:px-10 lg:px-14 lg:py-18">
+              <RobotEasterEgg
+                variant="orbit"
+                size={58}
+                className="right-5 top-5 sm:right-10 sm:top-7"
+              />
               <img
                 src="/images/ce-campus-hero.jpg"
                 alt=""

@@ -33,7 +33,11 @@ function UpcomingEvents() {
                 delay={index * 0.08}
                 direction={index % 2 === 0 ? 'left' : 'right'}
               >
-                <EventCard event={event} compact />
+                <EventCard
+                  event={event}
+                  compact
+                  robotVariant={index === 1 ? 'orbit' : ''}
+                />
               </Reveal>
             ))}
           </div>

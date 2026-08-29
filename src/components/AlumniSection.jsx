@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import useAlumni from '../hooks/useAlumni'
 import Reveal from './Reveal'
+import RobotEasterEgg from './RobotEasterEgg'
 
 const yearbookHighlights = [
   {
@@ -164,7 +165,14 @@ function AlumniSection() {
                             <span className="absolute -right-2 top-4 z-10 rounded-l-full bg-orange-500 px-3 py-1 text-[0.62rem] font-black text-white shadow-md shadow-orange-500/20">
                               {profile.batch || 'TBA'}
                             </span>
-                            <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-gradient-to-br from-brand-700 via-brand-600 to-blue-400">
+                            <div className="robot-easter-egg-host relative aspect-[4/5] overflow-hidden rounded-2xl bg-gradient-to-br from-brand-700 via-brand-600 to-blue-400">
+                              {index === 0 && (
+                                <RobotEasterEgg
+                                  variant="archive"
+                                  size={34}
+                                  className="bottom-2 right-2"
+                                />
+                              )}
                               {profile.photo || profile.photo_path ? (
                                 <img
                                   src={profile.photo || profile.photo_path}

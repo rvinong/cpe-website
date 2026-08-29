@@ -44,7 +44,11 @@ function NewsSection() {
                 delay={index * 0.08}
                 direction={index % 2 === 0 ? 'left' : 'right'}
               >
-                <NewsCard article={article} compact />
+                <NewsCard
+                  article={article}
+                  compact
+                  robotVariant={index === 0 ? 'circuit' : ''}
+                />
               </Reveal>
             ))}
           </div>
