@@ -1,6 +1,7 @@
 import {
   Building2,
   Camera,
+  ChevronDown,
   CirclePlus,
   Edit3,
   History,
@@ -12,9 +13,10 @@ import {
   UsersRound,
   X,
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import useOrganization from '../context/useOrganization'
+import { organizationPositionOptions } from '../data/organizationPositions'
 import {
   createMilestone,
   createOfficer,
@@ -33,12 +35,93 @@ import {
 const inputClassName =
   'admin-field mt-2 placeholder:text-slate-400'
 
+function PositionDropdown({ value, options, onChange }) {
+  const [isOpen, setIsOpen] = useState(false)
+  const rootRef = useRef(null)
+
+  useEffect(() => {
+    if (!isOpen) return undefined
+
+    const handlePointerDown = (event) => {
+      if (!rootRef.current?.contains(event.target)) {
+        setIsOpen(false)
+      }
+    }
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') setIsOpen(false)
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isOpen])
+
+  return (
+    <div ref={rootRef} className="relative mt-2">
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        aria-required="true"
+        onClick={() => setIsOpen((current) => !current)}
+        onKeyDown={(event) => {
+          if (
+            event.key === 'ArrowDown' ||
+            event.key === 'Enter' ||
+            event.key === ' '
+          ) {
+            event.preventDefault()
+            setIsOpen(true)
+          }
+        }}
+        className={`${inputClassName} flex items-center justify-between gap-3 text-left ${
+          value ? '' : 'text-slate-400'
+        }`}
+      >
+        <span className="truncate">{value || 'Select a position'}</span>
+        <ChevronDown
+          size={17}
+          className={`shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          aria-hidden="true"
+        />
+      </button>
+
+      {isOpen && (
+        <div
+          className="position-dropdown-menu absolute inset-x-0 top-full z-30 mt-2 overflow-y-auto p-1"
+          role="listbox"
+          aria-label="Available positions"
+        >
+          {options.map((position) => (
+            <button
+              key={position}
+              type="button"
+              role="option"
+              aria-selected={value === position}
+              onClick={() => {
+                onChange(position)
+                setIsOpen(false)
+              }}
+              className="position-dropdown-option"
+            >
+              {position}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 const emptyOfficer = {
   personType: 'officer',
   name: '',
   position: '',
   academicYear: '',
-  sortOrder: 0,
 }
 
 const emptyMilestone = {
@@ -73,6 +156,11 @@ function AdminOrganization() {
   const [success, setSuccess] = useState('')
 
   const needsSchema = isOrganizationSchemaMissing(contentError)
+  const positionOptions = organizationPositionOptions[officerForm.personType]
+  const availablePositionOptions =
+    officerForm.position && !positionOptions.includes(officerForm.position)
+      ? [officerForm.position, ...positionOptions]
+      : positionOptions
 
   useEffect(
     () => () => {
@@ -120,7 +208,6 @@ function AdminOrganization() {
             name: officer.name,
             position: officer.position,
             academicYear: officer.academic_year,
-            sortOrder: officer.sort_order,
           }
         : emptyOfficer,
     )
@@ -191,11 +278,6 @@ function AdminOrganization() {
       setError('Name and position/title are required.')
       return
     }
-    if (!personPhotoFile && !editingItem?.photo_path) {
-      setError('Add a profile photo before saving this person.')
-      return
-    }
-
     setIsSaving(true)
     let photoPath = editingItem?.photo_path || null
     let uploadedPath = null
@@ -616,7 +698,9 @@ function AdminOrganization() {
                   : 'Organization milestones'}
               </h3>
               <p className="mt-1 text-xs text-slate-500">
-                Displayed in ascending order
+                {activeTab === 'officers'
+                  ? 'Ordered by official position'
+                  : 'Displayed in ascending order'}
               </p>
             </div>
             <button
@@ -799,16 +883,15 @@ function AdminOrganization() {
                     </label>
                     <label className="text-sm font-extrabold text-navy-900">
                       Position
-                      <input
+                      <PositionDropdown
                         value={officerForm.position}
-                        onChange={(event) =>
+                        options={availablePositionOptions}
+                        onChange={(position) =>
                           setOfficerForm((current) => ({
                             ...current,
-                            position: event.target.value,
+                            position,
                           }))
                         }
-                        className={inputClassName}
-                        required
                       />
                     </label>
                     <label className="text-sm font-extrabold text-navy-900">
@@ -847,10 +930,12 @@ function AdminOrganization() {
                         )}
                         <div className="min-w-0 flex-1">
                           <p className="text-sm font-extrabold text-navy-900">
-                            Profile photo required
+                            Profile photo (optional)
                           </p>
                           <p className="mt-1 text-xs leading-5 text-slate-500">
                             Use a clear JPG, PNG, or WebP image under 8 MB.
+                            Without a photo, the person&apos;s initials will be
+                            shown instead.
                           </p>
                           <label className="mt-4 inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-extrabold text-brand-600 ring-1 ring-blue-100">
                             {personPhotoPreview ? (
@@ -920,30 +1005,23 @@ function AdminOrganization() {
                   </>
                 )}
 
-                <label className="text-sm font-extrabold text-navy-900">
-                  Display order
-                  <input
-                    type="number"
-                    min="0"
-                    value={
-                      editorType === 'officer'
-                        ? officerForm.sortOrder
-                        : milestoneForm.sortOrder
-                    }
-                    onChange={(event) =>
-                      editorType === 'officer'
-                        ? setOfficerForm((current) => ({
-                            ...current,
-                            sortOrder: event.target.value,
-                          }))
-                        : setMilestoneForm((current) => ({
-                            ...current,
-                            sortOrder: event.target.value,
-                          }))
-                    }
-                    className={inputClassName}
-                  />
-                </label>
+                {editorType === 'milestone' && (
+                  <label className="text-sm font-extrabold text-navy-900">
+                    Display order
+                    <input
+                      type="number"
+                      min="0"
+                      value={milestoneForm.sortOrder}
+                      onChange={(event) =>
+                        setMilestoneForm((current) => ({
+                          ...current,
+                          sortOrder: event.target.value,
+                        }))
+                      }
+                      className={inputClassName}
+                    />
+                  </label>
+                )}
               </div>
 
               {error && (

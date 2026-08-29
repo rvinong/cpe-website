@@ -64,6 +64,42 @@ const officialRecords = [
   },
 ]
 
+function OrganizationPersonCard({ person }) {
+  return (
+    <article className="rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-blue-200">
+      <div className="flex items-start gap-4">
+        {person.photo ? (
+          <img
+            src={person.photo}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="profile-image size-16 shrink-0 rounded-2xl object-cover"
+          />
+        ) : (
+          <span className="grid size-16 shrink-0 place-items-center rounded-2xl bg-brand-50 text-lg font-black text-brand-600 ring-1 ring-blue-100">
+            {person.initials}
+          </span>
+        )}
+        <div className="min-w-0">
+          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-extrabold text-slate-500 uppercase">
+            {person.person_type === 'faculty' ? 'Faculty' : 'Officer'}
+          </span>
+          <h3 className="mt-3 font-extrabold text-navy-900">{person.name}</h3>
+          <p className="mt-1 text-sm font-bold text-brand-600">
+            {person.position}
+          </p>
+          {person.academic_year && (
+            <p className="mt-1 text-xs font-bold text-slate-500">
+              {person.academic_year}
+            </p>
+          )}
+        </div>
+      </div>
+    </article>
+  )
+}
+
 function About() {
   const {
     profile: organizationProfile,
@@ -78,6 +114,12 @@ function About() {
   const displayedOrganizationPeople = isUsingSamplePeople
     ? fallbackOrganization.officers
     : organizationOfficers
+  const displayedFaculty = displayedOrganizationPeople.filter(
+    (person) => person.person_type === 'faculty',
+  )
+  const displayedOfficers = displayedOrganizationPeople.filter(
+    (person) => person.person_type !== 'faculty',
+  )
   const overviewFacts = [
     {
       icon: ShieldCheck,
@@ -312,7 +354,7 @@ function About() {
         </section>
 
         <section className="bg-white py-20 sm:py-24">
-          <div className="section-shell grid gap-8 lg:grid-cols-2">
+          <div className="section-shell space-y-8">
             <Motion.article
               initial={{ opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -372,61 +414,97 @@ function About() {
                 <BriefcaseBusiness size={25} aria-hidden="true" />
               </span>
               <p className="mt-6 text-xs font-extrabold tracking-[0.18em] text-brand-600 uppercase">
-                Current administration
+                Current leadership
               </p>
               <h2 className="mt-2 text-3xl font-black text-navy-900">
-                Officers & Faculty
+                Faculty & Organization Officers
               </h2>
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600">
+                Meet the faculty and student leaders supporting the chapter's
+                academic and organizational work.
+              </p>
               {isUsingSamplePeople && (
                 <p className="mt-4 rounded-2xl border border-blue-300 bg-brand-50/45 px-4 py-3 text-xs font-extrabold tracking-[0.12em] text-brand-600 uppercase">
                   Sample preview - replace these with verified officers and
                   faculty in the dashboard.
                 </p>
               )}
-              {displayedOrganizationPeople.length > 0 && (
-                <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                  {displayedOrganizationPeople.map((officer) => (
-                    <div
-                      key={`${officer.position}-${officer.name}`}
-                      className="rounded-2xl border border-slate-200 p-5"
-                    >
-                      <div className="flex items-start gap-4">
-                        {officer.photo ? (
-                          <img
-                            src={officer.photo}
-                            alt=""
-                            loading="lazy"
-                            decoding="async"
-                            className="profile-image size-16 rounded-2xl object-cover"
-                          />
-                        ) : (
-                          <span className="grid size-16 shrink-0 place-items-center rounded-2xl bg-brand-50 text-lg font-black text-brand-600 ring-1 ring-blue-100">
-                            {officer.initials}
-                          </span>
-                        )}
-                        <div className="min-w-0">
-                          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-extrabold text-slate-500 uppercase">
-                            {officer.person_type === 'faculty'
-                              ? 'Faculty'
-                              : 'Officer'}
-                          </span>
-                          <p className="mt-3 font-extrabold text-navy-900">
-                            {officer.name}
-                          </p>
-                          <p className="mt-1 text-sm font-bold text-brand-600">
-                            {officer.position}
-                          </p>
-                          {officer.academic_year && (
-                            <p className="mt-1 text-xs font-bold text-slate-500">
-                              {officer.academic_year}
-                            </p>
-                          )}
-                        </div>
-                      </div>
+
+              <div className="mt-8 space-y-8">
+                <section aria-labelledby="faculty-heading">
+                  <div className="flex flex-wrap items-end justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-extrabold tracking-[0.16em] text-brand-600 uppercase">
+                        Faculty
+                      </p>
+                      <h3
+                        id="faculty-heading"
+                        className="mt-2 text-2xl font-black text-navy-900"
+                      >
+                        Faculty Adviser
+                      </h3>
                     </div>
-                  ))}
-                </div>
-              )}
+                    {displayedFaculty.length > 0 && (
+                      <span className="text-xs font-bold text-slate-400">
+                        {displayedFaculty.length}{' '}
+                        {displayedFaculty.length === 1 ? 'record' : 'records'}
+                      </span>
+                    )}
+                  </div>
+                  {displayedFaculty.length > 0 ? (
+                    <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                      {displayedFaculty.map((person) => (
+                        <OrganizationPersonCard
+                          key={`${person.position}-${person.name}`}
+                          person={person}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-5 rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 px-5 py-4 text-sm text-slate-500">
+                      No faculty records have been published yet.
+                    </p>
+                  )}
+                </section>
+
+                <div className="border-t border-slate-200" />
+
+                <section aria-labelledby="officers-heading">
+                  <div className="flex flex-wrap items-end justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-extrabold tracking-[0.16em] text-brand-600 uppercase">
+                        Student leadership
+                      </p>
+                      <h3
+                        id="officers-heading"
+                        className="mt-2 text-2xl font-black text-navy-900"
+                      >
+                        Organization Officers
+                      </h3>
+                    </div>
+                    {displayedOfficers.length > 0 && (
+                      <span className="text-xs font-bold text-slate-400">
+                        {displayedOfficers.length}{' '}
+                        {displayedOfficers.length === 1 ? 'officer' : 'officers'}
+                      </span>
+                    )}
+                  </div>
+                  {displayedOfficers.length > 0 ? (
+                    <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                      {displayedOfficers.map((person) => (
+                        <OrganizationPersonCard
+                          key={`${person.position}-${person.name}`}
+                          person={person}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-5 rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 px-5 py-4 text-sm text-slate-500">
+                      No organization officers have been published yet.
+                    </p>
+                  )}
+                </section>
+              </div>
             </Motion.article>
           </div>
         </section>

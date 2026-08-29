@@ -68,7 +68,6 @@ export async function getPublicAlumni() {
     .lte('published_at', new Date().toISOString())
     .order('is_featured', { ascending: false })
     .order('batch', { ascending: false })
-    .order('sort_order', { ascending: true })
     .order('name', { ascending: true })
 
   return { data: data?.map(normalizeAlumniProfile) ?? null, error }
@@ -78,7 +77,7 @@ export async function getAdminAlumni() {
   return supabase
     .from('alumni_profiles')
     .select(alumniColumns)
-    .order('updated_at', { ascending: false })
+    .order('name', { ascending: true })
 }
 
 function toPayload(values, photoPath, publishedAt) {
@@ -93,7 +92,6 @@ function toPayload(values, photoPath, publishedAt) {
     status: values.status,
     is_featured: values.isFeatured,
     consent_confirmed: values.consentConfirmed,
-    sort_order: Number(values.sortOrder) || 0,
     published_at:
       values.status === 'published'
         ? publishedAt || new Date().toISOString()

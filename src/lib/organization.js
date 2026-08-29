@@ -5,6 +5,7 @@ import {
   organizationProfile,
   organizationStats,
 } from '../data/about'
+import { organizationPositionOrder } from '../data/organizationPositions'
 import {
   mediaBucket,
   removeMedia,
@@ -72,7 +73,9 @@ export const fallbackOrganization = {
   profile: organizationProfile,
   membership: membershipDetails,
   stats: organizationStats,
-  officers: organizationOfficers.map(normalizeOrganizationPerson),
+  officers: organizationOfficers
+    .map(normalizeOrganizationPerson)
+    .sort(compareOrganizationPeople),
   milestones: historyMilestones,
 }
 
@@ -109,6 +112,29 @@ export function normalizeOrganizationPerson(row) {
     photo: getOrganizationPersonPhotoUrl(row.photo_path),
     initials: getPersonInitials(row.name),
   }
+}
+
+function compareOrganizationPeople(first, second) {
+  const firstPosition = (first.position || '').trim()
+  const secondPosition = (second.position || '').trim()
+  const fallbackRank = organizationPositionOrder.size
+  const firstRank =
+    organizationPositionOrder.get(firstPosition.toLowerCase()) ?? fallbackRank
+  const secondRank =
+    organizationPositionOrder.get(secondPosition.toLowerCase()) ?? fallbackRank
+
+  if (firstRank !== secondRank) return firstRank - secondRank
+
+  const positionComparison = firstPosition.localeCompare(
+    secondPosition,
+    undefined,
+    { sensitivity: 'base' },
+  )
+  if (positionComparison !== 0) return positionComparison
+
+  return (first.name || '').localeCompare(second.name || '', undefined, {
+    sensitivity: 'base',
+  })
 }
 
 export function normalizeOrganizationProfile(row) {
@@ -168,7 +194,6 @@ export async function getOrganizationContent() {
     supabase
       .from('organization_officers')
       .select(officerColumns)
-      .order('sort_order', { ascending: true })
       .order('position', { ascending: true }),
     supabase
       .from('organization_milestones')
@@ -188,7 +213,9 @@ export async function getOrganizationContent() {
   return {
     data: {
       ...normalized,
-      officers: (officerResult.data || []).map(normalizeOrganizationPerson),
+      officers: (officerResult.data || [])
+        .map(normalizeOrganizationPerson)
+        .sort(compareOrganizationPeople),
       milestones: milestoneResult.data,
     },
     error: null,
@@ -244,7 +271,6 @@ function toOfficerPayload(values, photoPath) {
     position: values.position.trim(),
     academic_year: values.academicYear.trim(),
     photo_path: photoPath,
-    sort_order: Number(values.sortOrder) || 0,
   }
 }
 

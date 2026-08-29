@@ -35,7 +35,6 @@ const emptyForm = {
   status: 'draft',
   isFeatured: false,
   consentConfirmed: false,
-  sortOrder: 0,
 }
 
 const statusStyles = {
@@ -138,7 +137,6 @@ function AdminAlumni() {
             status: item.status,
             isFeatured: item.is_featured,
             consentConfirmed: item.consent_confirmed,
-            sortOrder: item.sort_order,
           }
         : emptyForm,
     )
@@ -522,17 +520,6 @@ function AdminAlumni() {
                     <option value="published">Published</option>
                     <option value="archived">Archived</option>
                   </select>
-                </label>
-                <label className="text-sm font-extrabold text-navy-900">
-                  Display order
-                  <input
-                    type="number"
-                    min="0"
-                    name="sortOrder"
-                    value={form.sortOrder}
-                    onChange={updateField}
-                    className={inputClassName}
-                  />
                 </label>
               </div>
 

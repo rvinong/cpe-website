@@ -16,6 +16,12 @@ import { alumniProfiles as sampleAlumniProfiles } from '../data/alumni'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import useAlumni from '../hooks/useAlumni'
 
+function compareAlumniNames(first, second) {
+  return (first.name || '').localeCompare(second.name || '', undefined, {
+    sensitivity: 'base',
+  })
+}
+
 function Alumni() {
   const { profiles, isLoading } = useAlumni()
   const [searchTerm, setSearchTerm] = useState('')
@@ -42,22 +48,27 @@ function Alumni() {
   const filteredProfiles = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase()
 
-    return displayedProfiles.filter((profile) => {
-      const matchesBatch = !activeBatch || profile.batch === activeBatch
-      const matchesSearch =
-        !normalizedSearch ||
-        [profile.name, profile.batch, profile.role, profile.organization]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase()
-          .includes(normalizedSearch)
+    return displayedProfiles
+      .filter((profile) => {
+        const matchesBatch = !activeBatch || profile.batch === activeBatch
+        const matchesSearch =
+          !normalizedSearch ||
+          [profile.name, profile.batch, profile.role, profile.organization]
+            .filter(Boolean)
+            .join(' ')
+            .toLowerCase()
+            .includes(normalizedSearch)
 
-      return matchesBatch && matchesSearch
-    })
+        return matchesBatch && matchesSearch
+      })
+      .sort(compareAlumniNames)
   }, [activeBatch, displayedProfiles, searchTerm])
 
   const featuredProfiles = useMemo(
-    () => displayedProfiles.filter((profile) => profile.featured),
+    () =>
+      displayedProfiles
+        .filter((profile) => profile.featured)
+        .sort(compareAlumniNames),
     [displayedProfiles],
   )
 
