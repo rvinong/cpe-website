@@ -35,13 +35,8 @@ function GlanceSection() {
       <div className="section-shell">
         <Reveal direction="left">
           <div className="relative pt-4 sm:pt-6">
-            <div className="robot-easter-egg-host relative isolate overflow-hidden rounded-[2.5rem] bg-navy-950 px-6 py-14 shadow-[0_34px_80px_-40px_rgba(7,21,47,0.85)] sm:px-10 lg:px-14 lg:py-18">
-              <RobotEasterEgg
-                variant="orbit"
-                size={58}
-                anchor="top-right"
-                className="right-5 top-5 sm:right-10 sm:top-7"
-              />
+            <div className="robot-easter-egg-frame">
+              <div className="robot-easter-egg-host relative isolate overflow-hidden rounded-[2.5rem] bg-navy-950 px-6 py-14 shadow-[0_34px_80px_-40px_rgba(7,21,47,0.85)] sm:px-10 lg:px-14 lg:py-18">
               <img
                 src="/images/ce-campus-hero.jpg"
                 alt=""
@@ -97,6 +92,8 @@ function GlanceSection() {
                   )
                 })}
               </div>
+              </div>
+              <RobotEasterEgg variant="orbit" size={58} />
             </div>
           </div>
         </Reveal>

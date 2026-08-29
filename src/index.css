@@ -7751,6 +7751,13 @@ html.dark .community-room-info {
 }
 
 /* Small robot sightings add personality without competing with page content. */
+.robot-easter-egg-frame {
+  position: relative;
+  height: 100%;
+  overflow: visible;
+  transition: transform var(--transition-base);
+}
+
 .robot-easter-egg {
   position: absolute;
   z-index: 8;
@@ -7761,6 +7768,16 @@ html.dark .community-room-info {
   filter: drop-shadow(0 0 0.5px #020617)
     drop-shadow(0 8px 7px rgba(15, 23, 42, 0.28));
   transition: opacity 0.25s ease, transform 0.3s ease;
+}
+
+.robot-easter-egg-rim-top {
+  right: 0.9rem;
+  bottom: calc(100% - 0.75rem);
+}
+
+.robot-easter-egg-rim-bottom {
+  top: calc(100% - 0.75rem);
+  right: 0.9rem;
 }
 
 .robot-easter-egg-body {
@@ -7868,7 +7885,7 @@ html.dark .community-room-info {
   white-space: nowrap;
 }
 
-.robot-easter-egg-top-right .robot-easter-egg-emote {
+.robot-easter-egg-rim-bottom .robot-easter-egg-emote {
   top: calc(100% - 0.25rem);
   right: -0.3rem;
   border-radius: 0.35rem 999px 999px 999px;
@@ -7890,9 +7907,28 @@ html.dark .community-room-info {
 }
 
 .robot-easter-egg-host:hover > .robot-easter-egg,
-.robot-easter-egg-host:focus-within > .robot-easter-egg {
+.robot-easter-egg-host:focus-within > .robot-easter-egg,
+.robot-easter-egg-frame:hover > .robot-easter-egg,
+.robot-easter-egg-frame:focus-within > .robot-easter-egg {
   opacity: 1;
   transform: translateY(-0.28rem) rotate(-2deg) scale(1.04);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .robot-easter-egg-frame:hover {
+    transform: translateY(-2px);
+  }
+
+  .robot-easter-egg-frame > .interactive-card:hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .robot-easter-egg-rim-top,
+  .robot-easter-egg-rim-bottom {
+    right: 0.65rem;
+  }
 }
 
 html.dark .robot-easter-egg {
@@ -7980,7 +8016,9 @@ html.dark .robot-booster-core {
   }
 
   .robot-easter-egg-host:hover > .robot-easter-egg,
-  .robot-easter-egg-host:focus-within > .robot-easter-egg {
+  .robot-easter-egg-host:focus-within > .robot-easter-egg,
+  .robot-easter-egg-frame:hover > .robot-easter-egg,
+  .robot-easter-egg-frame:focus-within > .robot-easter-egg {
     transform: none;
   }
 }

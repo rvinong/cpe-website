@@ -154,18 +154,14 @@ function About() {
 
         <section className="bg-white py-20 sm:py-24">
           <div className="section-shell grid items-center gap-12 lg:grid-cols-[0.85fr_1.15fr]">
-            <Motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, amount: 0.25 }}
-              transition={{ duration: 0.55 }}
-              className="robot-easter-egg-host relative mx-auto aspect-square w-full max-w-md overflow-hidden rounded-[2rem] bg-navy-950 p-8 shadow-[0_30px_80px_-45px_rgba(7,21,47,0.75)]"
-            >
-              <RobotEasterEgg
-                variant="scout"
-                size={52}
-                className="bottom-5 right-5"
-              />
+            <div className="robot-easter-egg-frame mx-auto w-full max-w-md">
+              <Motion.div
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.25 }}
+                transition={{ duration: 0.55 }}
+                className="robot-easter-egg-host relative aspect-square w-full overflow-hidden rounded-[2rem] bg-navy-950 p-8 shadow-[0_30px_80px_-45px_rgba(7,21,47,0.75)]"
+              >
               <div className="subtle-grid absolute inset-0 opacity-10" />
               <div className="absolute -right-20 -top-20 size-64 rounded-full bg-brand-600/30 blur-3xl" />
               <div className="relative flex h-full flex-col items-center justify-center text-center">
@@ -188,7 +184,9 @@ function About() {
                     organizationProfile.name}
                 </p>
               </div>
-            </Motion.div>
+              </Motion.div>
+              <RobotEasterEgg variant="scout" size={52} />
+            </div>
 
             <Motion.div
               initial={{ opacity: 0, x: 20 }}

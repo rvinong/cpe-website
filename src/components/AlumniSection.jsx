@@ -165,19 +165,18 @@ function AlumniSection() {
                         return (
                           <article
                             key={profile.id}
-                            className={`alumni-home-profile-card group relative rounded-[1.35rem] p-3 transition duration-300 hover:z-10 hover:-translate-y-2 hover:rotate-0 ${rotation}`}
+                            className={`alumni-home-profile-card robot-easter-egg-host group relative rounded-[1.35rem] p-3 transition duration-300 hover:z-10 hover:-translate-y-2 hover:rotate-0 ${rotation}`}
                           >
                             <span className="absolute -right-2 top-4 z-10 rounded-l-full bg-orange-500 px-3 py-1 text-[0.62rem] font-black text-white shadow-md shadow-orange-500/20">
                               {profile.batch || 'TBA'}
                             </span>
-                            <div className="robot-easter-egg-host relative aspect-[4/5] overflow-hidden rounded-2xl bg-gradient-to-br from-brand-700 via-brand-600 to-blue-400">
-                              {robotAssignments[index] && (
-                                <RobotEasterEgg
-                                  variant={robotAssignments[index]}
-                                  size={34}
-                                  className="bottom-2 right-2"
-                                />
-                              )}
+                            {robotAssignments[index] && (
+                              <RobotEasterEgg
+                                variant={robotAssignments[index]}
+                                size={34}
+                              />
+                            )}
+                            <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-gradient-to-br from-brand-700 via-brand-600 to-blue-400">
                               {profile.photo || profile.photo_path ? (
                                 <img
                                   src={profile.photo || profile.photo_path}

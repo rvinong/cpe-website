@@ -315,22 +315,16 @@ function InternalAudit() {
                 ).length
 
                 return (
-                  <Motion.article
+                  <Motion.div
                     key={category.id}
                     initial={{ opacity: 0, y: 18 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     whileHover={{ y: -4 }}
                     viewport={{ once: true, amount: 0.25 }}
                     transition={{ duration: 0.5, delay: index * 0.06 }}
-                    className="robot-easter-egg-host surface-card interactive-card relative isolate overflow-hidden p-6"
+                    className="robot-easter-egg-frame h-full"
                   >
-                    {robotVariant && (
-                      <RobotEasterEgg
-                        variant={robotVariant}
-                        size={46}
-                        className="bottom-3 right-4"
-                      />
-                    )}
+                    <article className="robot-easter-egg-host surface-card interactive-card relative isolate h-full overflow-hidden p-6">
                     <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                       <div className="flex gap-4">
                         <span
@@ -344,11 +338,7 @@ function InternalAudit() {
                           <h3 className="text-xl font-black text-navy-900">
                             {category.label}
                           </h3>
-                          <p
-                            className={`mt-2 text-sm leading-6 text-slate-600 ${
-                              robotVariant ? 'pr-14' : ''
-                            }`}
-                          >
+                          <p className="mt-2 text-sm leading-6 text-slate-600">
                             {category.description}
                           </p>
                         </div>
@@ -358,7 +348,11 @@ function InternalAudit() {
                         {count === 1 ? 'record' : 'records'}
                       </span>
                     </div>
-                  </Motion.article>
+                    </article>
+                    {robotVariant && (
+                      <RobotEasterEgg variant={robotVariant} size={46} />
+                    )}
+                  </Motion.div>
                 )
               })}
             </Motion.div>

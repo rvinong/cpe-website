@@ -40,11 +40,7 @@ function NewsCard({ article, compact = false, robotVariant = '' }) {
           />
         </div>
       )}
-      <div
-        className={`flex flex-1 flex-col p-6 sm:p-7 ${
-          robotVariant ? 'pr-14 sm:pr-16' : ''
-        }`}
-      >
+      <div className="flex flex-1 flex-col p-6 sm:p-7">
         <div className="flex flex-wrap items-center gap-2">
           <p className="text-xs font-extrabold tracking-wide text-brand-600 uppercase">
             {article.category}
@@ -116,16 +112,12 @@ function NewsCard({ article, compact = false, robotVariant = '' }) {
   )
 
   return (
-    <article className="robot-easter-egg-host surface-card interactive-card group relative flex h-full flex-col overflow-hidden">
-      {robotVariant && (
-        <RobotEasterEgg
-          variant={robotVariant}
-          size={40}
-          className="bottom-4 right-4"
-        />
-      )}
-      {cardContent}
-    </article>
+    <div className="robot-easter-egg-frame h-full">
+      <article className="robot-easter-egg-host surface-card interactive-card group relative flex h-full flex-col overflow-hidden">
+        {cardContent}
+      </article>
+      {robotVariant && <RobotEasterEgg variant={robotVariant} size={40} />}
+    </div>
   )
 }
 

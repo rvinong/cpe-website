@@ -350,8 +350,8 @@ const robotMotionProfiles = {
   },
 }
 
-function getRouteAnimation(route, anchor) {
-  const yDirection = anchor === 'top-right' ? -1 : 1
+function getRouteAnimation(route, rim) {
+  const yDirection = rim === 'bottom' ? -1 : 1
 
   return {
     ...route,
@@ -363,10 +363,15 @@ function RobotEasterEgg({
   variant = 'scout',
   size = 52,
   className = '',
-  anchor = 'bottom-right',
+  rim = 'auto',
 }) {
   const safeVariant = robotComponents[variant] ? variant : 'scout'
-  const safeAnchor = anchor === 'top-right' ? 'top-right' : 'bottom-right'
+  const safeRim =
+    rim === 'top' || rim === 'bottom'
+      ? rim
+      : safeVariant === 'orbit'
+        ? 'bottom'
+        : 'top'
   const Robot = robotComponents[safeVariant]
   const colors = robotPalettes[safeVariant]
   const motionProfile = robotMotionProfiles[safeVariant]
@@ -380,9 +385,9 @@ function RobotEasterEgg({
   const routeAnimation = useMemo(
     () =>
       isActive
-        ? getRouteAnimation(motionProfile.route, safeAnchor)
+        ? getRouteAnimation(motionProfile.route, safeRim)
         : { x: 0, y: 0, rotate: 0 },
-    [isActive, motionProfile.route, safeAnchor],
+    [isActive, motionProfile.route, safeRim],
   )
 
   useEffect(() => {
@@ -420,7 +425,7 @@ function RobotEasterEgg({
   return (
     <span
       ref={stageRef}
-      className={`robot-easter-egg robot-easter-egg-${safeVariant} robot-easter-egg-${safeAnchor} ${className}`.trim()}
+      className={`robot-easter-egg robot-easter-egg-${safeVariant} robot-easter-egg-rim-${safeRim} ${className}`.trim()}
       style={{
         width: size,
         height: size,

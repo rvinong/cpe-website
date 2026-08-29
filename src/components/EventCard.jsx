@@ -20,15 +20,9 @@ function EventCard({ event, compact = false, robotVariant = '' }) {
   }[event.timing]
 
   return (
-    <article className="robot-easter-egg-host surface-card interactive-card group relative isolate flex h-full flex-col overflow-hidden">
-      {robotVariant && (
-        <RobotEasterEgg
-          variant={robotVariant}
-          size={42}
-          className="bottom-4 right-4"
-        />
-      )}
-      <span className="brand-corner-orb absolute -right-12 -top-12 -z-10 size-32 rounded-full transition duration-500 group-hover:scale-125" />
+    <div className="robot-easter-egg-frame h-full">
+      <article className="robot-easter-egg-host surface-card interactive-card group relative isolate flex h-full flex-col overflow-hidden">
+        <span className="brand-corner-orb absolute -right-12 -top-12 -z-10 size-32 rounded-full transition duration-500 group-hover:scale-125" />
       <div
         className={`h-1 ${
           event.timing === 'cancelled'
@@ -47,11 +41,7 @@ function EventCard({ event, compact = false, robotVariant = '' }) {
           />
         </div>
       )}
-      <div
-        className={`flex flex-1 flex-col p-6 sm:p-7 ${
-          robotVariant ? 'pr-14 sm:pr-16' : ''
-        }`}
-      >
+        <div className="flex flex-1 flex-col p-6 sm:p-7">
         <div className="flex flex-wrap items-center gap-2">
           <span
             className={`rounded-full px-3 py-1.5 text-[10px] font-extrabold tracking-wide uppercase ring-1 ring-inset ${
@@ -115,8 +105,10 @@ function EventCard({ event, compact = false, robotVariant = '' }) {
               <ExternalLink size={16} aria-hidden="true" />
             </a>
           )}
-      </div>
-    </article>
+        </div>
+      </article>
+      {robotVariant && <RobotEasterEgg variant={robotVariant} size={42} />}
+    </div>
   )
 }
 
