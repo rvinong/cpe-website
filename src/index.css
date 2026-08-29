@@ -7760,10 +7760,18 @@ html.dark .community-room-info {
   pointer-events: none;
   filter: drop-shadow(0 0 0.5px #020617)
     drop-shadow(0 8px 7px rgba(15, 23, 42, 0.28));
-  animation: robot-easter-egg-idle 5.8s ease-in-out infinite;
+  transition: opacity 0.25s ease, transform 0.3s ease;
 }
 
-.robot-easter-egg::before {
+.robot-easter-egg-body {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 100%;
+}
+
+.robot-easter-egg-body::before {
   position: absolute;
   right: 16%;
   bottom: -0.08rem;
@@ -7774,6 +7782,15 @@ html.dark .community-room-info {
   content: "";
   filter: blur(1px);
   transform: scaleX(0.82);
+}
+
+.robot-easter-egg-action {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 100%;
 }
 
 .robot-easter-egg svg {
@@ -7787,25 +7804,52 @@ html.dark .community-room-info {
   image-rendering: pixelated;
 }
 
-.robot-easter-egg-circuit {
-  animation-duration: 4.7s;
-  animation-delay: -1.2s;
+.robot-easter-egg-emote {
+  position: absolute;
+  top: -0.78rem;
+  right: -0.3rem;
+  z-index: 2;
+  display: grid;
+  min-width: 1.9rem;
+  height: 1.25rem;
+  place-items: center;
+  padding: 0 0.4rem;
+  border: 1px solid rgba(37, 99, 235, 0.22);
+  border-radius: 999px 999px 999px 0.35rem;
+  background: rgba(255, 255, 255, 0.96);
+  color: #1d4ed8;
+  box-shadow: 0 7px 15px rgba(15, 23, 42, 0.16);
+  font-size: 0.52rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  white-space: nowrap;
 }
 
-.robot-easter-egg-orbit {
-  animation-duration: 6.8s;
-  animation-delay: -2.4s;
+.robot-easter-egg-top-right .robot-easter-egg-emote {
+  top: calc(100% - 0.25rem);
+  right: -0.3rem;
+  border-radius: 0.35rem 999px 999px 999px;
 }
 
-.robot-easter-egg-archive {
-  animation-duration: 5.2s;
-  animation-delay: -3.1s;
+.robot-easter-egg-circuit .robot-easter-egg-emote {
+  border-color: rgba(13, 148, 136, 0.24);
+  color: #0f766e;
+}
+
+.robot-easter-egg-orbit .robot-easter-egg-emote {
+  border-color: rgba(124, 58, 237, 0.24);
+  color: #6d28d9;
+}
+
+.robot-easter-egg-archive .robot-easter-egg-emote {
+  border-color: rgba(234, 88, 12, 0.24);
+  color: #c2410c;
 }
 
 .robot-easter-egg-host:hover > .robot-easter-egg,
 .robot-easter-egg-host:focus-within > .robot-easter-egg {
   opacity: 1;
-  animation-play-state: paused;
   transform: translateY(-0.28rem) rotate(-2deg) scale(1.04);
 }
 
@@ -7815,26 +7859,19 @@ html.dark .robot-easter-egg {
     drop-shadow(0 9px 8px rgba(0, 0, 0, 0.42));
 }
 
-html.dark .robot-easter-egg::before {
+html.dark .robot-easter-egg-body::before {
   background: rgba(2, 6, 23, 0.58);
 }
 
-@keyframes robot-easter-egg-idle {
-  0%,
-  100% {
-    transform: translateY(0) rotate(0deg);
-  }
-  45% {
-    transform: translateY(-0.18rem) rotate(1deg);
-  }
-  72% {
-    transform: translateY(-0.06rem) rotate(-1deg);
-  }
+html.dark .robot-easter-egg-emote {
+  border-color: rgba(147, 197, 253, 0.3);
+  background: rgba(15, 23, 42, 0.96);
+  color: #bfdbfe;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.32);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .robot-easter-egg {
-    animation: none;
     transition: none;
   }
 

@@ -1,3 +1,11 @@
+import { useEffect, useMemo, useRef, useState } from 'react'
+import {
+  AnimatePresence,
+  motion as Motion,
+  useInView,
+} from 'framer-motion'
+import { useMotionPreferences } from '../hooks/useMotionPreferences'
+
 const robotPalettes = {
   scout: {
     primary: '#2563eb',
@@ -169,17 +177,237 @@ const robotComponents = {
   archive: ArchiveRobot,
 }
 
-function RobotEasterEgg({ variant = 'scout', size = 52, className = '' }) {
-  const Robot = robotComponents[variant] || ScoutRobot
-  const colors = robotPalettes[variant] || robotPalettes.scout
+const robotMotionProfiles = {
+  scout: {
+    routeDuration: 11,
+    startDelay: 1600,
+    actionInterval: 6200,
+    emoteDuration: 1050,
+    route: {
+      x: [0, -8, -20, -28, -17, -4, 0],
+      y: [0, -5, -13, -8, -2, 0, 0],
+      rotate: [0, -1, -3, -2, 1, 0, 0],
+    },
+    actions: [
+      {
+        emote: 'HI',
+        motion: {
+          rotate: [0, -8, 8, -5, 0],
+          scale: [1, 1.04, 1, 1.03, 1],
+        },
+      },
+      {
+        emote: 'LOOK',
+        motion: {
+          x: [0, -3, 0, -3, 0],
+          rotate: [0, -5, 5, -2, 0],
+        },
+      },
+    ],
+  },
+  circuit: {
+    routeDuration: 9.5,
+    startDelay: 2400,
+    actionInterval: 5900,
+    emoteDuration: 1100,
+    route: {
+      x: [0, -6, -16, -25, -18, -7, 0],
+      y: [0, -4, -11, -7, -2, 0, 0],
+      rotate: [0, 1, 3, 1, -2, -1, 0],
+    },
+    actions: [
+      {
+        emote: 'SCAN',
+        motion: {
+          x: [0, -3, -1, -3, 0],
+          scale: [1, 1.02, 1, 1.02, 1],
+        },
+      },
+      {
+        emote: 'SYNC',
+        motion: {
+          rotate: [0, 5, -5, 3, 0],
+          scale: [1, 1.04, 1, 1.04, 1],
+        },
+      },
+    ],
+  },
+  orbit: {
+    routeDuration: 12.5,
+    startDelay: 1900,
+    actionInterval: 6800,
+    emoteDuration: 1150,
+    route: {
+      x: [0, -9, -22, -30, -20, -7, 0],
+      y: [0, -5, -15, -9, -2, 0, 0],
+      rotate: [0, -2, -4, -1, 3, 1, 0],
+    },
+    actions: [
+      {
+        emote: 'PING',
+        motion: {
+          rotate: [0, 12, -12, 7, 0],
+          scale: [1, 1.06, 1, 1.04, 1],
+        },
+      },
+      {
+        emote: 'FLOAT',
+        motion: {
+          y: [0, -5, 0, -3, 0],
+          scale: [1, 1.05, 1, 1.03, 1],
+        },
+      },
+    ],
+  },
+  archive: {
+    routeDuration: 10.5,
+    startDelay: 3000,
+    actionInterval: 6400,
+    emoteDuration: 1050,
+    route: {
+      x: [0, -7, -18, -27, -16, -4, 0],
+      y: [0, -6, -14, -8, -2, 0, 0],
+      rotate: [0, 1, 3, 2, -2, -1, 0],
+    },
+    actions: [
+      {
+        emote: 'OK',
+        motion: {
+          rotate: [0, -6, 6, -4, 0],
+          scale: [1, 1.04, 1, 1.02, 1],
+        },
+      },
+      {
+        emote: 'FILE',
+        motion: {
+          x: [0, -3, 0, -2, 0],
+          y: [0, -3, 0, -2, 0],
+          rotate: [0, 3, -3, 2, 0],
+        },
+      },
+    ],
+  },
+}
+
+function getRouteAnimation(route, anchor) {
+  const yDirection = anchor === 'top-right' ? -1 : 1
+
+  return {
+    ...route,
+    y: route.y.map((value) => value * yDirection),
+  }
+}
+
+function RobotEasterEgg({
+  variant = 'scout',
+  size = 52,
+  className = '',
+  anchor = 'bottom-right',
+}) {
+  const safeVariant = robotComponents[variant] ? variant : 'scout'
+  const safeAnchor = anchor === 'top-right' ? 'top-right' : 'bottom-right'
+  const Robot = robotComponents[safeVariant]
+  const colors = robotPalettes[safeVariant]
+  const motionProfile = robotMotionProfiles[safeVariant]
+  const stageRef = useRef(null)
+  const isInView = useInView(stageRef, { margin: '80px 0px', amount: 0.2 })
+  const { shouldReduceMotion } = useMotionPreferences()
+  const [actionIndex, setActionIndex] = useState(-1)
+  const isActive = isInView && !shouldReduceMotion
+  const activeAction =
+    isActive && actionIndex >= 0 ? motionProfile.actions[actionIndex] : null
+  const routeAnimation = useMemo(
+    () =>
+      isActive
+        ? getRouteAnimation(motionProfile.route, safeAnchor)
+        : { x: 0, y: 0, rotate: 0 },
+    [isActive, motionProfile.route, safeAnchor],
+  )
+
+  useEffect(() => {
+    let actionTimer
+    let emoteTimer
+    let cancelled = false
+
+    if (!isActive) {
+      const resetTimer = window.setTimeout(() => setActionIndex(-1), 0)
+      return () => window.clearTimeout(resetTimer)
+    }
+
+    const triggerAction = () => {
+      if (cancelled) return
+
+      setActionIndex((current) => (current + 1) % motionProfile.actions.length)
+      emoteTimer = window.setTimeout(() => {
+        if (!cancelled) setActionIndex(-1)
+      }, motionProfile.emoteDuration)
+      actionTimer = window.setTimeout(
+        triggerAction,
+        motionProfile.actionInterval,
+      )
+    }
+
+    actionTimer = window.setTimeout(triggerAction, motionProfile.startDelay)
+
+    return () => {
+      cancelled = true
+      window.clearTimeout(actionTimer)
+      window.clearTimeout(emoteTimer)
+    }
+  }, [isActive, motionProfile])
 
   return (
     <span
-      className={`robot-easter-egg robot-easter-egg-${variant} ${className}`.trim()}
+      ref={stageRef}
+      className={`robot-easter-egg robot-easter-egg-${safeVariant} robot-easter-egg-${safeAnchor} ${className}`.trim()}
       style={{ width: size, height: size }}
       aria-hidden="true"
     >
-      <Robot colors={colors} />
+      <Motion.span
+        className="robot-easter-egg-body"
+        animate={routeAnimation}
+        transition={
+          isActive
+            ? {
+                duration: motionProfile.routeDuration,
+                ease: 'easeInOut',
+                repeat: Infinity,
+                repeatType: 'loop',
+              }
+            : { duration: 0.2, ease: 'easeOut' }
+        }
+      >
+        <Motion.span
+          className="robot-easter-egg-action"
+          animate={
+            activeAction?.motion || { x: 0, y: 0, rotate: 0, scale: 1 }
+          }
+          transition={
+            activeAction
+              ? {
+                  duration: motionProfile.emoteDuration / 1000,
+                  ease: 'easeInOut',
+                }
+              : { duration: 0.2, ease: 'easeOut' }
+          }
+        >
+          <Robot colors={colors} />
+        </Motion.span>
+        <AnimatePresence initial={false}>
+          {activeAction && (
+            <Motion.span
+              key={`${safeVariant}-${actionIndex}`}
+              className="robot-easter-egg-emote"
+              initial={{ opacity: 0, scale: 0.65, y: 4 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.72, y: -4 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+            >
+              {activeAction.emote}
+            </Motion.span>
+          )}
+        </AnimatePresence>
+      </Motion.span>
     </span>
   )
 }

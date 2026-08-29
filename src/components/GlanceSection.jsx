@@ -39,6 +39,7 @@ function GlanceSection() {
               <RobotEasterEgg
                 variant="orbit"
                 size={58}
+                anchor="top-right"
                 className="right-5 top-5 sm:right-10 sm:top-7"
               />
               <img
