@@ -25,6 +25,7 @@ import {
   createAuditReportDownload,
   getPublicAuditReports,
 } from '../lib/internalAudit'
+import { getRandomRobotAssignments } from '../lib/robotSightings'
 
 const categoryIcons = {
   project_proposal: ClipboardCheck,
@@ -63,6 +64,11 @@ function InternalAudit() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [downloadError, setDownloadError] = useState('')
+  const categoryCount = internalAuditCategories.length
+  const robotAssignments = useMemo(
+    () => getRandomRobotAssignments(categoryCount, ['circuit']),
+    [categoryCount],
+  )
 
   useEffect(() => {
     let isMounted = true
@@ -302,6 +308,7 @@ function InternalAudit() {
             >
               {internalAuditCategories.map((category, index) => {
                 const Icon = categoryIcons[category.id]
+                const robotVariant = robotAssignments[index]
                 const count = reports.filter(
                   (report) =>
                     getInternalAuditCategoryId(report.type) === category.id,
@@ -317,9 +324,9 @@ function InternalAudit() {
                     transition={{ duration: 0.5, delay: index * 0.06 }}
                     className="robot-easter-egg-host surface-card interactive-card relative isolate overflow-hidden p-6"
                   >
-                    {category.id === 'activity' && (
+                    {robotVariant && (
                       <RobotEasterEgg
-                        variant="circuit"
+                        variant={robotVariant}
                         size={46}
                         className="bottom-3 right-4"
                       />
@@ -339,7 +346,7 @@ function InternalAudit() {
                           </h3>
                           <p
                             className={`mt-2 text-sm leading-6 text-slate-600 ${
-                              category.id === 'activity' ? 'pr-14' : ''
+                              robotVariant ? 'pr-14' : ''
                             }`}
                           >
                             {category.description}

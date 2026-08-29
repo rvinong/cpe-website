@@ -10,6 +10,7 @@ import {
   Sparkles,
 } from 'lucide-react'
 import useAlumni from '../hooks/useAlumni'
+import { getRandomRobotAssignments } from '../lib/robotSightings'
 import Reveal from './Reveal'
 import RobotEasterEgg from './RobotEasterEgg'
 
@@ -50,6 +51,10 @@ function AlumniSection() {
   const previewProfiles = useMemo(
     () => getRandomPreviewProfiles(profiles),
     [profiles],
+  )
+  const robotAssignments = useMemo(
+    () => getRandomRobotAssignments(previewProfiles.length, ['archive']),
+    [previewProfiles.length],
   )
 
   return (
@@ -166,9 +171,9 @@ function AlumniSection() {
                               {profile.batch || 'TBA'}
                             </span>
                             <div className="robot-easter-egg-host relative aspect-[4/5] overflow-hidden rounded-2xl bg-gradient-to-br from-brand-700 via-brand-600 to-blue-400">
-                              {index === 0 && (
+                              {robotAssignments[index] && (
                                 <RobotEasterEgg
-                                  variant="archive"
+                                  variant={robotAssignments[index]}
                                   size={34}
                                   className="bottom-2 right-2"
                                 />

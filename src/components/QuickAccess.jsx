@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import {
   ArrowUpRight,
   BookOpen,
@@ -10,6 +11,7 @@ import {
 import { motion as Motion } from 'framer-motion'
 import { quickAccessItems } from '../data/quickAccess'
 import { springTransition } from '../lib/motion'
+import { getRandomRobotAssignments } from '../lib/robotSightings'
 import Reveal from './Reveal'
 import RobotEasterEgg from './RobotEasterEgg'
 import SectionHeader from './SectionHeader'
@@ -24,6 +26,13 @@ const iconMap = {
 }
 
 function QuickAccess() {
+  const quickAccessCount = quickAccessItems.length
+  const robotAssignments = useMemo(
+    () =>
+      getRandomRobotAssignments(quickAccessCount, ['scout', 'archive']),
+    [quickAccessCount],
+  )
+
   return (
     <section id="quick-access" className="bg-white py-24 sm:py-32">
       <div className="section-shell">
@@ -39,8 +48,7 @@ function QuickAccess() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           {quickAccessItems.map((item, index) => {
             const Icon = iconMap[item.icon]
-            const robotVariant =
-              index === 0 ? 'scout' : index === 4 ? 'archive' : null
+            const robotVariant = robotAssignments[index]
 
             return (
               <Reveal key={item.title} delay={index * 0.055}>

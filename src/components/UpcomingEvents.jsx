@@ -1,5 +1,7 @@
+import { useMemo } from 'react'
 import { CalendarOff } from 'lucide-react'
 import { useEvents } from '../hooks/useEvents'
+import { getRandomRobotAssignments } from '../lib/robotSightings'
 import ContentSkeleton from './ContentSkeleton'
 import EmptyState from './EmptyState'
 import EventCard from './EventCard'
@@ -9,6 +11,10 @@ import SectionHeader from './SectionHeader'
 function UpcomingEvents() {
   const { upcoming, isLoading } = useEvents()
   const homepageEvents = upcoming.slice(0, 3)
+  const robotAssignments = useMemo(
+    () => getRandomRobotAssignments(homepageEvents.length, ['orbit']),
+    [homepageEvents.length],
+  )
 
   return (
     <section id="events" className="bg-slate-50/70 py-24 sm:py-32">
@@ -36,7 +42,7 @@ function UpcomingEvents() {
                 <EventCard
                   event={event}
                   compact
-                  robotVariant={index === 1 ? 'orbit' : ''}
+                  robotVariant={robotAssignments[index]}
                 />
               </Reveal>
             ))}

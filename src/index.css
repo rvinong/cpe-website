@@ -7793,6 +7793,48 @@ html.dark .community-room-info {
   transform-origin: 50% 100%;
 }
 
+.robot-feet .robot-foot {
+  transform-box: fill-box;
+  transform-origin: 50% 0%;
+}
+
+.robot-easter-egg-body-active .robot-feet .robot-foot-left {
+  animation: robot-footstep-left var(--robot-step-duration, 0.72s)
+    steps(2, end) infinite;
+}
+
+.robot-easter-egg-body-active .robot-feet .robot-foot-right {
+  animation: robot-footstep-right var(--robot-step-duration, 0.72s)
+    steps(2, end) infinite;
+}
+
+.robot-booster-flame,
+.robot-booster-core {
+  transform-box: fill-box;
+  transform-origin: 50% 0%;
+}
+
+.robot-booster-flame {
+  filter: drop-shadow(0 0 2px rgba(249, 115, 22, 0.78));
+}
+
+.robot-booster-core {
+  filter: drop-shadow(0 0 2px rgba(254, 240, 138, 0.82));
+}
+
+.robot-easter-egg-body-active .robot-booster-flame {
+  animation: robot-booster-flame 0.34s steps(3, end) infinite;
+}
+
+.robot-easter-egg-body-active .robot-booster-core {
+  animation: robot-booster-core 0.24s steps(2, end) infinite;
+}
+
+.robot-easter-egg-body-active .robot-booster-flame-right,
+.robot-easter-egg-body-active .robot-booster-core-right {
+  animation-delay: -0.12s;
+}
+
 .robot-easter-egg svg {
   position: relative;
   z-index: 1;
@@ -7870,9 +7912,71 @@ html.dark .robot-easter-egg-emote {
   box-shadow: 0 8px 18px rgba(0, 0, 0, 0.32);
 }
 
+html.dark .robot-booster-flame {
+  filter: drop-shadow(0 0 3px rgba(251, 146, 60, 0.95));
+}
+
+html.dark .robot-booster-core {
+  filter: drop-shadow(0 0 3px rgba(254, 240, 138, 0.95));
+}
+
+@keyframes robot-footstep-left {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(-1px, -2px) rotate(-3deg);
+  }
+}
+
+@keyframes robot-footstep-right {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(1px, 1px) rotate(3deg);
+  }
+}
+
+@keyframes robot-booster-flame {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(0.82);
+    opacity: 0.84;
+  }
+  45% {
+    transform: translateY(1px) scaleY(1.2);
+    opacity: 1;
+  }
+  75% {
+    transform: translateY(-1px) scaleY(0.92);
+    opacity: 0.9;
+  }
+}
+
+@keyframes robot-booster-core {
+  0%,
+  100% {
+    transform: scaleY(0.72);
+    opacity: 0.78;
+  }
+  50% {
+    transform: scaleY(1.16);
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .robot-easter-egg {
     transition: none;
+  }
+
+  .robot-easter-egg-body-active .robot-feet .robot-foot,
+  .robot-easter-egg-body-active .robot-booster-flame,
+  .robot-easter-egg-body-active .robot-booster-core {
+    animation: none;
   }
 
   .robot-easter-egg-host:hover > .robot-easter-egg,

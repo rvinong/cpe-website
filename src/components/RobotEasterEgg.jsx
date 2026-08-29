@@ -25,6 +25,8 @@ const robotPalettes = {
     primary: '#7c3aed',
     secondary: '#60a5fa',
     accent: '#fb7185',
+    booster: '#f97316',
+    boosterCore: '#fef08a',
     screen: '#11103b',
     light: '#ede9fe',
   },
@@ -66,10 +68,16 @@ function ScoutRobot({ colors }) {
       <rect x="34" y="62" width="28" height="18" fill={colors.primary} />
       <rect x="40" y="67" width="16" height="7" fill={colors.accent} />
       <rect x="44" y="68" width="8" height="4" fill={colors.light} />
-      <rect x="30" y="80" width="13" height="7" fill={colors.secondary} />
-      <rect x="53" y="80" width="13" height="7" fill={colors.secondary} />
-      <rect x="27" y="87" width="18" height="4" fill="#07152f" />
-      <rect x="51" y="87" width="18" height="4" fill="#07152f" />
+      <g className="robot-feet">
+        <g className="robot-foot robot-foot-left">
+          <rect x="30" y="80" width="13" height="7" fill={colors.secondary} />
+          <rect x="27" y="87" width="18" height="4" fill="#07152f" />
+        </g>
+        <g className="robot-foot robot-foot-right">
+          <rect x="53" y="80" width="13" height="7" fill={colors.secondary} />
+          <rect x="51" y="87" width="18" height="4" fill="#07152f" />
+        </g>
+      </g>
     </svg>
   )
 }
@@ -92,12 +100,18 @@ function CircuitRobot({ colors }) {
       <rect x="42" y="51" width="12" height="2" fill={colors.accent} />
 
       <path d="M28 61h40v7H28v-7Z" fill={colors.secondary} />
-      <rect x="34" y="68" width="10" height="15" fill={colors.primary} />
-      <rect x="52" y="68" width="10" height="15" fill={colors.primary} />
-      <rect x="30" y="81" width="18" height="7" fill={colors.accent} />
-      <rect x="48" y="81" width="18" height="7" fill={colors.accent} />
-      <rect x="27" y="88" width="24" height="4" fill="#07152f" />
-      <rect x="45" y="88" width="24" height="4" fill="#07152f" />
+      <g className="robot-feet">
+        <g className="robot-foot robot-foot-left">
+          <rect x="34" y="68" width="10" height="15" fill={colors.primary} />
+          <rect x="30" y="81" width="18" height="7" fill={colors.accent} />
+          <rect x="27" y="88" width="24" height="4" fill="#07152f" />
+        </g>
+        <g className="robot-foot robot-foot-right">
+          <rect x="52" y="68" width="10" height="15" fill={colors.primary} />
+          <rect x="48" y="81" width="18" height="7" fill={colors.accent} />
+          <rect x="45" y="88" width="24" height="4" fill="#07152f" />
+        </g>
+      </g>
     </svg>
   )
 }
@@ -127,11 +141,42 @@ function OrbitRobot({ colors }) {
       <rect x="41" y="48" width="14" height="2" fill={colors.accent} />
       <path d="M31 56h34v8H31v-8Z" fill={colors.secondary} />
       <rect x="37" y="64" width="22" height="8" fill={colors.accent} />
-      <rect x="30" y="71" width="13" height="6" fill={colors.secondary} />
-      <rect x="53" y="71" width="13" height="6" fill={colors.secondary} />
-      <path d="M35 79h10v8H35v-8Zm20 0h10v8H55v-8Z" fill="#07152f" />
-      <rect x="39" y="82" width="6" height="4" fill={colors.accent} />
-      <rect x="55" y="82" width="6" height="4" fill={colors.accent} />
+      <g className="robot-boosters">
+        <g className="robot-booster robot-booster-left">
+          <rect x="30" y="71" width="13" height="6" fill={colors.secondary} />
+          <rect x="32" y="77" width="9" height="7" fill="#07152f" />
+          <path
+            className="robot-booster-flame robot-booster-flame-left"
+            d="M32 84h9v5h-2v4h-5v-4h-2v-5Z"
+            fill={colors.booster}
+          />
+          <rect
+            className="robot-booster-core robot-booster-core-left"
+            x="35"
+            y="84"
+            width="3"
+            height="6"
+            fill={colors.boosterCore}
+          />
+        </g>
+        <g className="robot-booster robot-booster-right">
+          <rect x="53" y="71" width="13" height="6" fill={colors.secondary} />
+          <rect x="55" y="77" width="9" height="7" fill="#07152f" />
+          <path
+            className="robot-booster-flame robot-booster-flame-right"
+            d="M55 84h9v5h-2v4h-5v-4h-2v-5Z"
+            fill={colors.booster}
+          />
+          <rect
+            className="robot-booster-core robot-booster-core-right"
+            x="58"
+            y="84"
+            width="3"
+            height="6"
+            fill={colors.boosterCore}
+          />
+        </g>
+      </g>
     </svg>
   )
 }
@@ -160,12 +205,18 @@ function ArchiveRobot({ colors }) {
         stroke={colors.primary}
         strokeWidth="2"
       />
-      <rect x="30" y="69" width="14" height="14" fill={colors.primary} />
-      <rect x="52" y="69" width="14" height="14" fill={colors.primary} />
-      <rect x="27" y="81" width="20" height="8" fill={colors.accent} />
-      <rect x="49" y="81" width="20" height="8" fill={colors.accent} />
-      <rect x="25" y="88" width="24" height="4" fill="#07152f" />
-      <rect x="47" y="88" width="24" height="4" fill="#07152f" />
+      <g className="robot-feet">
+        <g className="robot-foot robot-foot-left">
+          <rect x="30" y="69" width="14" height="14" fill={colors.primary} />
+          <rect x="27" y="81" width="20" height="8" fill={colors.accent} />
+          <rect x="25" y="88" width="24" height="4" fill="#07152f" />
+        </g>
+        <g className="robot-foot robot-foot-right">
+          <rect x="52" y="69" width="14" height="14" fill={colors.primary} />
+          <rect x="49" y="81" width="20" height="8" fill={colors.accent} />
+          <rect x="47" y="88" width="24" height="4" fill="#07152f" />
+        </g>
+      </g>
     </svg>
   )
 }
@@ -180,6 +231,7 @@ const robotComponents = {
 const robotMotionProfiles = {
   scout: {
     routeDuration: 11,
+    stepDuration: 0.78,
     startDelay: 1600,
     actionInterval: 6200,
     emoteDuration: 1050,
@@ -207,6 +259,7 @@ const robotMotionProfiles = {
   },
   circuit: {
     routeDuration: 9.5,
+    stepDuration: 0.66,
     startDelay: 2400,
     actionInterval: 5900,
     emoteDuration: 1100,
@@ -244,6 +297,13 @@ const robotMotionProfiles = {
     },
     actions: [
       {
+        emote: 'BOOST',
+        motion: {
+          y: [0, -4, -8, -2, 0],
+          scale: [1, 1.04, 1.08, 1.03, 1],
+        },
+      },
+      {
         emote: 'PING',
         motion: {
           rotate: [0, 12, -12, 7, 0],
@@ -261,6 +321,7 @@ const robotMotionProfiles = {
   },
   archive: {
     routeDuration: 10.5,
+    stepDuration: 0.88,
     startDelay: 3000,
     actionInterval: 6400,
     emoteDuration: 1050,
@@ -360,11 +421,17 @@ function RobotEasterEgg({
     <span
       ref={stageRef}
       className={`robot-easter-egg robot-easter-egg-${safeVariant} robot-easter-egg-${safeAnchor} ${className}`.trim()}
-      style={{ width: size, height: size }}
+      style={{
+        width: size,
+        height: size,
+        '--robot-step-duration': `${motionProfile.stepDuration || 0.72}s`,
+      }}
       aria-hidden="true"
     >
       <Motion.span
-        className="robot-easter-egg-body"
+        className={`robot-easter-egg-body ${
+          isActive ? 'robot-easter-egg-body-active' : ''
+        }`}
         animate={routeAnimation}
         transition={
           isActive
