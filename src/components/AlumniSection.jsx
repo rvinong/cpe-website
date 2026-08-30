@@ -101,21 +101,29 @@ function AlumniSection() {
                   respectful, and authorized alumni information.
                 </p>
 
-                <div className="mx-auto mt-6 grid max-w-5xl gap-3 sm:grid-cols-3">
-                  {yearbookHighlights.map(({ icon: Icon, label, value }) => (
+                <div className="mx-auto mt-6 grid max-w-5xl grid-cols-1 gap-3 sm:grid-cols-3">
+                  {yearbookHighlights.map(({ icon: Icon, label, value }, index) => (
                     <div
                       key={label}
-                      className="alumni-home-stat-card rounded-2xl p-4"
+                      className="alumni-home-stat-card group relative flex min-h-28 items-center gap-4 rounded-2xl p-4 text-left"
                     >
-                      <span className="alumni-home-stat-icon grid size-10 place-items-center rounded-xl">
+                      <span
+                        className="alumni-home-stat-index absolute right-4 top-3 text-[0.65rem] font-black tracking-[0.18em]"
+                        aria-hidden="true"
+                      >
+                        0{index + 1}
+                      </span>
+                      <span className="alumni-home-stat-icon relative z-[1] grid size-12 shrink-0 place-items-center rounded-2xl">
                         <Icon size={19} aria-hidden="true" />
                       </span>
-                      <p className="alumni-home-stat-label mt-3 text-[0.68rem] font-extrabold tracking-[0.14em] uppercase">
-                        {label}
-                      </p>
-                      <p className="alumni-home-stat-value mt-1 text-sm font-black">
-                        {value}
-                      </p>
+                      <div className="relative z-[1] min-w-0">
+                        <p className="alumni-home-stat-label text-[0.68rem] font-extrabold tracking-[0.14em] uppercase">
+                          {label}
+                        </p>
+                        <p className="alumni-home-stat-value mt-1 text-sm font-black leading-5">
+                          {value}
+                        </p>
+                      </div>
                     </div>
                   ))}
                 </div>
