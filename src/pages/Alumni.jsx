@@ -270,7 +270,7 @@ function Alumni() {
                           <p className="text-xs font-extrabold tracking-[0.16em] text-blue-300 uppercase">
                             Achievements
                           </p>
-                          <p className="mt-2 line-clamp-4 text-sm leading-6 text-slate-300">
+                          <p className="mt-2 line-clamp-4 whitespace-pre-line text-sm leading-6 text-slate-300">
                             {profile.highlight}
                           </p>
                         </div>
@@ -528,7 +528,7 @@ function Alumni() {
                   <p className="text-xs font-extrabold tracking-[0.16em] text-brand-600 uppercase">
                     Achievements
                   </p>
-                  <p className="mt-2 text-sm leading-7 text-slate-600">
+                  <p className="mt-2 whitespace-pre-line text-sm leading-7 text-slate-600">
                     {selectedProfile.highlight}
                   </p>
                 </div>
