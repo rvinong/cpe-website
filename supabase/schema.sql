@@ -9,7 +9,7 @@ create table public.profiles (
   nickname text not null default '',
   student_number text unique,
   year_level text not null default ''
-    check (year_level in ('', '1st Year', '2nd Year', '3rd Year', '4th Year', 'Irregular')),
+    check (year_level in ('', '1st Year', '2nd Year', '3rd Year', '4th Year')),
   role public.app_role not null default 'student',
   status public.profile_status not null default 'pending',
   email_notifications boolean not null default true,
@@ -56,8 +56,7 @@ begin
         '1st Year',
         '2nd Year',
         '3rd Year',
-        '4th Year',
-        'Irregular'
+        '4th Year'
       )
       then coalesce(new.raw_user_meta_data ->> 'year_level', '')
       else ''

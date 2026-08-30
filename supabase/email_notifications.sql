@@ -6,28 +6,24 @@ alter table public.profiles
 alter table public.profiles
   add column if not exists year_level text not null default '';
 
-do $$
-begin
-  if not exists (
-    select 1
-    from pg_constraint
-    where conname = 'profiles_year_level_check'
-      and conrelid = 'public.profiles'::regclass
-  ) then
-    alter table public.profiles
-      add constraint profiles_year_level_check
-      check (
-        year_level in (
-          '',
-          '1st Year',
-          '2nd Year',
-          '3rd Year',
-          '4th Year',
-          'Irregular'
-        )
-      );
-  end if;
-end $$;
+update public.profiles
+set year_level = ''
+where year_level = 'Irregular';
+
+alter table public.profiles
+  drop constraint if exists profiles_year_level_check;
+
+alter table public.profiles
+  add constraint profiles_year_level_check
+  check (
+    year_level in (
+      '',
+      '1st Year',
+      '2nd Year',
+      '3rd Year',
+      '4th Year'
+    )
+  );
 
 create or replace function public.handle_new_user()
 returns trigger
@@ -52,8 +48,7 @@ begin
         '1st Year',
         '2nd Year',
         '3rd Year',
-        '4th Year',
-        'Irregular'
+        '4th Year'
       )
       then coalesce(new.raw_user_meta_data ->> 'year_level', '')
       else ''

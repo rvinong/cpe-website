@@ -47,6 +47,11 @@ const roleFilters = [
   ['admin', 'Admins'],
 ]
 
+const yearLevelFilters = [
+  ['all', 'All years'],
+  ...yearLevelOptions.map(({ value, label }) => [value, label]),
+]
+
 function AdminUsers() {
   const { user, refreshProfile } = useAuth()
   const [items, setItems] = useState([])
@@ -59,6 +64,7 @@ function AdminUsers() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedStatus, setSelectedStatus] = useState('all')
   const [selectedRole, setSelectedRole] = useState('all')
+  const [selectedYearLevel, setSelectedYearLevel] = useState('all')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [needsSchema, setNeedsSchema] = useState(false)
@@ -120,6 +126,8 @@ function AdminUsers() {
       const matchesStatus =
         selectedStatus === 'all' || item.status === selectedStatus
       const matchesRole = selectedRole === 'all' || item.role === selectedRole
+      const matchesYearLevel =
+        selectedYearLevel === 'all' || item.year_level === selectedYearLevel
       const matchesSearch =
         !query ||
         [
@@ -135,9 +143,9 @@ function AdminUsers() {
           .toLowerCase()
           .includes(query)
 
-      return matchesStatus && matchesRole && matchesSearch
+      return matchesStatus && matchesRole && matchesYearLevel && matchesSearch
     })
-  }, [items, searchTerm, selectedRole, selectedStatus])
+  }, [items, searchTerm, selectedRole, selectedStatus, selectedYearLevel])
 
   const openEditor = (item) => {
     setEditingItem(item)
@@ -348,6 +356,28 @@ function AdminUsers() {
                   key={value}
                   type="button"
                   onClick={() => setSelectedRole(value)}
+                  aria-pressed={isActive}
+                  className={`filter-chip ${
+                    isActive ? 'filter-chip-active' : ''
+                  }`}
+                >
+                  {label}
+                </button>
+              )
+            })}
+          </div>
+          <div
+            className="flex flex-wrap justify-center gap-2 border-t border-slate-100 pt-3 sm:justify-start lg:col-span-2"
+            aria-label="Filter by year level"
+          >
+            {yearLevelFilters.map(([value, label]) => {
+              const isActive = selectedYearLevel === value
+
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setSelectedYearLevel(value)}
                   aria-pressed={isActive}
                   className={`filter-chip ${
                     isActive ? 'filter-chip-active' : ''

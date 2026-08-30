@@ -3,7 +3,6 @@ export const yearLevelOptions = [
   { value: '2nd Year', label: '2nd Year' },
   { value: '3rd Year', label: '3rd Year' },
   { value: '4th Year', label: '4th Year' },
-  { value: 'Irregular', label: 'Irregular' },
 ]
 
 export function getYearLevelLabel(value) {
