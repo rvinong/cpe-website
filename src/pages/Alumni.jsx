@@ -98,6 +98,7 @@ function Alumni() {
           description="Explore the people and batches that helped shape the NwSSU Computer Engineering community."
           icon={BookOpen}
           accentIcon={GraduationCap}
+          robotVariant="tread"
         />
 
         <section className="bg-white py-14 sm:py-16">

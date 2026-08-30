@@ -213,6 +213,7 @@ function Gallery() {
           description="Official updates and a visual archive of Computer Engineering Organization activities, achievements, and shared experiences."
           icon={Images}
           accentIcon={Camera}
+          robotVariant="booster"
         />
 
         <section id="news" className="bg-white py-20 sm:py-24">

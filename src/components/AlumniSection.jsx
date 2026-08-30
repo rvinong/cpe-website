@@ -10,7 +10,6 @@ import {
   Sparkles,
 } from 'lucide-react'
 import useAlumni from '../hooks/useAlumni'
-import { getRandomRobotAssignments } from '../lib/robotSightings'
 import Reveal from './Reveal'
 import RobotEasterEgg from './RobotEasterEgg'
 
@@ -52,10 +51,6 @@ function AlumniSection() {
     () => getRandomPreviewProfiles(profiles),
     [profiles],
   )
-  const robotAssignments = useMemo(
-    () => getRandomRobotAssignments(previewProfiles.length),
-    [previewProfiles.length],
-  )
 
   return (
     <section
@@ -66,20 +61,23 @@ function AlumniSection() {
       <div className="alumni-home-glow alumni-home-glow-primary absolute -left-24 top-24 -z-10 size-72 rounded-full blur-3xl" />
       <div className="alumni-home-glow alumni-home-glow-accent absolute -bottom-24 right-10 -z-10 size-80 rounded-full blur-3xl" />
       <div className="section-shell">
-        <Reveal>
-          <div className="mb-9 max-w-2xl sm:mb-12">
-            <p className="alumni-home-eyebrow mb-4 text-[11px] font-extrabold tracking-[0.22em] uppercase">
-              Alumni records
-            </p>
-            <h2 className="alumni-home-title text-3xl font-black tracking-[-0.05em] sm:text-5xl sm:tracking-[-0.055em]">
-              Computer Engineering Alumni Directory
-            </h2>
-            <p className="alumni-home-copy mt-5 text-base leading-7">
-              An official directory for verified Computer Engineering graduates,
-              organized by batch and maintained with approved alumni information.
-            </p>
-          </div>
-        </Reveal>
+        <div className="robot-easter-egg-frame">
+          <Reveal>
+            <div className="mb-9 max-w-2xl sm:mb-12">
+              <p className="alumni-home-eyebrow mb-4 text-[11px] font-extrabold tracking-[0.22em] uppercase">
+                Alumni records
+              </p>
+              <h2 className="alumni-home-title text-3xl font-black tracking-[-0.05em] sm:text-5xl sm:tracking-[-0.055em]">
+                Computer Engineering Alumni Directory
+              </h2>
+              <p className="alumni-home-copy mt-5 text-base leading-7">
+                An official directory for verified Computer Engineering graduates,
+                organized by batch and maintained with approved alumni information.
+              </p>
+            </div>
+          </Reveal>
+          <RobotEasterEgg variant="archive" size={42} />
+        </div>
 
         <Reveal delay={0.08} direction="right">
           <div className="alumni-home-shell relative isolate overflow-hidden p-6 sm:p-9 lg:p-12">
@@ -173,17 +171,11 @@ function AlumniSection() {
                         return (
                           <article
                             key={profile.id}
-                            className={`alumni-home-profile-card robot-easter-egg-host group relative rounded-[1.35rem] p-3 transition duration-300 hover:z-10 hover:-translate-y-2 hover:rotate-0 ${rotation}`}
+                            className={`alumni-home-profile-card group relative rounded-[1.35rem] p-3 transition duration-300 hover:z-10 hover:-translate-y-2 hover:rotate-0 ${rotation}`}
                           >
                             <span className="absolute -right-2 top-4 z-10 rounded-l-full bg-orange-500 px-3 py-1 text-[0.62rem] font-black text-white shadow-md shadow-orange-500/20">
                               {profile.batch || 'TBA'}
                             </span>
-                            {robotAssignments[index] && (
-                              <RobotEasterEgg
-                                variant={robotAssignments[index]}
-                                size={34}
-                              />
-                            )}
                             <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-gradient-to-br from-brand-700 via-brand-600 to-blue-400">
                               {profile.photo || profile.photo_path ? (
                                 <img

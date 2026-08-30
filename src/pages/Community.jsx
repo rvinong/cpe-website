@@ -28,6 +28,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import ProfileAvatar from '../components/ProfileAvatar'
 import Reveal from '../components/Reveal'
+import RobotEasterEgg from '../components/RobotEasterEgg'
 import useAuth from '../context/useAuth'
 import { communityRooms } from '../data/community'
 import { useMotionPreferences } from '../hooks/useMotionPreferences'
@@ -1153,7 +1154,8 @@ function Community() {
     <>
       <main className="community-page pt-[84px]">
         <section id="rooms" className="community-page-section community-page-section-workspace scroll-mt-24">
-          <div className="section-shell community-page-shell">
+          <div className="section-shell community-page-shell relative">
+            <RobotEasterEgg variant="prism" size={48} rim="top" />
             <div className="community-page-topbar">
               <Link to="/" className="secondary-button community-back-link">
                 <ArrowLeft size={17} aria-hidden="true" />

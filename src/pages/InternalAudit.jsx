@@ -16,7 +16,6 @@ import {
 import { useEffect, useMemo, useState } from 'react'
 import ContentSkeleton from '../components/ContentSkeleton'
 import PageHero from '../components/PageHero'
-import RobotEasterEgg from '../components/RobotEasterEgg'
 import {
   getInternalAuditCategoryId,
   internalAuditCategories,
@@ -25,7 +24,6 @@ import {
   createAuditReportDownload,
   getPublicAuditReports,
 } from '../lib/internalAudit'
-import { getRandomRobotAssignments } from '../lib/robotSightings'
 
 const categoryIcons = {
   project_proposal: ClipboardCheck,
@@ -74,12 +72,6 @@ function InternalAudit() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [downloadError, setDownloadError] = useState('')
-  const categoryCount = internalAuditCategories.length
-  const robotAssignments = useMemo(
-    () => getRandomRobotAssignments(categoryCount),
-    [categoryCount],
-  )
-
   useEffect(() => {
     let isMounted = true
 
@@ -190,6 +182,7 @@ function InternalAudit() {
         description="Access approved project proposals, activity records, liquidation reports, resolutions, and transparency records from the organization."
         icon={ShieldCheck}
         accentIcon={ClipboardCheck}
+        robotVariant="circuit"
         actions={
           <>
             <a href="#reports" className="primary-button">
@@ -328,7 +321,6 @@ function InternalAudit() {
             >
               {internalAuditCategories.map((category, index) => {
                 const Icon = categoryIcons[category.id]
-                const robotVariant = robotAssignments[index]
                 const count = reports.filter(
                   (report) =>
                     getInternalAuditCategoryId(report.type) === category.id,
@@ -342,9 +334,9 @@ function InternalAudit() {
                     whileHover={{ y: -4 }}
                     viewport={{ once: true, amount: 0.25 }}
                     transition={{ duration: 0.5, delay: index * 0.06 }}
-                    className="robot-easter-egg-frame h-full"
+                    className="h-full"
                   >
-                    <article className="robot-easter-egg-host surface-card interactive-card relative isolate h-full overflow-hidden p-6">
+                    <article className="surface-card interactive-card relative isolate h-full overflow-hidden p-6">
                     <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                       <div className="flex gap-4">
                         <span
@@ -369,9 +361,6 @@ function InternalAudit() {
                       </span>
                     </div>
                     </article>
-                    {robotVariant && (
-                      <RobotEasterEgg variant={robotVariant} size={46} />
-                    )}
                   </Motion.div>
                 )
               })}

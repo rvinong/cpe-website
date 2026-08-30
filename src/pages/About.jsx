@@ -185,7 +185,7 @@ function About() {
                 </p>
               </div>
               </Motion.div>
-              <RobotEasterEgg variant="scout" size={52} />
+              <RobotEasterEgg variant="sleep" size={52} />
             </div>
 
             <Motion.div

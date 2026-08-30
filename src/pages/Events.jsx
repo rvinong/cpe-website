@@ -88,6 +88,7 @@ function Events() {
           description="Find organization workshops, meetings, outreach programs, and other student activities in one place."
           icon={CalendarDays}
           accentIcon={Sun}
+          robotVariant="signal"
         />
 
         <section className="bg-slate-50/70 py-20 sm:py-24">

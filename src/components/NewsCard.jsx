@@ -1,13 +1,12 @@
 import { ArrowRight, CalendarDays, MessageCircle, Star } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import NewsReactionSummary from './NewsReactionSummary'
-import RobotEasterEgg from './RobotEasterEgg'
 
 function pluralizeComment(count) {
   return `${count} ${count === 1 ? 'comment' : 'comments'}`
 }
 
-function NewsCard({ article, compact = false, robotVariant = '' }) {
+function NewsCard({ article, compact = false }) {
   const storyHref = `/gallery/news/${article.slug}`
   const initialReactionSummary = article.reactions || {
     total: Number(article.reactionTotal) || 0,
@@ -112,11 +111,10 @@ function NewsCard({ article, compact = false, robotVariant = '' }) {
   )
 
   return (
-    <div className="robot-easter-egg-frame h-full">
-      <article className="robot-easter-egg-host surface-card interactive-card group relative flex h-full flex-col overflow-hidden">
+    <div className="h-full">
+      <article className="surface-card interactive-card group relative flex h-full flex-col overflow-hidden">
         {cardContent}
       </article>
-      {robotVariant && <RobotEasterEgg variant={robotVariant} size={40} />}
     </div>
   )
 }

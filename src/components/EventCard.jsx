@@ -4,7 +4,6 @@ import {
   ExternalLink,
   MapPin,
 } from 'lucide-react'
-import RobotEasterEgg from './RobotEasterEgg'
 
 const timingStyles = {
   upcoming: 'bg-brand-50 text-brand-700 ring-blue-100',
@@ -12,7 +11,7 @@ const timingStyles = {
   cancelled: 'bg-red-50 text-red-700 ring-red-200',
 }
 
-function EventCard({ event, compact = false, robotVariant = '' }) {
+function EventCard({ event, compact = false }) {
   const timingLabel = {
     upcoming: 'Upcoming',
     completed: 'Completed',
@@ -20,8 +19,8 @@ function EventCard({ event, compact = false, robotVariant = '' }) {
   }[event.timing]
 
   return (
-    <div className="robot-easter-egg-frame h-full">
-      <article className="robot-easter-egg-host surface-card interactive-card group relative isolate flex h-full flex-col overflow-hidden">
+    <div className="h-full">
+      <article className="surface-card interactive-card group relative isolate flex h-full flex-col overflow-hidden">
         <span className="brand-corner-orb absolute -right-12 -top-12 -z-10 size-32 rounded-full transition duration-500 group-hover:scale-125" />
       <div
         className={`h-1 ${
@@ -107,7 +106,6 @@ function EventCard({ event, compact = false, robotVariant = '' }) {
           )}
         </div>
       </article>
-      {robotVariant && <RobotEasterEgg variant={robotVariant} size={42} />}
     </div>
   )
 }

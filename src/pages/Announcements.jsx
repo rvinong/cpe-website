@@ -51,6 +51,7 @@ function Announcements() {
           description="Stay updated with the latest news, events, opportunities, and important notices from the organization."
           icon={Megaphone}
           accentIcon={Bell}
+          robotVariant="chat"
         />
 
         <section className="bg-white py-14 sm:py-16">

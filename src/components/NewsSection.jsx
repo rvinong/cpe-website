@@ -1,7 +1,5 @@
-import { useMemo } from 'react'
 import { Newspaper } from 'lucide-react'
 import { useNews } from '../hooks/useMedia'
-import { getRandomRobotAssignments } from '../lib/robotSightings'
 import ContentSkeleton from './ContentSkeleton'
 import EmptyState from './EmptyState'
 import NewsCard from './NewsCard'
@@ -10,10 +8,6 @@ import SectionHeader from './SectionHeader'
 
 function NewsSection() {
   const { news: organizationNews, isLoading } = useNews(3)
-  const robotAssignments = useMemo(
-    () => getRandomRobotAssignments(organizationNews.length),
-    [organizationNews.length],
-  )
 
   return (
     <section id="news" className="bg-slate-50/70 py-24 sm:py-32">
@@ -53,7 +47,6 @@ function NewsSection() {
                 <NewsCard
                   article={article}
                   compact
-                  robotVariant={robotAssignments[index]}
                 />
               </Reveal>
             ))}
