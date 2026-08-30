@@ -12,6 +12,7 @@ import {
   X,
 } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { officerPositionOptions } from '../data/organizationPositions'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import AdminListSkeleton from './AdminListSkeleton'
 import { signalBytePublished } from '../lib/byteAssistant'
@@ -48,6 +49,27 @@ const leadershipCategories = [
   'Student Organization',
   'Class Organization',
   'Other',
+]
+
+const leadershipPositionOptions = [
+  ...officerPositionOptions,
+  'Department Representative',
+  'College Representative',
+  'Class Representative',
+  'Committee Chairperson',
+  'Committee Member',
+  'Project Lead',
+  'Faculty Representative',
+  'Other',
+]
+
+const leadershipOrganizationSuggestions = [
+  'Computer Engineering Department',
+  'College of Engineering',
+  'ICpEP.se NWSSU Chapter',
+  'College Student Council',
+  'Institutional Supreme Student Council',
+  'Class Organization',
 ]
 
 const statusStyles = {
@@ -724,11 +746,12 @@ function AdminAlumni() {
                               }
                               className={inputClassName}
                               placeholder="Computer Engineering Department"
+                              list="alumni-leadership-organizations"
                             />
                           </label>
                           <label className="text-xs font-extrabold text-navy-900">
                             Position
-                            <input
+                            <select
                               value={entry.position}
                               onChange={(event) =>
                                 updateLeadershipEntry(
@@ -738,8 +761,22 @@ function AdminAlumni() {
                                 )
                               }
                               className={inputClassName}
-                              placeholder="Department Representative"
-                            />
+                            >
+                              <option value="">Select a position</option>
+                              {entry.position &&
+                                !leadershipPositionOptions.includes(
+                                  entry.position,
+                                ) && (
+                                  <option value={entry.position}>
+                                    {entry.position}
+                                  </option>
+                                )}
+                              {leadershipPositionOptions.map((position) => (
+                                <option key={position} value={position}>
+                                  {position}
+                                </option>
+                              ))}
+                            </select>
                           </label>
                           <label className="text-xs font-extrabold text-navy-900">
                             Category
@@ -794,6 +831,11 @@ function AdminAlumni() {
                     ))}
                   </div>
                 )}
+                <datalist id="alumni-leadership-organizations">
+                  {leadershipOrganizationSuggestions.map((organization) => (
+                    <option key={organization} value={organization} />
+                  ))}
+                </datalist>
               </section>
 
               <div className="mt-5 rounded-2xl border border-dashed border-blue-200 bg-brand-50/35 p-5">
