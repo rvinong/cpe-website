@@ -1,5 +1,6 @@
 import {
   Award,
+  BriefcaseBusiness,
   CirclePlus,
   Edit3,
   GraduationCap,
@@ -24,6 +25,8 @@ import {
   updateAlumniProfile,
   uploadAlumniPhoto,
   validateAlumniPhoto,
+  getAdminAlumniLeadership,
+  replaceAlumniLeadership,
 } from '../lib/alumni'
 
 const emptyForm = {
@@ -36,7 +39,16 @@ const emptyForm = {
   status: 'draft',
   isFeatured: false,
   consentConfirmed: false,
+  leadership: [],
 }
+
+const leadershipCategories = [
+  'Department',
+  'College Organization',
+  'Student Organization',
+  'Class Organization',
+  'Other',
+]
 
 const statusStyles = {
   draft: 'bg-amber-50 text-amber-700 ring-amber-200',
@@ -54,49 +66,77 @@ function AdminAlumni() {
   const [isEditorOpen, setIsEditorOpen] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
   const [form, setForm] = useState(emptyForm)
+  const [leadershipByProfile, setLeadershipByProfile] = useState({})
   const [selectedFile, setSelectedFile] = useState(null)
   const [previewUrl, setPreviewUrl] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [needsSchema, setNeedsSchema] = useState(false)
+  const [needsLeadershipSchema, setNeedsLeadershipSchema] = useState(false)
 
   useBodyScrollLock(isEditorOpen)
 
-  const loadAlumni = useCallback(async () => {
+  const loadAlumni = useCallback(async (isActive = () => true) => {
     setIsLoading(true)
-    const { data, error: loadError } = await getAdminAlumni()
+    try {
+      const { data, error: loadError } = await getAdminAlumni()
 
-    if (loadError) {
-      setError(loadError.message)
-      setNeedsSchema(isAlumniSchemaMissing(loadError))
-    } else {
+      if (!isActive()) return
+
+      if (loadError) {
+        setError(loadError.message)
+        setNeedsSchema(isAlumniSchemaMissing(loadError))
+        return
+      }
+
+      const {
+        data: leadershipData,
+        error: leadershipError,
+      } = await getAdminAlumniLeadership()
+
+      if (!isActive()) return
+
+      if (leadershipError) {
+        const schemaMissing = isAlumniSchemaMissing(leadershipError)
+        setLeadershipByProfile({})
+        setNeedsLeadershipSchema(schemaMissing)
+        setError(schemaMissing ? '' : leadershipError.message)
+      } else {
+        setLeadershipByProfile(
+          leadershipData.reduce((groups, entry) => {
+            if (!groups[entry.alumni_profile_id]) {
+              groups[entry.alumni_profile_id] = []
+            }
+            groups[entry.alumni_profile_id].push(entry)
+            return groups
+          }, {}),
+        )
+        setNeedsLeadershipSchema(false)
+        setError('')
+      }
+
       setItems(data)
-      setError('')
       setNeedsSchema(false)
+    } catch (loadError) {
+      if (isActive()) {
+        setError(loadError.message || 'Unable to load alumni profiles.')
+      }
+    } finally {
+      if (isActive()) setIsLoading(false)
     }
-    setIsLoading(false)
   }, [])
 
   useEffect(() => {
     let isMounted = true
-
-    getAdminAlumni().then(({ data, error: loadError }) => {
-      if (!isMounted) return
-      if (loadError) {
-        setError(loadError.message)
-        setNeedsSchema(isAlumniSchemaMissing(loadError))
-      } else {
-        setItems(data)
-        setError('')
-        setNeedsSchema(false)
-      }
-      setIsLoading(false)
-    })
+    const loadTimer = window.setTimeout(() => {
+      loadAlumni(() => isMounted)
+    }, 0)
 
     return () => {
       isMounted = false
+      window.clearTimeout(loadTimer)
     }
-  }, [])
+  }, [loadAlumni])
 
   useEffect(
     () => () => {
@@ -119,7 +159,7 @@ function AdminAlumni() {
     if (previewUrl.startsWith('blob:')) URL.revokeObjectURL(previewUrl)
     setIsEditorOpen(false)
     setEditingItem(null)
-    setForm(emptyForm)
+    setForm({ ...emptyForm, leadership: [] })
     setSelectedFile(null)
     setPreviewUrl('')
   }
@@ -138,8 +178,11 @@ function AdminAlumni() {
             status: item.status,
             isFeatured: item.is_featured,
             consentConfirmed: item.consent_confirmed,
+            leadership: (
+              leadershipByProfile[item.id] || item.leadership || []
+            ).map((entry) => ({ ...entry })),
           }
-        : emptyForm,
+        : { ...emptyForm, leadership: [] },
     )
     setSelectedFile(null)
     setPreviewUrl(
@@ -150,6 +193,41 @@ function AdminAlumni() {
     setError('')
     setSuccess('')
     setIsEditorOpen(true)
+  }
+
+  const addLeadershipEntry = () => {
+    setForm((current) => ({
+      ...current,
+      leadership: [
+        ...current.leadership,
+        {
+          id: null,
+          organization: '',
+          position: '',
+          category: 'Student Organization',
+          term: '',
+          description: '',
+        },
+      ],
+    }))
+  }
+
+  const updateLeadershipEntry = (index, field, value) => {
+    setForm((current) => ({
+      ...current,
+      leadership: current.leadership.map((entry, entryIndex) =>
+        entryIndex === index ? { ...entry, [field]: value } : entry,
+      ),
+    }))
+  }
+
+  const removeLeadershipEntry = (index) => {
+    setForm((current) => ({
+      ...current,
+      leadership: current.leadership.filter(
+        (_, entryIndex) => entryIndex !== index,
+      ),
+    }))
   }
 
   const updateField = (event) => {
@@ -185,6 +263,30 @@ function AdminAlumni() {
       setError('Graduate name and batch are required.')
       return
     }
+
+    const leadershipEntries = form.leadership.filter((entry) =>
+      [
+        entry.organization,
+        entry.position,
+        entry.term,
+        entry.description,
+      ].some((value) => value?.trim()),
+    )
+    const hasIncompleteLeadership = leadershipEntries.some(
+      (entry) => !entry.organization.trim() || !entry.position.trim(),
+    )
+
+    if (hasIncompleteLeadership) {
+      setError('Each leadership role needs an organization and position.')
+      return
+    }
+    if (needsLeadershipSchema && leadershipEntries.length > 0) {
+      setError(
+        'Run the updated supabase/alumni.sql file before saving leadership roles.',
+      )
+      return
+    }
+
     if (form.status === 'published' && !form.consentConfirmed) {
       setError('Confirm publication consent before publishing this profile.')
       return
@@ -236,6 +338,20 @@ function AdminAlumni() {
       editingItem.photo_path !== uploadedPath
     ) {
       await removeAlumniPhoto(editingItem.photo_path)
+    }
+
+    if (!needsLeadershipSchema) {
+      const leadershipResult = await replaceAlumniLeadership(
+        result.data.id,
+        form.leadership,
+      )
+
+      if (leadershipResult.error) {
+        setError(leadershipResult.error.message)
+        setNeedsLeadershipSchema(isAlumniSchemaMissing(leadershipResult.error))
+        setIsSaving(false)
+        return
+      }
     }
 
     if (
@@ -294,6 +410,13 @@ function AdminAlumni() {
         <div className="mt-7 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-800">
           Run <code className="font-bold">supabase/alumni.sql</code> in the
           Supabase SQL Editor, then refresh this page.
+        </div>
+      )}
+
+      {needsLeadershipSchema && !needsSchema && (
+        <div className="mt-7 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-800">
+          Run the updated <code className="font-bold">supabase/alumni.sql</code>{' '}
+          file to enable leadership background records.
         </div>
       )}
 
@@ -386,6 +509,15 @@ function AdminAlumni() {
                     {item.is_featured && (
                       <span className="text-xs font-extrabold text-amber-600">
                         Spotlight
+                      </span>
+                    )}
+                    {(leadershipByProfile[item.id] || []).length > 0 && (
+                      <span className="text-xs font-extrabold text-violet-600">
+                        {(leadershipByProfile[item.id] || []).length}{' '}
+                        leadership role
+                        {(leadershipByProfile[item.id] || []).length === 1
+                          ? ''
+                          : 's'}
                       </span>
                     )}
                   </div>
@@ -523,6 +655,146 @@ function AdminAlumni() {
                   </select>
                 </label>
               </div>
+
+              <section className="mt-5 rounded-2xl border border-violet-200 bg-violet-50/45 p-5">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-violet-600 shadow-sm ring-1 ring-violet-200">
+                      <BriefcaseBusiness size={18} aria-hidden="true" />
+                    </span>
+                    <div>
+                      <h4 className="text-sm font-black text-navy-900">
+                        Leadership background
+                      </h4>
+                      <p className="mt-1 max-w-xl text-xs leading-5 text-slate-600">
+                        Add department, college, class, or student organization
+                        roles held by this graduate.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={addLeadershipEntry}
+                    disabled={needsLeadershipSchema}
+                    className="inline-flex items-center gap-2 rounded-xl bg-white px-3.5 py-2 text-xs font-extrabold text-violet-700 ring-1 ring-violet-200 transition hover:bg-violet-100 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <CirclePlus size={15} aria-hidden="true" />
+                    Add role
+                  </button>
+                </div>
+
+                {form.leadership.length === 0 ? (
+                  <p className="mt-4 rounded-xl border border-dashed border-violet-200 bg-white/70 px-4 py-3 text-xs font-bold text-slate-500">
+                    No leadership roles added yet.
+                  </p>
+                ) : (
+                  <div className="mt-4 grid gap-3">
+                    {form.leadership.map((entry, index) => (
+                      <fieldset
+                        key={entry.id || `leadership-${index}`}
+                        className="rounded-xl border border-violet-200 bg-white p-4"
+                      >
+                        <legend className="sr-only">
+                          Leadership role {index + 1}
+                        </legend>
+                        <div className="flex items-start justify-between gap-3">
+                          <p className="text-xs font-extrabold tracking-[0.14em] text-violet-600 uppercase">
+                            Role {index + 1}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => removeLeadershipEntry(index)}
+                            className="grid size-8 place-items-center rounded-lg text-red-600 transition hover:bg-red-50"
+                            aria-label={`Remove leadership role ${index + 1}`}
+                          >
+                            <Trash2 size={15} aria-hidden="true" />
+                          </button>
+                        </div>
+                        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                          <label className="text-xs font-extrabold text-navy-900">
+                            Organization or unit
+                            <input
+                              value={entry.organization}
+                              onChange={(event) =>
+                                updateLeadershipEntry(
+                                  index,
+                                  'organization',
+                                  event.target.value,
+                                )
+                              }
+                              className={inputClassName}
+                              placeholder="Computer Engineering Department"
+                            />
+                          </label>
+                          <label className="text-xs font-extrabold text-navy-900">
+                            Position
+                            <input
+                              value={entry.position}
+                              onChange={(event) =>
+                                updateLeadershipEntry(
+                                  index,
+                                  'position',
+                                  event.target.value,
+                                )
+                              }
+                              className={inputClassName}
+                              placeholder="Department Representative"
+                            />
+                          </label>
+                          <label className="text-xs font-extrabold text-navy-900">
+                            Category
+                            <select
+                              value={entry.category}
+                              onChange={(event) =>
+                                updateLeadershipEntry(
+                                  index,
+                                  'category',
+                                  event.target.value,
+                                )
+                              }
+                              className={inputClassName}
+                            >
+                              {leadershipCategories.map((category) => (
+                                <option key={category}>{category}</option>
+                              ))}
+                            </select>
+                          </label>
+                          <label className="text-xs font-extrabold text-navy-900">
+                            Term or school year
+                            <input
+                              value={entry.term}
+                              onChange={(event) =>
+                                updateLeadershipEntry(
+                                  index,
+                                  'term',
+                                  event.target.value,
+                                )
+                              }
+                              className={inputClassName}
+                              placeholder="2024-2025"
+                            />
+                          </label>
+                          <label className="text-xs font-extrabold text-navy-900 sm:col-span-2">
+                            Description (optional)
+                            <textarea
+                              value={entry.description}
+                              onChange={(event) =>
+                                updateLeadershipEntry(
+                                  index,
+                                  'description',
+                                  event.target.value,
+                                )
+                              }
+                              className={`${inputClassName} min-h-20 resize-y`}
+                              placeholder="Briefly describe the role or contribution."
+                            />
+                          </label>
+                        </div>
+                      </fieldset>
+                    ))}
+                  </div>
+                )}
+              </section>
 
               <div className="mt-5 rounded-2xl border border-dashed border-blue-200 bg-brand-50/35 p-5">
                 <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-extrabold text-brand-600 ring-1 ring-blue-100">
