@@ -7,6 +7,7 @@ import {
   Save,
   Search,
   ShieldCheck,
+  Trash2,
   UserRound,
   UsersRound,
   X,
@@ -19,6 +20,7 @@ import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import {
   getAdminProfiles,
   isProfilesRpcMissing,
+  deleteAdminUser,
   updateAdminProfile,
 } from '../lib/profiles'
 
@@ -50,8 +52,10 @@ function AdminUsers() {
   const [items, setItems] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
   const [form, setForm] = useState(null)
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedStatus, setSelectedStatus] = useState('all')
   const [selectedRole, setSelectedRole] = useState('all')
@@ -137,6 +141,7 @@ function AdminUsers() {
 
   const openEditor = (item) => {
     setEditingItem(item)
+    setShowDeleteConfirmation(false)
     setForm({
       fullName: item.full_name,
       studentNumber: item.student_number || '',
@@ -149,9 +154,10 @@ function AdminUsers() {
   }
 
   const closeEditor = () => {
-    if (isSaving) return
+    if (isSaving || isDeleting) return
     setEditingItem(null)
     setForm(null)
+    setShowDeleteConfirmation(false)
   }
 
   const updateField = (event) => {
@@ -161,6 +167,7 @@ function AdminUsers() {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
+    if (showDeleteConfirmation) return
     setError('')
 
     if (!form.fullName.trim()) {
@@ -190,6 +197,38 @@ function AdminUsers() {
     setIsSaving(false)
     closeEditor()
     setSuccess('Account profile updated.')
+    await loadProfiles()
+  }
+
+  const requestDelete = () => {
+    if (!editingItem || editingItem.id === user?.id) {
+      setError('You cannot delete your own administrator account.')
+      return
+    }
+
+    setError('')
+    setShowDeleteConfirmation(true)
+  }
+
+  const handleDelete = async () => {
+    if (!editingItem || editingItem.id === user?.id) return
+
+    setError('')
+    setIsDeleting(true)
+    const { error: deleteError } = await deleteAdminUser(editingItem.id)
+
+    if (deleteError) {
+      setError(deleteError.message)
+      setIsDeleting(false)
+      return
+    }
+
+    const deletedName = editingItem.full_name || editingItem.email
+    setIsDeleting(false)
+    setShowDeleteConfirmation(false)
+    setEditingItem(null)
+    setForm(null)
+    setSuccess(`Account for ${deletedName} was permanently deleted.`)
     await loadProfiles()
   }
 
@@ -500,26 +539,87 @@ function AdminUsers() {
                 </p>
               )}
 
-              <div className="mt-7 flex justify-end gap-3 border-t border-slate-200 pt-6">
-                <button
-                  type="button"
-                  onClick={closeEditor}
-                  className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-extrabold text-slate-600"
+              {showDeleteConfirmation && (
+                <div
+                  className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4"
+                  role="alert"
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSaving}
-                  className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-3 text-sm font-extrabold text-white disabled:opacity-60"
-                >
-                  {isSaving ? (
-                    <LoaderCircle size={17} className="animate-spin" />
-                  ) : (
-                    <Save size={17} />
+                  <div className="flex gap-3">
+                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-red-600 shadow-sm">
+                      <Trash2 size={18} aria-hidden="true" />
+                    </span>
+                    <div>
+                      <p className="text-sm font-black text-red-800">
+                        Delete this account permanently?
+                      </p>
+                      <p className="mt-1 text-sm leading-6 text-red-700">
+                        This removes the user&apos;s sign-in account, profile, and
+                        account-owned records. This action cannot be undone.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-4 flex flex-wrap justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowDeleteConfirmation(false)}
+                      disabled={isDeleting}
+                      className="rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-extrabold text-red-700 disabled:opacity-60"
+                    >
+                      Keep account
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDelete}
+                      disabled={isDeleting}
+                      className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2.5 text-sm font-extrabold text-white disabled:opacity-60"
+                    >
+                      {isDeleting ? (
+                        <LoaderCircle size={16} className="animate-spin" />
+                      ) : (
+                        <Trash2 size={16} aria-hidden="true" />
+                      )}
+                      {isDeleting ? 'Deleting...' : 'Delete permanently'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="mt-7 flex flex-col gap-4 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  {editingItem.id !== user?.id && !showDeleteConfirmation && (
+                    <button
+                      type="button"
+                      onClick={requestDelete}
+                      disabled={isSaving || isDeleting}
+                      className="inline-flex items-center gap-2 rounded-xl border border-red-200 px-4 py-3 text-sm font-extrabold text-red-600 transition hover:border-red-300 hover:bg-red-50 disabled:opacity-60"
+                    >
+                      <Trash2 size={16} aria-hidden="true" />
+                      Delete account
+                    </button>
                   )}
-                  {isSaving ? 'Saving...' : 'Save account'}
-                </button>
+                </div>
+                <div className="flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={closeEditor}
+                    disabled={isDeleting}
+                    className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-extrabold text-slate-600 disabled:opacity-60"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSaving || isDeleting || showDeleteConfirmation}
+                    className="inline-flex items-center gap-2 rounded-xl bg-brand-600 px-5 py-3 text-sm font-extrabold text-white disabled:opacity-60"
+                  >
+                    {isSaving ? (
+                      <LoaderCircle size={17} className="animate-spin" />
+                    ) : (
+                      <Save size={17} />
+                    )}
+                    {isSaving ? 'Saving...' : 'Save account'}
+                  </button>
+                </div>
               </div>
             </form>
           </div>

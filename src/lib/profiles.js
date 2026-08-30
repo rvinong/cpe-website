@@ -18,3 +18,35 @@ export async function updateAdminProfile(id, values) {
     target_status: values.status,
   })
 }
+
+export async function deleteAdminUser(id) {
+  if (!supabase) {
+    return {
+      data: null,
+      error: new Error('Supabase is not configured.'),
+    }
+  }
+
+  const { data, error } = await supabase.functions.invoke('admin-delete-user', {
+    body: { userId: id },
+  })
+
+  if (error) {
+    const response = error.context
+    if (response && typeof response.json === 'function') {
+      try {
+        const payload = await response.json()
+        if (payload?.error) {
+          return { data: null, error: new Error(payload.error) }
+        }
+      } catch {
+        // Fall back to the SDK error when the response has no readable body.
+      }
+    }
+
+    return { data: null, error }
+  }
+  if (data?.error) return { data: null, error: new Error(data.error) }
+
+  return { data, error: null }
+}
