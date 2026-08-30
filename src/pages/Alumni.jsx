@@ -363,7 +363,7 @@ function Alumni() {
                           duration: 0.38,
                           delay: Math.min(index * 0.018, 0.18),
                         }}
-                        className="group flex h-full min-h-[21rem] flex-col rounded-2xl border border-slate-200 bg-white/75 p-3 text-center shadow-[0_18px_40px_-30px_rgba(15,23,42,0.42)] transition hover:border-brand-500/60 hover:shadow-[0_22px_48px_-30px_rgba(21,94,239,0.42)]"
+                        className="group flex h-full min-h-[18rem] flex-col rounded-2xl border border-slate-200 bg-white/75 p-3 text-center shadow-[0_18px_40px_-30px_rgba(15,23,42,0.42)] transition hover:border-brand-500/60 hover:shadow-[0_22px_48px_-30px_rgba(21,94,239,0.42)]"
                         aria-label={`Open ${profile.name}'s alumni profile`}
                       >
                         <span className="mx-auto block aspect-[3/4] w-full max-w-48 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.42)] transition group-hover:scale-[1.015]">
@@ -381,7 +381,7 @@ function Alumni() {
                             </span>
                           )}
                         </span>
-                        <span className="mt-3 flex min-h-[7rem] flex-1 flex-col items-center">
+                        <span className="mt-3 flex min-h-[5rem] flex-1 flex-col items-center">
                           <span className="line-clamp-2 min-h-10 text-sm font-extrabold leading-5 text-navy-900 transition group-hover:text-brand-600 sm:text-base">
                             {profile.name}
                           </span>
@@ -390,13 +390,6 @@ function Alumni() {
                           </span>
                           <span className="mt-0.5 block min-h-4 w-full truncate text-xs font-bold text-slate-500">
                             {profile.role || ''}
-                          </span>
-                          <span className="mt-2 flex min-h-8 items-start justify-center">
-                            {profile.leadership?.length > 0 && (
-                              <span className="inline-flex max-w-full items-center justify-center rounded-full bg-violet-50 px-2 py-1 text-[0.58rem] font-extrabold leading-4 text-violet-700 ring-1 ring-violet-100 sm:text-[0.62rem]">
-                                Leadership background
-                              </span>
-                            )}
                           </span>
                         </span>
                       </Motion.button>
