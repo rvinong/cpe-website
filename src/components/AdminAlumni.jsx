@@ -1,12 +1,14 @@
 import {
   Award,
   BriefcaseBusiness,
+  ChevronDown,
   CirclePlus,
   Edit3,
   GraduationCap,
   ImageUp,
   LoaderCircle,
   Save,
+  Search,
   Trash2,
   UsersRound,
   X,
@@ -93,6 +95,8 @@ function AdminAlumni() {
   const [previewUrl, setPreviewUrl] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [nameSearchTerm, setNameSearchTerm] = useState('')
+  const [expandedBatches, setExpandedBatches] = useState({})
   const [needsSchema, setNeedsSchema] = useState(false)
   const [needsLeadershipSchema, setNeedsLeadershipSchema] = useState(false)
 
@@ -175,6 +179,58 @@ function AdminAlumni() {
     }),
     [items],
   )
+
+  const batchGroups = useMemo(() => {
+    const grouped = new Map()
+
+    items.forEach((item) => {
+      const batch = String(item.batch || '').trim() || 'Not specified'
+      const currentItems = grouped.get(batch) || []
+      grouped.set(batch, [...currentItems, item])
+    })
+
+    return Array.from(grouped, ([batch, batchItems]) => ({
+      batch,
+      items: batchItems.sort((first, second) =>
+        String(first.name || '').localeCompare(String(second.name || '')),
+      ),
+    })).sort((first, second) => {
+      const firstYear = Number(first.batch.match(/\d{4}/)?.[0] || 0)
+      const secondYear = Number(second.batch.match(/\d{4}/)?.[0] || 0)
+
+      if (firstYear !== secondYear) return secondYear - firstYear
+      return first.batch.localeCompare(second.batch, undefined, {
+        numeric: true,
+        sensitivity: 'base',
+      })
+    })
+  }, [items])
+
+  const filteredBatchGroups = useMemo(() => {
+    const normalizedSearch = nameSearchTerm.trim().toLowerCase()
+    if (!normalizedSearch) return batchGroups
+
+    return batchGroups
+      .map((group) => ({
+        ...group,
+        items: group.items.filter((item) =>
+          String(item.name || '').toLowerCase().includes(normalizedSearch),
+        ),
+      }))
+      .filter((group) => group.items.length > 0)
+  }, [batchGroups, nameSearchTerm])
+
+  const filteredProfileCount = filteredBatchGroups.reduce(
+    (total, group) => total + group.items.length,
+    0,
+  )
+
+  const toggleBatch = (batch) => {
+    setExpandedBatches((current) => ({
+      ...current,
+      [batch]: !(current[batch] ?? true),
+    }))
+  }
 
   const resetEditor = () => {
     if (isSaving) return
@@ -493,86 +549,182 @@ function AdminAlumni() {
             </h3>
           </div>
         ) : (
-          <div className="divide-y divide-slate-200">
-            {items.map((item) => (
-              <article
-                key={item.id}
-                className="grid gap-4 px-5 py-5 sm:grid-cols-[64px_1fr_auto] sm:items-center sm:px-6"
-              >
-                {item.photo_path ? (
-                  <img
-                    src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/organization-media/${item.photo_path}`}
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    className="size-16 rounded-2xl object-cover"
+          <>
+            <div className="border-b border-slate-200 px-5 py-4 sm:px-6">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <label className="relative block lg:max-w-xl lg:flex-1">
+                  <span className="sr-only">Search alumni by name</span>
+                  <Search
+                    size={18}
+                    className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                    aria-hidden="true"
                   />
-                ) : (
-                  <span className="grid size-16 place-items-center rounded-2xl bg-brand-50 font-black text-brand-600">
-                    {item.name
-                      .split(/\s+/)
-                      .slice(0, 2)
-                      .map((part) => part[0])
-                      .join('')}
-                  </span>
-                )}
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span
-                      className={`rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase ring-1 ring-inset ${
-                        statusStyles[item.status]
-                      }`}
-                    >
-                      {item.status}
-                    </span>
-                    <span className="text-xs font-bold text-slate-500">
-                      Batch {item.batch}
-                    </span>
-                    {item.is_featured && (
-                      <span className="text-xs font-extrabold text-amber-600">
-                        Spotlight
-                      </span>
-                    )}
-                    {(leadershipByProfile[item.id] || []).length > 0 && (
-                      <span className="text-xs font-extrabold text-violet-600">
-                        {(leadershipByProfile[item.id] || []).length}{' '}
-                        leadership role
-                        {(leadershipByProfile[item.id] || []).length === 1
-                          ? ''
-                          : 's'}
-                      </span>
-                    )}
-                  </div>
-                  <h3 className="mt-2 truncate text-lg font-black text-navy-900">
-                    {item.name}
-                  </h3>
-                  <p className="mt-1 truncate text-sm text-slate-600">
-                    {[item.professional_role, item.organization]
-                      .filter(Boolean)
-                      .join(' at ') || 'Career details not supplied'}
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => openEditor(item)}
-                    className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3.5 py-2 text-xs font-extrabold text-slate-600"
-                  >
-                    <Edit3 size={15} />
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(item)}
-                    className="grid size-10 place-items-center rounded-lg border border-red-200 text-red-600"
-                    aria-label={`Delete ${item.name}`}
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              </article>
-            ))}
-          </div>
+                  <input
+                    type="search"
+                    value={nameSearchTerm}
+                    onChange={(event) => setNameSearchTerm(event.target.value)}
+                    placeholder="Search alumni by name"
+                    className="admin-search-field pl-11"
+                  />
+                </label>
+                <p className="text-xs font-extrabold text-slate-500">
+                  Showing {filteredProfileCount} of {items.length} profiles
+                </p>
+              </div>
+            </div>
+
+            {filteredBatchGroups.length === 0 ? (
+              <div className="px-6 py-16 text-center">
+                <Search
+                  size={30}
+                  className="mx-auto text-brand-600"
+                  aria-hidden="true"
+                />
+                <h3 className="mt-4 text-lg font-black text-navy-900">
+                  No alumni found
+                </h3>
+                <p className="mt-2 text-sm text-slate-600">
+                  No profile names match &ldquo;{nameSearchTerm}&rdquo;.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setNameSearchTerm('')}
+                  className="mt-5 rounded-xl bg-brand-600 px-4 py-2.5 text-xs font-extrabold text-white"
+                >
+                  Clear search
+                </button>
+              </div>
+            ) : (
+              <div className="divide-y divide-slate-200">
+                {filteredBatchGroups.map((group, index) => {
+                  const isExpanded =
+                    nameSearchTerm.trim().length > 0 ||
+                    (expandedBatches[group.batch] ?? index === 0)
+                  const batchContentId = `alumni-batch-${index}`
+
+                  return (
+                    <div key={group.batch}>
+                      <button
+                        type="button"
+                        onClick={() => toggleBatch(group.batch)}
+                        aria-expanded={isExpanded}
+                        aria-controls={batchContentId}
+                        className="flex w-full items-center justify-between gap-4 bg-slate-50/70 px-5 py-4 text-left transition hover:bg-brand-50/50 sm:px-6"
+                      >
+                        <span className="flex min-w-0 items-center gap-3">
+                          <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-brand-50 text-xs font-black text-brand-600 ring-1 ring-blue-100">
+                            {group.batch.match(/\d{4}/)?.[0] || '?'}
+                          </span>
+                          <span className="min-w-0">
+                            <span className="block truncate text-sm font-black text-navy-900">
+                              Batch {group.batch}
+                            </span>
+                            <span className="mt-0.5 block text-xs font-bold text-slate-500">
+                              {group.items.length}{' '}
+                              {group.items.length === 1 ? 'profile' : 'profiles'}
+                            </span>
+                          </span>
+                        </span>
+                        <ChevronDown
+                          size={19}
+                          className={`shrink-0 text-slate-500 transition-transform ${
+                            isExpanded ? 'rotate-180' : ''
+                          }`}
+                          aria-hidden="true"
+                        />
+                      </button>
+
+                      {isExpanded && (
+                        <div
+                          id={batchContentId}
+                          className="divide-y divide-slate-200 border-t border-slate-200"
+                        >
+                          {group.items.map((item) => (
+                            <article
+                              key={item.id}
+                              className="grid gap-4 px-5 py-5 sm:grid-cols-[64px_1fr_auto] sm:items-center sm:px-6"
+                            >
+                              {item.photo_path ? (
+                                <img
+                                  src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/organization-media/${item.photo_path}`}
+                                  alt=""
+                                  loading="lazy"
+                                  decoding="async"
+                                  className="size-16 rounded-2xl object-cover"
+                                />
+                              ) : (
+                                <span className="grid size-16 place-items-center rounded-2xl bg-brand-50 font-black text-brand-600">
+                                  {item.name
+                                    .split(/\s+/)
+                                    .slice(0, 2)
+                                    .map((part) => part[0])
+                                    .join('')}
+                                </span>
+                              )}
+                              <div className="min-w-0">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <span
+                                    className={`rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase ring-1 ring-inset ${
+                                      statusStyles[item.status]
+                                    }`}
+                                  >
+                                    {item.status}
+                                  </span>
+                                  {item.is_featured && (
+                                    <span className="text-xs font-extrabold text-amber-600">
+                                      Spotlight
+                                    </span>
+                                  )}
+                                  {(leadershipByProfile[item.id] || []).length >
+                                    0 && (
+                                    <span className="text-xs font-extrabold text-violet-600">
+                                      {(leadershipByProfile[item.id] || []).length}{' '}
+                                      leadership role
+                                      {(leadershipByProfile[item.id] || [])
+                                        .length === 1
+                                        ? ''
+                                        : 's'}
+                                    </span>
+                                  )}
+                                </div>
+                                <h3 className="mt-2 truncate text-lg font-black text-navy-900">
+                                  {item.name}
+                                </h3>
+                                <p className="mt-1 truncate text-sm text-slate-600">
+                                  {[item.professional_role, item.organization]
+                                    .filter(Boolean)
+                                    .join(' at ') ||
+                                    'Career details not supplied'}
+                                </p>
+                              </div>
+                              <div className="flex gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => openEditor(item)}
+                                  className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3.5 py-2 text-xs font-extrabold text-slate-600"
+                                >
+                                  <Edit3 size={15} />
+                                  Edit
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDelete(item)}
+                                  className="grid size-10 place-items-center rounded-lg border border-red-200 text-red-600"
+                                  aria-label={`Delete ${item.name}`}
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
+                            </article>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </>
         )}
       </section>
 
