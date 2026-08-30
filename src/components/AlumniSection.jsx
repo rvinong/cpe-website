@@ -83,8 +83,8 @@ function AlumniSection() {
 
         <Reveal delay={0.08} direction="right">
           <div className="alumni-home-shell relative isolate overflow-hidden p-6 sm:p-9 lg:p-12">
-            <div className="grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr]">
-              <div>
+            <div className="grid gap-10">
+              <div className="mx-auto w-full max-w-5xl text-center">
                 <span className="alumni-home-badge inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-extrabold">
                   <BookOpen size={14} aria-hidden="true" />
                   Official alumni archive
@@ -92,16 +92,16 @@ function AlumniSection() {
                 <h3 className="alumni-home-subtitle mt-5 text-3xl font-black tracking-tight sm:text-4xl">
                   Verified alumni profiles by batch
                 </h3>
-                <p className="alumni-home-copy mt-4 max-w-xl text-base leading-7">
+                <p className="alumni-home-copy mx-auto mt-4 max-w-2xl text-base leading-7">
                   Browse published alumni records by graduation year, including
                   approved profile details submitted for the organization archive.
                 </p>
-                <p className="alumni-home-callout mt-5 max-w-xl rounded-2xl p-4 text-sm font-bold leading-7">
+                <p className="alumni-home-callout mx-auto mt-5 max-w-3xl rounded-2xl p-4 text-sm font-bold leading-7">
                   All entries are reviewed before publication to ensure accurate,
                   respectful, and authorized alumni information.
                 </p>
 
-                <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                <div className="mx-auto mt-6 grid max-w-5xl gap-3 sm:grid-cols-3">
                   {yearbookHighlights.map(({ icon: Icon, label, value }) => (
                     <div
                       key={label}
@@ -124,14 +124,14 @@ function AlumniSection() {
                   href="/alumni"
                   whileHover={{ x: 4 }}
                   whileTap={{ scale: 0.985 }}
-                  className="primary-button mt-7"
+                  className="primary-button mx-auto mt-7"
                 >
                   View alumni directory
                   <ArrowRight size={17} aria-hidden="true" />
                 </Motion.a>
               </div>
 
-              <div className="relative">
+              <div className="relative mx-auto w-full">
                 <div className="alumni-home-preview relative overflow-hidden rounded-[2rem] p-5">
                   <div className="alumni-home-preview-corner absolute right-0 top-0 h-28 w-28 rounded-bl-[4rem]" />
                   <div className="relative mb-5 flex items-center justify-between gap-4">
