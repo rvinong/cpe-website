@@ -151,7 +151,7 @@ function AlumniSection() {
                   </div>
 
                   {previewProfiles.length > 0 ? (
-                    <div className="relative grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-2">
+                    <div className="relative grid grid-cols-2 gap-4 sm:grid-cols-4">
                       {previewProfiles.map((profile, index) => {
                         const rotation =
                           index % 4 === 0
