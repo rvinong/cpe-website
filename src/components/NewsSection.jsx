@@ -11,7 +11,7 @@ import SectionHeader from './SectionHeader'
 function NewsSection() {
   const { news: organizationNews, isLoading } = useNews(3)
   const robotAssignments = useMemo(
-    () => getRandomRobotAssignments(organizationNews.length, ['circuit']),
+    () => getRandomRobotAssignments(organizationNews.length),
     [organizationNews.length],
   )
 

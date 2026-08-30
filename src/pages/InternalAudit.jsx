@@ -76,7 +76,7 @@ function InternalAudit() {
   const [downloadError, setDownloadError] = useState('')
   const categoryCount = internalAuditCategories.length
   const robotAssignments = useMemo(
-    () => getRandomRobotAssignments(categoryCount, ['circuit']),
+    () => getRandomRobotAssignments(categoryCount),
     [categoryCount],
   )
 

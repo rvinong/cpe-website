@@ -53,7 +53,7 @@ function AlumniSection() {
     [profiles],
   )
   const robotAssignments = useMemo(
-    () => getRandomRobotAssignments(previewProfiles.length, ['archive']),
+    () => getRandomRobotAssignments(previewProfiles.length),
     [previewProfiles.length],
   )
 

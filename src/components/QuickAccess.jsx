@@ -28,8 +28,7 @@ const iconMap = {
 function QuickAccess() {
   const quickAccessCount = quickAccessItems.length
   const robotAssignments = useMemo(
-    () =>
-      getRandomRobotAssignments(quickAccessCount, ['scout', 'archive']),
+    () => getRandomRobotAssignments(quickAccessCount),
     [quickAccessCount],
   )
 

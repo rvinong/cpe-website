@@ -12,7 +12,23 @@ function shuffle(values) {
   return shuffledValues
 }
 
-export function getRandomRobotAssignments(cardCount, variants) {
+export const robotVariants = [
+  'scout',
+  'circuit',
+  'orbit',
+  'archive',
+  'tread',
+  'chat',
+  'signal',
+  'booster',
+  'sleep',
+  'prism',
+]
+
+export function getRandomRobotAssignments(
+  cardCount,
+  variants = robotVariants,
+) {
   const safeCardCount = Number.isFinite(cardCount)
     ? Math.max(0, Math.floor(cardCount))
     : 0

@@ -12,7 +12,7 @@ function UpcomingEvents() {
   const { upcoming, isLoading } = useEvents()
   const homepageEvents = upcoming.slice(0, 3)
   const robotAssignments = useMemo(
-    () => getRandomRobotAssignments(homepageEvents.length, ['orbit']),
+    () => getRandomRobotAssignments(homepageEvents.length),
     [homepageEvents.length],
   )
 
