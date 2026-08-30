@@ -1,7 +1,7 @@
 import {
   CirclePlus,
-  Download,
   Edit3,
+  Eye,
   FileArchive,
   FileText,
   Link2,
@@ -388,7 +388,7 @@ function AdminResources() {
                       className="grid size-10 place-items-center rounded-lg border border-slate-200 text-slate-500"
                       aria-label={`Open ${item.title}`}
                     >
-                      <Download size={16} />
+                      <Eye size={16} />
                     </button>
                     <button
                       type="button"

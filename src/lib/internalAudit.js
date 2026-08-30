@@ -174,9 +174,7 @@ export async function createAuditReportDownload(report) {
 
   return supabase.storage
     .from(auditReportsBucket)
-    .createSignedUrl(report.file_path || report.filePath, 60, {
-      download: report.file_name || report.fileName || report.title,
-    })
+    .createSignedUrl(report.file_path || report.filePath, 60)
 }
 
 async function createAvailableSlug(title) {

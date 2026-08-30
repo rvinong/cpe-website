@@ -76,16 +76,29 @@ export async function removeResource(path) {
   return supabase.storage.from(resourcesBucket).remove([path])
 }
 
+function isPdfResource(resource) {
+  const mimeType = String(resource?.mime_type || resource?.mimeType || '')
+    .trim()
+    .toLowerCase()
+  const fileName = String(resource?.file_name || resource?.fileName || '')
+
+  return mimeType === 'application/pdf' || /\.pdf$/i.test(fileName)
+}
+
 export async function createResourceDownload(resource) {
   if (resource.external_url) {
     return { data: { signedUrl: resource.external_url }, error: null }
   }
 
-  return supabase.storage
-    .from(resourcesBucket)
-    .createSignedUrl(resource.file_path, 60, {
-      download: resource.file_name || resource.title,
-    })
+  const bucket = supabase.storage.from(resourcesBucket)
+
+  if (isPdfResource(resource)) {
+    return bucket.createSignedUrl(resource.file_path, 60)
+  }
+
+  return bucket.createSignedUrl(resource.file_path, 60, {
+    download: resource.file_name || resource.title,
+  })
 }
 
 export async function getPublishedResources() {

@@ -2,7 +2,7 @@ import { motion as Motion } from 'framer-motion'
 import {
   BookOpen,
   Clock3,
-  Download,
+  Eye,
   Files,
   FlaskConical,
   GraduationCap,
@@ -286,7 +286,7 @@ function StudentPortal() {
                           onClick={() => openResource(resource)}
                           className="primary-button motion-button min-h-0 shrink-0 px-4 py-2.5 text-xs"
                         >
-                          <Download size={15} />
+                          <Eye size={15} />
                           Open
                         </button>
                       </div>

@@ -4,7 +4,6 @@ import {
   CalendarDays,
   CheckCircle2,
   ClipboardCheck,
-  Download,
   Eye,
   FileText,
   Filter,
@@ -303,7 +302,7 @@ function InternalAudit() {
                   onClick={() => openReportFile(featuredReport)}
                   className="mt-7 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-extrabold text-navy-900 transition hover:-translate-y-0.5 hover:bg-blue-50"
                 >
-                  <Download size={17} aria-hidden="true" />
+                  <Eye size={17} aria-hidden="true" />
                   View latest PDF
                 </button>
               ) : (
@@ -312,7 +311,7 @@ function InternalAudit() {
                   disabled
                   className="mt-7 inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.08] px-5 py-3 text-sm font-extrabold text-slate-300 opacity-75"
                 >
-                  <Download size={17} aria-hidden="true" />
+                  <FileText size={17} aria-hidden="true" />
                   PDF upload pending
                 </button>
               )}

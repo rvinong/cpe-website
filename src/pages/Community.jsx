@@ -688,6 +688,10 @@ function MessageItem({
                 const isImage = String(attachment.mimeType || '').startsWith(
                   'image/',
                 )
+                const isPdf =
+                  String(attachment.mimeType || '').toLowerCase() ===
+                    'application/pdf' ||
+                  /\.pdf$/i.test(String(attachment.fileName || ''))
                 const attachmentSize = formatCommunityAttachmentSize(
                   attachment.sizeBytes,
                 )
@@ -723,7 +727,7 @@ function MessageItem({
                       href={attachment.url}
                       target="_blank"
                       rel="noreferrer"
-                      download={attachment.fileName}
+                      download={isPdf ? undefined : attachment.fileName}
                       className="community-message-file"
                     >
                       <FileText size={16} aria-hidden="true" />
