@@ -23,6 +23,17 @@ function compareAlumniNames(first, second) {
   })
 }
 
+function getSpotlightScore(profile) {
+  // Admin selections lead; profile details provide a deterministic fallback.
+  return (
+    (profile.featured ? 1000 : 0) +
+    (profile.highlight?.trim() ? 40 : 0) +
+    Math.min(profile.leadership?.length || 0, 3) * 20 +
+    (profile.role?.trim() ? 15 : 0) +
+    (profile.organization?.trim() ? 10 : 0)
+  )
+}
+
 function Alumni() {
   const { profiles, isLoading } = useAlumni()
   const [searchTerm, setSearchTerm] = useState('')
@@ -68,8 +79,13 @@ function Alumni() {
   const featuredProfiles = useMemo(
     () =>
       displayedProfiles
-        .filter((profile) => profile.featured)
-        .sort(compareAlumniNames),
+        .slice()
+        .sort((first, second) => {
+          const scoreDifference =
+            getSpotlightScore(second) - getSpotlightScore(first)
+          return scoreDifference || compareAlumniNames(first, second)
+        })
+        .slice(0, 3),
     [displayedProfiles],
   )
 
@@ -206,7 +222,7 @@ function Alumni() {
                 description="Featured graduates will appear here after their information has been verified and approved for publication."
               />
             ) : (
-              <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <div className="mt-10 grid items-stretch gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {featuredProfiles.map((profile, index) => (
                   <Motion.article
                     key={profile.id}
@@ -215,44 +231,51 @@ function Alumni() {
                     whileHover={{ y: -5 }}
                     viewport={{ once: true, amount: 0.2 }}
                     transition={{ duration: 0.5, delay: index * 0.07 }}
-                    className="interactive-card rounded-2xl border border-white/10 bg-white/[0.07] p-6 backdrop-blur-sm"
+                    className="interactive-card flex h-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/[0.07] backdrop-blur-sm"
                   >
-                    <div className="flex items-start justify-between gap-4">
+                    <div className="relative aspect-[4/5] overflow-hidden bg-brand-600">
                       {profile.photo ? (
                         <img
                           src={profile.photo}
                           alt=""
                           loading="lazy"
                           decoding="async"
-                          className="profile-image size-16 rounded-2xl object-cover"
+                          className="profile-image h-full w-full object-cover"
                         />
                       ) : (
-                        <span className="grid size-16 place-items-center rounded-2xl bg-brand-600 text-lg font-black text-white">
+                        <span className="grid h-full w-full place-items-center bg-brand-600 text-4xl font-black text-white">
                           {profile.initials}
                         </span>
                       )}
-                      <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1.5 text-xs font-bold text-blue-100">
+                      <span className="absolute right-4 top-4 rounded-full border border-white/15 bg-navy-950/75 px-3 py-1.5 text-xs font-bold text-blue-100 backdrop-blur-sm">
                         {profile.batch}
                       </span>
                     </div>
-                    <h3 className="mt-6 text-xl font-extrabold text-white">
-                      {profile.name}
-                    </h3>
-                    {profile.role && (
-                      <p className="mt-2 text-sm font-bold text-blue-200">
-                        {profile.role}
-                      </p>
-                    )}
-                    {profile.organization && (
-                      <p className="mt-1 text-sm text-slate-400">
-                        {profile.organization}
-                      </p>
-                    )}
-                    {profile.highlight && (
-                      <p className="mt-5 border-t border-white/10 pt-5 text-sm leading-6 text-slate-300">
-                        {profile.highlight}
-                      </p>
-                    )}
+                    <div className="flex flex-1 flex-col p-6">
+                      <h3 className="text-2xl font-extrabold text-white">
+                        {profile.name}
+                      </h3>
+                      {profile.role && (
+                        <p className="mt-2 text-sm font-bold text-blue-200">
+                          {profile.role}
+                        </p>
+                      )}
+                      {profile.organization && (
+                        <p className="mt-1 text-sm text-slate-400">
+                          {profile.organization}
+                        </p>
+                      )}
+                      {profile.highlight && (
+                        <div className="mt-6 border-t border-white/10 pt-5">
+                          <p className="text-xs font-extrabold tracking-[0.16em] text-blue-300 uppercase">
+                            Achievements
+                          </p>
+                          <p className="mt-2 line-clamp-4 text-sm leading-6 text-slate-300">
+                            {profile.highlight}
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </Motion.article>
                 ))}
               </div>
@@ -323,7 +346,7 @@ function Alumni() {
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-3 gap-x-4 gap-y-7 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-9">
+                  <div className="grid grid-cols-2 items-stretch gap-5 sm:grid-cols-3 lg:grid-cols-4">
                     {filteredProfiles.map((profile, index) => (
                       <Motion.button
                         key={profile.id}
@@ -338,10 +361,10 @@ function Alumni() {
                           duration: 0.38,
                           delay: Math.min(index * 0.018, 0.18),
                         }}
-                        className="group rounded-xl border-0 bg-transparent p-0 text-center"
+                        className="group flex h-full min-h-[21rem] flex-col rounded-2xl border border-slate-200 bg-white/75 p-3 text-center shadow-[0_18px_40px_-30px_rgba(15,23,42,0.42)] transition hover:border-brand-500/60 hover:shadow-[0_22px_48px_-30px_rgba(21,94,239,0.42)]"
                         aria-label={`Open ${profile.name}'s alumni profile`}
                       >
-                        <span className="mx-auto block aspect-[3/4] w-full max-w-24 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.42)] transition group-hover:border-brand-500/60 group-hover:shadow-[0_22px_48px_-30px_rgba(21,94,239,0.42)] sm:max-w-28">
+                        <span className="mx-auto block aspect-[3/4] w-full max-w-48 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_18px_40px_-30px_rgba(15,23,42,0.42)] transition group-hover:scale-[1.015]">
                           {profile.photo ? (
                             <img
                               src={profile.photo}
@@ -356,22 +379,24 @@ function Alumni() {
                             </span>
                           )}
                         </span>
-                        <span className="mt-2 block truncate text-[0.68rem] font-extrabold leading-4 text-navy-900 transition group-hover:text-brand-600 sm:text-xs">
-                          {profile.name}
-                        </span>
-                        <span className="mt-0.5 block truncate text-[0.62rem] font-bold text-brand-600 sm:text-[0.68rem]">
-                          Batch {profile.batch}
-                        </span>
-                        {profile.role && (
-                          <span className="mt-0.5 block truncate text-[0.62rem] font-bold text-slate-500 sm:text-[0.68rem]">
-                            {profile.role}
+                        <span className="mt-3 flex min-h-[7rem] flex-1 flex-col items-center">
+                          <span className="line-clamp-2 min-h-10 text-sm font-extrabold leading-5 text-navy-900 transition group-hover:text-brand-600 sm:text-base">
+                            {profile.name}
                           </span>
-                        )}
-                        {profile.leadership?.length > 0 && (
-                          <span className="mt-1 inline-flex items-center rounded-full bg-violet-50 px-2 py-0.5 text-[0.58rem] font-extrabold text-violet-700 ring-1 ring-violet-100 sm:text-[0.62rem]">
-                            Leadership background
+                          <span className="mt-1 block truncate text-xs font-bold text-brand-600">
+                            Batch {profile.batch}
                           </span>
-                        )}
+                          <span className="mt-0.5 block min-h-4 w-full truncate text-xs font-bold text-slate-500">
+                            {profile.role || ''}
+                          </span>
+                          <span className="mt-2 flex min-h-8 items-start justify-center">
+                            {profile.leadership?.length > 0 && (
+                              <span className="inline-flex max-w-full items-center justify-center rounded-full bg-violet-50 px-2 py-1 text-[0.58rem] font-extrabold leading-4 text-violet-700 ring-1 ring-violet-100 sm:text-[0.62rem]">
+                                Leadership background
+                              </span>
+                            )}
+                          </span>
+                        </span>
                       </Motion.button>
                     ))}
                   </div>
@@ -442,16 +467,6 @@ function Alumni() {
             </div>
 
             <div className="grid gap-5 p-6 sm:p-8">
-              {selectedProfile.history && (
-                <div className="rounded-2xl border border-slate-300 bg-slate-50/70 p-5">
-                  <p className="text-xs font-extrabold tracking-[0.16em] text-brand-600 uppercase">
-                    Organization history
-                  </p>
-                  <p className="mt-2 text-sm leading-7 text-slate-600">
-                    {selectedProfile.history}
-                  </p>
-                </div>
-              )}
               {selectedProfile.leadership?.length > 0 && (
                 <section className="rounded-2xl border border-violet-200 bg-violet-50/45 p-5">
                   <div className="flex items-start gap-3">
@@ -511,7 +526,7 @@ function Alumni() {
               {selectedProfile.highlight && (
                 <div className="rounded-2xl border border-blue-300 bg-brand-50/45 p-5">
                   <p className="text-xs font-extrabold tracking-[0.16em] text-brand-600 uppercase">
-                    Spotlight note
+                    Achievements
                   </p>
                   <p className="mt-2 text-sm leading-7 text-slate-600">
                     {selectedProfile.highlight}

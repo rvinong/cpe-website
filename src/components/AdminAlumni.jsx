@@ -807,7 +807,7 @@ function AdminAlumni() {
                   />
                 </label>
                 <label className="text-sm font-extrabold text-navy-900 sm:col-span-2">
-                  Spotlight note
+                  Achievements
                   <textarea
                     name="highlight"
                     value={form.highlight}
