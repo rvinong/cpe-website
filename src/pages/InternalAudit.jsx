@@ -58,6 +58,16 @@ function getCategory(documentType) {
   return internalAuditCategories.find((category) => category.id === categoryId)
 }
 
+function getAuditSignOffs(report) {
+  if (!report) return []
+
+  return [
+    report.preparedBy && `Prepared by ${report.preparedBy}`,
+    report.reviewedBy && `Reviewed by ${report.reviewedBy}`,
+    report.approvedBy && `Approved by ${report.approvedBy}`,
+  ].filter(Boolean)
+}
+
 function InternalAudit() {
   const [reports, setReports] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -86,6 +96,7 @@ function InternalAudit() {
 
   const featuredReport =
     reports.find((report) => report.isFeatured) || reports[0] || null
+  const featuredSignOffs = getAuditSignOffs(featuredReport)
   const filteredReports = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase()
 
@@ -102,6 +113,7 @@ function InternalAudit() {
           report.summary,
           report.preparedBy,
           report.reviewedBy,
+          report.approvedBy,
           category?.label,
         ]
           .filter(Boolean)
@@ -261,21 +273,29 @@ function InternalAudit() {
                     </span>
                   </span>
                 </span>
-                <span className="inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.07] px-4 py-3">
-                  <ShieldCheck
-                    size={17}
-                    className="text-blue-200"
-                    aria-hidden="true"
-                  />
-                  <span>
-                    <strong className="block text-white">
-                      Reviewed by {featuredReport?.reviewedBy || 'TBA'}
-                    </strong>
-                    <span className="text-slate-400">
-                      Prepared by {featuredReport?.preparedBy || 'TBA'}
+                {featuredSignOffs.length > 0 && (
+                  <span className="inline-flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.07] px-4 py-3">
+                    <ShieldCheck
+                      size={17}
+                      className="text-blue-200"
+                      aria-hidden="true"
+                    />
+                    <span>
+                      {featuredSignOffs.map((signOff, index) => (
+                        <span
+                          key={signOff}
+                          className={
+                            index === 0
+                              ? 'block text-white'
+                              : 'mt-1 block text-slate-400'
+                          }
+                        >
+                          {signOff}
+                        </span>
+                      ))}
                     </span>
                   </span>
-                </span>
+                )}
               </div>
 
               {featuredReport?.filePath ? (
@@ -466,6 +486,7 @@ function InternalAudit() {
               const categoryId = getInternalAuditCategoryId(report.type)
               const category = getCategory(categoryId)
               const Icon = categoryIcons[categoryId]
+              const signOffs = getAuditSignOffs(report)
 
               return (
                 <Motion.article
@@ -567,10 +588,11 @@ function InternalAudit() {
                   </ul>
 
                   <div className="audit-report-card-footer mt-auto flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="audit-report-card-byline text-xs font-bold text-slate-500">
-                      Prepared by {report.preparedBy} - reviewed by{' '}
-                      {report.reviewedBy}
-                    </p>
+                    {signOffs.length > 0 && (
+                      <p className="audit-report-card-byline text-xs font-bold text-slate-500">
+                        {signOffs.join(' - ')}
+                      </p>
+                    )}
                     {report.filePath ? (
                       <button
                         type="button"

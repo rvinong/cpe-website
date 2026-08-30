@@ -191,6 +191,7 @@ function AdminInternalAudit() {
           item.summary,
           item.prepared_by,
           item.reviewed_by,
+          item.approved_by,
           item.resolution_number,
           getTypeLabel(item.report_type),
         ]
@@ -212,9 +213,9 @@ function AdminInternalAudit() {
             reportType: getInternalAuditCategoryId(item.report_type),
             period: item.period,
             summary: item.summary,
-            preparedBy: item.prepared_by,
-            reviewedBy: item.reviewed_by,
-            approvedBy: item.approved_by,
+            preparedBy: item.prepared_by || '',
+            reviewedBy: item.reviewed_by || '',
+            approvedBy: item.approved_by || '',
             resolutionNumber: item.resolution_number,
             fundsReceived: item.funds_received ?? '',
             totalExpenses: item.total_expenses ?? '',
@@ -272,11 +273,9 @@ function AdminInternalAudit() {
     if (
       !form.title.trim() ||
       !form.period.trim() ||
-      !form.summary.trim() ||
-      !form.preparedBy.trim() ||
-      !form.reviewedBy.trim()
+      !form.summary.trim()
     ) {
-      setError('Title, period, summary, prepared by, and reviewed by are required.')
+      setError('Title, period, and summary are required.')
       return
     }
 
@@ -708,29 +707,27 @@ function AdminInternalAudit() {
                 </label>
 
                 <label className="text-sm font-extrabold text-navy-900">
-                  Prepared by
+                  Prepared by (optional)
                   <input
                     name="preparedBy"
                     value={form.preparedBy}
                     onChange={updateField}
                     className={inputClassName}
-                    required
                   />
                 </label>
 
                 <label className="text-sm font-extrabold text-navy-900">
-                  Reviewed by
+                  Reviewed by (optional)
                   <input
                     name="reviewedBy"
                     value={form.reviewedBy}
                     onChange={updateField}
                     className={inputClassName}
-                    required
                   />
                 </label>
 
                 <label className="text-sm font-extrabold text-navy-900">
-                  Approved by
+                  Approved by (optional)
                   <input
                     name="approvedBy"
                     value={form.approvedBy}

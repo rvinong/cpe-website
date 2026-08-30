@@ -124,7 +124,7 @@ export function normalizeAuditReport(row) {
       row.highlights ||
       [
         'Approved document summary',
-        'Prepared and reviewed record',
+        'Record details supplied by the organization',
         'Publication-ready archive entry',
       ],
   }
@@ -199,9 +199,9 @@ function toAuditReportPayload(values, file, currentPublishedAt = null) {
     report_type: getInternalAuditCategoryId(values.reportType),
     period: values.period.trim(),
     summary: values.summary.trim(),
-    prepared_by: values.preparedBy.trim(),
-    reviewed_by: values.reviewedBy.trim(),
-    approved_by: values.approvedBy.trim(),
+    prepared_by: values.preparedBy?.trim() || '',
+    reviewed_by: values.reviewedBy?.trim() || '',
+    approved_by: values.approvedBy?.trim() || '',
     resolution_number: values.resolutionNumber.trim(),
     funds_received: toNullableNumber(values.fundsReceived),
     total_expenses: toNullableNumber(values.totalExpenses),
