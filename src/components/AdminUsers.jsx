@@ -43,6 +43,7 @@ const statusFilters = [
 const roleFilters = [
   ['all', 'All roles'],
   ['student', 'Students'],
+  ['faculty', 'Faculty'],
   ['editor', 'Editors'],
   ['admin', 'Admins'],
 ]
@@ -250,8 +251,9 @@ function AdminUsers() {
           Users & Roles
         </h2>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-          Approve member accounts, suspend access, and assign student, editor,
-          or administrator roles. Only administrators can open this module.
+          Approve member accounts, suspend access, and assign student, faculty,
+          editor, or administrator roles. Only administrators can open this
+          module.
         </p>
       </div>
 
@@ -536,6 +538,7 @@ function AdminUsers() {
                     className={inputClassName}
                   >
                     <option value="student">Student</option>
+                    <option value="faculty">Faculty</option>
                     <option value="editor">Editor</option>
                     <option value="admin">Administrator</option>
                   </select>

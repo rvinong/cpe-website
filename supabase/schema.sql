@@ -1,6 +1,6 @@
 -- Run this file in the Supabase SQL Editor for a new project.
 
-create type public.app_role as enum ('student', 'editor', 'admin');
+create type public.app_role as enum ('student', 'faculty', 'editor', 'admin');
 create type public.profile_status as enum ('pending', 'approved', 'suspended');
 
 create table public.profiles (
@@ -44,6 +44,7 @@ begin
     id,
     full_name,
     student_number,
+    role,
     year_level,
     email_notifications
   )
@@ -51,6 +52,11 @@ begin
     new.id,
     coalesce(new.raw_user_meta_data ->> 'full_name', ''),
     nullif(new.raw_user_meta_data ->> 'student_number', ''),
+    case
+      when lower(coalesce(new.raw_user_meta_data ->> 'account_type', 'student')) = 'faculty'
+      then 'faculty'::public.app_role
+      else 'student'::public.app_role
+    end,
     case
       when coalesce(new.raw_user_meta_data ->> 'year_level', '') in (
         '1st Year',

@@ -136,6 +136,7 @@ function AuthProvider({ children }) {
   const signUp = async ({
     email,
     password,
+    accountType = 'student',
     fullName,
     studentNumber,
     yearLevel,
@@ -154,6 +155,7 @@ function AuthProvider({ children }) {
       options: {
         emailRedirectTo: getAuthRedirectUrl(),
         data: {
+          account_type: accountType,
           full_name: fullName,
           student_number: studentNumber,
           year_level: yearLevel,

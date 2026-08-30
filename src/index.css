@@ -4724,6 +4724,83 @@ html.dark .community-message-file-unavailable {
   gap: 0.9rem;
 }
 
+.account-type-field {
+  grid-column: 1 / -1;
+}
+
+.account-type-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.account-type-option {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 0.85rem;
+  background: var(--surface-muted);
+  cursor: pointer;
+  padding: 0.65rem 0.75rem;
+  transition:
+    border-color var(--transition-base),
+    background-color var(--transition-base),
+    box-shadow var(--transition-base);
+}
+
+.account-type-option:hover,
+.account-type-option:focus-within {
+  border-color: rgba(21, 94, 239, 0.42);
+}
+
+.account-type-option-active {
+  border-color: rgba(21, 94, 239, 0.62);
+  background: var(--brand-soft);
+  box-shadow: 0 8px 20px -18px rgba(21, 94, 239, 0.8);
+}
+
+.account-type-radio {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.account-type-option-icon {
+  display: grid;
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border-radius: 0.65rem;
+  background: rgba(21, 94, 239, 0.1);
+  color: var(--color-brand);
+}
+
+.account-type-option-copy {
+  display: grid;
+  min-width: 0;
+  gap: 0.12rem;
+}
+
+.account-type-option-copy strong {
+  color: var(--text-strong);
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.account-type-option-copy small {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 0.64rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .account-form-field {
   display: block;
 }
@@ -4795,13 +4872,18 @@ html.dark .community-message-file-unavailable {
   position: absolute;
   top: 50%;
   right: 0.35rem;
+  z-index: 2;
   display: grid;
   width: 2.25rem;
   height: 2.25rem;
   place-items: center;
   border: 0;
   border-radius: 0.6rem;
+  background: transparent;
   color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  touch-action: manipulation;
   transform: translateY(-50%);
 }
 
@@ -5623,6 +5705,21 @@ html.dark .account-access-tab-active {
   color: #bfdbfe;
 }
 
+html.dark .account-type-option {
+  border-color: rgba(125, 158, 202, 0.23);
+  background: rgba(8, 16, 29, 0.72);
+}
+
+html.dark .account-type-option-active {
+  border-color: rgba(96, 165, 250, 0.62);
+  background: rgba(37, 99, 235, 0.16);
+}
+
+html.dark .account-type-option-icon {
+  background: rgba(59, 130, 246, 0.16);
+  color: #93c5fd;
+}
+
 html.dark .account-input {
   border-color: rgba(125, 158, 202, 0.23);
   background: rgba(8, 16, 29, 0.72);
@@ -5809,6 +5906,10 @@ html.dark .account-save-action-saved {
   }
 
   .account-signup-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .account-type-options {
     grid-template-columns: 1fr;
   }
 

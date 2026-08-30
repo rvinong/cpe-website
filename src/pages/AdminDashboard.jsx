@@ -142,7 +142,7 @@ const contentModules = [
   },
   {
     title: 'Users & Roles',
-    description: 'Approve accounts and assign student, editor, or admin roles.',
+    description: 'Approve accounts and assign student, faculty, editor, or admin roles.',
     icon: UsersRound,
     status: 'Admin only',
     section: 'users',

@@ -1,5 +1,7 @@
 -- Run this file after supabase/users.sql.
 
+alter type public.app_role add value if not exists 'faculty';
+
 alter table public.profiles
   add column if not exists email_notifications boolean not null default true;
 
@@ -36,6 +38,7 @@ begin
     id,
     full_name,
     student_number,
+    role,
     year_level,
     email_notifications
   )
@@ -43,6 +46,11 @@ begin
     new.id,
     coalesce(new.raw_user_meta_data ->> 'full_name', ''),
     nullif(new.raw_user_meta_data ->> 'student_number', ''),
+    case
+      when lower(coalesce(new.raw_user_meta_data ->> 'account_type', 'student')) = 'faculty'
+      then 'faculty'::public.app_role
+      else 'student'::public.app_role
+    end,
     case
       when coalesce(new.raw_user_meta_data ->> 'year_level', '') in (
         '1st Year',

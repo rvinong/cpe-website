@@ -2,6 +2,7 @@ import { motion as Motion } from 'framer-motion'
 import {
   ArrowRight,
   Bell,
+  BriefcaseBusiness,
   BookOpen,
   CalendarDays,
   Camera,
@@ -43,6 +44,21 @@ const modes = [
   { id: 'signup', label: 'Sign Up', icon: UserPlus },
 ]
 
+const signupTypes = [
+  {
+    id: 'student',
+    label: 'Student',
+    detail: 'Student number and year level',
+    icon: GraduationCap,
+  },
+  {
+    id: 'faculty',
+    label: 'Faculty',
+    detail: 'No student number required',
+    icon: BriefcaseBusiness,
+  },
+]
+
 function PasswordField({
   id,
   label,
@@ -73,7 +89,7 @@ function PasswordField({
           onChange={onChange}
           placeholder={placeholder}
           autoComplete={autoComplete}
-          className="account-input account-password-input"
+          className="account-input account-input-with-icon account-password-input"
         />
         <button
           type="button"
@@ -114,6 +130,7 @@ function Account() {
   const [resourceOwnerId, setResourceOwnerId] = useState('')
   const [resourceError, setResourceError] = useState('')
   const [formData, setFormData] = useState({
+    accountType: 'student',
     fullName: '',
     studentNumber: '',
     yearLevel: '',
@@ -130,6 +147,8 @@ function Account() {
   const [avatarPreview, setAvatarPreview] = useState('')
   const [isSavingProfile, setIsSavingProfile] = useState(false)
   const userId = user?.id || ''
+  const isStudentSignup =
+    activeMode === 'signup' && formData.accountType === 'student'
   const displayName = getDisplayName(profile, user, 'Student')
   const profileNickname = profile?.nickname || ''
   const nicknameValue = isNicknameDirty
@@ -215,6 +234,19 @@ function Account() {
     setFormData((current) => ({
       ...current,
       [field]: event.target.value,
+    }))
+    setMessage({ type: '', text: '' })
+  }
+
+  const selectAccountType = (event) => {
+    const accountType = event.target.value
+
+    setFormData((current) => ({
+      ...current,
+      accountType,
+      ...(accountType === 'faculty'
+        ? { studentNumber: '', yearLevel: '' }
+        : {}),
     }))
     setMessage({ type: '', text: '' })
   }
@@ -370,7 +402,7 @@ function Account() {
       return
     }
 
-    if (activeMode === 'signup' && !formData.yearLevel) {
+    if (isStudentSignup && !formData.yearLevel) {
       setMessage({ type: 'error', text: 'Please select your year level.' })
       return
     }
@@ -382,6 +414,7 @@ function Account() {
       const { data, error } = await signUp({
         email: formData.email,
         password: formData.password,
+        accountType: formData.accountType,
         fullName: formData.fullName,
         studentNumber: formData.studentNumber,
         yearLevel: formData.yearLevel,
@@ -866,12 +899,12 @@ function Account() {
                     </h1>
                     <p>
                       {activeMode === 'signup'
-                        ? 'Create your student account to follow organization updates, resources, events, and community conversations.'
+                        ? 'Create a student or faculty account to follow organization updates, resources, events, and community conversations.'
                         : 'Sign in to manage your profile and access the parts of the portal available to you.'}
                     </p>
                     <div className="account-access-points">
-                      <span><CheckCircle2 size={15} aria-hidden="true" /> Verified student access</span>
-                      <span><CheckCircle2 size={15} aria-hidden="true" /> Profile and year-level details</span>
+                      <span><CheckCircle2 size={15} aria-hidden="true" /> Verified member access</span>
+                      <span><CheckCircle2 size={15} aria-hidden="true" /> Student year-level details when applicable</span>
                       <span><CheckCircle2 size={15} aria-hidden="true" /> News, events, and resources</span>
                     </div>
                   </div>
@@ -879,11 +912,38 @@ function Account() {
                   <form className="account-auth-form" onSubmit={handleSubmit}>
                     <div className="account-form-heading">
                       <h2>{activeMode === 'signup' ? 'Create account' : 'Log in'}</h2>
-                      <p>{activeMode === 'signup' ? 'Use your official student information.' : 'Use your registered email and password.'}</p>
+                      <p>{activeMode === 'signup' ? 'Use an email address you can access. Student accounts include year-level details; faculty accounts do not need a student number.' : 'Use your registered email and password.'}</p>
                     </div>
 
                     {activeMode === 'signup' && (
                       <div className="account-signup-fields">
+                        <div className="account-type-field">
+                          <span className="account-form-label">Account type</span>
+                          <div className="account-type-options" role="radiogroup" aria-label="Account type">
+                            {signupTypes.map(({ id, label, detail, icon: Icon }) => (
+                              <label
+                                key={id}
+                                className={`account-type-option ${formData.accountType === id ? 'account-type-option-active' : ''}`}
+                              >
+                                <input
+                                  type="radio"
+                                  name="accountType"
+                                  value={id}
+                                  checked={formData.accountType === id}
+                                  onChange={selectAccountType}
+                                  className="account-type-radio"
+                                />
+                                <span className="account-type-option-icon">
+                                  <Icon size={17} aria-hidden="true" />
+                                </span>
+                                <span className="account-type-option-copy">
+                                  <strong>{label}</strong>
+                                  <small>{detail}</small>
+                                </span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
                         <label htmlFor="account-full-name" className="account-form-field">
                           <span className="account-form-label">Full name</span>
                           <span className="account-input-wrap">
@@ -891,23 +951,27 @@ function Account() {
                             <input id="account-full-name" type="text" required value={formData.fullName} onChange={updateField('fullName')} placeholder="Enter your full name" autoComplete="name" className="account-input account-input-with-icon" />
                           </span>
                         </label>
-                        <label htmlFor="account-student-number" className="account-form-field">
-                          <span className="account-form-label">Student number</span>
-                          <span className="account-input-wrap">
-                            <ShieldCheck size={18} className="account-input-icon" aria-hidden="true" />
-                            <input id="account-student-number" type="text" required value={formData.studentNumber} onChange={updateField('studentNumber')} placeholder="Enter your student number" autoComplete="off" className="account-input account-input-with-icon" />
-                          </span>
-                        </label>
-                        <label htmlFor="account-year-level" className="account-form-field">
-                          <span className="account-form-label">Year level</span>
-                          <span className="account-input-wrap">
-                            <GraduationCap size={18} className="account-input-icon" aria-hidden="true" />
-                            <select id="account-year-level" required value={formData.yearLevel} onChange={updateField('yearLevel')} className="account-input account-input-with-icon account-select">
-                              <option value="">Select your year level</option>
-                              {yearLevelOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
-                            </select>
-                          </span>
-                        </label>
+                        {isStudentSignup && (
+                          <>
+                            <label htmlFor="account-student-number" className="account-form-field">
+                              <span className="account-form-label">Student number</span>
+                              <span className="account-input-wrap">
+                                <ShieldCheck size={18} className="account-input-icon" aria-hidden="true" />
+                                <input id="account-student-number" type="text" required value={formData.studentNumber} onChange={updateField('studentNumber')} placeholder="Enter your student number" autoComplete="off" className="account-input account-input-with-icon" />
+                              </span>
+                            </label>
+                            <label htmlFor="account-year-level" className="account-form-field">
+                              <span className="account-form-label">Year level</span>
+                              <span className="account-input-wrap">
+                                <GraduationCap size={18} className="account-input-icon" aria-hidden="true" />
+                                <select id="account-year-level" required value={formData.yearLevel} onChange={updateField('yearLevel')} className="account-input account-input-with-icon account-select">
+                                  <option value="">Select your year level</option>
+                                  {yearLevelOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                                </select>
+                              </span>
+                            </label>
+                          </>
+                        )}
                       </div>
                     )}
 

@@ -78,6 +78,7 @@ function roleLabel(role) {
   const labels = {
     admin: 'Administrator',
     editor: 'Editor',
+    faculty: 'Faculty',
     student: 'Member',
   }
 
