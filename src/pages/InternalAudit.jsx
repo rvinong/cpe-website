@@ -16,6 +16,7 @@ import {
 import { useEffect, useMemo, useState } from 'react'
 import ContentSkeleton from '../components/ContentSkeleton'
 import PageHero from '../components/PageHero'
+import RobotEasterEgg from '../components/RobotEasterEgg'
 import {
   getInternalAuditCategoryId,
   internalAuditCategories,
@@ -182,7 +183,6 @@ function InternalAudit() {
         description="Access approved project proposals, activity records, liquidation reports, resolutions, and transparency records from the organization."
         icon={ShieldCheck}
         accentIcon={ClipboardCheck}
-        robotVariant="circuit"
         actions={
           <>
             <a href="#reports" className="primary-button">
@@ -203,7 +203,10 @@ function InternalAudit() {
             className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4"
           >
             {summaryCards.map(({ label, value, description, icon: Icon }) => (
-              <article key={label} className="surface-card p-5">
+              <article
+                key={label}
+                className="robot-easter-egg-host surface-card relative overflow-hidden p-5"
+              >
                 <div className="flex items-center justify-between gap-4">
                   <span className="grid size-11 place-items-center rounded-xl bg-brand-50 text-brand-600">
                     <Icon size={20} aria-hidden="true" />
@@ -218,6 +221,9 @@ function InternalAudit() {
                 <p className="mt-1 text-sm leading-6 text-slate-600">
                   {description}
                 </p>
+                {label === 'Published records' && (
+                  <RobotEasterEgg variant="circuit" size={36} surface />
+                )}
               </article>
             ))}
           </Motion.div>

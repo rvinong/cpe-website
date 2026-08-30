@@ -184,8 +184,8 @@ function About() {
                     organizationProfile.name}
                 </p>
               </div>
+              <RobotEasterEgg variant="sleep" size={46} surface />
               </Motion.div>
-              <RobotEasterEgg variant="sleep" size={52} />
             </div>
 
             <Motion.div

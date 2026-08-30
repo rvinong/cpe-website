@@ -5,6 +5,7 @@ import AnnouncementCard from '../components/AnnouncementCard'
 import ContentSkeleton from '../components/ContentSkeleton'
 import EmptyState from '../components/EmptyState'
 import PageHero from '../components/PageHero'
+import RobotEasterEgg from '../components/RobotEasterEgg'
 import { announcementCategories } from '../data/announcements'
 import { useAnnouncements } from '../hooks/useAnnouncements'
 
@@ -51,7 +52,6 @@ function Announcements() {
           description="Stay updated with the latest news, events, opportunities, and important notices from the organization."
           icon={Megaphone}
           accentIcon={Bell}
-          robotVariant="chat"
         />
 
         <section className="bg-white py-14 sm:py-16">
@@ -61,7 +61,7 @@ function Announcements() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.25 }}
               transition={{ duration: 0.55 }}
-              className="filter-panel"
+              className="filter-panel robot-easter-egg-host relative overflow-hidden"
             >
               <label className="relative block" htmlFor="announcement-search">
                 <span className="sr-only">Search announcements</span>
@@ -102,6 +102,7 @@ function Announcements() {
                   )
                 })}
               </div>
+              <RobotEasterEgg variant="chat" size={38} surface />
             </Motion.div>
           </div>
         </section>

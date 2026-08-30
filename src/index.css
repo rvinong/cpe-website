@@ -7826,6 +7826,11 @@ html.dark .community-room-info {
   right: 0.9rem;
 }
 
+.robot-easter-egg-surface {
+  top: 1.15rem;
+  right: 0.85rem;
+}
+
 .robot-easter-egg-body {
   position: relative;
   display: block;
@@ -7991,6 +7996,12 @@ html.dark .community-room-info {
   top: calc(100% - 0.25rem);
   right: -0.3rem;
   border-radius: 0.35rem 999px 999px 999px;
+}
+
+.robot-easter-egg-surface .robot-easter-egg-emote {
+  top: 0.15rem;
+  right: 0.1rem;
+  border-radius: 999px 999px 0.35rem 999px;
 }
 
 .robot-easter-egg-circuit .robot-easter-egg-emote {

@@ -19,6 +19,7 @@ import ContentSkeleton from '../components/ContentSkeleton'
 import EmptyState from '../components/EmptyState'
 import NewsCard from '../components/NewsCard'
 import PageHero from '../components/PageHero'
+import RobotEasterEgg from '../components/RobotEasterEgg'
 import { useGalleryPhotos, useNews } from '../hooks/useMedia'
 
 function getPhotoGroupId(photo) {
@@ -213,7 +214,6 @@ function Gallery() {
           description="Official updates and a visual archive of Computer Engineering Organization activities, achievements, and shared experiences."
           icon={Images}
           accentIcon={Camera}
-          robotVariant="booster"
         />
 
         <section id="news" className="bg-white py-20 sm:py-24">
@@ -342,7 +342,7 @@ function Gallery() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.3 }}
                   transition={{ duration: 0.45, delay: index * 0.06 }}
-                  className="flex items-center gap-4 rounded-2xl border border-blue-300 bg-brand-50/45 p-5"
+                  className="robot-easter-egg-host relative flex items-center gap-4 overflow-hidden rounded-2xl border border-blue-300 bg-brand-50/45 p-5"
                 >
                   <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-white text-brand-600 shadow-sm ring-1 ring-blue-100">
                     <Icon size={21} aria-hidden="true" />
@@ -353,6 +353,9 @@ function Gallery() {
                       {label}
                     </p>
                   </div>
+                  {index === 0 && (
+                    <RobotEasterEgg variant="booster" size={38} surface />
+                  )}
                 </Motion.article>
               ))}
             </div>

@@ -92,8 +92,8 @@ function GlanceSection() {
                   )
                 })}
               </div>
+              <RobotEasterEgg variant="orbit" size={52} surface />
               </div>
-              <RobotEasterEgg variant="orbit" size={58} />
             </div>
           </div>
         </Reveal>

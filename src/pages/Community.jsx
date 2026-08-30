@@ -1154,8 +1154,7 @@ function Community() {
     <>
       <main className="community-page pt-[84px]">
         <section id="rooms" className="community-page-section community-page-section-workspace scroll-mt-24">
-          <div className="section-shell community-page-shell relative">
-            <RobotEasterEgg variant="prism" size={48} rim="top" />
+          <div className="section-shell community-page-shell">
             <div className="community-page-topbar">
               <Link to="/" className="secondary-button community-back-link">
                 <ArrowLeft size={17} aria-hidden="true" />
@@ -1164,7 +1163,7 @@ function Community() {
               <p>Choose a room to join the conversation.</p>
             </div>
 
-            <Reveal className="community-workspace">
+            <Reveal className="community-workspace robot-easter-egg-host relative">
               <header className="community-workspace-header">
                 <div className="community-workspace-identity">
                   <span className="community-workspace-mark" aria-hidden="true">
@@ -1207,6 +1206,8 @@ function Community() {
                   </button>
                 </div>
               </header>
+
+              <RobotEasterEgg variant="prism" size={44} surface />
 
               <div className="community-workspace-toolbar">
                 <div className="community-current-room">

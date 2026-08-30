@@ -1,7 +1,6 @@
 import { motion as Motion } from 'framer-motion'
 import { useMotionPreferences } from '../hooks/useMotionPreferences'
 import { motionEase } from '../lib/motion'
-import RobotEasterEgg from './RobotEasterEgg'
 
 function PageHero({
   eyebrow,
@@ -10,7 +9,6 @@ function PageHero({
   icon: Icon,
   accentIcon: AccentIcon,
   actions,
-  robotVariant = '',
 }) {
   const { isCompactMotion, shouldReduceMotion } = useMotionPreferences()
 
@@ -75,9 +73,6 @@ function PageHero({
           </Motion.div>
         )}
       </div>
-      {robotVariant && (
-        <RobotEasterEgg variant={robotVariant} size={48} rim="top" />
-      )}
     </section>
   )
 }

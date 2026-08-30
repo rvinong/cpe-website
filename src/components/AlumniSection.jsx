@@ -61,23 +61,20 @@ function AlumniSection() {
       <div className="alumni-home-glow alumni-home-glow-primary absolute -left-24 top-24 -z-10 size-72 rounded-full blur-3xl" />
       <div className="alumni-home-glow alumni-home-glow-accent absolute -bottom-24 right-10 -z-10 size-80 rounded-full blur-3xl" />
       <div className="section-shell">
-        <div className="robot-easter-egg-frame">
-          <Reveal>
-            <div className="mb-9 max-w-2xl sm:mb-12">
-              <p className="alumni-home-eyebrow mb-4 text-[11px] font-extrabold tracking-[0.22em] uppercase">
-                Alumni records
-              </p>
-              <h2 className="alumni-home-title text-3xl font-black tracking-[-0.05em] sm:text-5xl sm:tracking-[-0.055em]">
-                Computer Engineering Alumni Directory
-              </h2>
-              <p className="alumni-home-copy mt-5 text-base leading-7">
-                An official directory for verified Computer Engineering graduates,
-                organized by batch and maintained with approved alumni information.
-              </p>
-            </div>
-          </Reveal>
-          <RobotEasterEgg variant="archive" size={42} />
-        </div>
+        <Reveal>
+          <div className="mb-9 max-w-2xl sm:mb-12">
+            <p className="alumni-home-eyebrow mb-4 text-[11px] font-extrabold tracking-[0.22em] uppercase">
+              Alumni records
+            </p>
+            <h2 className="alumni-home-title text-3xl font-black tracking-[-0.05em] sm:text-5xl sm:tracking-[-0.055em]">
+              Computer Engineering Alumni Directory
+            </h2>
+            <p className="alumni-home-copy mt-5 text-base leading-7">
+              An official directory for verified Computer Engineering graduates,
+              organized by batch and maintained with approved alumni information.
+            </p>
+          </div>
+        </Reveal>
 
         <Reveal delay={0.08} direction="right">
           <div className="alumni-home-shell relative isolate overflow-hidden p-6 sm:p-9 lg:p-12">
@@ -138,8 +135,9 @@ function AlumniSection() {
               </div>
 
               <div className="relative mx-auto w-full">
-                <div className="alumni-home-preview relative overflow-hidden rounded-[2rem] p-5">
+                <div className="alumni-home-preview robot-easter-egg-host relative overflow-hidden rounded-[2rem] p-5">
                   <div className="alumni-home-preview-corner absolute right-0 top-0 h-28 w-28 rounded-bl-[4rem]" />
+                  <RobotEasterEgg variant="archive" size={38} surface />
                   <div className="relative mb-5 flex items-center justify-between gap-4">
                     <div>
                       <p className="alumni-home-preview-label text-xs font-extrabold tracking-[0.2em] uppercase">

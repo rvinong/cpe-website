@@ -27,17 +27,14 @@ function QuickAccess() {
   return (
     <section id="quick-access" className="bg-white py-24 sm:py-32">
       <div className="section-shell">
-        <div className="robot-easter-egg-frame">
-          <Reveal>
-            <SectionHeader
-              eyebrow="Student portal"
-              title="Quick Access"
-              description="Everything you need, all in one place."
-              centered
-            />
-          </Reveal>
-          <RobotEasterEgg variant="scout" size={42} />
-        </div>
+        <Reveal>
+          <SectionHeader
+            eyebrow="Student portal"
+            title="Quick Access"
+            description="Everything you need, all in one place."
+            centered
+          />
+        </Reveal>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
           {quickAccessItems.map((item, index) => {
@@ -50,7 +47,9 @@ function QuickAccess() {
                   aria-label={`Open ${item.title}`}
                   whileTap={{ scale: 0.985 }}
                   transition={springTransition}
-                  className="quick-access-card surface-card group relative flex h-full min-h-52 flex-col overflow-hidden p-6 transition duration-300 hover:border-brand-500 hover:shadow-[0_28px_70px_-38px_rgba(21,94,239,0.5)] focus-visible:border-brand-500 focus-visible:ring-4 focus-visible:ring-brand-100"
+                  className={`quick-access-card surface-card group relative flex h-full min-h-52 flex-col overflow-hidden p-6 transition duration-300 hover:border-brand-500 hover:shadow-[0_28px_70px_-38px_rgba(21,94,239,0.5)] focus-visible:border-brand-500 focus-visible:ring-4 focus-visible:ring-brand-100 ${
+                    index === 0 ? 'robot-easter-egg-host' : ''
+                  }`}
                 >
                   <span className="absolute inset-x-6 top-0 h-px bg-brand-500 opacity-0 transition duration-500 group-hover:opacity-100" />
                   <span className="quick-access-orb absolute -right-8 -top-8 size-28 origin-top-right rounded-full transition duration-500 group-hover:-translate-x-2 group-hover:translate-y-2 group-hover:scale-125" />
@@ -68,6 +67,9 @@ function QuickAccess() {
                     Open
                     <ArrowUpRight size={14} aria-hidden="true" />
                   </span>
+                  {index === 0 && (
+                    <RobotEasterEgg variant="scout" size={36} surface />
+                  )}
                 </Motion.a>
               </Reveal>
             )

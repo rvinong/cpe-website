@@ -15,6 +15,7 @@ import ContentSkeleton from '../components/ContentSkeleton'
 import EmptyState from '../components/EmptyState'
 import EventCard from '../components/EventCard'
 import PageHero from '../components/PageHero'
+import RobotEasterEgg from '../components/RobotEasterEgg'
 import { useEvents } from '../hooks/useEvents'
 
 const eventInfo = [
@@ -88,7 +89,6 @@ function Events() {
           description="Find organization workshops, meetings, outreach programs, and other student activities in one place."
           icon={CalendarDays}
           accentIcon={Sun}
-          robotVariant="signal"
         />
 
         <section className="bg-slate-50/70 py-20 sm:py-24">
@@ -345,7 +345,7 @@ function Events() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.25 }}
                   transition={{ duration: 0.5, delay: index * 0.07 }}
-                  className="surface-card interactive-card p-6"
+                  className="robot-easter-egg-host surface-card interactive-card relative overflow-hidden p-6"
                 >
                   <span className="grid size-12 place-items-center rounded-xl bg-brand-50 text-brand-600">
                     <Icon size={22} strokeWidth={1.7} aria-hidden="true" />
@@ -356,6 +356,9 @@ function Events() {
                   <p className="mt-2 text-sm leading-6 text-slate-600">
                     {description}
                   </p>
+                  {index === 0 && (
+                    <RobotEasterEgg variant="signal" size={38} surface />
+                  )}
                 </Motion.article>
               ))}
             </div>

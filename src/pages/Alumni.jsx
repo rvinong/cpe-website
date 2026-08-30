@@ -13,6 +13,7 @@ import { useMemo, useState } from 'react'
 import ContentSkeleton from '../components/ContentSkeleton'
 import EmptyState from '../components/EmptyState'
 import PageHero from '../components/PageHero'
+import RobotEasterEgg from '../components/RobotEasterEgg'
 import { alumniProfiles as sampleAlumniProfiles } from '../data/alumni'
 import { useBodyScrollLock } from '../hooks/useBodyScrollLock'
 import useAlumni from '../hooks/useAlumni'
@@ -98,7 +99,6 @@ function Alumni() {
           description="Explore the people and batches that helped shape the NwSSU Computer Engineering community."
           icon={BookOpen}
           accentIcon={GraduationCap}
-          robotVariant="tread"
         />
 
         <section className="bg-white py-14 sm:py-16">
@@ -162,7 +162,7 @@ function Alumni() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, amount: 0.3 }}
                   transition={{ duration: 0.45, delay: index * 0.06 }}
-                  className="flex items-center gap-4 rounded-2xl border border-blue-300 bg-brand-50/45 p-5"
+                  className="robot-easter-egg-host relative flex items-center gap-4 overflow-hidden rounded-2xl border border-blue-300 bg-brand-50/45 p-5"
                 >
                   <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-white text-brand-600 shadow-sm ring-1 ring-blue-100">
                     <Icon size={21} aria-hidden="true" />
@@ -173,6 +173,9 @@ function Alumni() {
                       {label}
                     </p>
                   </div>
+                  {index === 0 && (
+                    <RobotEasterEgg variant="tread" size={36} surface />
+                  )}
                 </Motion.article>
               ))}
             </div>
