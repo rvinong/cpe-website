@@ -7,7 +7,6 @@ import {
   Megaphone,
   ShieldCheck,
   Sparkles,
-  UsersRound,
 } from 'lucide-react'
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
@@ -48,11 +47,6 @@ function Hero() {
   const trustSignals = [
     [ShieldCheck, 'Official portal', 'Managed for CpE students'],
     [CheckCircle2, 'Verified updates', 'Approved notices and records'],
-    [
-      UsersRound,
-      'Student-led',
-      `${stats.members.value}${stats.members.suffix} student innovators`,
-    ],
   ]
 
   return (
@@ -203,7 +197,7 @@ function Hero() {
               duration: shouldReduceMotion ? 0.01 : isCompactMotion ? 0.4 : 0.55,
               ease: motionEase,
             }}
-            className="mt-7 grid w-full max-w-3xl gap-3 sm:grid-cols-3"
+            className="mt-7 grid w-full max-w-2xl gap-3 sm:grid-cols-2"
           >
             {trustSignals.map(([Icon, title, detail]) => (
               <Motion.div
