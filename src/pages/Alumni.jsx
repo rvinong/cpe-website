@@ -252,19 +252,17 @@ function Alumni() {
                       </span>
                     </div>
                     <div className="flex flex-1 flex-col p-6">
-                      <h3 className="text-2xl font-extrabold text-white">
-                        {profile.name}
-                      </h3>
-                      {profile.role && (
-                        <p className="mt-2 text-sm font-bold text-blue-200">
-                          {profile.role}
+                      <div className="min-h-[7.5rem]">
+                        <h3 className="line-clamp-2 min-h-[4rem] text-2xl font-extrabold text-white">
+                          {profile.name}
+                        </h3>
+                        <p className="mt-2 min-h-5 line-clamp-1 text-sm font-bold text-blue-200">
+                          {profile.role || ' '}
                         </p>
-                      )}
-                      {profile.organization && (
-                        <p className="mt-1 text-sm text-slate-400">
-                          {profile.organization}
+                        <p className="mt-1 min-h-5 line-clamp-1 text-sm text-slate-400">
+                          {profile.organization || ' '}
                         </p>
-                      )}
+                      </div>
                       {profile.highlight && (
                         <div className="mt-6 border-t border-white/10 pt-5">
                           <p className="text-xs font-extrabold tracking-[0.16em] text-blue-300 uppercase">
