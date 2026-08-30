@@ -201,7 +201,7 @@ function AdminAlumni() {
       leadership: [
         ...current.leadership,
         {
-          id: null,
+          id: crypto.randomUUID(),
           organization: '',
           position: '',
           category: 'Student Organization',

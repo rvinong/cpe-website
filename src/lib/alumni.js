@@ -173,6 +173,7 @@ export async function replaceAlumniLeadership(profileId, entries) {
     )
     .map((entry, index) => {
       const payload = {
+        id: entry.id || crypto.randomUUID(),
         alumni_profile_id: profileId,
         organization: entry.organization.trim(),
         position: entry.position.trim(),
@@ -182,7 +183,6 @@ export async function replaceAlumniLeadership(profileId, entries) {
         sort_order: index,
       }
 
-      if (entry.id) payload.id = entry.id
       return payload
     })
 
