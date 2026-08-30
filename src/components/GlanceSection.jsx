@@ -1,7 +1,6 @@
 import {
   ArrowRight,
   Award,
-  CalendarCheck,
   LibraryBig,
   UsersRound,
 } from 'lucide-react'
@@ -12,7 +11,6 @@ import RobotEasterEgg from './RobotEasterEgg'
 
 const iconMap = {
   award: Award,
-  calendar: CalendarCheck,
   users: UsersRound,
   library: LibraryBig,
 }
@@ -21,7 +19,6 @@ function GlanceSection() {
   const { profile, stats } = useOrganization()
   const glanceStats = [
     { ...stats.years, label: 'Years of Excellence', icon: 'award' },
-    { ...stats.events, label: 'Events & Activities', icon: 'calendar' },
     { ...stats.members, label: 'Active Members', icon: 'users' },
     {
       ...stats.curriculumUnits,
@@ -66,7 +63,7 @@ function GlanceSection() {
                 </a>
               </div>
 
-              <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="mt-12 grid gap-4 sm:grid-cols-3">
                 {glanceStats.map((stat, index) => {
                   const Icon = iconMap[stat.icon]
 
