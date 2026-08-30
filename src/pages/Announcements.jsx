@@ -13,15 +13,7 @@ function Announcements() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
 
-  const categories = useMemo(
-    () => [
-      ...new Set([
-        ...announcementCategories,
-        ...announcements.map((announcement) => announcement.category),
-      ]),
-    ],
-    [announcements],
-  )
+  const categories = useMemo(() => announcementCategories, [])
 
   const filteredAnnouncements = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase()

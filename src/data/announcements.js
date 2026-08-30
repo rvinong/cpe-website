@@ -3,9 +3,6 @@ export const announcementCategories = [
   'Website Update',
   'Events',
   'Merchandise',
-  'Academic',
-  'Achievements',
-  'Meetings',
 ]
 
 export const announcements = [
