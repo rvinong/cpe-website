@@ -7842,18 +7842,26 @@ html.dark .photo-crop-cancel:hover:not(:disabled) {
 /* Mobile community chat: keep the conversation and composer in one viewport. */
 @media (max-width: 767px) {
   .community-page {
+    display: flex;
+    height: 100dvh;
+    min-height: 0;
+    flex-direction: column;
     overflow: hidden;
+    overscroll-behavior: none;
   }
 
   .community-page-section-workspace {
-    height: calc(100dvh - 84px);
+    height: auto;
     min-height: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
     padding: 0.4rem 0 0.5rem;
   }
 
   .community-page-shell {
     width: calc(100% - 0.75rem);
     height: 100%;
+    min-height: 0;
   }
 
   .community-page-topbar {
