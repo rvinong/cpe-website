@@ -6523,12 +6523,32 @@ html.dark .community-room-overview-empty {
 }
 
 @media (min-width: 1121px) {
+  .community-page {
+    padding-top: 72px !important;
+  }
+
+  .community-page-section-workspace {
+    height: calc(100dvh - 72px);
+    padding-top: 0.5rem;
+  }
+
   .community-page-shell {
     width: min(100% - 2rem, 118rem);
   }
 
   .community-workspace-body {
     grid-template-columns: minmax(15rem, 18rem) minmax(0, 1fr) minmax(20rem, 24rem);
+  }
+
+  .community-room-button {
+    transition:
+      background-color var(--transition-base),
+      border-color var(--transition-base),
+      color var(--transition-base);
+  }
+
+  .community-room-button:hover {
+    transform: none;
   }
 
   .community-room-overview {
