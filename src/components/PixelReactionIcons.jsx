@@ -5,7 +5,7 @@ function PixelReactionIcon({ size = 18, className = '', children, ...props }) {
       className={`pixel-reaction-icon ${className}`}
       width={size}
       height={size}
-      viewBox="0 0 24 24"
+      viewBox="0 0 32 32"
       fill="none"
       shapeRendering="crispEdges"
       focusable="false"
@@ -20,9 +20,10 @@ export function PixelLikeIcon(props) {
     <PixelReactionIcon {...props}>
       <path
         fill="currentColor"
-        d="M4 10h5v10H4V10Zm5 0V8h2V5h2V3h3v2h1v5h4v2h1v5h-1v2H9V10Z"
+        d="M5 14h8v13H5V14Zm8 0v-3h2V8h2V4h5v2h2v8h4v2h1v8h-1v2H13V14Z"
       />
-      <path fill="currentColor" fillOpacity="0.42" d="M5 12h2v6H5v-6Zm6-2h2v2h-2v-2Z" />
+      <path fill="currentColor" fillOpacity="0.38" d="M7 16h3v9H7v-9Zm9-3h3v3h-3v-3Z" />
+      <path fill="#fff" fillOpacity="0.6" d="M6 16h2v8H6v-8Zm10-5h2v2h-2v-2Zm4-5h2v2h-2V6Z" />
     </PixelReactionIcon>
   )
 }
@@ -32,9 +33,10 @@ export function PixelLoveIcon(props) {
     <PixelReactionIcon {...props}>
       <path
         fill="currentColor"
-        d="M4 6h2V4h5v2h2v2h2V6h2V4h5v2h2v7h-2v3h-2v2h-2v2h-2v2h-2v-2h-2v-2H8v-2H6v-3H4V6Z"
+        d="M4 8h2V5h6v2h2v3h4V7h2V5h6v3h2v9h-2v4h-2v3h-3v3h-2v2h-2v-2h-2v-3h-3v-3H9v-4H6v-3H4V8Z"
       />
-      <path fill="#fff" fillOpacity="0.45" d="M7 6h2v2H7V6Zm2 2h2v2H9V8Z" />
+      <path fill="#fff" fillOpacity="0.62" d="M8 7h3v2H8V7Zm3 2h2v2h-2V9Z" />
+      <path fill="currentColor" fillOpacity="0.32" d="M7 17h3v3h2v3h2v2h-2v-2h-3v-3H7v-3Z" />
     </PixelReactionIcon>
   )
 }
@@ -44,10 +46,11 @@ export function PixelCelebrateIcon(props) {
     <PixelReactionIcon {...props}>
       <path
         fill="currentColor"
-        d="M5 14h12v2h-2v2h-2v2h-2v2H8v-2H5v-2H3v-2h2v-2Z"
+        d="M7 19h6L25 9l-5-5L8 14v5H7Z"
       />
-      <path fill="#fff" fillOpacity="0.42" d="M8 15h3v2H9v2H7v-2h1v-2Z" />
-      <path fill="currentColor" d="M4 5h2v4H4V5Zm7-2h2v4h-2V3Zm7 4h3v2h-3V7Zm-2-4h2v2h-2V3Z" />
+      <path fill="currentColor" fillOpacity="0.38" d="M9 15h5l8-7 2 2-9 8h-6v-3Z" />
+      <path fill="#fff" fillOpacity="0.62" d="M12 14h4v2h-4v-2Zm-4 5h4v2H8v-2Z" />
+      <path fill="currentColor" d="M4 5h3v5H4V5Zm8-3h3v5h-3V2Zm10 4h4v3h-4V6Zm-2-4h3v3h-3V2Zm7 12h3v3h-3v-3Z" />
     </PixelReactionIcon>
   )
 }
@@ -57,10 +60,11 @@ export function PixelWowIcon(props) {
     <PixelReactionIcon {...props}>
       <path
         fill="currentColor"
-        d="M8 3h8v2h3v3h2v8h-2v3h-3v2H8v-2H5v-3H3V8h2V5h3V3Z"
+        d="M10 3h12v2h4v4h3v14h-3v4h-4v3H10v-3H6v-4H3V9h3V5h4V3Z"
       />
-      <path fill="#fff" d="M8 9h2v3H8V9Zm6 0h2v3h-2V9Zm-4 6h4v4h-4v-4Z" />
-      <path fill="currentColor" d="M11 16h2v2h-2v-2Z" />
+      <path fill="#fff" d="M9 11h4v4H9v-4Zm10 0h4v4h-4v-4Zm-6 7h6v6h-6v-6Z" />
+      <path fill="currentColor" d="M11 12h1v2h-1v-2Zm10 0h1v2h-1v-2Zm0 7h2v3h-2v-3Z" />
+      <path fill="#fff" fillOpacity="0.58" d="M7 8h2v2H7V8Zm17-2h2v2h-2V6Z" />
     </PixelReactionIcon>
   )
 }
@@ -70,13 +74,14 @@ export function PixelSupportIcon(props) {
     <PixelReactionIcon {...props}>
       <path
         fill="currentColor"
-        d="M2 11h4V8h4v2h2v2h2v-2h2V8h4v3h2v8h-4v-2h-2v-2h-2v2h-2v2H8v-2H2v-8Z"
+        d="M3 12h7l4-4h4l4 4h7v14h-7v-3h-3l-3-2-3 2h-3v3H3V12Z"
       />
       <path
         fill="#fff"
-        fillOpacity="0.42"
-        d="M3 13h3v4H3v-4Zm15-2h3v5h-3v-5Zm-8 1h4v2h-4v-2Z"
+        fillOpacity="0.62"
+        d="M4 15h4v8H4v-8Zm20-3h4v9h-4v-9Zm-13 1h4v2h3v2h-4v2h-3v-2H9v-2h2v-2Z"
       />
+      <path fill="currentColor" fillOpacity="0.36" d="M5 16h2v6H5v-6Zm20-2h2v7h-2v-7Z" />
     </PixelReactionIcon>
   )
 }

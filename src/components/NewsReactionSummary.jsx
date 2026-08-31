@@ -487,7 +487,7 @@ function NewsReactionSummary({
   }
 
   const pickerSizeClass = isDetail ? 'size-12 sm:size-14' : 'size-10'
-  const pickerIconSize = isDetail ? 22 : 18
+  const pickerIconSize = isDetail ? 24 : 20
   const actionButtonClass =
     'border-slate-200 text-slate-600 hover:border-blue-200 hover:bg-brand-50/60 hover:text-brand-600'
 
@@ -597,10 +597,10 @@ function NewsReactionSummary({
           <span
             className={`grid size-6 place-items-center rounded-full border-2 border-white ${reactionButtonStyles[activeReaction.id]}`}
           >
-            <ActiveReactionIcon size={12} aria-hidden="true" />
+            <ActiveReactionIcon size={14} aria-hidden="true" />
           </span>
         ) : (
-          <ActiveReactionIcon size={14} aria-hidden="true" />
+          <ActiveReactionIcon size={16} aria-hidden="true" />
         )}
         {activeReaction?.label || 'Like'}
       </button>
@@ -626,14 +626,14 @@ function NewsReactionSummary({
                 key={id}
                 className={`grid size-6 place-items-center rounded-full border-2 border-white ${reactionButtonStyles[id]}`}
               >
-                <Icon size={12} aria-hidden="true" />
+                <Icon size={14} aria-hidden="true" />
               </span>
             )
           })}
         </span>
       ) : (
         <span className="grid size-6 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-slate-400">
-          <PixelLikeIcon size={12} aria-hidden="true" />
+          <PixelLikeIcon size={14} aria-hidden="true" />
         </span>
       )}
       {variant !== 'comments' && (
@@ -767,7 +767,7 @@ function NewsReactionSummary({
                                 reactionButtonStyles[tab.id]
                               }`}
                             >
-                              <Icon size={14} aria-hidden="true" />
+                              <Icon size={16} aria-hidden="true" />
                             </span>
                           ) : (
                             <span>All</span>
@@ -827,7 +827,7 @@ function NewsReactionSummary({
                                   reactionButtonStyles[member.reactionId]
                                 }`}
                               >
-                                <Icon size={12} aria-hidden="true" />
+                                <Icon size={14} aria-hidden="true" />
                               </span>
                             </span>
                             <span className="min-w-0 flex-1">
