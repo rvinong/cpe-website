@@ -6540,6 +6540,37 @@ html.dark .community-room-overview-empty {
     grid-template-columns: minmax(15rem, 18rem) minmax(0, 1fr) minmax(20rem, 24rem);
   }
 
+  /* Keep the desktop chat dense enough to show one more message at a glance. */
+  .community-workspace-header {
+    padding-block: 0.7rem;
+  }
+
+  .community-workspace-toolbar {
+    padding-block: 0.5rem;
+  }
+
+  .community-chat-header {
+    padding-block: 0.82rem;
+  }
+
+  .community-message-list {
+    gap: 0.68rem;
+    padding: 0.8rem 1rem;
+  }
+
+  .community-chat-footer {
+    padding-top: 0.68rem;
+    padding-bottom: 0.78rem;
+  }
+
+  .community-composer-tools {
+    margin-top: 0.4rem;
+  }
+
+  .community-chat-composer-meta {
+    margin-top: 0.25rem;
+  }
+
   .community-room-button {
     transition:
       background-color var(--transition-base),
