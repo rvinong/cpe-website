@@ -18,11 +18,11 @@ import {
   setNewsReaction,
 } from '../lib/media'
 import {
-  PixelCelebrateIcon,
-  PixelLikeIcon,
-  PixelLoveIcon,
-  PixelSupportIcon,
-  PixelWowIcon,
+  CelebrateReactionIcon,
+  LikeReactionIcon,
+  LoveReactionIcon,
+  SupportReactionIcon,
+  WowReactionIcon,
 } from './PixelReactionIcons'
 import ProfileAvatar from './ProfileAvatar'
 
@@ -37,11 +37,11 @@ const reactionButtonStyles = {
 const touchReactionActiveClass = 'reaction-touch-active'
 
 const reactionIcons = {
-  like: PixelLikeIcon,
-  love: PixelLoveIcon,
-  celebrate: PixelCelebrateIcon,
-  wow: PixelWowIcon,
-  support: PixelSupportIcon,
+  like: LikeReactionIcon,
+  love: LoveReactionIcon,
+  celebrate: CelebrateReactionIcon,
+  wow: WowReactionIcon,
+  support: SupportReactionIcon,
 }
 
 function createDefaultReactionSummary(total = 0) {
@@ -201,7 +201,7 @@ function NewsReactionSummary({
     null
   const ActiveReactionIcon = activeReaction
     ? reactionIcons[activeReaction.id]
-    : PixelLikeIcon
+    : LikeReactionIcon
   const summaryText = getReactionText(summary)
   const reactionMemberRows = useMemo(
     () =>
@@ -633,7 +633,7 @@ function NewsReactionSummary({
         </span>
       ) : (
         <span className="grid size-6 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-slate-400">
-          <PixelLikeIcon size={14} aria-hidden="true" />
+          <LikeReactionIcon size={14} aria-hidden="true" />
         </span>
       )}
       {variant !== 'comments' && (
@@ -806,7 +806,7 @@ function NewsReactionSummary({
                     ) : (
                       visibleReactionMembers.map((member) => {
                         const Icon =
-                          reactionIcons[member.reactionId] || PixelLikeIcon
+                          reactionIcons[member.reactionId] || LikeReactionIcon
                         const displayName = member.full_name || 'Member'
                         const isCurrentUser = member.profile_id === user?.id
 
