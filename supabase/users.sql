@@ -82,6 +82,40 @@ as $$
     and status = 'approved';
 $$;
 
+drop function if exists public.get_public_member_preview();
+create or replace function public.get_public_member_preview()
+returns table (
+  profile_id uuid,
+  display_name text,
+  avatar_path text,
+  role public.app_role,
+  total_members bigint
+)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select
+    profiles.id as profile_id,
+    coalesce(nullif(trim(profiles.full_name), ''), 'Member') as display_name,
+    profiles.avatar_path,
+    profiles.role,
+    count(*) over () as total_members
+  from public.profiles as profiles
+  where profiles.status = 'approved'
+  order by
+    (nullif(trim(profiles.avatar_path), '') is null),
+    lower(coalesce(nullif(trim(profiles.full_name), ''), 'member')),
+    profiles.id
+  limit 36;
+$$;
+
+revoke all on function public.get_public_member_preview()
+  from public;
+grant execute on function public.get_public_member_preview()
+  to anon, authenticated;
+
 drop policy if exists "Admins and editors can read profiles"
   on public.profiles;
 drop policy if exists "Admins can read profiles"

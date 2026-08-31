@@ -1,7 +1,35 @@
-import { supabase } from './supabase'
+import { isSupabaseConfigured, supabase } from './supabase'
 
 export function isProfilesRpcMissing(error) {
   return ['42883', 'PGRST202', '404'].includes(error?.code)
+}
+
+export function normalizePublicMemberPreview(row) {
+  return {
+    profileId: row?.profile_id || row?.id || '',
+    fullName:
+      row?.display_name || row?.full_name || row?.fullName || 'Member',
+    avatarPath: row?.avatar_path || row?.avatarPath || '',
+    role: row?.role || 'student',
+  }
+}
+
+export async function getPublicMemberPreview() {
+  if (!isSupabaseConfigured || !supabase) {
+    return { data: [], total: 0, error: null }
+  }
+
+  const { data, error } = await supabase.rpc('get_public_member_preview')
+  const members = error
+    ? []
+    : (data || []).map(normalizePublicMemberPreview)
+  const rawTotal = data?.length ? Number(data[0].total_members) : 0
+
+  return {
+    data: members,
+    total: Number.isFinite(rawTotal) ? rawTotal : 0,
+    error,
+  }
 }
 
 export async function getAdminProfiles() {

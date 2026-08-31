@@ -126,7 +126,8 @@ supabase/users.sql
 
 This limits staff access to approved accounts and adds administrator-only
 functions for reviewing profiles, approving members, suspending access, and
-assigning roles. Refresh `/admin`, then open **Users & Roles**.
+assigning roles. It also adds the public member preview used by the homepage
+avatar stack. Refresh `/admin`, then open **Users & Roles**.
 
 ## 10. Enable alumni management
 

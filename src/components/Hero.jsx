@@ -8,12 +8,14 @@ import {
   ShieldCheck,
   Sparkles,
 } from 'lucide-react'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import useOrganization from '../context/useOrganization'
 import { useAnnouncements } from '../hooks/useAnnouncements'
 import { useMotionPreferences } from '../hooks/useMotionPreferences'
 import { motionEase, springTransition } from '../lib/motion'
+import { getPublicMemberPreview } from '../lib/profiles'
+import ProfileAvatar from './ProfileAvatar'
 
 function getAnnouncementTime(announcement) {
   const value =
@@ -23,10 +25,68 @@ function getAnnouncementTime(announcement) {
   return Number.isNaN(timestamp) ? 0 : timestamp
 }
 
+function shuffleMembers(members) {
+  const shuffled = [...members]
+
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1))
+    const currentMember = shuffled[index]
+
+    shuffled[index] = shuffled[randomIndex]
+    shuffled[randomIndex] = currentMember
+  }
+
+  return shuffled
+}
+
+function getRandomizedMemberPreview(members, limit = 3) {
+  const validMembers = (Array.isArray(members) ? members : []).filter(
+    (member) => member?.profileId || member?.fullName,
+  )
+  const membersWithPhotos = validMembers.filter((member) => member.avatarPath)
+  const membersWithInitials = validMembers.filter((member) => !member.avatarPath)
+
+  return [
+    ...shuffleMembers(membersWithPhotos),
+    ...shuffleMembers(membersWithInitials),
+  ].slice(0, limit)
+}
+
+function getMemberRoleLabel(role) {
+  return (
+    {
+      admin: 'Administrator',
+      editor: 'Editor',
+      faculty: 'Faculty',
+      student: 'Student',
+    }[role] || 'Member'
+  )
+}
+
+const fallbackMemberPreview = [
+  {
+    profileId: 'fallback-community-member',
+    fullName: 'Community Member',
+    avatarPath: '',
+  },
+  {
+    profileId: 'fallback-student-innovator',
+    fullName: 'Student Innovator',
+    avatarPath: '',
+  },
+  {
+    profileId: 'fallback-organization-ally',
+    fullName: 'Organization Ally',
+    avatarPath: '',
+  },
+]
+
 function Hero() {
   const { profile, stats } = useOrganization()
   const { announcements } = useAnnouncements()
   const { isCompactMotion, shouldReduceMotion } = useMotionPreferences()
+  const [memberPreview, setMemberPreview] = useState([])
+  const [memberCount, setMemberCount] = useState(null)
   const enterY = shouldReduceMotion ? 0 : isCompactMotion ? 12 : 22
   const introDuration = shouldReduceMotion
     ? 0.01
@@ -44,6 +104,30 @@ function Hero() {
   const latestAnnouncementPath = latestAnnouncement
     ? `/announcements/${latestAnnouncement.id}`
     : '/announcements'
+  useEffect(() => {
+    let isMounted = true
+
+    getPublicMemberPreview().then((result) => {
+      if (!isMounted) return
+
+      setMemberPreview(getRandomizedMemberPreview(result.data))
+      if (!result.error && result.total > 0) {
+        setMemberCount(result.total)
+      }
+    })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  const displayedMemberPreview = memberPreview.length
+    ? memberPreview
+    : fallbackMemberPreview
+  const memberCountLabel =
+    memberCount === null
+      ? `${stats.members.value}${stats.members.suffix}`
+      : memberCount.toLocaleString()
   const trustSignals = [
     [ShieldCheck, 'Official portal', 'Managed for CpE students'],
     [CheckCircle2, 'Verified updates', 'Approved notices and records'],
@@ -165,24 +249,31 @@ function Hero() {
             }}
             className="home-hero-member-line mt-7 flex flex-col items-center gap-3 text-sm sm:flex-row"
           >
-            <span className="flex -space-x-2" aria-hidden="true">
-              {['CP', 'ES', 'AI'].map((initials, index) => (
+            <span
+              className="flex -space-x-2"
+              role="list"
+              aria-label="Featured community members"
+            >
+              {displayedMemberPreview.map((member) => (
                 <span
-                  key={initials}
-                  className={`grid size-9 place-items-center rounded-full border-2 border-white text-[9px] font-black text-white ${
-                    ['bg-brand-600', 'bg-indigo-500', 'bg-emerald-500'][index]
-                  }`}
+                  key={member.profileId || member.fullName}
+                  role="listitem"
+                  title={`${member.fullName} - ${getMemberRoleLabel(member.role)}`}
                 >
-                  {initials}
+                  <ProfileAvatar
+                    path={member.avatarPath}
+                    name={member.fullName}
+                    className="size-9 rounded-full border-2 border-white"
+                    textClassName="text-[9px]"
+                  />
                 </span>
               ))}
             </span>
             <span>
               <strong className="home-hero-member-count font-extrabold">
-                {stats.members.value}
-                {stats.members.suffix}
+                {memberCountLabel}
               </strong>{' '}
-              student innovators connected through {profile.name}
+              members connected through {profile.name}
             </span>
           </Motion.div>
 
