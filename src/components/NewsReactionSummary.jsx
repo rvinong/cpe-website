@@ -4,11 +4,7 @@ import {
   useReducedMotion,
 } from 'framer-motion'
 import {
-  Handshake,
-  Heart,
   LogIn,
-  PartyPopper,
-  ThumbsUp,
   X,
 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -21,6 +17,13 @@ import {
   newsReactionTypes,
   setNewsReaction,
 } from '../lib/media'
+import {
+  PixelCelebrateIcon,
+  PixelLikeIcon,
+  PixelLoveIcon,
+  PixelSupportIcon,
+  PixelWowIcon,
+} from './PixelReactionIcons'
 import ProfileAvatar from './ProfileAvatar'
 
 const reactionButtonStyles = {
@@ -33,38 +36,12 @@ const reactionButtonStyles = {
 
 const touchReactionActiveClass = 'reaction-touch-active'
 
-function WowReactionIcon({ size = 18, className = '', style, ...props }) {
-  return (
-    <span
-      {...props}
-      className={`inline-flex items-center justify-center ${className}`}
-      style={{
-        width: size,
-        height: size,
-        fontSize: Math.max(12, size * 0.86),
-        lineHeight: 1,
-        ...style,
-      }}
-    >
-      <span
-        aria-hidden="true"
-        className="block leading-none"
-        style={{
-          transform: 'translateY(-0.04em)',
-        }}
-      >
-        {'\u{1F62E}'}
-      </span>
-    </span>
-  )
-}
-
 const reactionIcons = {
-  like: ThumbsUp,
-  love: Heart,
-  celebrate: PartyPopper,
-  wow: WowReactionIcon,
-  support: Handshake,
+  like: PixelLikeIcon,
+  love: PixelLoveIcon,
+  celebrate: PixelCelebrateIcon,
+  wow: PixelWowIcon,
+  support: PixelSupportIcon,
 }
 
 function createDefaultReactionSummary(total = 0) {
@@ -224,7 +201,7 @@ function NewsReactionSummary({
     null
   const ActiveReactionIcon = activeReaction
     ? reactionIcons[activeReaction.id]
-    : ThumbsUp
+    : PixelLikeIcon
   const summaryText = getReactionText(summary)
   const reactionMemberRows = useMemo(
     () =>
@@ -656,7 +633,7 @@ function NewsReactionSummary({
         </span>
       ) : (
         <span className="grid size-6 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-slate-400">
-          <ThumbsUp size={12} aria-hidden="true" />
+          <PixelLikeIcon size={12} aria-hidden="true" />
         </span>
       )}
       {variant !== 'comments' && (
@@ -829,7 +806,7 @@ function NewsReactionSummary({
                     ) : (
                       visibleReactionMembers.map((member) => {
                         const Icon =
-                          reactionIcons[member.reactionId] || ThumbsUp
+                          reactionIcons[member.reactionId] || PixelLikeIcon
                         const displayName = member.full_name || 'Member'
                         const isCurrentUser = member.profile_id === user?.id
 
