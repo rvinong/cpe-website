@@ -82,11 +82,10 @@ const fallbackMemberPreview = [
 ]
 
 function Hero() {
-  const { profile, stats } = useOrganization()
+  const { profile } = useOrganization()
   const { announcements } = useAnnouncements()
   const { isCompactMotion, shouldReduceMotion } = useMotionPreferences()
   const [memberPreview, setMemberPreview] = useState([])
-  const [memberCount, setMemberCount] = useState(null)
   const enterY = shouldReduceMotion ? 0 : isCompactMotion ? 12 : 22
   const introDuration = shouldReduceMotion
     ? 0.01
@@ -111,9 +110,6 @@ function Hero() {
       if (!isMounted) return
 
       setMemberPreview(getRandomizedMemberPreview(result.data))
-      if (!result.error && result.total > 0) {
-        setMemberCount(result.total)
-      }
     })
 
     return () => {
@@ -124,10 +120,6 @@ function Hero() {
   const displayedMemberPreview = memberPreview.length
     ? memberPreview
     : fallbackMemberPreview
-  const memberCountLabel =
-    memberCount === null
-      ? `${stats.members.value}${stats.members.suffix}`
-      : memberCount.toLocaleString()
   const trustSignals = [
     [ShieldCheck, 'Official portal', 'Managed for CpE students'],
     [CheckCircle2, 'Verified updates', 'Approved notices and records'],
@@ -271,7 +263,7 @@ function Hero() {
             </span>
             <span>
               <strong className="home-hero-member-count font-extrabold">
-                {memberCountLabel}
+                200
               </strong>{' '}
               members connected through {profile.name}
             </span>
