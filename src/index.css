@@ -6992,6 +6992,58 @@ html.dark .site-notification-primary:hover {
 }
 
 /* Shared photo presentation used by dashboard previews and published cards. */
+.news-card-footer {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.news-card-engagement-row {
+  display: flex;
+  min-width: 0;
+  min-height: 2.25rem;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.news-card-reactions {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.news-card-reactions .news-reaction-controls {
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  gap: 0.35rem;
+}
+
+.news-card-reactions .news-reaction-controls > :last-child {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.news-card-reactions .news-reaction-controls > :last-child {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.news-card-reactions .news-reaction-controls > :last-child > button > span:last-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.news-card-comment-link {
+  flex: 0 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.news-card-story-link {
+  min-height: 1.5rem;
+  align-items: center;
+}
+
 .news-card-media {
   height: 10rem;
 }

@@ -667,13 +667,13 @@ function NewsReactionSummary({
 
   const controls =
     variant === 'comments' ? (
-      <div className="flex min-w-0 flex-wrap items-center gap-3">
+      <div className="news-reaction-controls flex min-w-0 flex-wrap items-center gap-3">
         {reactionAction}
         {middleSlot}
         <span className="ml-auto">{reactionMembersButton}</span>
       </div>
     ) : (
-      <div className="flex min-w-0 flex-wrap items-center justify-between gap-2">
+      <div className="news-reaction-controls flex min-w-0 flex-wrap items-center justify-between gap-2">
         {reactionAction}
         {reactionMembersButton}
       </div>

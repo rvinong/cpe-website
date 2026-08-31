@@ -80,15 +80,16 @@ function NewsCard({ article, compact = false }) {
           </p>
         )}
         {compact && (
-          <div className="mt-auto flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
-            <div className="flex min-w-0 flex-wrap items-center gap-2">
+          <div className="news-card-footer mt-auto border-t border-slate-100 pt-4">
+            <div className="news-card-engagement-row">
               <NewsReactionSummary
                 initialSummary={initialReactionSummary}
                 newsPostId={article.id}
+                className="news-card-reactions"
               />
               <Link
                 to={`${storyHref}#comments`}
-                className="inline-flex min-h-9 items-center gap-2 rounded-full px-1.5 py-1 text-xs font-extrabold text-slate-500 transition hover:text-brand-600"
+                className="news-card-comment-link inline-flex min-h-9 items-center gap-2 rounded-full px-1.5 py-1 text-xs font-extrabold text-slate-500 transition hover:text-brand-600"
                 title="View comments"
               >
                 <span className="grid size-6 shrink-0 place-items-center rounded-full border border-slate-200 bg-white text-slate-400">
@@ -99,7 +100,7 @@ function NewsCard({ article, compact = false }) {
             </div>
             <Link
               to={storyHref}
-              className="inline-flex items-center gap-1.5 text-xs font-extrabold text-brand-600"
+              className="news-card-story-link inline-flex items-center gap-1.5 text-xs font-extrabold text-brand-600"
             >
               Read full story
               <ArrowRight size={14} aria-hidden="true" />
