@@ -1084,20 +1084,20 @@ a {
 }
 
 .community-message-bubble {
-  border: 1px solid #dce6f1;
+  border: 1px solid #d1d5db;
   border-radius: 0.25rem 1rem 1rem 1rem;
-  background: #f8fafc;
+  background: #e5e7eb;
   padding: 0.7rem 0.85rem;
-  color: #334155;
+  color: #374151;
   font-size: 0.82rem;
   font-weight: 600;
   line-height: 1.6;
 }
 
 .community-message-row-own .community-message-bubble {
-  border-color: #155eef;
+  border-color: #111827;
   border-radius: 1rem 0.25rem 1rem 1rem;
-  background: #155eef;
+  background: #111111;
   color: #ffffff;
 }
 
@@ -3052,14 +3052,14 @@ html.dark .community-role-badge {
 }
 
 html.dark .community-message-bubble {
-  border-color: rgba(147, 197, 253, 0.15);
-  background: rgba(255, 255, 255, 0.055);
-  color: #d7e3f0;
+  border-color: #566274;
+  background: #4b5563;
+  color: #f3f4f6;
 }
 
 html.dark .community-message-row-own .community-message-bubble {
-  border-color: #2563eb;
-  background: #1d4ed8;
+  border-color: #374151;
+  background: #050505;
   color: #ffffff;
 }
 
