@@ -463,16 +463,16 @@ function Alumni() {
 
             <div className="grid gap-5 p-6 sm:p-8">
               {selectedProfile.leadership?.length > 0 && (
-                <section className="rounded-2xl border border-violet-200 bg-violet-50/45 p-5">
+                <section className="alumni-leadership-section rounded-2xl border border-violet-200 bg-violet-50/45 p-5">
                   <div className="flex items-start gap-3">
-                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-violet-600 shadow-sm ring-1 ring-violet-200">
+                    <span className="alumni-leadership-icon grid size-10 shrink-0 place-items-center rounded-xl bg-white text-violet-600 shadow-sm ring-1 ring-violet-200">
                       <BriefcaseBusiness size={18} aria-hidden="true" />
                     </span>
                     <div>
-                      <p className="text-xs font-extrabold tracking-[0.16em] text-violet-700 uppercase">
+                      <p className="alumni-leadership-title text-xs font-extrabold tracking-[0.16em] text-violet-700 uppercase">
                         Leadership background
                       </p>
-                      <p className="mt-1 text-xs leading-5 text-slate-600">
+                      <p className="alumni-leadership-description mt-1 text-xs leading-5 text-slate-600">
                         Roles held in the department, college, and student
                         organizations.
                       </p>
@@ -486,30 +486,30 @@ function Alumni() {
                       .map((entry, index) => (
                         <article
                           key={entry.id || `${entry.organization}-${index}`}
-                          className="rounded-xl border border-violet-200 bg-white p-4"
+                          className="alumni-leadership-entry rounded-xl border border-violet-200 bg-white p-4"
                         >
                           <div className="flex flex-wrap items-start justify-between gap-3">
                             <div>
-                              <h3 className="text-sm font-black text-navy-900">
+                              <h3 className="alumni-leadership-position text-sm font-black text-navy-900">
                                 {entry.position}
                               </h3>
-                              <p className="mt-1 text-sm font-bold text-violet-700">
+                              <p className="alumni-leadership-organization mt-1 text-sm font-bold text-violet-700">
                                 {entry.organization}
                               </p>
                             </div>
                             {entry.category && (
-                              <span className="rounded-full bg-violet-50 px-2.5 py-1 text-[10px] font-extrabold text-violet-700 ring-1 ring-violet-100">
+                              <span className="alumni-leadership-category rounded-full bg-violet-50 px-2.5 py-1 text-[10px] font-extrabold text-violet-700 ring-1 ring-violet-100">
                                 {entry.category}
                               </span>
                             )}
                           </div>
                           {entry.term && (
-                            <p className="mt-3 text-xs font-extrabold tracking-wide text-slate-500 uppercase">
+                            <p className="alumni-leadership-term mt-3 text-xs font-extrabold tracking-wide text-slate-500 uppercase">
                               {entry.term}
                             </p>
                           )}
                           {entry.description && (
-                            <p className="mt-2 text-sm leading-6 text-slate-600">
+                            <p className="alumni-leadership-entry-description mt-2 text-sm leading-6 text-slate-600">
                               {entry.description}
                             </p>
                           )}
