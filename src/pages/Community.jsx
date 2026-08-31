@@ -9,6 +9,8 @@ import {
   FileText,
   Hash,
   ImagePlus,
+  Images,
+  Link2,
   LockKeyhole,
   Menu,
   MessageCircle,
@@ -20,6 +22,7 @@ import {
   Send,
   ShieldCheck,
   Trash2,
+  UsersRound,
   X,
 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -783,6 +786,237 @@ function MessageItem({
   )
 }
 
+function isImageAttachment(attachment) {
+  return String(attachment?.mimeType || '').startsWith('image/')
+}
+
+function isPdfAttachment(attachment) {
+  return (
+    String(attachment?.mimeType || '').toLowerCase() === 'application/pdf' ||
+    /\.pdf$/i.test(String(attachment?.fileName || ''))
+  )
+}
+
+function getSharedLinks(messages) {
+  const seen = new Set()
+
+  return messages.flatMap((message) => {
+    const matches = String(message.body || '').match(/https?:\/\/[^\s<>"']+/gi) || []
+
+    return matches
+      .map((value) => value.replace(/[),.!?]+$/, ''))
+      .filter((url) => {
+        if (!url || seen.has(url)) return false
+        seen.add(url)
+        return true
+      })
+      .map((url, index) => {
+        let host = url
+        try {
+          host = new URL(url).hostname.replace(/^www\./i, '')
+        } catch {
+          // Keep the original URL as the fallback label.
+        }
+
+        return {
+          id: `${message.id}-link-${index}`,
+          author: message.fullName,
+          host,
+          url,
+        }
+      })
+  })
+}
+
+function CommunityRoomOverview({ canViewMessages, members, messages, room }) {
+  const sharedContent = useMemo(() => {
+    if (!canViewMessages) {
+      return { files: [], links: [], media: [] }
+    }
+
+    const attachments = messages.flatMap((message) =>
+      (Array.isArray(message.attachments) ? message.attachments : []).map(
+        (attachment, index) => ({
+          ...attachment,
+          author: message.fullName,
+          key: `${message.id}-attachment-${attachment.id || index}`,
+        }),
+      ),
+    )
+
+    return {
+      files: attachments.filter((attachment) => !isImageAttachment(attachment)),
+      links: getSharedLinks(messages),
+      media: attachments.filter(
+        (attachment) => isImageAttachment(attachment) && attachment.url,
+      ),
+    }
+  }, [canViewMessages, messages])
+
+  const contributorCount = useMemo(
+    () =>
+      new Set(
+        messages
+          .map((message) => message.profileId || message.fullName)
+          .filter(Boolean),
+      ).size,
+    [messages],
+  )
+  const memberCount = members.length || contributorCount
+  const sharedItemCount =
+    sharedContent.media.length +
+    sharedContent.files.length +
+    sharedContent.links.length
+
+  return (
+    <aside className="community-room-overview" aria-label="Room overview">
+      <div className="community-room-overview-header">
+        <span className="community-room-overview-icon" aria-hidden="true">
+          <Hash size={22} />
+        </span>
+        <div className="community-room-overview-heading">
+          <p>Room overview</p>
+          <h2>{room?.title || 'Community room'}</h2>
+          <span>{room?.description || 'Public messages for the CpE community.'}</span>
+        </div>
+      </div>
+
+      {canViewMessages ? (
+        <div className="community-room-overview-scroll">
+          <div className="community-room-overview-stats">
+            <div>
+              <UsersRound size={15} aria-hidden="true" />
+              <strong>{memberCount}</strong>
+              <span>Members</span>
+            </div>
+            <div>
+              <Images size={15} aria-hidden="true" />
+              <strong>{sharedItemCount}</strong>
+              <span>Shared items</span>
+            </div>
+          </div>
+
+          <section className="community-room-overview-section">
+            <div className="community-room-overview-section-heading">
+              <span>
+                <Images size={15} aria-hidden="true" />
+                Photos
+              </span>
+              <small>{sharedContent.media.length}</small>
+            </div>
+            {sharedContent.media.length > 0 ? (
+              <div className="community-room-media-grid">
+                {sharedContent.media.map((attachment) => (
+                  <a
+                    key={attachment.key}
+                    href={attachment.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="community-room-media-item"
+                    aria-label={`Open ${attachment.fileName}`}
+                  >
+                    <img src={attachment.url} alt={attachment.fileName} loading="lazy" />
+                    <span>{attachment.fileName}</span>
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <p className="community-room-overview-empty">No photos shared yet.</p>
+            )}
+          </section>
+
+          <section className="community-room-overview-section">
+            <div className="community-room-overview-section-heading">
+              <span>
+                <FileText size={15} aria-hidden="true" />
+                Files
+              </span>
+              <small>{sharedContent.files.length}</small>
+            </div>
+            {sharedContent.files.length > 0 ? (
+              <div className="community-room-shared-list">
+                {sharedContent.files.map((attachment) => {
+                  const content = (
+                    <>
+                      <FileText size={17} aria-hidden="true" />
+                      <span>
+                        <strong>{attachment.fileName}</strong>
+                        <small>
+                          {formatCommunityAttachmentSize(attachment.sizeBytes) ||
+                            'Shared file'}
+                        </small>
+                      </span>
+                    </>
+                  )
+
+                  return attachment.url ? (
+                    <a
+                      key={attachment.key}
+                      href={attachment.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      download={isPdfAttachment(attachment) ? undefined : attachment.fileName}
+                      className="community-room-shared-item"
+                    >
+                      {content}
+                    </a>
+                  ) : (
+                    <div
+                      key={attachment.key}
+                      className="community-room-shared-item community-room-shared-item-unavailable"
+                    >
+                      {content}
+                    </div>
+                  )
+                })}
+              </div>
+            ) : (
+              <p className="community-room-overview-empty">No files shared yet.</p>
+            )}
+          </section>
+
+          <section className="community-room-overview-section">
+            <div className="community-room-overview-section-heading">
+              <span>
+                <Link2 size={15} aria-hidden="true" />
+                Links
+              </span>
+              <small>{sharedContent.links.length}</small>
+            </div>
+            {sharedContent.links.length > 0 ? (
+              <div className="community-room-shared-list">
+                {sharedContent.links.map((link) => (
+                  <a
+                    key={link.id}
+                    href={link.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="community-room-shared-item"
+                  >
+                    <Link2 size={17} aria-hidden="true" />
+                    <span>
+                      <strong>{link.host}</strong>
+                      <small>Shared by {link.author || 'a member'}</small>
+                    </span>
+                  </a>
+                ))}
+              </div>
+            ) : (
+              <p className="community-room-overview-empty">No links shared yet.</p>
+            )}
+          </section>
+        </div>
+      ) : (
+        <div className="community-room-overview-locked">
+          <LockKeyhole size={21} aria-hidden="true" />
+          <strong>Shared content is members-only</strong>
+          <span>Approved members can view photos, files, and links shared in this room.</span>
+        </div>
+      )}
+    </aside>
+  )
+}
+
 function Community() {
   const { user, profile, isApprovedMember, canAccessAdmin, isConfigured } = useAuth()
   const { shouldReduceMotion } = useMotionPreferences()
@@ -1345,6 +1579,12 @@ function Community() {
                   </div>
                 </section>
 
+                <CommunityRoomOverview
+                  canViewMessages={canViewMessages}
+                  members={members}
+                  messages={messages}
+                  room={selectedRoom}
+                />
               </div>
             </Reveal>
           </div>
