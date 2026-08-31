@@ -2,7 +2,7 @@ import {
   AnimatePresence,
   motion as Motion,
 } from 'framer-motion'
-import { ArrowUpRight, LogIn, Menu, X } from 'lucide-react'
+import { ArrowLeft, ArrowUpRight, LogIn, Menu, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import useAuth from '../context/useAuth'
@@ -188,6 +188,16 @@ function Navbar() {
         </nav>
 
         <div className="absolute right-3 flex shrink-0 items-center gap-2 sm:right-4 xl:static">
+          {pathname === '/community' && (
+            <Link
+              to="/"
+              className="community-navbar-back-link"
+              aria-label="Back to homepage"
+              title="Back to homepage"
+            >
+              <ArrowLeft size={18} aria-hidden="true" />
+            </Link>
+          )}
           <div className="hidden sm:block">
             <ThemeToggle />
           </div>

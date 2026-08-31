@@ -8,7 +8,6 @@ import {
   CheckCircle2,
   FileText,
   Hash,
-  Info,
   ImagePlus,
   LockKeyhole,
   Menu,
@@ -21,7 +20,6 @@ import {
   Send,
   ShieldCheck,
   Trash2,
-  UsersRound,
   X,
 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -785,70 +783,6 @@ function MessageItem({
   )
 }
 
-function CommunityRoomInfo({
-  canSend,
-  canViewMessages,
-  className = '',
-  onClose,
-  room,
-}) {
-  return (
-    <aside
-      id="community-room-info"
-      className={`community-room-info ${className}`.trim()}
-      aria-label="Room information"
-    >
-      <div className="community-room-info-heading">
-        <span className="community-room-info-icon">
-          <Info size={17} aria-hidden="true" />
-        </span>
-        <div>
-          <p className="community-room-info-kicker">Room details</p>
-          <h2>About this room</h2>
-        </div>
-        {onClose && (
-          <button
-            type="button"
-            className="community-room-info-close"
-            onClick={onClose}
-            aria-label="Close room details"
-          >
-            <X size={16} aria-hidden="true" />
-          </button>
-        )}
-      </div>
-
-      <div className="community-room-info-card">
-        <span className="community-room-info-hash" aria-hidden="true">
-          <Hash size={22} />
-        </span>
-        <h3>{room?.title || 'Community room'}</h3>
-        <p>{room?.description || 'Public messages for the CpE community.'}</p>
-      </div>
-
-      <dl className="community-room-facts">
-        <div>
-          <dt><UsersRound size={14} aria-hidden="true" /> Visibility</dt>
-          <dd>{room?.isStaffOnly ? 'Approved staff only' : 'Approved members only'}</dd>
-        </div>
-        <div>
-          <dt><Radio size={14} aria-hidden="true" /> Posting</dt>
-          <dd>{canSend ? 'You can send messages' : 'Approved members only'}</dd>
-        </div>
-        <div>
-          <dt><MessageCircle size={14} aria-hidden="true" /> Reading</dt>
-          <dd>{canViewMessages ? 'Messages unlocked' : 'Approval required'}</dd>
-        </div>
-      </dl>
-
-      <div className="community-room-info-note">
-        <ShieldCheck size={15} aria-hidden="true" />
-        <p>Use official pages for confirmed announcements, schedules, and documents.</p>
-      </div>
-    </aside>
-  )
-}
-
 function Community() {
   const { user, profile, isApprovedMember, canAccessAdmin, isConfigured } = useAuth()
   const { shouldReduceMotion } = useMotionPreferences()
@@ -867,7 +801,6 @@ function Community() {
   const [searchTerm, setSearchTerm] = useState('')
   const [replyingTo, setReplyingTo] = useState(null)
   const [isMobileRoomsOpen, setIsMobileRoomsOpen] = useState(false)
-  const [isRoomInfoOpen, setIsRoomInfoOpen] = useState(false)
   const messageListRef = useRef(null)
 
   const selectedRoom = useMemo(
@@ -910,21 +843,19 @@ function Community() {
     setChatNotice('')
     setSearchTerm('')
     setReplyingTo(null)
-    setIsRoomInfoOpen(false)
   }
 
   useEffect(() => {
-    if (!isMobileRoomsOpen && !isRoomInfoOpen) return undefined
+    if (!isMobileRoomsOpen) return undefined
 
     const handleEscape = (event) => {
       if (event.key !== 'Escape') return
       setIsMobileRoomsOpen(false)
-      setIsRoomInfoOpen(false)
     }
 
     window.addEventListener('keydown', handleEscape)
     return () => window.removeEventListener('keydown', handleEscape)
-  }, [isMobileRoomsOpen, isRoomInfoOpen])
+  }, [isMobileRoomsOpen])
 
   useEffect(() => {
     let isMounted = true
@@ -1202,7 +1133,6 @@ function Community() {
                     aria-controls="community-room-sidebar"
                     aria-expanded={isMobileRoomsOpen}
                     onClick={() => {
-                      setIsRoomInfoOpen(false)
                       setIsMobileRoomsOpen((current) => !current)
                     }}
                   >
@@ -1325,27 +1255,14 @@ function Community() {
                         <p>{selectedRoom?.description}</p>
                       </div>
                     </div>
-                    <div className="community-chat-header-actions">
-                      {selectedRoom?.isStaffOnly && (
+                    {selectedRoom?.isStaffOnly && (
+                      <div className="community-chat-header-actions">
                         <span className="community-staff-badge">
                           <LockKeyhole size={12} aria-hidden="true" />
                           Staff only
                         </span>
-                      )}
-                      <button
-                        type="button"
-                        className="community-room-info-toggle"
-                        aria-controls="community-room-info"
-                        aria-expanded={isRoomInfoOpen}
-                        onClick={() => {
-                          setIsMobileRoomsOpen(false)
-                          setIsRoomInfoOpen((current) => !current)
-                        }}
-                      >
-                        <Info size={14} aria-hidden="true" />
-                        Details
-                      </button>
-                    </div>
+                      </div>
+                    )}
                   </header>
 
                   <div
@@ -1428,13 +1345,6 @@ function Community() {
                   </div>
                 </section>
 
-                <CommunityRoomInfo
-                  canSend={canSend}
-                  canViewMessages={canViewMessages}
-                  className={isRoomInfoOpen ? 'community-room-info-open' : ''}
-                  onClose={() => setIsRoomInfoOpen(false)}
-                  room={selectedRoom}
-                />
               </div>
             </Reveal>
           </div>

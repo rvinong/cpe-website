@@ -829,7 +829,7 @@ a {
 
 .community-workspace-body {
   display: grid;
-  grid-template-columns: 15.5rem minmax(0, 1fr) minmax(18rem, 22rem);
+  grid-template-columns: 15.5rem minmax(0, 1fr);
   align-items: stretch;
 }
 
@@ -5928,6 +5928,43 @@ html.dark .account-save-action-saved {
 }
 
 /* Keep the community route focused on the conversation viewport. */
+.community-navbar-back-link {
+  display: none;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.72);
+  color: #07152f;
+  transition:
+    border-color var(--transition-base),
+    background-color var(--transition-base),
+    color var(--transition-base),
+    transform var(--transition-base);
+}
+
+.community-navbar-back-link:hover,
+.community-navbar-back-link:focus-visible {
+  border-color: #60a5fa;
+  background: #eff6ff;
+  color: #155eef;
+  transform: translateY(-1px);
+}
+
+html.dark .community-navbar-back-link {
+  border-color: rgba(147, 197, 253, 0.22);
+  background: rgba(96, 165, 250, 0.12);
+  color: #bfdbfe;
+}
+
+html.dark .community-navbar-back-link:hover,
+html.dark .community-navbar-back-link:focus-visible {
+  border-color: rgba(147, 197, 253, 0.48);
+  background: rgba(96, 165, 250, 0.2);
+  color: #f8fafc;
+}
+
 .community-page {
   overflow: hidden;
 }
@@ -6098,11 +6135,11 @@ html.dark .account-save-action-saved {
   }
 
   .community-page-shell {
-    width: min(100% - 1rem, 82rem);
+    width: min(100% - 0.5rem, 82rem);
   }
 
   .community-page-topbar {
-    margin-bottom: 0.45rem;
+    display: none;
   }
 
   .community-page-topbar > p {
@@ -6112,6 +6149,10 @@ html.dark .account-save-action-saved {
   .community-back-link {
     min-height: 2rem;
     font-size: 0.68rem;
+  }
+
+  .community-navbar-back-link {
+    display: grid;
   }
 
   .community-workspace-header {
