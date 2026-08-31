@@ -473,123 +473,126 @@ function MessageComposer({
       <label className="sr-only" htmlFor="community-message-body">
         Write a message to this room
       </label>
-      <div className="community-chat-input-wrap">
-        <textarea
-          ref={inputRef}
-          id="community-message-body"
-          value={body}
-          onChange={(event) => {
-            const nextBody = event.target.value
-            const cursorPosition =
-              event.target.selectionStart ?? nextBody.length
-            setBody(nextBody)
-            setSelectedMentions((current) =>
-              current.filter((member) =>
-                hasMentionToken(nextBody, member.fullName),
-              ),
-            )
-            setMention(findMention(nextBody, cursorPosition))
-            setActiveMentionIndex(0)
-          }}
-          onKeyDown={handleKeyDown}
-          onBlur={() => setMention(null)}
-          maxLength={maxCommunityMessageLength}
-          rows="1"
-          placeholder={replyingTo ? 'Write your reply...' : 'Message this room...'}
-          disabled={disabled || isSubmitting}
-          aria-autocomplete="list"
-          aria-controls={showMentionMenu ? 'community-mention-list' : undefined}
-          aria-expanded={showMentionMenu}
-          aria-activedescendant={
-            showMentionMenu && mentionSuggestions[activeMentionIndex]
-              ? 'community-mention-option-' + activeMentionIndex
-              : undefined
-          }
-          className="community-input community-chat-input resize-none"
-        />
-        {showMentionMenu && (
-          <div
-            id="community-mention-list"
-            className="community-mention-menu"
-            role="listbox"
-            aria-label="Mention a member"
-          >
-            <p className="community-mention-menu-label">
-              {mention?.query ? 'Matching members' : 'Mention a member'}
-            </p>
-            {mentionSuggestions.length ? (
-              mentionSuggestions.map((member, index) => (
-                <button
-                  key={member.profileId}
-                  id={'community-mention-option-' + index}
-                  type="button"
-                  role="option"
-                  aria-selected={index === activeMentionIndex}
-                  className={
-                    'community-mention-option ' +
-                    (index === activeMentionIndex
-                      ? 'community-mention-option-active'
-                      : '')
-                  }
-                  onPointerDown={(event) => event.preventDefault()}
-                  onClick={() => handleMentionSelect(member)}
-                >
-                  <ProfileAvatar
-                    path={member.avatarPath}
-                    name={member.fullName}
-                    className="community-mention-avatar size-8 rounded-lg"
-                    textClassName="text-[0.65rem]"
-                  />
-                  <span className="community-mention-copy">
-                    <span className="community-mention-name">
-                      {member.fullName}
-                    </span>
-                    <span className="community-mention-role">
-                      {roleLabel(member.role)}
-                    </span>
-                  </span>
-                </button>
-              ))
-            ) : (
-              <p className="community-mention-empty">
-                No other approved members match.
+      <div className="community-composer-input-row">
+        <div className="community-chat-input-wrap">
+          <textarea
+            ref={inputRef}
+            id="community-message-body"
+            value={body}
+            onChange={(event) => {
+              const nextBody = event.target.value
+              const cursorPosition =
+                event.target.selectionStart ?? nextBody.length
+              setBody(nextBody)
+              setSelectedMentions((current) =>
+                current.filter((member) =>
+                  hasMentionToken(nextBody, member.fullName),
+                ),
+              )
+              setMention(findMention(nextBody, cursorPosition))
+              setActiveMentionIndex(0)
+            }}
+            onKeyDown={handleKeyDown}
+            onBlur={() => setMention(null)}
+            maxLength={maxCommunityMessageLength}
+            rows="1"
+            placeholder={replyingTo ? 'Write your reply...' : 'Message this room...'}
+            disabled={disabled || isSubmitting}
+            aria-autocomplete="list"
+            aria-controls={showMentionMenu ? 'community-mention-list' : undefined}
+            aria-expanded={showMentionMenu}
+            aria-activedescendant={
+              showMentionMenu && mentionSuggestions[activeMentionIndex]
+                ? 'community-mention-option-' + activeMentionIndex
+                : undefined
+            }
+            className="community-input community-chat-input resize-none"
+          />
+          {showMentionMenu && (
+            <div
+              id="community-mention-list"
+              className="community-mention-menu"
+              role="listbox"
+              aria-label="Mention a member"
+            >
+              <p className="community-mention-menu-label">
+                {mention?.query ? 'Matching members' : 'Mention a member'}
               </p>
-            )}
-          </div>
-        )}
-        <button
-          type="submit"
-          disabled={!canSubmit}
-          className="community-chat-send"
-          aria-label="Send message"
-        >
-          <Send size={16} aria-hidden="true" />
-        </button>
-      </div>
-      <div className="community-composer-tools">
-        <input
-          ref={fileInputRef}
-          type="file"
-          className="community-attachment-input"
-          accept={communityAttachmentAccept}
-          multiple
-          onChange={handleFileChange}
-          disabled={disabled || isSubmitting}
-        />
-        <button
-          type="button"
-          className="community-attachment-button"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={disabled || isSubmitting}
-          aria-label="Add file or image"
-        >
-          <Paperclip size={14} aria-hidden="true" />
-          <span className="community-attachment-label">Add file or image</span>
-        </button>
-        <span className="community-attachment-limit">
-          {selectedFiles.length}/{maxCommunityAttachmentCount} files, up to{' '}
-          {maxCommunityAttachmentSize / (1024 * 1024)} MB each
-        </span>
+              {mentionSuggestions.length ? (
+                mentionSuggestions.map((member, index) => (
+                  <button
+                    key={member.profileId}
+                    id={'community-mention-option-' + index}
+                    type="button"
+                    role="option"
+                    aria-selected={index === activeMentionIndex}
+                    className={
+                      'community-mention-option ' +
+                      (index === activeMentionIndex
+                        ? 'community-mention-option-active'
+                        : '')
+                    }
+                    onPointerDown={(event) => event.preventDefault()}
+                    onClick={() => handleMentionSelect(member)}
+                  >
+                    <ProfileAvatar
+                      path={member.avatarPath}
+                      name={member.fullName}
+                      className="community-mention-avatar size-8 rounded-lg"
+                      textClassName="text-[0.65rem]"
+                    />
+                    <span className="community-mention-copy">
+                      <span className="community-mention-name">
+                        {member.fullName}
+                      </span>
+                      <span className="community-mention-role">
+                        {roleLabel(member.role)}
+                      </span>
+                    </span>
+                  </button>
+                ))
+              ) : (
+                <p className="community-mention-empty">
+                  No other approved members match.
+                </p>
+              )}
+            </div>
+          )}
+          <button
+            type="submit"
+            disabled={!canSubmit}
+            className="community-chat-send"
+            aria-label="Send message"
+          >
+            <Send size={16} aria-hidden="true" />
+          </button>
+        </div>
+        <div className="community-composer-tools">
+          <input
+            ref={fileInputRef}
+            type="file"
+            className="community-attachment-input"
+            accept={communityAttachmentAccept}
+            multiple
+            onChange={handleFileChange}
+            disabled={disabled || isSubmitting}
+          />
+          <button
+            type="button"
+            className="community-attachment-button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={disabled || isSubmitting}
+            aria-label="Add file or image"
+            title="Attach file or image"
+          >
+            <Paperclip size={16} aria-hidden="true" />
+            <span className="community-attachment-label">Add file or image</span>
+          </button>
+          <span className="community-attachment-limit">
+            {selectedFiles.length}/{maxCommunityAttachmentCount} files, up to{' '}
+            {maxCommunityAttachmentSize / (1024 * 1024)} MB each
+          </span>
+        </div>
       </div>
       <div className="community-chat-composer-meta">
         <span>

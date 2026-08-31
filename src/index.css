@@ -6563,6 +6563,47 @@ html.dark .community-room-overview-empty {
     padding-bottom: 0.78rem;
   }
 
+  .community-composer-input-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .community-composer-input-row .community-chat-input-wrap {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .community-composer-input-row .community-composer-tools {
+    order: -1;
+    flex: 0 0 auto;
+    gap: 0;
+    margin-top: 0;
+  }
+
+  .community-composer-input-row .community-attachment-button {
+    width: 2.25rem;
+    height: 2.25rem;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .community-composer-input-row .community-attachment-label,
+  .community-composer-input-row .community-attachment-limit,
+  .community-chat-composer-meta {
+    display: none;
+  }
+
+  .community-composer-input-row .community-chat-send {
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+  }
+
+  .community-composer-input-row .community-chat-send:hover:not(:disabled) {
+    transform: translateY(calc(-50% - 1px));
+  }
+
   .community-composer-tools {
     margin-top: 0.4rem;
   }
