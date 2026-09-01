@@ -19,6 +19,7 @@ import {
 import PageHero from '../components/PageHero'
 import RobotEasterEgg from '../components/RobotEasterEgg'
 import useOrganization from '../context/useOrganization'
+import { useMotionPreferences } from '../hooks/useMotionPreferences'
 import { fallbackOrganization } from '../lib/organization'
 
 const involvementAreas = [
@@ -102,6 +103,7 @@ function OrganizationPersonCard({ person }) {
 }
 
 function About() {
+  const { isCompactMotion } = useMotionPreferences()
   const {
     profile: organizationProfile,
     officers: organizationOfficers,
@@ -357,8 +359,8 @@ function About() {
           </div>
         </section>
 
-        <section className="bg-white py-20 sm:py-24">
-          <div className="section-shell space-y-8">
+        <section className="bg-white py-14 sm:py-24">
+          <div className="section-shell space-y-6 sm:space-y-8">
             <Motion.article
               initial={{ opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -408,9 +410,9 @@ function About() {
             </Motion.article>
 
             <Motion.article
-              initial={{ opacity: 0, y: 18 }}
+              initial={isCompactMotion ? false : { opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.2 }}
+              viewport={{ once: true, amount: isCompactMotion ? 0.05 : 0.2 }}
               transition={{ duration: 0.5, delay: 0.08 }}
               className="rounded-3xl border border-slate-200 bg-white p-7 shadow-[0_24px_70px_-48px_rgba(15,23,42,0.38)] sm:p-9"
             >
@@ -434,7 +436,7 @@ function About() {
                 </p>
               )}
 
-              <div className="mt-8 space-y-8">
+              <div className="mt-6 space-y-6 sm:mt-8 sm:space-y-8">
                 <section aria-labelledby="faculty-heading">
                   <div className="flex flex-wrap items-end justify-between gap-3">
                     <div>
