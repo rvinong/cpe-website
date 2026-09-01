@@ -85,15 +85,15 @@ function OrganizationPersonCard({ person }) {
             {person.initials}
           </span>
         )}
-        <div className="min-w-0 flex-1">
-          <h3 className="mt-0 font-extrabold text-navy-900">
+        <div className="flex min-w-0 flex-1 flex-col justify-center sm:self-stretch">
+          <h3 className="mt-0 text-lg font-extrabold leading-7 tracking-tight text-navy-900 sm:text-2xl sm:leading-8">
             {person.name}
           </h3>
-          <p className="mt-1 text-sm font-bold text-brand-600">
+          <p className="mt-2 text-base font-bold leading-6 text-brand-600">
             {person.position}
           </p>
           {person.academic_year && (
-            <p className="mt-1 text-xs font-bold text-slate-500">
+            <p className="mt-2 text-sm font-bold text-slate-500">
               {person.academic_year}
             </p>
           )}
