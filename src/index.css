@@ -4951,46 +4951,6 @@ html.dark .community-message-file-unavailable {
   appearance: auto;
 }
 
-.account-check-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.65rem;
-  border: 1px solid #bfdbfe;
-  border-radius: 0.8rem;
-  background: #eff6ff;
-  cursor: pointer;
-  padding: 0.75rem;
-}
-
-.account-check-row input,
-.account-notification-toggle input {
-  width: 1rem;
-  height: 1rem;
-  flex: 0 0 auto;
-  margin-top: 0.1rem;
-  accent-color: var(--color-brand);
-}
-
-.account-check-row span,
-.account-notification-copy {
-  display: grid;
-  gap: 0.18rem;
-}
-
-.account-check-row strong,
-.account-notification-copy strong {
-  color: var(--text-strong);
-  font-size: 0.76rem;
-  font-weight: 850;
-}
-
-.account-check-row small,
-.account-notification-copy span {
-  color: var(--text-body);
-  font-size: 0.68rem;
-  line-height: 1.45;
-}
-
 .account-submit-button,
 .account-primary-action,
 .account-save-action {
@@ -5622,23 +5582,6 @@ html.dark .community-message-file-unavailable {
   overflow-wrap: anywhere;
 }
 
-.account-notification-toggle {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.65rem;
-  border: 1px solid #bfdbfe;
-  border-radius: 1.05rem;
-  background: var(--brand-soft);
-  cursor: pointer;
-  padding: 0.9rem;
-}
-
-.account-notification-toggle > svg {
-  flex: 0 0 auto;
-  margin-left: auto;
-  color: var(--color-brand);
-}
-
 .account-link-list,
 .account-resource-list {
   display: grid;
@@ -5784,12 +5727,6 @@ html.dark .account-input:focus {
   border-color: rgba(96, 165, 250, 0.72);
   background: rgba(10, 20, 36, 0.94);
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.16);
-}
-
-html.dark .account-check-row,
-html.dark .account-notification-toggle {
-  border-color: rgba(96, 165, 250, 0.25);
-  background: rgba(37, 99, 235, 0.13);
 }
 
 html.dark .account-profile-hero {

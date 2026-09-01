@@ -476,26 +476,6 @@ export async function uploadCommunityMessageAttachments(messageId, files = []) {
   }
 }
 
-export async function notifyCommunityMentions(messageId) {
-  if (!supabase || !messageId) {
-    return { data: null, error: null }
-  }
-
-  const result = await supabase.functions.invoke(
-    'send-community-mention-notification',
-    {
-      body: { messageId },
-    },
-  )
-
-  if (result.error) return result
-  if (result.data?.error) {
-    return { data: null, error: new Error(result.data.error) }
-  }
-
-  return result
-}
-
 export async function deleteCommunityMessage(messageId, attachments = []) {
   if (!supabase) {
     return {

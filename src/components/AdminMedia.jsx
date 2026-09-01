@@ -37,10 +37,6 @@ import {
   uploadMedia,
   validateMediaFile,
 } from '../lib/media'
-import {
-  describeNotificationResult,
-  notifyPublishedContent,
-} from '../lib/notifications'
 import { supabase } from '../lib/supabase'
 
 const emptyNewsForm = {
@@ -565,17 +561,12 @@ function AdminMedia() {
       ? 'News story updated.'
       : 'News story created.'
 
-    const shouldNotify =
+    const isNewlyPublished =
       result.data.status === 'published' &&
       editingItem?.status !== 'published'
 
-    if (shouldNotify) {
+    if (isNewlyPublished) {
       signalBytePublished('news', result.data.title)
-      const notificationResult = await notifyPublishedContent(
-        'news',
-        result.data.id,
-      )
-      successMessage += describeNotificationResult(notificationResult)
     }
 
     setIsSaving(false)

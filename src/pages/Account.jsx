@@ -118,7 +118,6 @@ function Account() {
     signIn,
     signUp,
     signOut,
-    updateEmailNotifications,
     refreshProfile,
   } = useAuth()
   const requestedMode = searchParams.get('mode')
@@ -137,7 +136,6 @@ function Account() {
     email: '',
     password: '',
     confirmPassword: '',
-    emailNotifications: true,
   })
   const [message, setMessage] = useState({ type: '', text: '' })
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -418,7 +416,6 @@ function Account() {
         fullName: formData.fullName,
         studentNumber: formData.studentNumber,
         yearLevel: formData.yearLevel,
-        emailNotifications: formData.emailNotifications,
       })
 
       setIsSubmitting(false)
@@ -464,26 +461,6 @@ function Account() {
     }
 
     setMessage({ type: 'success', text: 'You have been signed out.' })
-  }
-
-  const handleEmailNotifications = async (event) => {
-    const enabled = event.target.checked
-    setIsSubmitting(true)
-    setMessage({ type: '', text: '' })
-
-    const { error } = await updateEmailNotifications(enabled)
-    setIsSubmitting(false)
-
-    setMessage(
-      error
-        ? { type: 'error', text: error.message }
-        : {
-            type: 'success',
-            text: enabled
-              ? 'Email notifications are enabled.'
-              : 'Email notifications are disabled.',
-          },
-    )
   }
 
   return (
@@ -818,22 +795,6 @@ function Account() {
                         </dl>
                       </section>
 
-                      {profile && (
-                        <label className="account-notification-toggle">
-                          <input
-                            type="checkbox"
-                            checked={profile.email_notifications ?? true}
-                            onChange={handleEmailNotifications}
-                            disabled={isSubmitting}
-                          />
-                          <span className="account-notification-copy">
-                            <strong>Organization updates</strong>
-                            <span>Receive new news and announcement emails.</span>
-                          </span>
-                          <Mail size={17} aria-hidden="true" />
-                        </label>
-                      )}
-
                       <section className="account-panel account-links-panel">
                         <div className="account-panel-heading">
                           <div>
@@ -987,13 +948,6 @@ function Account() {
 
                     {activeMode === 'signup' && (
                       <PasswordField id="account-confirm-password" label="Confirm password" value={formData.confirmPassword} onChange={updateField('confirmPassword')} placeholder="Repeat your password" autoComplete="new-password" />
-                    )}
-
-                    {activeMode === 'signup' && (
-                      <label className="account-check-row">
-                        <input type="checkbox" checked={formData.emailNotifications} onChange={(event) => setFormData((current) => ({ ...current, emailNotifications: event.target.checked }))} />
-                        <span><strong>Email me organization updates</strong><small>Change this setting later from your account.</small></span>
-                      </label>
                     )}
 
                     <button type="submit" disabled={isSubmitting} className="account-submit-button">

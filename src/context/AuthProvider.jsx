@@ -5,11 +5,11 @@ import AuthContext from './auth-context'
 const dashboardRoles = new Set(['admin', 'editor'])
 const configuredSiteUrl = import.meta.env.VITE_SITE_URL?.replace(/\/+$/, '')
 const profileColumns =
-  'id, full_name, nickname, student_number, year_level, role, status, email_notifications, avatar_path'
+  'id, full_name, nickname, student_number, year_level, role, status, avatar_path'
 const profileColumnsWithoutYearLevel =
-  'id, full_name, nickname, student_number, role, status, email_notifications, avatar_path'
+  'id, full_name, nickname, student_number, role, status, avatar_path'
 const legacyProfileColumns =
-  'id, full_name, student_number, role, status, email_notifications, avatar_path'
+  'id, full_name, student_number, role, status, avatar_path'
 
 function isProfileColumnMissing(error, column) {
   const message = error?.message?.toLowerCase() || ''
@@ -140,7 +140,6 @@ function AuthProvider({ children }) {
     fullName,
     studentNumber,
     yearLevel,
-    emailNotifications,
   }) => {
     if (!supabase) {
       return {
@@ -159,33 +158,10 @@ function AuthProvider({ children }) {
           full_name: fullName,
           student_number: studentNumber,
           year_level: yearLevel,
-          email_notifications: emailNotifications,
         },
       },
     })
   }
-
-  const updateEmailNotifications = useCallback(
-    async (enabled) => {
-      if (!supabase || !session?.user) {
-        return {
-          data: null,
-          error: new Error('Sign in to update this setting.'),
-        }
-      }
-
-      const result = await supabase.rpc('set_email_notifications', {
-        enabled,
-      })
-
-      if (!result.error) {
-        await loadProfile(session.user)
-      }
-
-      return result
-    },
-    [loadProfile, session],
-  )
 
   const signOut = async () => {
     if (!supabase) return { error: null }
@@ -206,7 +182,6 @@ function AuthProvider({ children }) {
       signIn,
       signUp,
       signOut,
-      updateEmailNotifications,
       refreshProfile: () => loadProfile(session?.user),
     }),
     [
@@ -215,7 +190,6 @@ function AuthProvider({ children }) {
       profile,
       profileError,
       session,
-      updateEmailNotifications,
     ],
   )
 

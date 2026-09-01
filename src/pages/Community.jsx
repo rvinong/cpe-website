@@ -50,7 +50,6 @@ import {
   maxCommunityMessageLength,
   maxCommunityAttachmentCount,
   maxCommunityAttachmentSize,
-  notifyCommunityMentions,
   subscribeToCommunityMessages,
   uploadCommunityMessageAttachments,
 } from '../lib/communityChat'
@@ -595,10 +594,7 @@ function MessageComposer({
         </div>
       </div>
       <div className="community-chat-composer-meta">
-        <span>
-          Enter to send. Shift + Enter for a new line. Mentioned members may
-          receive an email.
-        </span>
+        <span>Enter to send. Shift + Enter for a new line.</span>
         <span>{maxCommunityMessageLength - body.length}</span>
       </div>
       {attachmentError && (
@@ -1276,21 +1272,6 @@ function Community() {
           deliveryNotice =
             'Message sent, but the attachment could not be displayed yet. Refresh the room to try again.'
         }
-      }
-    }
-
-    if (mentionedProfileIds.length > 0) {
-      try {
-        const notificationResult = await notifyCommunityMentions(data.id)
-        if (notificationResult.error) {
-          deliveryNotice = deliveryNotice
-            ? `${deliveryNotice} The mention email could not be delivered.`
-            : 'Message sent, but the mention email could not be delivered.'
-        }
-      } catch {
-        deliveryNotice = deliveryNotice
-          ? `${deliveryNotice} The mention email could not be delivered.`
-          : 'Message sent, but the mention email could not be delivered.'
       }
     }
 

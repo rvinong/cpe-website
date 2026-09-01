@@ -25,10 +25,6 @@ import {
   updateAnnouncement,
 } from '../lib/announcements'
 import { signalBytePublished } from '../lib/byteAssistant'
-import {
-  describeNotificationResult,
-  notifyPublishedContent,
-} from '../lib/notifications'
 
 const emptyForm = {
   title: '',
@@ -192,17 +188,12 @@ function AdminAnnouncements() {
         ? 'Announcement updated successfully.'
         : 'Announcement created successfully.'
 
-    const shouldNotify =
+    const isNewlyPublished =
       result.data.status === 'published' &&
       editingItem?.status !== 'published'
 
-    if (shouldNotify) {
+    if (isNewlyPublished) {
       signalBytePublished('announcement', result.data.title)
-      const notificationResult = await notifyPublishedContent(
-        'announcement',
-        result.data.id,
-      )
-      successMessage += describeNotificationResult(notificationResult)
     }
 
     setSuccess(successMessage)
