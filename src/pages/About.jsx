@@ -68,8 +68,8 @@ const officialRecords = [
 
 function OrganizationPersonCard({ person }) {
   return (
-    <article className="group mx-auto flex h-full w-full max-w-[20rem] rounded-2xl border border-slate-200 bg-white p-5 text-center transition hover:-translate-y-0.5 hover:border-blue-200 sm:p-6">
-      <div className="flex w-full flex-col items-center gap-4">
+    <article className="group flex h-full w-full rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-blue-200 sm:p-6">
+      <div className="flex w-full flex-col items-center gap-5 text-center sm:flex-row sm:items-start sm:text-left">
         {person.photo ? (
           <img
             src={person.photo}
@@ -78,10 +78,10 @@ function OrganizationPersonCard({ person }) {
             decoding="async"
             width="128"
             height="160"
-            className="profile-image h-44 w-36 shrink-0 rounded-3xl object-cover object-center shadow-md ring-2 ring-blue-100"
+            className="profile-image h-36 w-28 shrink-0 rounded-3xl object-cover object-center shadow-md ring-2 ring-blue-100 lg:h-40 lg:w-32"
           />
         ) : (
-          <span className="grid h-44 w-36 shrink-0 place-items-center rounded-3xl bg-brand-50 text-2xl font-black text-brand-600 ring-2 ring-blue-100">
+          <span className="grid h-36 w-28 shrink-0 place-items-center rounded-3xl bg-brand-50 text-2xl font-black text-brand-600 ring-2 ring-blue-100 lg:h-40 lg:w-32">
             {person.initials}
           </span>
         )}
@@ -92,7 +92,7 @@ function OrganizationPersonCard({ person }) {
             </span>
           )}
           <h3
-            className={`${person.person_type === 'faculty' ? 'mt-0' : 'mt-3'} font-extrabold leading-6 text-navy-900`}
+            className={`${person.person_type === 'faculty' ? 'mt-0' : 'mt-3'} font-extrabold text-navy-900`}
           >
             {person.name}
           </h3>
@@ -490,11 +490,11 @@ function About() {
                         />
                       </div>
                       {otherFaculty.length > 0 && (
-                        <div className="mx-auto mt-4 flex max-w-4xl flex-wrap justify-center gap-4">
+                        <div className="mx-auto mt-4 grid max-w-6xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
                           {otherFaculty.map((person) => (
                             <div
                               key={`${person.position}-${person.name}`}
-                              className="w-full sm:w-80"
+                              className="min-w-0"
                             >
                               <OrganizationPersonCard person={person} />
                             </div>
@@ -539,11 +539,11 @@ function About() {
                         />
                       </div>
                       {otherOfficers.length > 0 && (
-                        <div className="mx-auto mt-4 flex max-w-2xl flex-wrap justify-center gap-4">
+                        <div className="mx-auto mt-4 grid max-w-5xl gap-4 sm:grid-cols-2">
                           {otherOfficers.map((person) => (
                             <div
                               key={`${person.position}-${person.name}`}
-                              className="w-full sm:w-80"
+                              className="min-w-0"
                             >
                               <OrganizationPersonCard person={person} />
                             </div>
