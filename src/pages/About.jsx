@@ -86,14 +86,7 @@ function OrganizationPersonCard({ person }) {
           </span>
         )}
         <div className="min-w-0 flex-1">
-          {person.person_type !== 'faculty' && (
-            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-extrabold text-slate-500 uppercase">
-              Officer
-            </span>
-          )}
-          <h3
-            className={`${person.person_type === 'faculty' ? 'mt-0' : 'mt-3'} font-extrabold text-navy-900`}
-          >
+          <h3 className="mt-0 font-extrabold text-navy-900">
             {person.name}
           </h3>
           <p className="mt-1 text-sm font-bold text-brand-600">
