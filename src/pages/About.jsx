@@ -125,6 +125,22 @@ function About() {
   const displayedOfficers = displayedOrganizationPeople.filter(
     (person) => person.person_type !== 'faculty',
   )
+  const facultyHead =
+    displayedFaculty.find(
+      (person) =>
+        String(person.position || '').trim().toLowerCase() ===
+        'program chairperson',
+    ) || displayedFaculty[0]
+  const otherFaculty = facultyHead
+    ? displayedFaculty.filter((person) => person !== facultyHead)
+    : []
+  const chapterPresident =
+    displayedOfficers.find(
+      (person) => String(person.position || '').trim().toLowerCase() === 'president',
+    ) || displayedOfficers[0]
+  const otherOfficers = chapterPresident
+    ? displayedOfficers.filter((person) => person !== chapterPresident)
+    : []
   const overviewFacts = [
     {
       icon: ShieldCheck,
@@ -429,7 +445,8 @@ function About() {
               </h2>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600">
                 Meet the faculty and student leaders supporting the chapter's
-                academic and organizational work.
+                academic and organizational work. Program leadership appears
+                first in each directory for a clear chain of responsibility.
               </p>
               {isUsingSamplePeople && (
                 <p className="mt-4 rounded-2xl border border-blue-300 bg-brand-50/45 px-4 py-3 text-xs font-extrabold tracking-[0.12em] text-brand-600 uppercase">
@@ -460,14 +477,23 @@ function About() {
                     )}
                   </div>
                   {displayedFaculty.length > 0 ? (
-                    <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                      {displayedFaculty.map((person) => (
+                    <>
+                      <div className="mx-auto mt-5 w-full max-w-2xl">
                         <OrganizationPersonCard
-                          key={`${person.position}-${person.name}`}
-                          person={person}
+                          person={facultyHead}
                         />
-                      ))}
-                    </div>
+                      </div>
+                      {otherFaculty.length > 0 && (
+                        <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                          {otherFaculty.map((person) => (
+                            <OrganizationPersonCard
+                              key={`${person.position}-${person.name}`}
+                              person={person}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <p className="mt-5 rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 px-5 py-4 text-sm text-slate-500">
                       No faculty records have been published yet.
@@ -498,14 +524,23 @@ function About() {
                     )}
                   </div>
                   {displayedOfficers.length > 0 ? (
-                    <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                      {displayedOfficers.map((person) => (
+                    <>
+                      <div className="mx-auto mt-5 w-full max-w-2xl">
                         <OrganizationPersonCard
-                          key={`${person.position}-${person.name}`}
-                          person={person}
+                          person={chapterPresident}
                         />
-                      ))}
-                    </div>
+                      </div>
+                      {otherOfficers.length > 0 && (
+                        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                          {otherOfficers.map((person) => (
+                            <OrganizationPersonCard
+                              key={`${person.position}-${person.name}`}
+                              person={person}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <p className="mt-5 rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 px-5 py-4 text-sm text-slate-500">
                       No organization officers have been published yet.
