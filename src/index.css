@@ -7404,6 +7404,18 @@ html.dark .published-photo-preview-profile-image {
   }
 }
 
+.published-photo-preview-profile-image-portrait {
+  width: 6.5rem;
+  height: 8.125rem;
+}
+
+@media (max-width: 639px) {
+  .published-photo-preview-profile-image-portrait {
+    width: 5.5rem;
+    height: 6.875rem;
+  }
+}
+
 /* Photo crop controls used before news, gallery, and event media is saved. */
 .photo-crop-trigger {
   display: inline-flex;

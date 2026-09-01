@@ -31,6 +31,7 @@ import {
   uploadOrganizationPersonPhoto,
   validateOrganizationPersonPhoto,
 } from '../lib/organization'
+import PhotoCropEditor from './PhotoCropEditor'
 import PublishedPhotoPreview from './PublishedPhotoPreview'
 
 const inputClassName =
@@ -276,6 +277,15 @@ function AdminOrganization() {
     setPersonPhotoPreview(URL.createObjectURL(file))
     setError('')
     event.target.value = ''
+  }
+
+  const applyPersonPhotoCrop = ({ file, previewUrl: croppedPreviewUrl }) => {
+    if (!croppedPreviewUrl) return
+
+    clearPersonPhotoPreview()
+    setPersonPhotoFile(file)
+    setPersonPhotoPreview(croppedPreviewUrl)
+    setError('')
   }
 
   const handleOfficerSubmit = async (event) => {
@@ -924,10 +934,10 @@ function AdminOrganization() {
                           <img
                             src={personPhotoPreview}
                             alt="Selected profile preview"
-                            className="profile-image size-24 rounded-2xl object-cover"
+                            className="profile-image h-36 w-28 rounded-3xl object-cover object-center"
                           />
                         ) : (
-                          <span className="grid size-24 place-items-center rounded-2xl bg-white text-2xl font-black text-brand-600 ring-1 ring-blue-100">
+                          <span className="grid h-36 w-28 place-items-center rounded-3xl bg-white text-2xl font-black text-brand-600 ring-1 ring-blue-100">
                             {officerForm.name
                               .split(/\s+/)
                               .filter(Boolean)
@@ -946,22 +956,38 @@ function AdminOrganization() {
                             Without a photo, the person&apos;s initials will be
                             shown instead.
                           </p>
-                          <label className="mt-4 inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-extrabold text-brand-600 ring-1 ring-blue-100">
-                            {personPhotoPreview ? (
-                              <Camera size={17} />
-                            ) : (
-                              <ImageUp size={17} />
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-extrabold text-brand-600 ring-1 ring-blue-100">
+                              {personPhotoPreview ? (
+                                <Camera size={17} />
+                              ) : (
+                                <ImageUp size={17} />
+                              )}
+                              {personPhotoPreview
+                                ? 'Change photo'
+                                : 'Choose photo'}
+                              <input
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp"
+                                onChange={handlePersonPhotoChange}
+                                className="sr-only"
+                              />
+                            </label>
+                            {personPhotoPreview && (
+                              <PhotoCropEditor
+                                image={personPhotoPreview}
+                                sourceFile={personPhotoFile}
+                                aspectRatio={4 / 5}
+                                title="Adjust profile photo"
+                                label="Edit crop"
+                                fileName={
+                                  personPhotoFile?.name || officerForm.name
+                                }
+                                disabled={isSaving}
+                                onApply={applyPersonPhotoCrop}
+                              />
                             )}
-                            {personPhotoPreview
-                              ? 'Change photo'
-                              : 'Choose photo'}
-                            <input
-                              type="file"
-                              accept="image/jpeg,image/png,image/webp"
-                              onChange={handlePersonPhotoChange}
-                              className="sr-only"
-                            />
-                          </label>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -972,6 +998,7 @@ function AdminOrganization() {
                       name={officerForm.name}
                       role={officerForm.position}
                       academicYear={officerForm.academicYear}
+                      profilePortrait
                       profileLabel={
                         officerForm.personType === 'faculty'
                           ? 'Faculty'

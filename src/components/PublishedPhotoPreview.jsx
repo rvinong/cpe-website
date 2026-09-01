@@ -84,6 +84,7 @@ function PublishedPhotoPreview({
   batch = '',
   academicYear = '',
   profileLabel = '',
+  profilePortrait = false,
   status = '',
   isFeatured = false,
 }) {
@@ -113,7 +114,13 @@ function PublishedPhotoPreview({
 
       {isProfile ? (
         <article className="published-photo-preview-profile-card">
-          <div className="published-photo-preview-profile-image">
+          <div
+            className={`published-photo-preview-profile-image ${
+              profilePortrait
+                ? 'published-photo-preview-profile-image-portrait'
+                : ''
+            }`}
+          >
             {image ? (
               <img src={image} alt="" />
             ) : (
