@@ -68,22 +68,24 @@ const officialRecords = [
 
 function OrganizationPersonCard({ person }) {
   return (
-    <article className="rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-blue-200">
-      <div className="flex items-start gap-4">
+    <article className="group flex h-full rounded-2xl border border-slate-200 bg-white p-5 transition hover:-translate-y-0.5 hover:border-blue-200 sm:p-6">
+      <div className="flex w-full flex-col items-center gap-5 text-center sm:flex-row sm:items-start sm:text-left">
         {person.photo ? (
           <img
             src={person.photo}
             alt=""
             loading="lazy"
             decoding="async"
-            className="profile-image size-16 shrink-0 rounded-2xl object-cover"
+            width="128"
+            height="160"
+            className="profile-image h-36 w-28 shrink-0 rounded-3xl object-cover object-center shadow-md ring-2 ring-blue-100 lg:h-40 lg:w-32"
           />
         ) : (
-          <span className="grid size-16 shrink-0 place-items-center rounded-2xl bg-brand-50 text-lg font-black text-brand-600 ring-1 ring-blue-100">
+          <span className="grid h-36 w-28 shrink-0 place-items-center rounded-3xl bg-brand-50 text-2xl font-black text-brand-600 ring-2 ring-blue-100 lg:h-40 lg:w-32">
             {person.initials}
           </span>
         )}
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-extrabold text-slate-500 uppercase">
             {person.person_type === 'faculty' ? 'Faculty' : 'Officer'}
           </span>
