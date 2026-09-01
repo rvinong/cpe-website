@@ -483,15 +483,21 @@ function About() {
                         />
                       </div>
                       {otherFaculty.length > 0 && (
-                        <div className="mx-auto mt-4 grid max-w-6xl gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                          {otherFaculty.map((person) => (
-                            <div
-                              key={`${person.position}-${person.name}`}
-                              className="min-w-0"
-                            >
+                        <div className="mx-auto mt-4 grid max-w-5xl gap-4 sm:grid-cols-2">
+                          {otherFaculty.map((person, index) => {
+                            const isCenteredLastCard =
+                              otherFaculty.length % 2 === 1 &&
+                              index === otherFaculty.length - 1
+
+                            return (
+                              <div
+                                key={`${person.position}-${person.name}`}
+                                className={`min-w-0 ${isCenteredLastCard ? 'sm:col-span-2 sm:mx-auto sm:w-[calc(50%_-_0.5rem)]' : ''}`}
+                              >
                               <OrganizationPersonCard person={person} />
-                            </div>
-                          ))}
+                              </div>
+                            )
+                          })}
                         </div>
                       )}
                     </>
