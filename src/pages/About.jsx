@@ -432,7 +432,7 @@ function About() {
             <Motion.article
               initial={isCompactMotion ? false : { opacity: 0, y: 18 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: isCompactMotion ? 0.05 : 0.2 }}
+              viewport={{ once: true, amount: 'some' }}
               transition={{ duration: 0.5, delay: 0.08 }}
               className="rounded-3xl border border-slate-200 bg-white p-7 shadow-[0_24px_70px_-48px_rgba(15,23,42,0.38)] sm:p-9"
             >
