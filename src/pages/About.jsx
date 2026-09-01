@@ -484,12 +484,14 @@ function About() {
                         />
                       </div>
                       {otherFaculty.length > 0 && (
-                        <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                        <div className="mt-4 flex flex-wrap justify-center gap-4">
                           {otherFaculty.map((person) => (
-                            <OrganizationPersonCard
+                            <div
                               key={`${person.position}-${person.name}`}
-                              person={person}
-                            />
+                              className="w-full sm:w-[calc(50%_-_0.5rem)] lg:w-[calc(33.333%_-_0.75rem)]"
+                            >
+                              <OrganizationPersonCard person={person} />
+                            </div>
                           ))}
                         </div>
                       )}
@@ -531,12 +533,14 @@ function About() {
                         />
                       </div>
                       {otherOfficers.length > 0 && (
-                        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                        <div className="mt-4 flex flex-wrap justify-center gap-4">
                           {otherOfficers.map((person) => (
-                            <OrganizationPersonCard
+                            <div
                               key={`${person.position}-${person.name}`}
-                              person={person}
-                            />
+                              className="w-full sm:w-[calc(50%_-_0.5rem)]"
+                            >
+                              <OrganizationPersonCard person={person} />
+                            </div>
                           ))}
                         </div>
                       )}
