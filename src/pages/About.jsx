@@ -425,7 +425,7 @@ function About() {
                 Current leadership
               </p>
               <h2 className="mt-2 text-3xl font-black text-navy-900">
-                Faculty & Organization Officers
+                Faculty & Chapter Officers
               </h2>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600">
                 Meet the faculty and student leaders supporting the chapter's
@@ -449,7 +449,7 @@ function About() {
                         id="faculty-heading"
                         className="mt-2 text-2xl font-black text-navy-900"
                       >
-                        Faculty Adviser
+                        BS Computer Engineering Faculty
                       </h3>
                     </div>
                     {displayedFaculty.length > 0 && (
@@ -487,7 +487,7 @@ function About() {
                         id="officers-heading"
                         className="mt-2 text-2xl font-black text-navy-900"
                       >
-                        Organization Officers
+                        ICpEP.SE NwSSU Chapter Officers
                       </h3>
                     </div>
                     {displayedOfficers.length > 0 && (

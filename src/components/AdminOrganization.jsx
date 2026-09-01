@@ -133,6 +133,99 @@ const emptyMilestone = {
   sortOrder: 0,
 }
 
+function OrganizationPeopleTable({
+  title,
+  description,
+  people,
+  emptyMessage,
+  onEdit,
+  onDelete,
+}) {
+  return (
+    <section className="border-t border-slate-200 first:border-t-0">
+      <div className="flex flex-wrap items-start justify-between gap-4 px-5 py-5 sm:px-6">
+        <div>
+          <p className="text-[10px] font-extrabold tracking-[0.16em] text-brand-600 uppercase">
+            Directory table
+          </p>
+          <h4 className="mt-1 text-xl font-black text-navy-900">{title}</h4>
+          <p className="mt-1 text-xs leading-5 text-slate-500">
+            {description}
+          </p>
+        </div>
+        <span className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-extrabold text-slate-500">
+          {people.length} {people.length === 1 ? 'record' : 'records'}
+        </span>
+      </div>
+
+      {people.length === 0 ? (
+        <div className="mx-5 mb-5 rounded-xl border border-dashed border-slate-200 bg-slate-50/70 px-5 py-8 text-center sm:mx-6">
+          <p className="text-sm font-bold text-slate-500">{emptyMessage}</p>
+        </div>
+      ) : (
+        <div className="divide-y divide-slate-200 border-t border-slate-200">
+          {people.map((person) => (
+            <article
+              key={person.id}
+              className="grid gap-4 px-5 py-5 sm:grid-cols-[64px_1fr_auto] sm:items-center sm:px-6"
+            >
+              {person.photo ? (
+                <img
+                  src={person.photo}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  className="profile-image size-16 rounded-2xl object-cover"
+                />
+              ) : (
+                <span className="grid size-16 place-items-center rounded-2xl bg-brand-50 text-lg font-black text-brand-600 ring-1 ring-blue-100">
+                  {person.initials}
+                </span>
+              )}
+
+              <div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-xs font-extrabold text-brand-600">
+                    {person.position}
+                  </p>
+                  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-extrabold text-slate-500 uppercase">
+                    {person.person_type === 'faculty' ? 'Faculty' : 'Officer'}
+                  </span>
+                </div>
+                <h5 className="mt-1 text-lg font-black text-navy-900">
+                  {person.name}
+                </h5>
+                <p className="mt-1 text-sm leading-6 text-slate-600">
+                  {person.academic_year || 'Academic year not specified'}
+                </p>
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => onEdit(person)}
+                  className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3.5 py-2 text-xs font-extrabold text-slate-600"
+                >
+                  <Edit3 size={15} />
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onDelete(person)}
+                  className="grid size-10 place-items-center rounded-lg border border-red-200 text-red-600"
+                  aria-label={`Delete ${person.name}`}
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+  )
+}
+
 function AdminOrganization() {
   const {
     profile,
@@ -160,11 +253,15 @@ function AdminOrganization() {
   const needsSchema = isOrganizationSchemaMissing(contentError)
   const positionOptions = organizationPositionOptions[officerForm.personType]
   const availablePositionOptions =
-    officerForm.personType === 'faculty'
-      ? positionOptions
-      : officerForm.position && !positionOptions.includes(officerForm.position)
+    officerForm.position && !positionOptions.includes(officerForm.position)
       ? [officerForm.position, ...positionOptions]
       : positionOptions
+  const facultyRecords = officers.filter(
+    (person) => person.person_type === 'faculty',
+  )
+  const chapterOfficerRecords = officers.filter(
+    (person) => person.person_type !== 'faculty',
+  )
 
   useEffect(
     () => () => {
@@ -712,12 +809,12 @@ function AdminOrganization() {
             <div>
               <h3 className="font-black text-navy-900">
                 {activeTab === 'officers'
-                  ? 'Officers & faculty directory'
+                  ? 'Faculty and chapter officer directories'
                   : 'Organization milestones'}
               </h3>
               <p className="mt-1 text-xs text-slate-500">
                 {activeTab === 'officers'
-                  ? 'Ordered by official position'
+                  ? 'Manage the two public About directory tables'
                   : 'Displayed in ascending order'}
               </p>
             </div>
@@ -736,10 +833,29 @@ function AdminOrganization() {
             </button>
           </div>
 
-          {(activeTab === 'officers' ? officers : milestones).length === 0 ? (
+          {activeTab === 'officers' ? (
+            <div>
+              <OrganizationPeopleTable
+                title="BS Computer Engineering Faculty"
+                description="Faculty members, instructors, and technical support for the program."
+                people={facultyRecords}
+                emptyMessage="No faculty records yet."
+                onEdit={openOfficerEditor}
+                onDelete={handleDeleteOfficer}
+              />
+              <OrganizationPeopleTable
+                title="ICpEP.SE NwSSU Chapter Officers"
+                description="The current student officers and chapter representatives."
+                people={chapterOfficerRecords}
+                emptyMessage="No chapter officers yet."
+                onEdit={openOfficerEditor}
+                onDelete={handleDeleteOfficer}
+              />
+            </div>
+          ) : milestones.length === 0 ? (
             <div className="px-6 py-16 text-center">
               <h3 className="text-lg font-black text-navy-900">
-                No {activeTab === 'officers' ? 'officers' : 'milestones'} yet
+                No milestones yet
               </h3>
               <p className="mt-2 text-sm text-slate-600">
                 Add verified organization records when they are ready.
@@ -747,84 +863,42 @@ function AdminOrganization() {
             </div>
           ) : (
             <div className="divide-y divide-slate-200">
-              {(activeTab === 'officers' ? officers : milestones).map(
-                (item) => (
-                  <article
-                    key={item.id}
-                    className={`grid gap-4 px-5 py-5 sm:items-center sm:px-6 ${
-                      activeTab === 'officers'
-                        ? 'sm:grid-cols-[64px_1fr_auto]'
-                        : 'sm:grid-cols-[1fr_auto]'
-                    }`}
-                  >
-                    {activeTab === 'officers' && (
-                      item.photo ? (
-                        <img
-                          src={item.photo}
-                          alt=""
-                          loading="lazy"
-                          decoding="async"
-                          className="profile-image size-16 rounded-2xl object-cover"
-                        />
-                      ) : (
-                        <span className="grid size-16 place-items-center rounded-2xl bg-brand-50 text-lg font-black text-brand-600 ring-1 ring-blue-100">
-                          {item.initials}
-                        </span>
-                      )
-                    )}
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-xs font-extrabold text-brand-600">
-                          {activeTab === 'officers'
-                            ? item.position
-                            : item.year}
-                        </p>
-                        {activeTab === 'officers' && (
-                          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-extrabold text-slate-500 uppercase">
-                            {item.person_type === 'faculty'
-                              ? 'Faculty'
-                              : 'Officer'}
-                          </span>
-                        )}
-                      </div>
-                      <h4 className="mt-1 text-lg font-black text-navy-900">
-                        {activeTab === 'officers' ? item.name : item.title}
-                      </h4>
-                      <p className="mt-1 text-sm leading-6 text-slate-600">
-                        {activeTab === 'officers'
-                          ? item.academic_year || 'Academic year not specified'
-                          : item.description}
-                      </p>
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          activeTab === 'officers'
-                            ? openOfficerEditor(item)
-                            : openMilestoneEditor(item)
-                        }
-                        className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3.5 py-2 text-xs font-extrabold text-slate-600"
-                      >
-                        <Edit3 size={15} />
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          activeTab === 'officers'
-                            ? handleDeleteOfficer(item)
-                            : handleDeleteMilestone(item)
-                        }
-                        className="grid size-10 place-items-center rounded-lg border border-red-200 text-red-600"
-                        aria-label={`Delete ${activeTab === 'officers' ? item.name : item.title}`}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </article>
-                ),
-              )}
+              {milestones.map((milestone) => (
+                <article
+                  key={milestone.id}
+                  className="grid gap-4 px-5 py-5 sm:grid-cols-[1fr_auto] sm:items-center sm:px-6"
+                >
+                  <div>
+                    <p className="text-xs font-extrabold text-brand-600">
+                      {milestone.year}
+                    </p>
+                    <h4 className="mt-1 text-lg font-black text-navy-900">
+                      {milestone.title}
+                    </h4>
+                    <p className="mt-1 text-sm leading-6 text-slate-600">
+                      {milestone.description}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => openMilestoneEditor(milestone)}
+                      className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3.5 py-2 text-xs font-extrabold text-slate-600"
+                    >
+                      <Edit3 size={15} />
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteMilestone(milestone)}
+                      className="grid size-10 place-items-center rounded-lg border border-red-200 text-red-600"
+                      aria-label={`Delete ${milestone.title}`}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </article>
+              ))}
             </div>
           )}
         </section>
@@ -883,7 +957,7 @@ function AdminOrganization() {
                         className={inputClassName}
                       >
                         <option value="officer">Student officer</option>
-                        <option value="faculty">Faculty / adviser</option>
+                        <option value="faculty">Faculty</option>
                       </select>
                     </label>
                     <label className="text-sm font-extrabold text-navy-900">
