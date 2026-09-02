@@ -3,6 +3,9 @@
 alter type public.app_role add value if not exists 'faculty';
 
 alter table public.profiles
+  alter column student_number drop not null;
+
+alter table public.profiles
   add column if not exists year_level text not null default '';
 
 update public.profiles

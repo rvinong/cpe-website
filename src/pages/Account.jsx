@@ -425,7 +425,7 @@ function Account() {
         setMessage({
           type: 'error',
           text: errorText.includes('database error saving new user')
-            ? 'Account setup is unavailable because the Supabase profile trigger needs to be updated. Run supabase/users.sql in the Supabase SQL Editor, then try again.'
+            ? 'Account setup is unavailable because the Supabase profile schema still has an older signup constraint. Run the updated supabase/users.sql in the SQL Editor, then try again.'
             : error.message,
         })
         return
