@@ -422,10 +422,15 @@ function Account() {
 
       if (error) {
         const errorText = error.message?.toLowerCase() || ''
+        const isDatabaseSignupError = errorText.includes(
+          'database error saving new user',
+        )
         setMessage({
           type: 'error',
-          text: errorText.includes('database error saving new user')
-            ? 'Supabase rejected the new profile row. Check Supabase Dashboard > Logs > Postgres Logs for the signup attempt; Auth hides the exact database constraint from the website.'
+          text: isDatabaseSignupError
+            ? formData.accountType === 'student'
+              ? 'This student number is already registered. Use the existing account or a different student number. If it belongs to an old test account, delete that account from Users & Roles first.'
+              : 'Faculty accounts do not use a student number. Leave that field blank and run the latest supabase/users.sql trigger migration if this still appears.'
             : error.message,
         })
         return
@@ -433,8 +438,8 @@ function Account() {
 
       if (!data.session) {
         setMessage({
-          type: 'error',
-          text: 'Email confirmation is enabled in Supabase. Disable Confirm email under Authentication > Providers > Email so users can enter immediately.',
+          type: 'info',
+          text: 'Account created, but email confirmation is enabled in Supabase. Disable Confirm email under Authentication > Providers > Email, then sign in without confirming an email.',
         })
         return
       }

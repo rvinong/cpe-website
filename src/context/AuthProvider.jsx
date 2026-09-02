@@ -148,17 +148,22 @@ function AuthProvider({ children }) {
       }
     }
 
+    const userMetadata = {
+      account_type: accountType,
+      full_name: fullName,
+    }
+
+    if (accountType === 'student') {
+      userMetadata.student_number = studentNumber
+      userMetadata.year_level = yearLevel
+    }
+
     return supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: getAuthRedirectUrl(),
-        data: {
-          account_type: accountType,
-          full_name: fullName,
-          student_number: studentNumber,
-          year_level: yearLevel,
-        },
+        data: userMetadata,
       },
     })
   }
