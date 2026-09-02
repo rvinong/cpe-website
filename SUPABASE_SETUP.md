@@ -23,6 +23,10 @@ In **Authentication > URL Configuration**, set:
 The production URL must be present in the redirect allow list or Supabase will
 fall back to the configured Site URL.
 
+In **Authentication > Providers > Email**, disable **Confirm email** so new
+members can sign in immediately after creating an account. New profiles still
+start in `pending` status until an administrator approves them.
+
 ## 2. Create the authentication profile schema
 
 Open the Supabase SQL Editor and run:
@@ -41,7 +45,7 @@ This creates:
 ## 3. Create the first administrator
 
 1. Run the website and sign up normally.
-2. Confirm the account email if email confirmation is enabled.
+2. With **Confirm email** disabled, the account is signed in immediately after signup.
 3. Run this in the SQL Editor, replacing the email:
 
 ```sql

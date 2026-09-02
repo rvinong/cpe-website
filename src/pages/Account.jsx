@@ -421,15 +421,27 @@ function Account() {
       setIsSubmitting(false)
 
       if (error) {
-        setMessage({ type: 'error', text: error.message })
+        const errorText = error.message?.toLowerCase() || ''
+        setMessage({
+          type: 'error',
+          text: errorText.includes('database error saving new user')
+            ? 'Account setup is unavailable because the Supabase profile trigger needs to be updated. Run supabase/users.sql in the Supabase SQL Editor, then try again.'
+            : error.message,
+        })
+        return
+      }
+
+      if (!data.session) {
+        setMessage({
+          type: 'error',
+          text: 'Email confirmation is enabled in Supabase. Disable Confirm email under Authentication > Providers > Email so users can enter immediately.',
+        })
         return
       }
 
       setMessage({
         type: 'success',
-        text: data.session
-          ? 'Account created and signed in. Your organization profile is pending approval.'
-          : 'Account created. Check your email to confirm the address before signing in.',
+        text: 'Account created and signed in. Your organization profile is pending approval.',
       })
       return
     }

@@ -39,8 +39,7 @@ begin
     full_name,
     student_number,
     role,
-    year_level,
-    email_notifications
+    year_level
   )
   values (
     new.id,
@@ -60,17 +59,16 @@ begin
       )
       then coalesce(new.raw_user_meta_data ->> 'year_level', '')
       else ''
-    end,
-    case
-      when lower(
-        coalesce(new.raw_user_meta_data ->> 'email_notifications', 'true')
-      ) = 'false' then false
-      else true
     end
   );
   return new;
 end;
 $$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute procedure public.handle_new_user();
 
 create or replace function public.set_email_notifications(enabled boolean)
 returns boolean
