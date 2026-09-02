@@ -47,12 +47,19 @@ begin
     nickname,
     role,
     year_level,
-    email_notifications
+    email_notifications,
+    status,
+    created_at,
+    updated_at
   )
   values (
     new.id,
     coalesce(new.raw_user_meta_data ->> 'full_name', ''),
-    nullif(trim(coalesce(new.raw_user_meta_data ->> 'student_number', '')), ''),
+    case
+      when lower(coalesce(new.raw_user_meta_data ->> 'account_type', 'student')) = 'faculty'
+      then null
+      else nullif(trim(coalesce(new.raw_user_meta_data ->> 'student_number', '')), '')
+    end,
     '',
     case
       when lower(coalesce(new.raw_user_meta_data ->> 'account_type', 'student')) = 'faculty'
@@ -69,7 +76,10 @@ begin
       then coalesce(new.raw_user_meta_data ->> 'year_level', '')
       else ''
     end,
-    true
+    true,
+    'pending'::public.profile_status,
+    now(),
+    now()
   );
   return new;
 end;
