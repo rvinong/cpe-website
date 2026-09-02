@@ -425,7 +425,7 @@ function Account() {
         setMessage({
           type: 'error',
           text: errorText.includes('database error saving new user')
-            ? 'Account setup is unavailable because the Supabase profile schema still has an older signup constraint. Run the updated supabase/users.sql in the SQL Editor, then try again.'
+            ? 'Supabase rejected the new profile row. Check Supabase Dashboard > Logs > Postgres Logs for the signup attempt; Auth hides the exact database constraint from the website.'
             : error.message,
         })
         return

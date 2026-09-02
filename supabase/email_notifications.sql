@@ -6,6 +6,12 @@ alter table public.profiles
   add column if not exists email_notifications boolean not null default true;
 
 alter table public.profiles
+  add column if not exists nickname text not null default '';
+
+alter table public.profiles
+  alter column student_number drop not null;
+
+alter table public.profiles
   add column if not exists year_level text not null default '';
 
 update public.profiles
@@ -38,13 +44,16 @@ begin
     id,
     full_name,
     student_number,
+    nickname,
     role,
-    year_level
+    year_level,
+    email_notifications
   )
   values (
     new.id,
     coalesce(new.raw_user_meta_data ->> 'full_name', ''),
-    nullif(new.raw_user_meta_data ->> 'student_number', ''),
+    nullif(trim(coalesce(new.raw_user_meta_data ->> 'student_number', '')), ''),
+    '',
     case
       when lower(coalesce(new.raw_user_meta_data ->> 'account_type', 'student')) = 'faculty'
       then 'faculty'::public.app_role
@@ -59,7 +68,8 @@ begin
       )
       then coalesce(new.raw_user_meta_data ->> 'year_level', '')
       else ''
-    end
+    end,
+    true
   );
   return new;
 end;
