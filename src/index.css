@@ -4507,15 +4507,16 @@ html.dark .news-detail-footer {
   min-height: 20rem;
   place-items: center;
   overflow: hidden;
-  padding: 1rem 4.75rem 4rem;
+  padding: 0;
   background: #eaf2fc;
   touch-action: pan-y;
 }
 
 .merch-gallery-visual {
+  position: absolute;
+  inset: 0;
   display: grid;
   width: 100%;
-  min-height: 16rem;
   height: 100%;
   place-items: center;
 }
@@ -4524,17 +4525,16 @@ html.dark .news-detail-footer {
 .merch-gallery-main-image {
   display: block;
   width: 100%;
-  min-height: 16rem;
   height: 100%;
 }
 
 .merch-gallery-main-image {
-  max-height: 31rem;
-  object-fit: contain;
+  object-fit: cover;
+  object-position: center;
 }
 
 .merch-gallery-visual > .merch-artwork {
-  border-radius: 1rem;
+  border-radius: 0;
 }
 
 .merch-gallery-control {
@@ -4997,14 +4997,7 @@ html.dark .news-detail-footer {
   }
 
   .merch-product-gallery-stage {
-    padding-inline: 3.75rem;
-    padding-bottom: 3.5rem;
-  }
-
-  .merch-gallery-visual,
-  .merch-gallery-visual > .merch-artwork,
-  .merch-gallery-main-image {
-    min-height: 11rem;
+    padding: 0;
   }
 
   .merch-gallery-control {
