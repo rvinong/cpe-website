@@ -4030,81 +4030,6 @@ html.dark .news-detail-footer {
   --merch-muted: #667892;
 }
 
-.merch-intro-grid {
-  display: grid;
-  gap: 1rem;
-}
-
-.merch-featured-showcase {
-  position: relative;
-  display: grid;
-  min-height: 26rem;
-  overflow: hidden;
-  border: 1px solid rgba(96, 165, 250, 0.24);
-  border-radius: 2rem;
-  background:
-    radial-gradient(circle at 76% 16%, rgba(46, 115, 246, 0.44), transparent 18rem),
-    linear-gradient(135deg, #07152f 0%, #0b1f46 58%, #123f91 100%);
-  box-shadow: 0 30px 80px -48px rgba(7, 21, 47, 0.76);
-}
-
-.merch-featured-showcase::after {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(147, 197, 253, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(147, 197, 253, 0.08) 1px, transparent 1px);
-  background-size: 34px 34px;
-  mask-image: linear-gradient(120deg, black, transparent 78%);
-  pointer-events: none;
-  content: "";
-}
-
-.merch-featured-copy {
-  position: relative;
-  z-index: 1;
-  align-self: end;
-  padding: 2rem;
-}
-
-.merch-featured-art {
-  position: absolute;
-  top: 1.4rem;
-  right: 1.4rem;
-  width: min(38%, 15rem);
-  height: calc(100% - 2.8rem);
-  overflow: hidden;
-  border: 1px solid rgba(191, 219, 254, 0.28);
-  border-radius: 1.6rem;
-  background: rgba(255, 255, 255, 0.08);
-  transform: rotate(3deg);
-}
-
-.merch-featured-art .merch-artwork {
-  min-height: 100%;
-  border: 0;
-  border-radius: 0;
-}
-
-.merch-featured-stamp {
-  position: absolute;
-  right: 0.75rem;
-  bottom: 0.75rem;
-  z-index: 2;
-  border: 1px solid rgba(255, 255, 255, 0.24);
-  border-radius: 999px;
-  background: rgba(7, 21, 47, 0.7);
-  padding: 0.4rem 0.6rem;
-  color: #dbeafe;
-  font-size: 0.58rem;
-  font-weight: 900;
-  letter-spacing: 0.16em;
-}
-
-.merch-intro-note {
-  min-height: 0;
-}
-
 .merch-toolbar {
   display: grid;
   gap: 0.75rem;
@@ -4951,35 +4876,7 @@ html.dark .news-detail-footer {
   }
 }
 
-@media (min-width: 1024px) {
-  .merch-intro-grid {
-    grid-template-columns: minmax(0, 1.2fr) minmax(17rem, 0.8fr);
-  }
-
-  .merch-featured-copy {
-    max-width: 66%;
-  }
-}
-
 @media (max-width: 639px) {
-  .merch-featured-showcase {
-    min-height: 33rem;
-  }
-
-  .merch-featured-copy {
-    align-self: start;
-    max-width: 72%;
-    padding: 1.5rem;
-  }
-
-  .merch-featured-art {
-    top: auto;
-    right: 1rem;
-    bottom: 1rem;
-    width: 58%;
-    height: 14rem;
-  }
-
   .merch-modal-backdrop {
     align-items: end;
     padding: 0;
@@ -5149,7 +5046,6 @@ html.dark .merch-confirmation-number strong {
   color: #eef5ff;
 }
 
-html.dark .merch-intro-section,
 html.dark .merch-orders-section {
   background: #0a1424;
 }

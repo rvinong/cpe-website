@@ -425,11 +425,6 @@ function Merchandise() {
     () => products.filter((product) => product.status === 'archived'),
     [products],
   )
-  const featuredProducts = useMemo(
-    () => currentProducts.filter((product) => product.is_featured).slice(0, 2),
-    [currentProducts],
-  )
-
   const filteredProducts = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase()
     const viewProducts =
@@ -671,8 +666,6 @@ function Merchandise() {
     }
   }
 
-  const featuredProduct = featuredProducts[0] || currentProducts[0] || null
-
   return (
     <>
       <main className="merch-page pt-[84px]">
@@ -699,49 +692,6 @@ function Merchandise() {
             </>
           }
         />
-
-        <section className="merch-intro-section bg-white py-12 sm:py-16">
-          <div className="section-shell">
-            <div className="merch-intro-grid">
-              <div className="merch-featured-showcase">
-                <div className="merch-featured-copy">
-                  <p className="text-xs font-extrabold tracking-[0.2em] text-blue-200 uppercase">
-                    Current collection
-                  </p>
-                  <h2 className="mt-3 text-3xl font-black tracking-tight text-white sm:text-4xl">
-                    Made for the next build.
-                  </h2>
-                  <p className="mt-4 max-w-xl text-sm leading-7 text-blue-100/80">
-                    Every batch gets its own chapter mark. Start with what is available now, then explore the archive to see how the designs evolved.
-                  </p>
-                  <a href="#catalog" className="mt-6 inline-flex items-center gap-2 text-sm font-extrabold text-white hover:text-blue-200">
-                    See the current drop <ArrowRight size={16} aria-hidden="true" />
-                  </a>
-                </div>
-                <div className="merch-featured-art">
-                  {featuredProduct ? <ProductImage product={featuredProduct} /> : <MerchandiseArtwork product={{ category: 'Shirts', batch: 'ICpEP.SE' }} />}
-                  <span className="merch-featured-stamp">ICpEP.SE</span>
-                </div>
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
-                {[
-                  [Shirt, 'Current drops', 'Published designs with live size stock.'],
-                  [Archive, 'Batch archive', 'Older designs preserved as chapter history.'],
-                  [PackageCheck, 'Simple ordering', 'One secure order summary for pickup or delivery.'],
-                ].map(([Icon, title, description]) => (
-                  <article key={title} className="merch-intro-note surface-card p-5">
-                    <span className="grid size-11 place-items-center rounded-xl bg-brand-50 text-brand-600">
-                      <Icon size={21} aria-hidden="true" />
-                    </span>
-                    <h3 className="mt-4 text-base font-black text-navy-900">{title}</h3>
-                    <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
-                  </article>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
 
         <section id="catalog" className="scroll-mt-24 bg-slate-50/70 py-20 sm:py-24">
           <div className="section-shell">
