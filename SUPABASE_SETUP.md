@@ -236,6 +236,10 @@ database function rechecks the product status, current price, requested stock,
 and order total while locking the requested variants, so browser values cannot
 be used to change a checkout total or oversell inventory.
 
+Admins and editors can update or permanently delete orders from the **Orders**
+tab. Deleting a pending, confirmed, or ready order returns its reserved stock;
+deleting a cancelled or completed order does not change inventory.
+
 After running the SQL, refresh `/admin`, open **Merchandise**, publish the
 current products, add their size variants and stock, and use the **Orders** tab
 to process submitted requests.

@@ -335,3 +335,13 @@ export async function updateMerchandiseOrderStatus(orderId, status) {
     target_status: status,
   })
 }
+
+export async function deleteMerchandiseOrder(orderId) {
+  if (!supabase) {
+    return { data: null, error: new Error('Supabase is not configured.') }
+  }
+
+  return supabase.rpc('admin_delete_merch_order', {
+    target_order_id: orderId,
+  })
+}

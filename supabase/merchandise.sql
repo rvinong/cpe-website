@@ -626,6 +626,47 @@ begin
 end;
 $$;
 
+drop function if exists public.admin_delete_merch_order(uuid);
+create or replace function public.admin_delete_merch_order(
+  target_order_id uuid
+)
+returns boolean
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+  current_order public.merchandise_orders;
+begin
+  if public.current_user_role() not in ('admin', 'editor') then
+    raise exception 'Staff access required';
+  end if;
+
+  select *
+  into current_order
+  from public.merchandise_orders
+  where id = target_order_id
+  for update;
+
+  if current_order.id is null then
+    raise exception 'Order not found';
+  end if;
+
+  if current_order.status in ('pending', 'confirmed', 'ready') then
+    update public.merchandise_variants as variants
+    set stock = least(10000, variants.stock + items.quantity)
+    from public.merchandise_order_items as items
+    where items.order_id = current_order.id
+      and items.variant_id = variants.id;
+  end if;
+
+  delete from public.merchandise_orders
+  where id = target_order_id;
+
+  return true;
+end;
+$$;
+
 revoke all on function public.create_merch_order(
   jsonb,
   text,
@@ -648,4 +689,9 @@ grant execute on function public.create_merch_order(
 revoke all on function public.admin_set_merch_order_status(uuid, text)
   from public, anon;
 grant execute on function public.admin_set_merch_order_status(uuid, text)
+  to authenticated;
+
+revoke all on function public.admin_delete_merch_order(uuid)
+  from public, anon;
+grant execute on function public.admin_delete_merch_order(uuid)
   to authenticated;

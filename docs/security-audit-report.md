@@ -98,7 +98,7 @@ All listed functions are called through `supabase.rpc`. Sensitive functions are 
 - **Community chat:** `list_community_messages`, `list_community_members`, three compatible `create_community_message` signatures, `delete_community_message`, `list_community_message_attachments`, `add_community_message_attachments`.
 - **News reactions/comments:** `get_news_reaction_summary`, `set_news_reaction`, `clear_news_reaction`, `get_news_reaction_members`, `get_news_comment_summary`, `list_news_comments`, `create_news_comment`, `delete_news_comment`.
 - **Team:** `staff_list_team_members`, `staff_list_team_tasks`, `admin_create_team_task`, `admin_update_team_task`, `staff_update_team_task_status`, `admin_delete_team_task`, `staff_set_avatar_path`.
-- **Merchandise:** `create_merch_order`, `admin_set_merch_order_status`.
+- **Merchandise:** `create_merch_order`, `admin_set_merch_order_status`, `admin_delete_merch_order`.
 
 The current community read functions cap chat messages at 200 but the legacy forum lists and attachment metadata query are not paginated. Write RPCs also have no application-level per-user rate limit. These are resource-abuse and scraping risks, not authorization bypasses.
 
@@ -124,7 +124,7 @@ The current community read functions cap chat messages at 200 but the legacy for
 | `audit_reports` | RLS enabled; published public read; staff management | Published rows | Published plus staff rows |
 | `student_resources` | RLS enabled; approved/published read; staff CRUD | None | Approved members see published; staff see/manage all |
 | `merchandise_products`, `merchandise_variants` | RLS enabled; published/archive catalog reads; approved admin/editor CRUD | Published and archived products with available variants | Same public catalog; staff see/manage drafts, products, and variants |
-| `merchandise_orders`, `merchandise_order_items` | RLS enabled; direct writes revoked; protected RPCs create/update orders | None | Approved members read their own orders/items; admin/editor read orders and can update status through the RPC |
+| `merchandise_orders`, `merchandise_order_items` | RLS enabled; direct writes revoked; protected RPCs create/update/delete orders | None | Approved members read their own orders/items; admin/editor read orders and can update status or delete orders through role-checked RPCs |
 | `community_rooms` | RLS enabled; active room metadata read | Active room metadata | Active room metadata |
 | `community_posts`, `community_comments` | Direct table grants are revoked; protected RPCs enforce active/unlocked/staff-room boundaries | Public-room forum reads only through functions | Approved posting/deletion through functions |
 | `community_messages` | Direct writes are revoked; authenticated Realtime select policy and protected RPCs | None | Approved members in active/unlocked permitted rooms |
@@ -150,7 +150,7 @@ The current community read functions cap chat messages at 200 but the legacy for
 - Resource object reads now require a published `student_resources.file_path` match for ordinary approved members, preventing draft/orphan object reads.
 - Locked and staff-only legacy forum rooms are checked inside the `SECURITY DEFINER` read/write functions, preventing a public RPC caller from bypassing room state.
 - News reactions/comments use published-post and approved-member checks; direct DML is revoked.
-- Merchandise checkout derives the customer identity, locks published variants, validates stock and price in the database, inserts item snapshots, and decrements inventory atomically. Staff order cancellation restores stock through a role-checked function.
+- Merchandise checkout derives the customer identity, locks published variants, validates stock and price in the database, inserts item snapshots, and decrements inventory atomically. Staff order cancellation restores stock through a role-checked function, while staff deletion restores only unfinished-order reservations before cascading the order-item snapshots.
 
 ## 7. Storage and Upload Audit
 
@@ -287,7 +287,7 @@ The headers are materially stronger, but `unsafe-inline` is present for the inli
 - Removed the obsolete five-argument `admin_update_profile` overload.
 - Hardened Edge Function CORS to configured origins, removed raw provider response bodies, sanitized email subjects, and returned generic failures.
 - Added Vercel security headers and a CSP.
-- Added `supabase/merchandise.sql` with catalog, batch archive, size inventory, order snapshots, RLS, and protected checkout/status functions.
+- Added `supabase/merchandise.sql` with catalog, batch archive, size inventory, order snapshots, RLS, and protected checkout/status/delete functions.
 - Added the public `/merchandise` storefront with product details, cart persistence, approved-member order requests, and order history.
 - Added the admin Merchandise workspace for product images, publication status, variants/stock, and order-status processing.
 - Added `npm test` and the four URL safety tests.
