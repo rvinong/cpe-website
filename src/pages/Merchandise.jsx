@@ -42,7 +42,6 @@ import {
   getPublishedMerchandise,
   isMerchandiseSchemaMissing,
 } from '../lib/merchandise'
-import { getDisplayName } from '../lib/accountProfile'
 import { isSupabaseConfigured } from '../lib/supabase'
 
 const cartStorageKey = 'icpep-merchandise-cart'
@@ -344,7 +343,8 @@ function Merchandise() {
   const [ordersUserId, setOrdersUserId] = useState('')
   const [ordersError, setOrdersError] = useState('')
 
-  const displayName = getDisplayName(profile, user, 'Member')
+  const customerFullName =
+    profile?.full_name?.trim() || user?.user_metadata?.full_name?.trim() || ''
   const hasOpenPanel = Boolean(
     selectedProduct || isCartOpen || isCheckoutOpen || confirmation,
   )
@@ -588,7 +588,7 @@ function Merchandise() {
     setCheckoutError('')
     setCheckoutForm((current) => ({
       ...current,
-      customerName: current.customerName || displayName,
+      customerName: current.customerName || customerFullName,
     }))
     setIsCartOpen(false)
     setIsCheckoutOpen(true)
@@ -1119,7 +1119,7 @@ function Merchandise() {
               <form onSubmit={submitCheckout} className="grid gap-6 p-6 sm:p-8 lg:grid-cols-[1fr_0.72fr]">
                 <div className="space-y-5">
                   <div className="grid gap-5 sm:grid-cols-2">
-                    <label className="merch-form-label sm:col-span-2">Customer name<input name="customerName" value={checkoutForm.customerName} onChange={updateCheckoutField('customerName')} required maxLength={120} /></label>
+                    <label className="merch-form-label sm:col-span-2">Customer full name<input name="customerName" value={checkoutForm.customerName} onChange={updateCheckoutField('customerName')} required maxLength={120} autoComplete="name" placeholder="Enter your full name" /></label>
                     <label className="merch-form-label sm:col-span-2">Contact number<input name="contactNumber" type="tel" value={checkoutForm.contactNumber} onChange={updateCheckoutField('contactNumber')} required maxLength={40} placeholder="09xx xxx xxxx" /></label>
                   </div>
                   <fieldset>
