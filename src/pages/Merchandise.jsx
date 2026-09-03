@@ -8,6 +8,8 @@ import {
   Check,
   CheckCircle2,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Clock3,
   CreditCard,
   LockKeyhole,
@@ -129,6 +131,44 @@ function ProductImage({ product, compact = false }) {
       loading="lazy"
     />
   )
+}
+
+function getProductGallery(product) {
+  if (!product) return []
+
+  return [
+    {
+      key: 'front',
+      label: 'Front design',
+      src: product.frontImage || '',
+      alt: product.image_alt || `${product.name} front design`,
+    },
+    ...(product.backImage
+      ? [
+          {
+            key: 'back',
+            label: 'Back design',
+            src: product.backImage,
+            alt: `${product.name} back design`,
+          },
+        ]
+      : []),
+  ]
+}
+
+function ProductGalleryVisual({ product, item, compact = false }) {
+  if (item?.src) {
+    return (
+      <img
+        src={item.src}
+        alt={item.alt}
+        className={compact ? 'size-full object-cover' : 'merch-gallery-main-image'}
+        loading={compact ? 'lazy' : 'eager'}
+      />
+    )
+  }
+
+  return <MerchandiseArtwork product={product} compact={compact} />
 }
 
 function ProductCard({ product, onOpen }) {
@@ -293,6 +333,7 @@ function Merchandise() {
   const [cart, setCart] = useState(readStoredCart)
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [selectedVariantId, setSelectedVariantId] = useState('')
+  const [selectedGalleryIndex, setSelectedGalleryIndex] = useState(0)
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false)
   const [checkoutForm, setCheckoutForm] = useState(emptyCheckoutForm)
@@ -440,11 +481,58 @@ function Merchandise() {
   const cartTotal = cartLines.reduce((total, line) => total + line.lineTotal, 0)
   const visibleOrders =
     ordersUserId === user?.id && isApprovedMember && isSupabaseConfigured ? orders : []
+  const selectedGallery = getProductGallery(selectedProduct)
+  const activeGalleryIndex = Math.min(
+    selectedGalleryIndex,
+    Math.max(selectedGallery.length - 1, 0),
+  )
+  const activeGalleryItem = selectedGallery[activeGalleryIndex]
+
+  useEffect(() => {
+    if (!selectedProduct) return undefined
+
+    const handleGalleryKeyDown = (event) => {
+      if (selectedGallery.length > 1 && event.key === 'ArrowLeft') {
+        event.preventDefault()
+        setSelectedGalleryIndex((current) => (current - 1 + selectedGallery.length) % selectedGallery.length)
+      }
+      if (selectedGallery.length > 1 && event.key === 'ArrowRight') {
+        event.preventDefault()
+        setSelectedGalleryIndex((current) => (current + 1) % selectedGallery.length)
+      }
+      if (event.key === 'Escape') {
+        setSelectedProduct(null)
+      }
+    }
+
+    window.addEventListener('keydown', handleGalleryKeyDown)
+    return () => window.removeEventListener('keydown', handleGalleryKeyDown)
+  }, [selectedGallery.length, selectedProduct])
 
   const openProduct = (product) => {
     setSelectedProduct(product)
     setSelectedVariantId(getAvailableVariant(product)?.id || '')
+    setSelectedGalleryIndex(0)
     setCheckoutError('')
+  }
+
+  const shiftGallery = (direction) => {
+    if (selectedGallery.length < 2) return
+    setSelectedGalleryIndex(
+      (current) => (current + direction + selectedGallery.length) % selectedGallery.length,
+    )
+  }
+
+  const handleGalleryTouchStart = (event) => {
+    event.currentTarget.dataset.touchStartX = String(event.changedTouches[0]?.clientX ?? '')
+  }
+
+  const handleGalleryTouchEnd = (event) => {
+    const startX = Number(event.currentTarget.dataset.touchStartX)
+    const endX = event.changedTouches[0]?.clientX
+    if (!Number.isFinite(startX) || !Number.isFinite(endX) || Math.abs(endX - startX) < 42) return
+    shiftGallery(endX < startX ? 1 : -1)
+    delete event.currentTarget.dataset.touchStartX
   }
 
   const addToCart = () => {
@@ -817,10 +905,74 @@ function Merchandise() {
               </button>
               <div className="merch-product-modal-grid">
                 <div className="merch-product-modal-image">
-                  <ProductImage product={selectedProduct} />
-                  {selectedProduct.backImage && (
-                    <div className="merch-product-modal-back-image">
-                      <img src={selectedProduct.backImage} alt={`${selectedProduct.name} back design`} className="size-full object-cover" />
+                  <div
+                    id="merch-gallery-stage"
+                    className="merch-product-gallery-stage"
+                    role="group"
+                    aria-roledescription="carousel"
+                    aria-label={`${selectedProduct.name} product designs`}
+                    aria-live="polite"
+                    onTouchStart={handleGalleryTouchStart}
+                    onTouchEnd={handleGalleryTouchEnd}
+                  >
+                    <AnimatePresence mode="wait" initial={false}>
+                      <Motion.div
+                        key={activeGalleryItem?.key || 'front'}
+                        className="merch-gallery-visual"
+                        initial={{ opacity: 0, scale: 0.985 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 1.015 }}
+                        transition={{ duration: 0.18 }}
+                      >
+                        <ProductGalleryVisual product={selectedProduct} item={activeGalleryItem} />
+                      </Motion.div>
+                    </AnimatePresence>
+
+                    {selectedGallery.length > 1 && (
+                      <>
+                        <button
+                          type="button"
+                          className="merch-gallery-control merch-gallery-control-prev"
+                          onClick={() => shiftGallery(-1)}
+                          aria-label={`Show ${selectedGallery[(activeGalleryIndex - 1 + selectedGallery.length) % selectedGallery.length].label.toLowerCase()}`}
+                        >
+                          <ChevronLeft size={21} aria-hidden="true" />
+                        </button>
+                        <button
+                          type="button"
+                          className="merch-gallery-control merch-gallery-control-next"
+                          onClick={() => shiftGallery(1)}
+                          aria-label={`Show ${selectedGallery[(activeGalleryIndex + 1) % selectedGallery.length].label.toLowerCase()}`}
+                        >
+                          <ChevronRight size={21} aria-hidden="true" />
+                        </button>
+                        <div className="merch-gallery-meta">
+                          <span>{activeGalleryItem?.label}</span>
+                          <strong>{activeGalleryIndex + 1} / {selectedGallery.length}</strong>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  {selectedGallery.length > 1 && (
+                    <div className="merch-gallery-thumbnails" role="tablist" aria-label="Product designs">
+                      {selectedGallery.map((item, index) => (
+                        <button
+                          key={item.key}
+                          type="button"
+                          role="tab"
+                          aria-selected={activeGalleryIndex === index}
+                          aria-controls="merch-gallery-stage"
+                          className={`merch-gallery-thumbnail ${activeGalleryIndex === index ? 'merch-gallery-thumbnail-active' : ''}`}
+                          onClick={() => setSelectedGalleryIndex(index)}
+                          aria-label={`View ${item.label.toLowerCase()}`}
+                        >
+                          <span className="merch-gallery-thumbnail-image">
+                            <ProductGalleryVisual product={selectedProduct} item={item} compact />
+                          </span>
+                          <span>{item.label.replace(' design', '')}</span>
+                        </button>
+                      ))}
                     </div>
                   )}
                 </div>
