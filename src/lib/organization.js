@@ -13,6 +13,7 @@ import {
   validateMediaFile,
 } from './media'
 import { isSupabaseConfigured, supabase } from './supabase'
+import { getSafeAssetUrl, getSafeHttpUrl, isSafeStoragePath } from './safeUrl'
 
 const profileColumns = [
   'id',
@@ -93,7 +94,9 @@ export function getPersonInitials(name = '') {
 
 export function getOrganizationPersonPhotoUrl(path) {
   if (!path) return null
-  if (/^(https?:)?\/\//.test(path) || path.startsWith('/')) return path
+  const assetUrl = getSafeAssetUrl(path)
+  if (assetUrl) return assetUrl
+  if (!isSafeStoragePath(path)) return null
   if (!supabase) return null
   return supabase.storage.from(mediaBucket).getPublicUrl(path).data.publicUrl
 }
@@ -151,10 +154,10 @@ export function normalizeOrganizationProfile(row) {
       contactEmail: row.contact_email,
       contactPhone: row.contact_phone,
       officeHours: row.office_hours,
-      facebookUrl: row.facebook_url,
-      instagramUrl: row.instagram_url,
-      youtubeUrl: row.youtube_url,
-      linkedinUrl: row.linkedin_url,
+      facebookUrl: getSafeHttpUrl(row.facebook_url),
+      instagramUrl: getSafeHttpUrl(row.instagram_url),
+      youtubeUrl: getSafeHttpUrl(row.youtube_url),
+      linkedinUrl: getSafeHttpUrl(row.linkedin_url),
     },
     membership: {
       eligibility: row.membership_eligibility,

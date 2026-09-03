@@ -25,7 +25,7 @@ returns public.app_role
 language sql
 stable
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
   select role
   from public.profiles
@@ -37,7 +37,7 @@ create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 begin
   insert into public.profiles (
@@ -94,7 +94,7 @@ create or replace function public.set_email_notifications(enabled boolean)
 returns boolean
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 begin
   if auth.uid() is null then
@@ -121,7 +121,7 @@ create or replace function public.update_my_account_profile(
 returns public.profiles
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 declare
   clean_nickname text;
@@ -197,7 +197,7 @@ returns boolean
 language sql
 stable
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
   select exists (
     select 1
@@ -288,7 +288,7 @@ create index announcements_public_listing_idx
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
-set search_path = public
+set search_path = public, pg_temp
 as $$
 begin
   new.updated_at = now();
@@ -371,7 +371,8 @@ create table public.events (
   venue text not null,
   starts_at timestamptz not null,
   ends_at timestamptz,
-  registration_url text,
+  registration_url text
+    check (registration_url is null or registration_url ~* '^https?://[^[:space:]]+$'),
   image_path text,
   card_image_path text,
   image_alt text not null default '',

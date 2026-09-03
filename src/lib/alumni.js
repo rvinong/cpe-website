@@ -5,6 +5,7 @@ import {
   validateMediaFile,
 } from './media'
 import { isSupabaseConfigured, supabase } from './supabase'
+import { getSafeAssetUrl, isSafeStoragePath } from './safeUrl'
 
 const alumniColumns = [
   'id',
@@ -49,7 +50,9 @@ function getInitials(name) {
 
 function getPhotoUrl(path) {
   if (!path) return null
-  if (/^(https?:)?\/\//.test(path) || path.startsWith('/')) return path
+  const assetUrl = getSafeAssetUrl(path)
+  if (assetUrl) return assetUrl
+  if (!isSafeStoragePath(path)) return null
   if (!supabase) return null
   return supabase.storage.from(mediaBucket).getPublicUrl(path).data.publicUrl
 }

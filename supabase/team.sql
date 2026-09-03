@@ -54,7 +54,7 @@ returns table (
 )
 language plpgsql
 security definer
-set search_path = public, auth
+set search_path = public, auth, pg_temp
 as $$
 declare
   staff_role public.app_role;
@@ -104,7 +104,7 @@ returns table (
 )
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 declare
   staff_role public.app_role;
@@ -160,7 +160,7 @@ create or replace function public.admin_create_team_task(
 returns public.team_tasks
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 declare
   created_task public.team_tasks;
@@ -219,7 +219,7 @@ create or replace function public.admin_update_team_task(
 returns public.team_tasks
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 declare
   current_task public.team_tasks;
@@ -281,7 +281,7 @@ create or replace function public.staff_update_team_task_status(
 returns public.team_tasks
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 declare
   staff_role public.app_role;
@@ -331,7 +331,7 @@ create or replace function public.admin_delete_team_task(target_id uuid)
 returns boolean
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 begin
   if public.current_user_role()
@@ -351,7 +351,7 @@ create or replace function public.staff_set_avatar_path(
 returns text
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 declare
   staff_role public.app_role;

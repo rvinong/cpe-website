@@ -37,7 +37,7 @@ create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 begin
   insert into public.profiles (
@@ -95,7 +95,7 @@ returns public.app_role
 language sql
 stable
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
   select role
   from public.profiles
@@ -177,7 +177,7 @@ returns table (
 )
 language plpgsql
 security definer
-set search_path = public, auth
+set search_path = public, auth, pg_temp
 as $$
 begin
   if public.current_user_role()
@@ -221,7 +221,7 @@ create or replace function public.admin_update_profile(
 returns public.profiles
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 declare
   current_profile public.profiles;

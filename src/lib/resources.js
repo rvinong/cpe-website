@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { getSafeHttpUrl, isSafeStoragePath } from './safeUrl'
 
 export const resourcesBucket = 'student-resources'
 export const maxResourceFileSize = 20 * 1024 * 1024
@@ -87,7 +88,22 @@ function isPdfResource(resource) {
 
 export async function createResourceDownload(resource) {
   if (resource.external_url) {
-    return { data: { signedUrl: resource.external_url }, error: null }
+    const externalUrl = getSafeHttpUrl(resource.external_url)
+    if (!externalUrl) {
+      return {
+        data: null,
+        error: new Error('This resource has an invalid external link.'),
+      }
+    }
+
+    return { data: { signedUrl: externalUrl }, error: null }
+  }
+
+  if (!isSafeStoragePath(resource.file_path)) {
+    return {
+      data: null,
+      error: new Error('This resource has an invalid file path.'),
+    }
   }
 
   const bucket = supabase.storage.from(resourcesBucket)
@@ -129,13 +145,20 @@ function toPayload(values, file) {
     file_name: file?.name || null,
     file_size: file?.size || null,
     mime_type: file?.type || null,
-    external_url: values.externalUrl.trim() || null,
+    external_url: getSafeHttpUrl(values.externalUrl) || null,
     status: values.status,
     sort_order: Number(values.sortOrder) || 0,
   }
 }
 
 export async function createResource(values, file) {
+  if (values.externalUrl.trim() && !getSafeHttpUrl(values.externalUrl)) {
+    return {
+      data: null,
+      error: new Error('External resource links must use http:// or https://.'),
+    }
+  }
+
   return supabase
     .from('student_resources')
     .insert(toPayload(values, file))
@@ -144,6 +167,13 @@ export async function createResource(values, file) {
 }
 
 export async function updateResource(id, values, file) {
+  if (values.externalUrl.trim() && !getSafeHttpUrl(values.externalUrl)) {
+    return {
+      data: null,
+      error: new Error('External resource links must use http:// or https://.'),
+    }
+  }
+
   return supabase
     .from('student_resources')
     .update(toPayload(values, file))

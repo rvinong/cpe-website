@@ -1,4 +1,5 @@
 import { isSupabaseConfigured, supabase } from './supabase'
+import { getSafeAssetUrl, isSafeStoragePath } from './safeUrl'
 
 export const mediaBucket = 'organization-media'
 export const maxMediaFileSize = 8 * 1024 * 1024
@@ -182,7 +183,9 @@ function createDefaultReactionSummary() {
 
 function getPublicImageUrl(path) {
   if (!path || !supabase) return null
-  if (/^(https?:)?\/\//.test(path) || path.startsWith('/')) return path
+  const assetUrl = getSafeAssetUrl(path)
+  if (assetUrl) return assetUrl
+  if (!isSafeStoragePath(path)) return null
 
   return supabase.storage.from(mediaBucket).getPublicUrl(path).data.publicUrl
 }

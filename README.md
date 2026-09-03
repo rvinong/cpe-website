@@ -35,6 +35,7 @@ Run these files in the Supabase SQL Editor:
 11. `supabase/email_notifications.sql`
 12. `supabase/community.sql`
 13. `supabase/community-chat.sql`
+14. `supabase/security-hardening.sql`
 
 See `SUPABASE_SETUP.md` for administrator setup and backend details.
 
@@ -43,6 +44,7 @@ See `SUPABASE_SETUP.md` for administrator setup and backend details.
 ```bash
 npm run lint
 npm run build
+npm test
 ```
 
 The `main` branch is connected to Vercel for automatic production

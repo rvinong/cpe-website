@@ -1,5 +1,6 @@
 import { isSupabaseConfigured, supabase } from './supabase'
 import { isCardImageColumnMissing, mediaBucket } from './media'
+import { getSafeAssetUrl, getSafeHttpUrl, isSafeStoragePath } from './safeUrl'
 
 const eventColumns = [
   'id',
@@ -61,7 +62,9 @@ const timeFormatter = new Intl.DateTimeFormat('en-US', {
 
 function getPublicEventImageUrl(path) {
   if (!path || !supabase) return null
-  if (/^(https?:)?\/\//.test(path) || path.startsWith('/')) return path
+  const assetUrl = getSafeAssetUrl(path)
+  if (assetUrl) return assetUrl
+  if (!isSafeStoragePath(path)) return null
 
   return supabase.storage.from(mediaBucket).getPublicUrl(path).data.publicUrl
 }
@@ -105,6 +108,7 @@ export function normalizeEvent(row) {
 
   return {
     ...row,
+    registration_url: getSafeHttpUrl(row.registration_url) || '',
     databaseId: row.id,
     id: row.slug,
     date: dateFormatter.format(startsAt),
@@ -202,7 +206,7 @@ function toEventPayload(values, imagePath, publishedAt, cardImagePath) {
     ends_at: values.endsAt
       ? new Date(values.endsAt).toISOString()
       : null,
-    registration_url: values.registrationUrl.trim() || null,
+    registration_url: getSafeHttpUrl(values.registrationUrl) || null,
     image_path: imagePath || null,
     card_image_path: cardImagePath || imagePath || null,
     image_alt: values.imageAlt?.trim() || '',

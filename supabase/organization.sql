@@ -32,10 +32,14 @@ create table if not exists public.organization_profile (
   contact_email text not null default '',
   contact_phone text not null default '',
   office_hours text not null default '',
-  facebook_url text not null default '',
-  instagram_url text not null default '',
-  youtube_url text not null default '',
-  linkedin_url text not null default '',
+  facebook_url text not null default ''
+    check (facebook_url = '' or facebook_url ~* '^https?://[^[:space:]]+$'),
+  instagram_url text not null default ''
+    check (instagram_url = '' or instagram_url ~* '^https?://[^[:space:]]+$'),
+  youtube_url text not null default ''
+    check (youtube_url = '' or youtube_url ~* '^https?://[^[:space:]]+$'),
+  linkedin_url text not null default ''
+    check (linkedin_url = '' or linkedin_url ~* '^https?://[^[:space:]]+$'),
   membership_eligibility text not null default '',
   membership_process text not null default '',
   membership_requirements text not null default '',

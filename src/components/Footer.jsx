@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import useOrganization from '../context/useOrganization'
+import { getSafeHttpUrl } from '../lib/safeUrl'
 import Logo from './Logo'
 
 const quickLinks = [
@@ -67,10 +68,10 @@ function Footer() {
   const { profile } = useOrganization()
   const [contactStatus, setContactStatus] = useState(null)
   const socialLinks = [
-    { label: 'Facebook', icon: MessageCircle, href: profile.facebookUrl },
-    { label: 'Instagram', icon: Camera, href: profile.instagramUrl },
-    { label: 'YouTube', icon: Play, href: profile.youtubeUrl },
-    { label: 'LinkedIn', icon: Briefcase, href: profile.linkedinUrl },
+    { label: 'Facebook', icon: MessageCircle, href: getSafeHttpUrl(profile.facebookUrl) },
+    { label: 'Instagram', icon: Camera, href: getSafeHttpUrl(profile.instagramUrl) },
+    { label: 'YouTube', icon: Play, href: getSafeHttpUrl(profile.youtubeUrl) },
+    { label: 'LinkedIn', icon: Briefcase, href: getSafeHttpUrl(profile.linkedinUrl) },
   ].filter((link) => link.href)
   const officialSignals = [
     {

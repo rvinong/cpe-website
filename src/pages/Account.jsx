@@ -38,6 +38,7 @@ import {
   validateProfileAvatar,
 } from '../lib/accountProfile'
 import { getPublishedResources } from '../lib/resources'
+import { getSafeInternalPath } from '../lib/safeUrl'
 
 const modes = [
   { id: 'login', label: 'Log In', icon: LogIn },
@@ -464,7 +465,8 @@ function Account() {
     }
 
     setMessage({ type: 'success', text: 'Signed in successfully.' })
-    if (redirectPath?.startsWith('/')) navigate(redirectPath)
+    const safeRedirectPath = getSafeInternalPath(redirectPath)
+    if (safeRedirectPath) navigate(safeRedirectPath)
   }
 
   const handleSignOut = async () => {

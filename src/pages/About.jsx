@@ -21,6 +21,7 @@ import RobotEasterEgg from '../components/RobotEasterEgg'
 import useOrganization from '../context/useOrganization'
 import { useMotionPreferences } from '../hooks/useMotionPreferences'
 import { fallbackOrganization } from '../lib/organization'
+import { getSafeHttpUrl } from '../lib/safeUrl'
 
 const involvementAreas = [
   {
@@ -110,6 +111,7 @@ function About() {
     officers: organizationOfficers,
     milestones: historyMilestones,
   } = useOrganization()
+  const facebookUrl = getSafeHttpUrl(organizationProfile.facebookUrl)
   const populatedOfficialRecords = officialRecords.map((record) => ({
     ...record,
     value: organizationProfile[record.key],
@@ -624,9 +626,9 @@ function About() {
                           {organizationProfile.contactPhone}
                         </a>
                       )}
-                      {organizationProfile.facebookUrl && (
+                      {facebookUrl && (
                         <a
-                          href={organizationProfile.facebookUrl}
+                          href={facebookUrl}
                           target="_blank"
                           rel="noreferrer"
                           className="inline-flex items-center gap-1.5 transition hover:text-white"
@@ -640,7 +642,7 @@ function About() {
                       )}
                       {!organizationProfile.contactEmail &&
                         !organizationProfile.contactPhone &&
-                        !organizationProfile.facebookUrl &&
+                        !facebookUrl &&
                         !organizationProfile.officeHours && (
                           <span>
                             Official contact details will be posted once

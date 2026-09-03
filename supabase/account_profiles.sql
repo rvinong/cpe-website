@@ -10,7 +10,7 @@ create or replace function public.update_my_account_profile(
 returns public.profiles
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 declare
   clean_nickname text;
@@ -86,7 +86,7 @@ returns boolean
 language sql
 stable
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
   select exists (
     select 1

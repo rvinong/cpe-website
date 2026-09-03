@@ -202,6 +202,7 @@ secrets in **Supabase > Edge Functions > Secrets**:
 RESEND_API_KEY=re_your_api_key
 EMAIL_FROM=NwSSU CPE <updates@your-verified-domain.example>
 SITE_URL=https://cpe-website-two.vercel.app
+ALLOWED_ORIGINS=https://cpe-website-two.vercel.app
 ```
 
 New accounts opt in to email notifications by default and can change the
@@ -209,6 +210,50 @@ preference from `/account`. When staff publish a new announcement or news
 story, the Edge Function verifies the staff session, privately emails each
 confirmed non-suspended user who remains opted in, and records the delivery so
 later edits do not resend the same notice.
+
+The bundled Supabase email provider is intentionally rate limited. If Auth
+shows `email rate limit exceeded`, wait for the provider window to reset or
+configure a verified custom SMTP provider under **Authentication > SMTP
+Settings**. Do not solve this by repeatedly retrying signup or password
+recovery.
+
+## 15. Apply security hardening
+
+For a new project, run `supabase/security-hardening.sql` after all of the
+feature scripts above. For an existing project, run the updated feature files
+that are already installed, then run the hardening script last:
+
+```text
+supabase/community.sql
+supabase/community-chat.sql
+supabase/media.sql
+supabase/resources.sql
+supabase/security-hardening.sql
+```
+
+The hardening script is intentionally non-destructive. It adds URL checks for
+new or updated records, removes direct Data API access to reaction/comment
+tables, and removes the old five-argument `admin_update_profile` overload that
+can conflict with the current signup/profile schema. Existing invalid legacy
+URLs must be reviewed before the optional `VALIDATE CONSTRAINT` statements at
+the bottom of the script are enabled.
+
+Deploy the changed Edge Functions with JWT verification enabled:
+
+- `admin-delete-user`
+- `send-community-mention-notification`
+- `send-content-notification` (only if email notifications remain enabled)
+
+Set `ALLOWED_ORIGINS` as an Edge Function secret for each active function. Use
+a comma-separated list only when more than one trusted origin is required,
+for example the production URL and `http://localhost:5173` during local
+testing. Keep preview or temporary origins out of production unless they are
+deliberately part of the release workflow.
+
+The Vercel response headers in `vercel.json` are applied on the next frontend
+deployment. The repository does not contain a Supabase service-role key or a
+Supabase management token, so SQL execution and Edge Function deployment must
+be completed from the Supabase project by an administrator.
 
 ## Current backend scope
 

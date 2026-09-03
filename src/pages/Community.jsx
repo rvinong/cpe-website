@@ -54,6 +54,7 @@ import {
   uploadCommunityMessageAttachments,
 } from '../lib/communityChat'
 import { getDisplayName } from '../lib/accountProfile'
+import { getSafeHttpUrl } from '../lib/safeUrl'
 
 const roomIcons = {
   general: MessageCircle,
@@ -810,9 +811,12 @@ function getSharedLinks(messages) {
         return true
       })
       .map((url, index) => {
-        let host = url
+        const safeUrl = getSafeHttpUrl(url)
+        if (!safeUrl) return null
+
+        let host = safeUrl
         try {
-          host = new URL(url).hostname.replace(/^www\./i, '')
+          host = new URL(safeUrl).hostname.replace(/^www\./i, '')
         } catch {
           // Keep the original URL as the fallback label.
         }
@@ -821,9 +825,10 @@ function getSharedLinks(messages) {
           id: `${message.id}-link-${index}`,
           author: message.fullName,
           host,
-          url,
+          url: safeUrl,
         }
       })
+      .filter(Boolean)
   })
 }
 

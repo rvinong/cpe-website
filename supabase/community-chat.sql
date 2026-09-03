@@ -929,6 +929,21 @@ with check (
   and name ~ (
     '^' || auth.uid()::text || '/[0-9a-f-]{36}/[0-9a-f-]{36}$'
   )
+  and exists (
+    select 1
+    from public.community_messages as messages
+    join public.community_rooms as rooms
+      on rooms.id = messages.room_id
+    where messages.id::text = (storage.foldername(name))[2]
+      and messages.user_id = auth.uid()
+      and messages.deleted_at is null
+      and rooms.is_active
+      and not rooms.is_locked
+      and (
+        not rooms.is_staff_only
+        or public.current_user_role() in ('admin', 'editor')
+      )
+  )
 );
 
 drop policy if exists "Members can update their community attachments"
@@ -941,11 +956,41 @@ using (
   bucket_id = 'community-attachments'
   and public.current_user_role() is not null
   and (storage.foldername(name))[1] = auth.uid()::text
+  and exists (
+    select 1
+    from public.community_messages as messages
+    join public.community_rooms as rooms
+      on rooms.id = messages.room_id
+    where messages.id::text = (storage.foldername(name))[2]
+      and messages.user_id = auth.uid()
+      and messages.deleted_at is null
+      and rooms.is_active
+      and not rooms.is_locked
+      and (
+        not rooms.is_staff_only
+        or public.current_user_role() in ('admin', 'editor')
+      )
+  )
 )
 with check (
   bucket_id = 'community-attachments'
   and public.current_user_role() is not null
   and (storage.foldername(name))[1] = auth.uid()::text
+  and exists (
+    select 1
+    from public.community_messages as messages
+    join public.community_rooms as rooms
+      on rooms.id = messages.room_id
+    where messages.id::text = (storage.foldername(name))[2]
+      and messages.user_id = auth.uid()
+      and messages.deleted_at is null
+      and rooms.is_active
+      and not rooms.is_locked
+      and (
+        not rooms.is_staff_only
+        or public.current_user_role() in ('admin', 'editor')
+      )
+  )
 );
 
 drop policy if exists "Members and staff can delete community attachments"
@@ -958,7 +1003,24 @@ using (
   bucket_id = 'community-attachments'
   and public.current_user_role() is not null
   and (
-    (storage.foldername(name))[1] = auth.uid()::text
+    (
+      (storage.foldername(name))[1] = auth.uid()::text
+      and exists (
+        select 1
+        from public.community_messages as messages
+        join public.community_rooms as rooms
+          on rooms.id = messages.room_id
+        where messages.id::text = (storage.foldername(name))[2]
+          and messages.user_id = auth.uid()
+          and messages.deleted_at is null
+          and rooms.is_active
+          and not rooms.is_locked
+          and (
+            not rooms.is_staff_only
+            or public.current_user_role() in ('admin', 'editor')
+          )
+      )
+    )
     or public.current_user_role() in ('admin', 'editor')
   )
 );

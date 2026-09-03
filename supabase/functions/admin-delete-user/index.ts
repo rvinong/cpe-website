@@ -1,15 +1,46 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.108.1'
 
-const corsHeaders = {
+const baseCorsHeaders = {
   'Access-Control-Allow-Headers':
     'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Origin': '*',
 }
 
-const jsonHeaders = {
-  ...corsHeaders,
-  'Content-Type': 'application/json',
+function getAllowedOrigins() {
+  const configuredOrigins = (
+    Deno.env.get('ALLOWED_ORIGINS') ??
+    Deno.env.get('SITE_URL') ??
+    'https://cpe-website-two.vercel.app'
+  )
+    .split(',')
+    .map((value) => value.trim())
+    .map((value) => {
+      try {
+        const url = new URL(value)
+        return ['http:', 'https:'].includes(url.protocol) ? url.origin : ''
+      } catch {
+        return ''
+      }
+    })
+    .filter(Boolean)
+
+  return configuredOrigins.length > 0
+    ? configuredOrigins
+    : ['https://cpe-website-two.vercel.app']
+}
+
+function getCorsHeaders(request: Request) {
+  const requestedOrigin = request.headers.get('Origin')?.trim()
+  const allowedOrigins = getAllowedOrigins()
+  const origin = requestedOrigin && allowedOrigins.includes(requestedOrigin)
+    ? requestedOrigin
+    : allowedOrigins[0]
+
+  return {
+    ...baseCorsHeaders,
+    'Access-Control-Allow-Origin': origin,
+    Vary: 'Origin',
+  }
 }
 
 type Profile = {
@@ -19,10 +50,13 @@ type Profile = {
   avatar_path: string | null
 }
 
-function jsonResponse(body: unknown, status = 200) {
+function jsonResponse(body: unknown, status = 200, request?: Request) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: jsonHeaders,
+    headers: {
+      ...getCorsHeaders(request ?? new Request('https://cpe-website-two.vercel.app')),
+      'Content-Type': 'application/json',
+    },
   })
 }
 
@@ -65,12 +99,15 @@ async function removeAvatarCopies(
 }
 
 Deno.serve(async (request) => {
+  const respond = (body: unknown, status = 200) =>
+    jsonResponse(body, status, request)
+
   if (request.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { headers: getCorsHeaders(request) })
   }
 
   if (request.method !== 'POST') {
-    return jsonResponse({ error: 'Method not allowed.' }, 405)
+    return respond({ error: 'Method not allowed.' }, 405)
   }
 
   try {
@@ -86,11 +123,11 @@ Deno.serve(async (request) => {
     const authorization = request.headers.get('Authorization') ?? ''
 
     if (!supabaseUrl || !publishableKey || !adminKey || !authorization) {
-      return jsonResponse({ error: 'Function authentication is unavailable.' }, 503)
+      return respond({ error: 'Function authentication is unavailable.' }, 503)
     }
 
     const token = authorization.replace(/^Bearer\s+/i, '').trim()
-    if (!token) return jsonResponse({ error: 'Authentication required.' }, 401)
+    if (!token) return respond({ error: 'Authentication required.' }, 401)
 
     const userClient = createClient(supabaseUrl, publishableKey, {
       global: { headers: { Authorization: `Bearer ${token}` } },
@@ -109,7 +146,7 @@ Deno.serve(async (request) => {
     } = await userClient.auth.getUser(token)
 
     if (userError || !user) {
-      return jsonResponse({ error: 'Authentication required.' }, 401)
+      return respond({ error: 'Authentication required.' }, 401)
     }
 
     const { data: callerProfile, error: callerProfileError } = await adminClient
@@ -120,23 +157,23 @@ Deno.serve(async (request) => {
 
     if (callerProfileError) throw callerProfileError
     if (callerProfile?.role !== 'admin' || callerProfile.status !== 'approved') {
-      return jsonResponse({ error: 'Administrator access required.' }, 403)
+      return respond({ error: 'Administrator access required.' }, 403)
     }
 
     let body: { userId?: unknown } = {}
     try {
       body = await request.json()
     } catch {
-      return jsonResponse({ error: 'A valid user ID is required.' }, 400)
+      return respond({ error: 'A valid user ID is required.' }, 400)
     }
 
     const targetUserId = body.userId
     if (!isUuid(targetUserId)) {
-      return jsonResponse({ error: 'A valid user ID is required.' }, 400)
+      return respond({ error: 'A valid user ID is required.' }, 400)
     }
 
     if (targetUserId === user.id) {
-      return jsonResponse(
+      return respond(
         { error: 'You cannot delete your own administrator account.' },
         400,
       )
@@ -149,7 +186,7 @@ Deno.serve(async (request) => {
       .maybeSingle<Profile>()
 
     if (targetProfileError) throw targetProfileError
-    if (!targetProfile) return jsonResponse({ error: 'Account not found.' }, 404)
+    if (!targetProfile) return respond({ error: 'Account not found.' }, 404)
 
     if (targetProfile.role === 'admin' && targetProfile.status === 'approved') {
       const { count: approvedAdminCount, error: countError } = await adminClient
@@ -160,7 +197,7 @@ Deno.serve(async (request) => {
 
       if (countError) throw countError
       if ((approvedAdminCount ?? 0) <= 1) {
-        return jsonResponse(
+        return respond(
           { error: 'At least one approved administrator must remain.' },
           409,
         )
@@ -175,9 +212,9 @@ Deno.serve(async (request) => {
 
     if (deleteError) throw deleteError
 
-    return jsonResponse({ deletedUserId: targetUserId })
+    return respond({ deletedUserId: targetUserId })
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Account deletion failed.'
-    return jsonResponse({ error: message }, 500)
+    console.error('admin-delete-user failed', error)
+    return respond({ error: 'Account deletion could not be completed.' }, 500)
   }
 })

@@ -23,7 +23,7 @@ create index if not exists announcements_public_listing_idx
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
-set search_path = public
+set search_path = public, pg_temp
 as $$
 begin
   new.updated_at = now();

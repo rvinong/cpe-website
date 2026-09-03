@@ -5,7 +5,7 @@ returns boolean
 language sql
 stable
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
   select exists (
     select 1
@@ -29,7 +29,8 @@ create table if not exists public.student_resources (
   file_name text,
   file_size bigint,
   mime_type text,
-  external_url text,
+  external_url text
+    check (external_url is null or external_url ~* '^https?://[^[:space:]]+$'),
   status text not null default 'draft'
     check (status in ('draft', 'published', 'archived')),
   sort_order integer not null default 0,
@@ -148,7 +149,18 @@ for select
 to authenticated
 using (
   bucket_id = 'student-resources'
-  and public.current_user_is_approved()
+  and (
+    public.current_user_role() in ('admin', 'editor')
+    or (
+      public.current_user_is_approved()
+      and exists (
+        select 1
+        from public.student_resources
+        where student_resources.file_path = storage.objects.name
+          and student_resources.status = 'published'
+      )
+    )
+  )
 );
 
 drop policy if exists "Admins and editors can upload student resources"

@@ -1,15 +1,46 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.108.1'
 
-const corsHeaders = {
+const baseCorsHeaders = {
   'Access-Control-Allow-Headers':
     'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Origin': '*',
 }
 
-const jsonHeaders = {
-  ...corsHeaders,
-  'Content-Type': 'application/json',
+function getAllowedOrigins() {
+  const configuredOrigins = (
+    Deno.env.get('ALLOWED_ORIGINS') ??
+    Deno.env.get('SITE_URL') ??
+    'https://cpe-website-two.vercel.app'
+  )
+    .split(',')
+    .map((value) => value.trim())
+    .map((value) => {
+      try {
+        const url = new URL(value)
+        return ['http:', 'https:'].includes(url.protocol) ? url.origin : ''
+      } catch {
+        return ''
+      }
+    })
+    .filter(Boolean)
+
+  return configuredOrigins.length > 0
+    ? configuredOrigins
+    : ['https://cpe-website-two.vercel.app']
+}
+
+function getCorsHeaders(request: Request) {
+  const requestedOrigin = request.headers.get('Origin')?.trim()
+  const allowedOrigins = getAllowedOrigins()
+  const origin = requestedOrigin && allowedOrigins.includes(requestedOrigin)
+    ? requestedOrigin
+    : allowedOrigins[0]
+
+  return {
+    ...baseCorsHeaders,
+    'Access-Control-Allow-Origin': origin,
+    Vary: 'Origin',
+  }
 }
 
 type ContentType = 'announcement' | 'news'
@@ -23,10 +54,13 @@ type ContentRecord = {
   published_at: string | null
 }
 
-function jsonResponse(body: unknown, status = 200) {
+function jsonResponse(body: unknown, status = 200, request?: Request) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: jsonHeaders,
+    headers: {
+      ...getCorsHeaders(request ?? new Request('https://cpe-website-two.vercel.app')),
+      'Content-Type': 'application/json',
+    },
   })
 }
 
@@ -57,6 +91,14 @@ function escapeHtml(value: string) {
         "'": '&#039;',
       })[character] ?? character,
   )
+}
+
+function sanitizeSubjectPart(value: string) {
+  return value
+    .replace(/[\u0000-\u001f\u007f]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 160)
 }
 
 function splitIntoChunks<T>(items: T[], size: number) {
@@ -131,12 +173,15 @@ async function getEligibleEmails(
 }
 
 Deno.serve(async (request) => {
+  const respond = (body: unknown, status = 200) =>
+    jsonResponse(body, status, request)
+
   if (request.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { headers: getCorsHeaders(request) })
   }
 
   if (request.method !== 'POST') {
-    return jsonResponse({ error: 'Method not allowed.' }, 405)
+    return respond({ error: 'Method not allowed.' }, 405)
   }
 
   try {
@@ -152,7 +197,7 @@ Deno.serve(async (request) => {
     const authorization = request.headers.get('Authorization') ?? ''
 
     if (!supabaseUrl || !publishableKey || !adminKey || !authorization) {
-      return jsonResponse({ error: 'Function authentication is unavailable.' }, 503)
+      return respond({ error: 'Function authentication is unavailable.' }, 503)
     }
 
     const userClient = createClient(supabaseUrl, publishableKey, {
@@ -173,7 +218,7 @@ Deno.serve(async (request) => {
     } = await userClient.auth.getUser(token)
 
     if (userError || !user) {
-      return jsonResponse({ error: 'Authentication required.' }, 401)
+      return respond({ error: 'Authentication required.' }, 401)
     }
 
     const { data: profile, error: profileError } = await adminClient
@@ -187,7 +232,7 @@ Deno.serve(async (request) => {
       profile?.status !== 'approved' ||
       !['admin', 'editor'].includes(profile.role)
     ) {
-      return jsonResponse({ error: 'Staff access required.' }, 403)
+      return respond({ error: 'Staff access required.' }, 403)
     }
 
     const body = await request.json()
@@ -198,7 +243,7 @@ Deno.serve(async (request) => {
       !['announcement', 'news'].includes(contentType) ||
       !/^[0-9a-f-]{36}$/i.test(contentId)
     ) {
-      return jsonResponse({ error: 'Invalid notification request.' }, 400)
+      return respond({ error: 'Invalid notification request.' }, 400)
     }
 
     const { data: existingLog, error: logError } = await adminClient
@@ -211,7 +256,7 @@ Deno.serve(async (request) => {
     if (logError) throw logError
 
     if (existingLog) {
-      return jsonResponse({
+      return respond({
         alreadySent: true,
         recipientCount: existingLog.recipient_count,
         sentAt: existingLog.sent_at,
@@ -232,7 +277,7 @@ Deno.serve(async (request) => {
       !content.published_at ||
       new Date(content.published_at) > new Date()
     ) {
-      return jsonResponse({ error: 'Published content was not found.' }, 404)
+      return respond({ error: 'Published content was not found.' }, 404)
     }
 
     const resendApiKey = Deno.env.get('RESEND_API_KEY') ?? ''
@@ -242,7 +287,7 @@ Deno.serve(async (request) => {
     ).replace(/\/+$/, '')
 
     if (!resendApiKey || !fromAddress) {
-      return jsonResponse(
+      return respond(
         {
           error:
             'Email delivery is not configured. Add RESEND_API_KEY and EMAIL_FROM to the Edge Function secrets.',
@@ -261,11 +306,14 @@ Deno.serve(async (request) => {
     const accountUrl = `${siteUrl}/account`
     const safeTitle = escapeHtml(content.title)
     const safeSummary = escapeHtml(content.summary)
+    const safeSubjectTitle = sanitizeSubjectPart(content.title)
+    const safeContentUrl = escapeHtml(contentUrl)
+    const safeAccountUrl = escapeHtml(accountUrl)
 
     const emailMessages = emails.map((email) => ({
       from: fromAddress,
       to: [email],
-      subject: `[ICpEP Connect] New ${contentLabel}: ${content.title}`,
+      subject: `[ICpEP Connect] New ${contentLabel}: ${safeSubjectTitle}`,
       html: `
         <div style="margin:0 auto;max-width:620px;padding:32px 20px;font-family:Arial,sans-serif;color:#0f172a">
           <p style="margin:0 0 12px;color:#2563eb;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase">
@@ -273,12 +321,12 @@ Deno.serve(async (request) => {
           </p>
           <h1 style="margin:0 0 16px;font-size:28px;line-height:1.25">${safeTitle}</h1>
           <p style="margin:0 0 24px;color:#475569;font-size:16px;line-height:1.7">${safeSummary}</p>
-          <a href="${contentUrl}" style="display:inline-block;border-radius:10px;background:#2563eb;padding:13px 20px;color:#fff;font-weight:700;text-decoration:none">
+          <a href="${safeContentUrl}" style="display:inline-block;border-radius:10px;background:#2563eb;padding:13px 20px;color:#fff;font-weight:700;text-decoration:none">
             Read the ${contentLabel}
           </a>
           <p style="margin:28px 0 0;color:#64748b;font-size:12px;line-height:1.6">
             You are receiving this because organization email notifications are enabled for your portal account.
-            <a href="${accountUrl}" style="color:#2563eb">Manage your preference</a>.
+            <a href="${safeAccountUrl}" style="color:#2563eb">Manage your preference</a>.
           </p>
         </div>
       `,
@@ -303,8 +351,8 @@ Deno.serve(async (request) => {
       })
 
       if (!response.ok) {
-        const detail = await response.text()
-        throw new Error(`Email provider rejected the request: ${detail}`)
+        await response.body?.cancel()
+        throw new Error('Email provider rejected the request.')
       }
     }
 
@@ -319,20 +367,12 @@ Deno.serve(async (request) => {
 
     if (insertLogError?.code !== '23505') throw insertLogError
 
-    return jsonResponse({
+    return respond({
       alreadySent: false,
       recipientCount: emails.length,
     })
   } catch (error) {
-    console.error(error)
-    return jsonResponse(
-      {
-        error:
-          error instanceof Error
-            ? error.message
-            : 'Email notification failed.',
-      },
-      500,
-    )
+    console.error('send-content-notification failed', error)
+    return respond({ error: 'Email notification could not be completed.' }, 500)
   }
 })

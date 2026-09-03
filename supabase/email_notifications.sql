@@ -37,7 +37,7 @@ create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 begin
   insert into public.profiles (
@@ -94,7 +94,7 @@ create or replace function public.set_email_notifications(enabled boolean)
 returns boolean
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 begin
   if auth.uid() is null then

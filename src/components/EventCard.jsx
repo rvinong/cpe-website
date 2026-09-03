@@ -4,6 +4,7 @@ import {
   ExternalLink,
   MapPin,
 } from 'lucide-react'
+import { getSafeHttpUrl } from '../lib/safeUrl'
 
 const timingStyles = {
   upcoming: 'bg-brand-50 text-brand-700 ring-blue-100',
@@ -12,6 +13,7 @@ const timingStyles = {
 }
 
 function EventCard({ event, compact = false }) {
+  const registrationUrl = getSafeHttpUrl(event.registration_url)
   const timingLabel = {
     upcoming: 'Upcoming',
     completed: 'Completed',
@@ -91,11 +93,11 @@ function EventCard({ event, compact = false }) {
           </p>
         )}
 
-        {event.registration_url &&
+        {registrationUrl &&
           event.timing === 'upcoming' &&
           event.status !== 'cancelled' && (
             <a
-              href={event.registration_url}
+              href={registrationUrl}
               target="_blank"
               rel="noreferrer"
               className="primary-button motion-button mt-6 self-start"

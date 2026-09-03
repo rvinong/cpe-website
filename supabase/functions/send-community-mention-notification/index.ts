@@ -1,15 +1,46 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.108.1'
 
-const corsHeaders = {
+const baseCorsHeaders = {
   'Access-Control-Allow-Headers':
     'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Origin': '*',
 }
 
-const jsonHeaders = {
-  ...corsHeaders,
-  'Content-Type': 'application/json',
+function getAllowedOrigins() {
+  const configuredOrigins = (
+    Deno.env.get('ALLOWED_ORIGINS') ??
+    Deno.env.get('SITE_URL') ??
+    'https://cpe-website-two.vercel.app'
+  )
+    .split(',')
+    .map((value) => value.trim())
+    .map((value) => {
+      try {
+        const url = new URL(value)
+        return ['http:', 'https:'].includes(url.protocol) ? url.origin : ''
+      } catch {
+        return ''
+      }
+    })
+    .filter(Boolean)
+
+  return configuredOrigins.length > 0
+    ? configuredOrigins
+    : ['https://cpe-website-two.vercel.app']
+}
+
+function getCorsHeaders(request: Request) {
+  const requestedOrigin = request.headers.get('Origin')?.trim()
+  const allowedOrigins = getAllowedOrigins()
+  const origin = requestedOrigin && allowedOrigins.includes(requestedOrigin)
+    ? requestedOrigin
+    : allowedOrigins[0]
+
+  return {
+    ...baseCorsHeaders,
+    'Access-Control-Allow-Origin': origin,
+    Vary: 'Origin',
+  }
 }
 
 type MentionTarget = {
@@ -20,10 +51,13 @@ type MentionTarget = {
   status: string
 }
 
-function jsonResponse(body: unknown, status = 200) {
+function jsonResponse(body: unknown, status = 200, request?: Request) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: jsonHeaders,
+    headers: {
+      ...getCorsHeaders(request ?? new Request('https://cpe-website-two.vercel.app')),
+      'Content-Type': 'application/json',
+    },
   })
 }
 
@@ -54,6 +88,14 @@ function escapeHtml(value: string) {
         "'": '&#039;',
       })[character] ?? character,
   )
+}
+
+function sanitizeSubjectPart(value: string) {
+  return value
+    .replace(/[\u0000-\u001f\u007f]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 160)
 }
 
 function displayName(
@@ -94,18 +136,21 @@ async function sendEmail(
   })
 
   if (!response.ok) {
-    const detail = await response.text()
-    throw new Error(`Email provider rejected the request: ${detail}`)
+    await response.body?.cancel()
+    throw new Error('Email provider rejected the request.')
   }
 }
 
 Deno.serve(async (request) => {
+  const respond = (body: unknown, status = 200) =>
+    jsonResponse(body, status, request)
+
   if (request.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { headers: getCorsHeaders(request) })
   }
 
   if (request.method !== 'POST') {
-    return jsonResponse({ error: 'Method not allowed.' }, 405)
+    return respond({ error: 'Method not allowed.' }, 405)
   }
 
   try {
@@ -126,11 +171,11 @@ Deno.serve(async (request) => {
     const authorization = request.headers.get('Authorization') ?? ''
 
     if (!supabaseUrl || !publishableKey || !adminKey || !authorization) {
-      return jsonResponse({ error: 'Function authentication is unavailable.' }, 503)
+      return respond({ error: 'Function authentication is unavailable.' }, 503)
     }
 
     if (!resendApiKey || !fromAddress) {
-      return jsonResponse(
+      return respond(
         {
           error:
             'Email delivery is not configured. Add RESEND_API_KEY and EMAIL_FROM to the Edge Function secrets.',
@@ -157,7 +202,7 @@ Deno.serve(async (request) => {
     } = await userClient.auth.getUser(token)
 
     if (userError || !user) {
-      return jsonResponse({ error: 'Authentication required.' }, 401)
+      return respond({ error: 'Authentication required.' }, 401)
     }
 
     const { data: callerProfile, error: callerProfileError } = await adminClient
@@ -168,14 +213,14 @@ Deno.serve(async (request) => {
 
     if (callerProfileError) throw callerProfileError
     if (callerProfile?.status !== 'approved') {
-      return jsonResponse({ error: 'Approved account required.' }, 403)
+      return respond({ error: 'Approved account required.' }, 403)
     }
 
     const body = await request.json()
     const messageId = body.messageId
 
     if (!isUuid(messageId)) {
-      return jsonResponse({ error: 'Invalid message ID.' }, 400)
+      return respond({ error: 'Invalid message ID.' }, 400)
     }
 
     const { data: message, error: messageError } = await adminClient
@@ -186,10 +231,10 @@ Deno.serve(async (request) => {
 
     if (messageError) throw messageError
     if (!message || message.deleted_at) {
-      return jsonResponse({ sentCount: 0, skippedCount: 0 })
+      return respond({ sentCount: 0, skippedCount: 0 })
     }
     if (message.user_id !== user.id) {
-      return jsonResponse(
+      return respond(
         { error: 'Only the message author can request its notifications.' },
         403,
       )
@@ -217,7 +262,7 @@ Deno.serve(async (request) => {
     if (authorError) throw authorError
     if (mentionsError) throw mentionsError
     if (!room || !room.is_active || room.is_locked || !mentions?.length) {
-      return jsonResponse({ sentCount: 0, skippedCount: 0 })
+      return respond({ sentCount: 0, skippedCount: 0 })
     }
 
     const targetIds = [
@@ -228,7 +273,7 @@ Deno.serve(async (request) => {
       ),
     ]
 
-    if (!targetIds.length) return jsonResponse({ sentCount: 0, skippedCount: 0 })
+    if (!targetIds.length) return respond({ sentCount: 0, skippedCount: 0 })
 
     const { data: targetProfiles, error: targetProfilesError } = await adminClient
       .from('profiles')
@@ -243,6 +288,7 @@ Deno.serve(async (request) => {
     const safeAuthorName = escapeHtml(displayName(author))
     const safeMessage = escapeHtml(message.body)
     const messageUrl = `${siteUrl}/community?room=${encodeURIComponent(message.room_id)}#community-message-${message.id}`
+    const safeMessageUrl = escapeHtml(messageUrl)
     let sentCount = 0
     let skippedCount = targetIds.length - (targetProfiles?.length ?? 0)
 
@@ -292,7 +338,7 @@ Deno.serve(async (request) => {
       if (logWriteError) throw logWriteError
 
       try {
-        const subject = `[ICpEP Connect] ${displayName(author)} mentioned you`
+        const subject = `[ICpEP Connect] ${sanitizeSubjectPart(displayName(author))} mentioned you`
         const html = `
           <div style="margin:0 auto;max-width:620px;padding:32px 20px;font-family:Arial,sans-serif;color:#0f172a">
             <p style="margin:0 0 12px;color:#2563eb;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase">
@@ -305,7 +351,7 @@ Deno.serve(async (request) => {
             <blockquote style="margin:0 0 24px;border-left:4px solid #2563eb;padding:12px 16px;background:#eff6ff;color:#334155;font-size:16px;line-height:1.7">
               ${safeMessage}
             </blockquote>
-            <a href="${messageUrl}" style="display:inline-block;border-radius:10px;background:#2563eb;padding:13px 20px;color:#fff;font-weight:700;text-decoration:none">
+            <a href="${safeMessageUrl}" style="display:inline-block;border-radius:10px;background:#2563eb;padding:13px 20px;color:#fff;font-weight:700;text-decoration:none">
               Open the conversation
             </a>
             <p style="margin:28px 0 0;color:#64748b;font-size:12px;line-height:1.6">
@@ -335,28 +381,20 @@ Deno.serve(async (request) => {
 
         sentCount += 1
       } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Email delivery failed.'
+        console.error('Mention email delivery failed', error)
+        const errorMessage = 'Email delivery failed.'
         await adminClient
           .from('community_mention_notification_log')
           .update({ status: 'failed', last_error: errorMessage })
           .eq('message_id', message.id)
           .eq('mentioned_profile_id', target.id)
-        throw error
+        throw new Error(errorMessage)
       }
     }
 
-    return jsonResponse({ sentCount, skippedCount })
+    return respond({ sentCount, skippedCount })
   } catch (error) {
-    console.error(error)
-    return jsonResponse(
-      {
-        error:
-          error instanceof Error
-            ? error.message
-            : 'Mention notification failed.',
-      },
-      500,
-    )
+    console.error('send-community-mention-notification failed', error)
+    return respond({ error: 'Mention notification could not be completed.' }, 500)
   }
 })

@@ -17,6 +17,7 @@ import EventCard from '../components/EventCard'
 import PageHero from '../components/PageHero'
 import RobotEasterEgg from '../components/RobotEasterEgg'
 import { useEvents } from '../hooks/useEvents'
+import { getSafeHttpUrl } from '../lib/safeUrl'
 
 const eventInfo = [
   {
@@ -73,6 +74,9 @@ function Events() {
   const remainingUpcoming = highlightedEvent
     ? filteredUpcoming.filter((event) => event.id !== highlightedEvent.id)
     : filteredUpcoming
+  const highlightedRegistrationUrl = getSafeHttpUrl(
+    highlightedEvent?.registration_url,
+  )
   const eventStats = [
     ['Upcoming', filteredUpcoming.length, CalendarDays],
     ['Completed', filteredCompleted.length, Archive],
@@ -219,10 +223,10 @@ function Events() {
                                 {highlightedEvent.description}
                               </p>
                             )}
-                            {highlightedEvent.registration_url &&
+                            {highlightedRegistrationUrl &&
                               highlightedEvent.status !== 'cancelled' && (
                                 <a
-                                  href={highlightedEvent.registration_url}
+                                  href={highlightedRegistrationUrl}
                                   target="_blank"
                                   rel="noreferrer"
                                   className="primary-button mt-6"

@@ -10,7 +10,8 @@ create table if not exists public.events (
   venue text not null,
   starts_at timestamptz not null,
   ends_at timestamptz,
-  registration_url text,
+  registration_url text
+    check (registration_url is null or registration_url ~* '^https?://[^[:space:]]+$'),
   image_path text,
   card_image_path text,
   image_alt text not null default '',
@@ -47,7 +48,7 @@ create index if not exists events_gallery_listing_idx
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
-set search_path = public
+set search_path = public, pg_temp
 as $$
 begin
   new.updated_at = now();

@@ -182,9 +182,26 @@ returns table (
 )
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 begin
+  -- Keep the legacy forum API subject to the same room boundary as chat.
+  -- This function is callable by anonymous visitors for public rooms, so a
+  -- staff-only or locked room must return no rows instead of relying on RLS.
+  if not exists (
+    select 1
+    from public.community_rooms
+    where community_rooms.id = selected_room_id
+      and community_rooms.is_active
+      and not community_rooms.is_locked
+      and (
+        not community_rooms.is_staff_only
+        or public.current_user_role() in ('admin', 'editor')
+      )
+  ) then
+    return;
+  end if;
+
   return query
   select
     community_posts.id,
@@ -219,6 +236,11 @@ begin
     on profiles.id = community_posts.user_id
   where community_posts.room_id = selected_room_id
     and community_rooms.is_active
+    and not community_rooms.is_locked
+    and (
+      not community_rooms.is_staff_only
+      or public.current_user_role() in ('admin', 'editor')
+    )
     and community_posts.deleted_at is null
     and profiles.status = 'approved'
   order by community_posts.is_pinned desc, community_posts.updated_at desc;
@@ -242,9 +264,26 @@ returns table (
 )
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 begin
+  if not exists (
+    select 1
+    from public.community_posts
+    join public.community_rooms
+      on community_rooms.id = community_posts.room_id
+    where community_posts.id = selected_post_id
+      and community_posts.deleted_at is null
+      and community_rooms.is_active
+      and not community_rooms.is_locked
+      and (
+        not community_rooms.is_staff_only
+        or public.current_user_role() in ('admin', 'editor')
+      )
+  ) then
+    return;
+  end if;
+
   return query
   select
     community_comments.id,
@@ -274,6 +313,11 @@ begin
     and community_comments.deleted_at is null
     and community_posts.deleted_at is null
     and community_rooms.is_active
+    and not community_rooms.is_locked
+    and (
+      not community_rooms.is_staff_only
+      or public.current_user_role() in ('admin', 'editor')
+    )
     and profiles.status = 'approved'
   order by community_comments.created_at asc;
 end;
@@ -302,7 +346,7 @@ returns table (
 )
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 declare
   clean_title text;
@@ -380,11 +424,12 @@ returns table (
 )
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 declare
   clean_body text;
   inserted_comment_id uuid;
+  room_is_staff_only boolean;
 begin
   if auth.uid() is null then
     raise exception 'Authentication required';
@@ -394,16 +439,24 @@ begin
     raise exception 'Approved account required';
   end if;
 
-  if not exists (
-    select 1
-    from public.community_posts
-    join public.community_rooms
-      on community_rooms.id = community_posts.room_id
-    where community_posts.id = selected_post_id
-      and community_posts.deleted_at is null
-      and community_rooms.is_active
-  ) then
+  select community_rooms.is_staff_only
+  into room_is_staff_only
+  from public.community_posts
+  join public.community_rooms
+    on community_rooms.id = community_posts.room_id
+  where community_posts.id = selected_post_id
+    and community_posts.deleted_at is null
+    and community_rooms.is_active
+    and not community_rooms.is_locked;
+
+  if not found then
     raise exception 'Discussion not found';
+  end if;
+
+  if room_is_staff_only
+    and public.current_user_role() not in ('admin', 'editor')
+  then
+    raise exception 'Staff access required for this room';
   end if;
 
   clean_body := trim(coalesce(comment_body, ''));
@@ -433,7 +486,7 @@ create or replace function public.delete_community_post(
 returns boolean
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 declare
   owner_id uuid;
@@ -479,7 +532,7 @@ create or replace function public.delete_community_comment(
 returns boolean
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 declare
   owner_id uuid;

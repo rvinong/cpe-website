@@ -235,6 +235,12 @@ create trigger set_news_reactions_updated_at
 
 alter table public.news_reactions enable row level security;
 
+-- Reactions are read and mutated through the RPCs below. Do not expose direct
+-- Data API reads or writes that reveal user IDs or move a reaction to another
+-- story.
+revoke all on table public.news_reactions
+  from public, anon, authenticated;
+
 drop policy if exists "Signed-in users can react to published news"
   on public.news_reactions;
 create policy "Signed-in users can react to published news"
@@ -286,7 +292,7 @@ returns table (
 )
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 declare
   current_reaction text;
@@ -382,11 +388,20 @@ returns table (
 )
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 begin
   if auth.uid() is null then
     raise exception 'Authentication required';
+  end if;
+
+  if not exists (
+    select 1
+    from public.profiles
+    where profiles.id = auth.uid()
+      and profiles.status = 'approved'
+  ) then
+    raise exception 'Approved account required';
   end if;
 
   if selected_reaction_type not in (
@@ -442,7 +457,7 @@ returns table (
 )
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 begin
   if auth.uid() is null then
@@ -472,11 +487,20 @@ returns table (
 )
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 begin
   if auth.uid() is null then
     raise exception 'Authentication required';
+  end if;
+
+  if not exists (
+    select 1
+    from public.profiles
+    where profiles.id = auth.uid()
+      and profiles.status = 'approved'
+  ) then
+    raise exception 'Approved account required';
   end if;
 
   if selected_reaction_type not in (
@@ -571,6 +595,11 @@ create trigger set_news_comments_updated_at
 
 alter table public.news_comments enable row level security;
 
+-- Comments are read and mutated through the RPCs below. Direct Data API access
+-- would expose relationship and ownership columns and allow unsafe mutations.
+revoke all on table public.news_comments
+  from public, anon, authenticated;
+
 drop policy if exists "Published news comments are public"
   on public.news_comments;
 create policy "Published news comments are public"
@@ -658,7 +687,7 @@ create or replace function public.get_news_comment_summary(
 returns integer
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 declare
   visible_count integer;
@@ -711,7 +740,7 @@ returns table (
 )
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 begin
   if not exists (
@@ -788,7 +817,7 @@ returns table (
 )
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 declare
   clean_body text;
@@ -868,7 +897,7 @@ create or replace function public.delete_news_comment(
 returns integer
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, pg_temp
 as $$
 declare
   target_news_post_id uuid;
