@@ -24,6 +24,7 @@ const Events = lazy(() => import('./pages/Events'))
 const Gallery = lazy(() => import('./pages/Gallery'))
 const Home = lazy(() => import('./pages/Home'))
 const InternalAudit = lazy(() => import('./pages/InternalAudit'))
+const Merchandise = lazy(() => import('./pages/Merchandise'))
 const NewsDetails = lazy(() => import('./pages/NewsDetails'))
 const StudentPortal = lazy(() => import('./pages/StudentPortal'))
 
@@ -167,6 +168,7 @@ function App() {
                   <Route path="/gallery" element={<Gallery />} />
                   <Route path="/gallery/news/:slug" element={<NewsDetails />} />
                   <Route path="/internal-audit" element={<InternalAudit />} />
+                  <Route path="/merchandise" element={<Merchandise />} />
                   <Route path="/student-portal" element={<StudentPortal />} />
                   <Route path="*" element={<Home />} />
                 </Routes>

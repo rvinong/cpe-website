@@ -13,6 +13,7 @@ import {
   Newspaper,
   Settings,
   ShieldCheck,
+  ShoppingBag,
   UserRound,
   UsersRound,
   X,
@@ -26,6 +27,7 @@ import AdminAlumni from '../components/AdminAlumni'
 import AdminEvents from '../components/AdminEvents'
 import AdminInternalAudit from '../components/AdminInternalAudit'
 import AdminMedia from '../components/AdminMedia'
+import AdminMerchandise from '../components/AdminMerchandise'
 import AdminOrganization from '../components/AdminOrganization'
 import AdminResources from '../components/AdminResources'
 import AdminTeam from '../components/AdminTeam'
@@ -60,6 +62,7 @@ const adminSections = [
   },
   { key: 'alumni', label: 'Alumni', icon: GraduationCap, enabled: true },
   { key: 'resources', label: 'Resources', icon: Newspaper, enabled: true },
+  { key: 'merchandise', label: 'Merchandise', icon: ShoppingBag, enabled: true },
   {
     key: 'audit',
     label: 'Internal Audit',
@@ -125,6 +128,14 @@ const contentModules = [
     action: 'Manage resources',
   },
   {
+    title: 'Merchandise',
+    description: 'Publish batch designs, manage sizes, stock, and orders.',
+    icon: ShoppingBag,
+    status: 'Available',
+    section: 'merchandise',
+    action: 'Manage merchandise',
+  },
+  {
     title: 'Internal Audit',
     description: 'Publish transparency reports, liquidations, and resolutions.',
     icon: ShieldCheck,
@@ -159,6 +170,7 @@ const sectionTitles = {
   organization: 'Manage About Content',
   alumni: 'Manage Alumni',
   resources: 'Manage Resources',
+  merchandise: 'Manage Merchandise',
   audit: 'Manage Internal Audit',
   team: 'Manage Team',
   users: 'Manage Users & Roles',
@@ -172,6 +184,7 @@ const sectionDescriptions = {
   organization: 'Maintain public organization records and leadership.',
   alumni: 'Curate verified graduate profiles and spotlights.',
   resources: 'Publish approved learning files and external links.',
+  merchandise: 'Manage chapter designs, inventory, and member orders.',
   audit: 'Manage transparency reports, liquidations, and resolutions.',
   team: 'Coordinate assignments and staff profile information.',
   users: 'Approve accounts and manage role-based access.',
@@ -463,6 +476,8 @@ function AdminDashboard() {
             <AdminAlumni />
           ) : activeSection === 'resources' ? (
             <AdminResources />
+          ) : activeSection === 'merchandise' ? (
+            <AdminMerchandise />
           ) : activeSection === 'audit' ? (
             <AdminInternalAudit />
           ) : activeSection === 'team' ? (

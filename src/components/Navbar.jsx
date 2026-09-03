@@ -20,6 +20,7 @@ const links = [
   },
   { key: 'gallery', label: 'News & Gallery', sectionId: 'news' },
   { key: 'events', label: 'Events', sectionId: 'events' },
+  { key: 'merchandise', label: 'Merch', sectionId: 'merchandise' },
   { key: 'portal', label: 'Student Portal', sectionId: 'quick-access' },
   { key: 'alumni', label: 'Alumni', sectionId: 'alumni' },
   { key: 'audit', label: 'Internal Audit', sectionId: 'internal-audit' },
@@ -50,6 +51,8 @@ function Navbar() {
         ? 'gallery'
       : pathname === '/events'
         ? 'events'
+      : pathname === '/merchandise'
+        ? 'merchandise'
       : pathname === '/student-portal'
           ? 'portal'
           : 'home'
@@ -59,6 +62,7 @@ function Navbar() {
     if (link.key === 'about') return '/about'
     if (link.key === 'alumni') return '/alumni'
     if (link.key === 'events') return '/events'
+    if (link.key === 'merchandise') return '/merchandise'
     if (link.key === 'gallery') return '/gallery'
     if (link.key === 'audit') return '/internal-audit'
     if (link.key === 'portal') return '/student-portal'

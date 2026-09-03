@@ -217,7 +217,30 @@ configure a verified custom SMTP provider under **Authentication > SMTP
 Settings**. Do not solve this by repeatedly retrying signup or password
 recovery.
 
-## 15. Apply security hardening
+## 15. Enable merchandise management
+
+Run:
+
+```text
+supabase/merchandise.sql
+```
+
+This creates the public merchandise catalog, batch archive, size variants,
+inventory records, member order history, and staff order workflow. Product
+images reuse the public `organization-media` bucket and are uploaded by
+approved admin or editor accounts under the `merchandise/` folder.
+
+The storefront allows visitors to browse published and archived designs. Only
+approved signed-in accounts can place an order. The `create_merch_order`
+database function rechecks the product status, current price, requested stock,
+and order total while locking the requested variants, so browser values cannot
+be used to change a checkout total or oversell inventory.
+
+After running the SQL, refresh `/admin`, open **Merchandise**, publish the
+current products, add their size variants and stock, and use the **Orders** tab
+to process submitted requests.
+
+## 16. Apply security hardening
 
 For a new project, run `supabase/security-hardening.sql` after all of the
 feature scripts above. For an existing project, run the updated feature files
@@ -228,6 +251,7 @@ supabase/community.sql
 supabase/community-chat.sql
 supabase/media.sql
 supabase/resources.sql
+supabase/merchandise.sql
 supabase/security-hardening.sql
 ```
 
@@ -283,3 +307,5 @@ Implemented:
 - Administrator task assignment and editor task status updates
 - Opt-in email notifications for newly published news and announcements
 - Approved-member community chat with profile-ID mention notifications
+- Merchandise storefront with batch archive, inventory-aware checkout, and
+  staff-managed order requests

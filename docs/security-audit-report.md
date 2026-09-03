@@ -38,7 +38,7 @@ The canonical Vercel production alias was checked after deployment and its respo
 - **Browser backend client:** `src/lib/supabase.js` creates one Supabase client using `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` (with legacy anon-key compatibility).
 - **Authentication:** Supabase email/password Auth, persisted browser session, automatic token refresh, and an `auth.users` insert trigger that creates a pending `public.profiles` row.
 - **Authorization:** Database-derived `profiles.role` and `profiles.status`; approved status is required for member features, while admin/editor access is checked in RLS policies, RPCs, Edge Functions, and route guards.
-- **Backend operations:** Supabase Data API table queries, protected Postgres RPCs, Storage object APIs, Realtime message subscriptions, and three active-purpose Edge Functions plus one retired endpoint.
+- **Backend operations:** Supabase Data API table queries, protected Postgres RPCs, Storage object APIs, Realtime message subscriptions, and three active-purpose Edge Functions plus one retired endpoint. Merchandise checkout uses a server-side stock and price transaction rather than trusting browser totals.
 - **External service:** Resend is called only from Edge Functions using a server-side secret.
 
 ### Request and trust boundaries
@@ -52,9 +52,9 @@ The canonical Vercel production alias was checked after deployment and its respo
 
 ### Routes and privileged areas
 
-Public routes include `/`, `/about`, `/announcements`, `/announcements/:id`, `/alumni`, `/community`, `/events`, `/gallery`, `/gallery/news/:slug`, `/internal-audit`, and `/student-portal`. `/account` handles authentication and a user's own profile. `/admin` is guarded in the client and must remain protected by the database policies/RPCs even when a user manually navigates to it.
+Public routes include `/`, `/about`, `/announcements`, `/announcements/:id`, `/alumni`, `/community`, `/events`, `/gallery`, `/gallery/news/:slug`, `/internal-audit`, `/student-portal`, and `/merchandise`. `/account` handles authentication and a user's own profile. `/admin` is guarded in the client and must remain protected by the database policies/RPCs even when a user manually navigates to it.
 
-Admin sections are announcements, events, news/gallery, organization, alumni, resources, internal audit, team, and Users & Roles. Users & Roles requires an approved `admin` profile. Editors manage approved content but do not receive user-management or account-deletion authority.
+Admin sections are announcements, events, news/gallery, organization, alumni, resources, internal audit, team, Merchandise, and Users & Roles. Users & Roles requires an approved `admin` profile. Editors manage approved content, merchandise, and orders but do not receive user-management or account-deletion authority.
 
 ## 4. Data Inventory and Privacy Review
 
@@ -67,6 +67,7 @@ Admin sections are announcements, events, news/gallery, organization, alumni, re
 | Audit report metadata and PDFs | `audit_reports`, private `internal-audit-reports` bucket | Published metadata/files are public; drafts and management access are staff-only | Prepared/reviewed/approved fields are optional and public only when the report is published |
 | Student resources | `student_resources`, private `student-resources` bucket | Approved members for published resources; staff for all management records | Object access is now tied to a published database row |
 | Community messages, mentions, attachments | Community tables and private `community-attachments` bucket | Approved room members; staff-only rooms are restricted to admin/editor | Names/avatar paths are intentionally returned for chat UX; email addresses are not returned |
+| Merchandise catalog, variants, and order snapshots | `merchandise_products`, `merchandise_variants`, `merchandise_orders`, `merchandise_order_items`, public `organization-media` product images | Published/archive catalog is public; approved members see their own orders; approved admin/editor accounts manage catalog and orders | Checkout stores name, email, phone, fulfillment address, payment preference, note, and item snapshots. No card number or payment credential is collected |
 | Staff tasks and staff directory | `team_tasks`, `profiles`, private `staff-avatars` bucket | Approved staff; admin has team-wide task access | Editors see assigned tasks; admin-only task mutations are enforced by RPCs |
 | Notification delivery state | Email log tables | Edge Functions only; no anon/authenticated table grants | Logs retain recipient counts/status, not message secrets or provider response bodies |
 
@@ -84,6 +85,8 @@ There are no Vercel API routes, Next.js server actions, webhooks, payment endpoi
 | Profiles | `GET` own row | Authenticated user can read own profile; admin RPC reads all profile/email data | Fixed columns; no direct user update policy | Student number/status are private; no app rate limit |
 | Staff content management | `POST`, `PATCH`, `DELETE` through PostgREST | RLS requires approved admin/editor; created-by checks are used on inserts | Client forms validate basic lengths/types; database enums/checks enforce key states | Drafts and management data; no app rate limit |
 | Community rooms | `GET` | Active room listing is public; message/post access uses approved/room checks | Room ID is treated as an identifier and rechecked in RPCs | Room metadata is public; no app rate limit |
+| Merchandise catalog | `GET`/PostgREST `select` | Published and archived products/variants are public; drafts require staff access | Fixed columns; product status, price, and variant stock are database-constrained | Public catalog and product images; no private customer data in catalog rows |
+| Merchandise order request | `POST`/protected RPC | Approved authenticated member only; function derives the user email and rechecks product status, price, and stock | Cart size, quantity, contact fields, delivery address, payment choice, and notes are validated in the function; row locks make stock decrement atomic | Order PII is visible only to the member and staff; this is not an online payment gateway |
 | Private Storage | `GET` signed object, `POST` upload, `PATCH`/replace, `DELETE` | Bucket policies check approval, staff role, owner path, or published row | Browser MIME/size checks plus bucket MIME/size limits; no magic-byte scan | Private documents/photos; upload abuse controls remain incomplete |
 
 ### Postgres RPCs
@@ -95,6 +98,7 @@ All listed functions are called through `supabase.rpc`. Sensitive functions are 
 - **Community chat:** `list_community_messages`, `list_community_members`, three compatible `create_community_message` signatures, `delete_community_message`, `list_community_message_attachments`, `add_community_message_attachments`.
 - **News reactions/comments:** `get_news_reaction_summary`, `set_news_reaction`, `clear_news_reaction`, `get_news_reaction_members`, `get_news_comment_summary`, `list_news_comments`, `create_news_comment`, `delete_news_comment`.
 - **Team:** `staff_list_team_members`, `staff_list_team_tasks`, `admin_create_team_task`, `admin_update_team_task`, `staff_update_team_task_status`, `admin_delete_team_task`, `staff_set_avatar_path`.
+- **Merchandise:** `create_merch_order`, `admin_set_merch_order_status`.
 
 The current community read functions cap chat messages at 200 but the legacy forum lists and attachment metadata query are not paginated. Write RPCs also have no application-level per-user rate limit. These are resource-abuse and scraping risks, not authorization bypasses.
 
@@ -119,6 +123,8 @@ The current community read functions cap chat messages at 200 but the legacy for
 | `alumni_profiles`, `alumni_leadership` | RLS enabled; publication requires consent for alumni profiles | Published consent-confirmed rows | Same plus staff management rows |
 | `audit_reports` | RLS enabled; published public read; staff management | Published rows | Published plus staff rows |
 | `student_resources` | RLS enabled; approved/published read; staff CRUD | None | Approved members see published; staff see/manage all |
+| `merchandise_products`, `merchandise_variants` | RLS enabled; published/archive catalog reads; approved admin/editor CRUD | Published and archived products with available variants | Same public catalog; staff see/manage drafts, products, and variants |
+| `merchandise_orders`, `merchandise_order_items` | RLS enabled; direct writes revoked; protected RPCs create/update orders | None | Approved members read their own orders/items; admin/editor read orders and can update status through the RPC |
 | `community_rooms` | RLS enabled; active room metadata read | Active room metadata | Active room metadata |
 | `community_posts`, `community_comments` | Direct table grants are revoked; protected RPCs enforce active/unlocked/staff-room boundaries | Public-room forum reads only through functions | Approved posting/deletion through functions |
 | `community_messages` | Direct writes are revoked; authenticated Realtime select policy and protected RPCs | None | Approved members in active/unlocked permitted rooms |
@@ -144,6 +150,7 @@ The current community read functions cap chat messages at 200 but the legacy for
 - Resource object reads now require a published `student_resources.file_path` match for ordinary approved members, preventing draft/orphan object reads.
 - Locked and staff-only legacy forum rooms are checked inside the `SECURITY DEFINER` read/write functions, preventing a public RPC caller from bypassing room state.
 - News reactions/comments use published-post and approved-member checks; direct DML is revoked.
+- Merchandise checkout derives the customer identity, locks published variants, validates stock and price in the database, inserts item snapshots, and decrements inventory atomically. Staff order cancellation restores stock through a role-checked function.
 
 ## 7. Storage and Upload Audit
 
@@ -152,6 +159,7 @@ The current community read functions cap chat messages at 200 but the legacy for
 | `profile-avatars` | Private | Approved user owns first path segment; public read only when path is the avatar of an approved profile | Browser MIME/size checks and bucket limits are not content scanning |
 | `staff-avatars` | Private | Approved staff can read; staff upload/update/delete is scoped to own path | Path format could be made stricter; no magic-byte scan |
 | `organization-media` | Public | Approved admin/editor upload/update/delete; public URLs are usable by anyone who knows a path | Orphan, unpublished, or deleted-record media remains publicly fetchable if its path is known |
+| `organization-media` (`merchandise/`) | Public | Same approved admin/editor upload/update/delete policy; product rows store generated paths | Product artwork is intentionally public, but the shared bucket has the same orphan/unpublished path concern; do not place customer order documents here |
 | `student-resources` | Private | Staff writes; approved members read only published rows whose file path matches the object | MIME metadata is client-declared; no antivirus/magic-byte scan |
 | `internal-audit-reports` | Private | Staff management; published report row gates public object read | Same upload scanning limitation; publication intentionally makes the PDF public |
 | `community-attachments` | Private | Approved room member read; message author path-bound upload/update; owner/staff delete | Metadata query is unpaginated; no malware scan |
@@ -279,6 +287,9 @@ The headers are materially stronger, but `unsafe-inline` is present for the inli
 - Removed the obsolete five-argument `admin_update_profile` overload.
 - Hardened Edge Function CORS to configured origins, removed raw provider response bodies, sanitized email subjects, and returned generic failures.
 - Added Vercel security headers and a CSP.
+- Added `supabase/merchandise.sql` with catalog, batch archive, size inventory, order snapshots, RLS, and protected checkout/status functions.
+- Added the public `/merchandise` storefront with product details, cart persistence, approved-member order requests, and order history.
+- Added the admin Merchandise workspace for product images, publication status, variants/stock, and order-status processing.
 - Added `npm test` and the four URL safety tests.
 - Added the deployment instructions to `SUPABASE_SETUP.md` and `README.md`.
 
@@ -288,7 +299,7 @@ The following completed successfully on 2026-09-03:
 
 - `npm test`: 4 passed, 0 failed.
 - `npm run lint`: passed.
-- `npm run build`: passed; Vite transformed 2,295 modules.
+- `npm run build`: passed; Vite transformed 2,299 modules.
 - `git diff --check`: passed.
 - `npm audit --omit=optional`: 0 vulnerabilities reported.
 - Static searches found no `Access-Control-Allow-Origin: *`, `dangerouslySetInnerHTML`, `innerHTML`, `eval`, `new Function`, or unsafe login redirect pattern in the reviewed source.
@@ -308,9 +319,10 @@ Read-only live probes previously confirmed:
 
 1. Back up or export the project schema according to the organization's change process.
 2. Run the currently installed feature files that correspond to the project, including `community.sql`, `community-chat.sql`, `media.sql`, and `resources.sql` where applicable.
-3. Run `supabase/security-hardening.sql` last. It is designed to be non-destructive and adds URL checks as `NOT VALID`, removes direct reaction/comment grants, and drops the old profile-function overload.
-4. Review existing invalid URL rows and run the optional `VALIDATE CONSTRAINT` statements only after cleanup.
-5. Inspect live `pg_policies`, table grants, function grants/owners, Storage policies, and bucket visibility using an administrator connection.
+3. Run `supabase/merchandise.sql` to create the catalog, batch archive, inventory, order tables, RLS policies, and protected order functions.
+4. Run `supabase/security-hardening.sql` last. It is designed to be non-destructive and adds URL checks as `NOT VALID`, removes direct reaction/comment grants, and drops the old profile-function overload.
+5. Review existing invalid URL rows and run the optional `VALIDATE CONSTRAINT` statements only after cleanup.
+6. Inspect live `pg_policies`, table grants, function grants/owners, Storage policies, and bucket visibility using an administrator connection.
 
 ### Edge Functions and secrets
 

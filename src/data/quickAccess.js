@@ -27,7 +27,7 @@ export const quickAccessItems = [
     title: 'Merchandise',
     description: 'Check current merchandise and orders',
     icon: 'shirt',
-    href: '/announcements',
+    href: '/merchandise',
   },
   {
     title: 'About Us',
