@@ -25,7 +25,9 @@ The repository now has stronger authorization boundaries, safer URL handling, re
 
 The review used repository-wide file discovery, static code review, SQL/RLS/policy inspection, dependency audit, safe live read-only probes against the configured Supabase project, and local build/lint/unit-test verification. No destructive production testing, brute force, denial-of-service testing, mass requests, record deletion, or secret printing was performed.
 
-The environment did not contain a Supabase CLI session, management API token, service-role key, Postgres connection string, or usable browser session. Therefore, the following could not be independently verified in the live project: effective PostgreSQL grants, installed RLS policy definitions, function owners/volatility, Storage policy state, deployed Edge Function source, Vercel response headers, and Auth rate-limit settings beyond the public Auth settings endpoint. Treat the SQL/function deployment checklist as required release work.
+The environment did not contain a Supabase CLI session, management API token, service-role key, Postgres connection string, or usable browser session. Therefore, the following could not be independently verified in the live project: effective PostgreSQL grants, installed RLS policy definitions, function owners/volatility, Storage policy state, deployed Edge Function source, and Auth rate-limit settings beyond the public Auth settings endpoint. Treat the SQL/function deployment checklist as required release work.
+
+The canonical Vercel production alias was checked after deployment and its response headers matched `vercel.json`. A generated deployment URL returned additional Vercel platform protection headers instead; use the canonical alias/custom domain as the production verification target and re-check any preview/deployment URL separately if it is exposed to users.
 
 ## 3. Architecture and Security Map
 
@@ -291,6 +293,7 @@ The following completed successfully on 2026-09-03:
 - `npm audit --omit=optional`: 0 vulnerabilities reported.
 - Static searches found no `Access-Control-Allow-Origin: *`, `dangerouslySetInnerHTML`, `innerHTML`, `eval`, `new Function`, or unsafe login redirect pattern in the reviewed source.
 - `deno` was unavailable locally, so Edge Function TypeScript compilation was not run locally.
+- The canonical production alias returned HTTP 200 with the configured `Content-Security-Policy`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, and `Permissions-Policy` headers.
 
 Read-only live probes previously confirmed:
 
