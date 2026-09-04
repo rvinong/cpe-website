@@ -4154,12 +4154,11 @@ html.dark .news-detail-footer {
 }
 
 .merch-product-media > img {
-  object-fit: contain;
-  object-position: center;
+  transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .merch-product-card:hover .merch-product-media > img {
-  transform: none;
+  transform: scale(1.04);
 }
 
 .merch-product-status,

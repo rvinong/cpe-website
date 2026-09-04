@@ -22,7 +22,7 @@ My current mindset is simple:
 
 That does not mean skipping the fundamentals. It means building with curiosity, testing ideas quickly, fixing what breaks, and learning deeper each time the project asks more from me.
 
-One of my main builds is **CPE-HUB**, an ecommerce website where I worked with a React frontend, Tailwind styling, backend routes, authentication logic, MongoDB/Mongoose database work, product seeding scripts, and admin/user flows. It helped me practice how a web app moves from interface to server to database.
+One project I worked on is **CPE-HUB**, an ecommerce website where I practiced a React frontend, Tailwind styling, backend routes, authentication logic, MongoDB/Mongoose database work, product seeding scripts, and admin/user flows. It helped me understand how a web app moves from interface to server to database.
 
 I am also building **ICpEP Connect**, an organization portal for announcements, events, news, gallery posts, accounts, roles, dashboards, comments, reactions, and database-backed workflows.
 
@@ -57,14 +57,14 @@ I am also building **ICpEP Connect**, an organization portal for announcements, 
 
 ---
 
-## Featured Build: CPE-HUB
+## Ecommerce Practice Build: CPE-HUB
 
 <table>
   <tr>
     <td width="58%">
       <h3><a href="https://github.com/rvinong/CPE-HUB">CPE-HUB</a></h3>
       <p>
-        An ecommerce website project built to practice full-stack development.
+        An ecommerce website project I built while practicing full-stack development.
         It includes frontend pages, backend server work, database models,
         authentication-related logic, product scripts, and admin/user system ideas.
       </p>
