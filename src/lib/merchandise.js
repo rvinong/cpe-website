@@ -27,9 +27,7 @@ export const merchandiseOrderColumns = [
   'customer_name',
   'customer_email',
   'contact_number',
-  'fulfillment_method',
   'payment_method',
-  'delivery_address',
   'notes',
   'subtotal',
   'status',
@@ -56,7 +54,7 @@ export const merchandiseUploadFolder = 'merchandise'
 const orderStatusLabels = {
   pending: 'Pending review',
   confirmed: 'Confirmed',
-  ready: 'Ready for pickup',
+  ready: 'Ready for campus collection',
   completed: 'Completed',
   cancelled: 'Cancelled',
 }
@@ -318,9 +316,8 @@ export async function createMerchandiseOrder(items, values) {
     })),
     target_customer_name: values.customerName.trim(),
     target_contact_number: values.contactNumber.trim(),
-    target_fulfillment_method: values.fulfillmentMethod,
+    target_fulfillment_method: 'pickup',
     target_payment_method: values.paymentMethod,
-    target_delivery_address: values.deliveryAddress.trim(),
     target_notes: values.notes.trim(),
   })
 }

@@ -230,6 +230,10 @@ inventory records, member order history, and staff order workflow. Product
 images reuse the public `organization-media` bucket and are uploaded by
 approved admin or editor accounts under the `merchandise/` folder.
 
+Merchandise uses a campus collection workflow: requests are compiled first,
+the batch is produced after the order window, and completed orders are handed
+to customers personally on campus. Delivery addresses are not collected.
+
 The storefront allows visitors to browse published and archived designs. Only
 approved signed-in accounts can place an order. The `create_merch_order`
 database function rechecks the product status, current price, requested stock,

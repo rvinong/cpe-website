@@ -21,7 +21,6 @@ import {
   ShoppingBag,
   Sparkles,
   Tag,
-  Truck,
   UserRound,
   X,
 } from 'lucide-react'
@@ -49,9 +48,7 @@ const cartStorageKey = 'icpep-merchandise-cart'
 const emptyCheckoutForm = {
   customerName: '',
   contactNumber: '',
-  fulfillmentMethod: 'pickup',
   paymentMethod: 'cash_on_pickup',
-  deliveryAddress: '',
   notes: '',
 }
 
@@ -268,7 +265,7 @@ function OrderHistory({ orders }) {
               Order history
             </h2>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
-              Keep track of recent merchandise requests and their pickup or delivery status.
+              Keep track of recent merchandise requests and their campus collection status.
             </p>
           </div>
           <span className="grid size-12 place-items-center rounded-2xl bg-brand-50 text-brand-600">
@@ -306,7 +303,7 @@ function OrderHistory({ orders }) {
               </div>
               <div className="mt-5 flex items-center justify-between gap-4 border-t border-slate-100 pt-4">
                 <span className="text-xs font-bold text-slate-500">
-                  {order.fulfillment_method === 'pickup' ? 'Campus pickup' : 'Delivery'}
+                  Campus collection
                 </span>
                 <span className="text-lg font-black text-navy-900">
                   {formatMerchandisePrice(order.subtotal)}
@@ -594,11 +591,6 @@ function Merchandise() {
     setCheckoutForm((current) => ({
       ...current,
       [field]: value,
-      ...(field === 'fulfillmentMethod' &&
-      value === 'delivery' &&
-      current.paymentMethod === 'cash_on_pickup'
-        ? { paymentMethod: 'bank_transfer' }
-        : {}),
     }))
     setCheckoutError('')
   }
@@ -627,14 +619,6 @@ function Merchandise() {
       setCheckoutError('Enter a valid contact number.')
       return
     }
-    if (
-      checkoutForm.fulfillmentMethod === 'delivery' &&
-      checkoutForm.deliveryAddress.trim().length < 8
-    ) {
-      setCheckoutError('Enter a complete delivery address.')
-      return
-    }
-
     setIsSubmitting(true)
     const { data, error } = await createMerchandiseOrder(cartLines, checkoutForm)
     setIsSubmitting(false)
@@ -1073,21 +1057,12 @@ function Merchandise() {
                     <label className="merch-form-label sm:col-span-2">Contact number<input name="contactNumber" type="tel" value={checkoutForm.contactNumber} onChange={updateCheckoutField('contactNumber')} required maxLength={40} placeholder="09xx xxx xxxx" /></label>
                   </div>
                   <fieldset>
-                    <legend className="text-xs font-extrabold tracking-[0.16em] text-navy-900 uppercase">Fulfillment</legend>
-                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                      {[
-                        ['pickup', 'Campus pickup', 'Collect from the organization desk.', PackageCheck],
-                        ['delivery', 'Delivery', 'Add a complete delivery address.', Truck],
-                      ].map(([value, label, detail, Icon]) => (
-                        <label key={value} className={`merch-choice-card ${checkoutForm.fulfillmentMethod === value ? 'merch-choice-card-active' : ''}`}>
-                          <input type="radio" name="fulfillmentMethod" value={value} checked={checkoutForm.fulfillmentMethod === value} onChange={updateCheckoutField('fulfillmentMethod')} />
-                          <span className="grid size-9 place-items-center rounded-lg bg-brand-50 text-brand-600"><Icon size={17} /></span>
-                          <span><strong>{label}</strong><small>{detail}</small></span>
-                        </label>
-                      ))}
+                    <legend className="text-xs font-extrabold tracking-[0.16em] text-navy-900 uppercase">Campus collection</legend>
+                    <div className="merch-choice-card merch-choice-card-active merch-collection-note mt-3">
+                      <span className="grid size-9 place-items-center rounded-lg bg-brand-50 text-brand-600"><PackageCheck size={17} /></span>
+                      <span><strong>Personal campus handover</strong><small>We compile requests before production, then hand your order to you on campus when the batch is ready.</small></span>
                     </div>
                   </fieldset>
-                  {checkoutForm.fulfillmentMethod === 'delivery' && <label className="merch-form-label">Delivery address<textarea name="deliveryAddress" value={checkoutForm.deliveryAddress} onChange={updateCheckoutField('deliveryAddress')} required rows="3" maxLength={300} placeholder="House number, street, barangay, city" /></label>}
                   <fieldset>
                     <legend className="text-xs font-extrabold tracking-[0.16em] text-navy-900 uppercase">Payment method</legend>
                     <div className="mt-3 grid gap-3 sm:grid-cols-3">
@@ -1095,11 +1070,7 @@ function Merchandise() {
                         ['cash_on_pickup', 'Cash on pickup'],
                         ['bank_transfer', 'Bank transfer'],
                         ['e_wallet', 'E-wallet'],
-                      ].filter(
-                        ([value]) =>
-                          checkoutForm.fulfillmentMethod === 'pickup' ||
-                          value !== 'cash_on_pickup',
-                      ).map(([value, label]) => (
+                      ].map(([value, label]) => (
                         <label key={value} className={`merch-payment-option ${checkoutForm.paymentMethod === value ? 'merch-payment-option-active' : ''}`}><input type="radio" name="paymentMethod" value={value} checked={checkoutForm.paymentMethod === value} onChange={updateCheckoutField('paymentMethod')} /><CreditCard size={16} /><span>{label}</span></label>
                       ))}
                     </div>
@@ -1113,7 +1084,7 @@ function Merchandise() {
                     {cartLines.map((line) => <div key={`${line.product.id}-${line.variant.id}`} className="flex justify-between gap-3 text-sm"><span className="min-w-0 truncate text-slate-600">{line.quantity} x {line.product.name} ({line.variant.size})</span><span className="shrink-0 font-extrabold text-navy-900">{formatMerchandisePrice(line.lineTotal)}</span></div>)}
                   </div>
                   <div className="mt-5 flex items-center justify-between gap-4 border-t border-slate-200 pt-5"><span className="font-bold text-slate-500">Total</span><span className="text-2xl font-black text-navy-900">{formatMerchandisePrice(cartTotal)}</span></div>
-                  <p className="mt-4 text-xs leading-5 text-slate-500">No payment is collected by this form. The organization will confirm payment instructions and fulfillment details with you.</p>
+                  <p className="mt-4 text-xs leading-5 text-slate-500">No payment is collected by this form. Requests are compiled before production, and the organization will confirm payment instructions and your campus handover schedule.</p>
                   <button type="submit" disabled={isSubmitting} className="primary-button motion-button mt-6 flex w-full justify-center disabled:cursor-not-allowed disabled:opacity-60">{isSubmitting ? <Clock3 size={17} className="animate-pulse" /> : <Check size={17} />} {isSubmitting ? 'Placing order...' : 'Place order request'}</button>
                 </aside>
               </form>
@@ -1129,7 +1100,7 @@ function Merchandise() {
               <span className="mx-auto grid size-16 place-items-center rounded-2xl bg-emerald-50 text-emerald-600"><CheckCircle2 size={34} /></span>
               <p className="mt-6 text-xs font-extrabold tracking-[0.18em] text-emerald-600 uppercase">Order received</p>
               <h2 id="merch-confirmation-title" className="mt-2 text-3xl font-black text-navy-900">Your request is in.</h2>
-              <p className="mx-auto mt-4 max-w-md text-sm leading-7 text-slate-600">Keep this order number for reference. The organization will confirm the next steps for payment and fulfillment.</p>
+              <p className="mx-auto mt-4 max-w-md text-sm leading-7 text-slate-600">Keep this order number for reference. Your request will be compiled with the batch, and the organization will confirm payment instructions and when to collect it on campus.</p>
               <div className="merch-confirmation-number mt-6"><span>Order number</span><strong>{confirmation.orderNumber}</strong><small>{formatMerchandisePrice(confirmation.subtotal)} total</small></div>
               <button type="button" onClick={() => setConfirmation(null)} className="primary-button motion-button mt-7 w-full justify-center">Continue browsing <ArrowRight size={16} /></button>
             </Motion.div>

@@ -70,10 +70,11 @@ create table if not exists public.merchandise_orders (
     check (customer_email ~* '^[^[:space:]@]+@[^[:space:]@]+[.][^[:space:]@]+$'),
   contact_number text not null
     check (char_length(trim(contact_number)) between 7 and 40),
-  fulfillment_method text not null
-    check (fulfillment_method in ('pickup', 'delivery')),
+  fulfillment_method text not null default 'pickup'
+    check (fulfillment_method = 'pickup'),
   payment_method text not null
     check (payment_method in ('cash_on_pickup', 'bank_transfer', 'e_wallet')),
+  -- Retained so older order rows remain readable; new orders always store ''.
   delivery_address text not null default '',
   notes text not null default ''
     check (char_length(notes) <= 500),
@@ -82,17 +83,7 @@ create table if not exists public.merchandise_orders (
   status text not null default 'pending'
     check (status in ('pending', 'confirmed', 'ready', 'completed', 'cancelled')),
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
-  constraint merchandise_orders_delivery_address_check
-    check (
-      fulfillment_method = 'pickup'
-      or char_length(trim(delivery_address)) between 8 and 300
-    ),
-  constraint merchandise_orders_delivery_payment_check
-    check (
-      fulfillment_method = 'pickup'
-      or payment_method <> 'cash_on_pickup'
-    )
+  updated_at timestamptz not null default now()
 );
 
 create table if not exists public.merchandise_order_items (
@@ -378,24 +369,12 @@ begin
     raise exception 'Enter a valid contact number';
   end if;
 
-  if target_fulfillment_method not in ('pickup', 'delivery') then
-    raise exception 'Invalid fulfillment method';
+  if coalesce(target_fulfillment_method, '') <> 'pickup' then
+    raise exception 'Campus collection is the only available fulfillment method';
   end if;
 
   if target_payment_method not in ('cash_on_pickup', 'bank_transfer', 'e_wallet') then
     raise exception 'Invalid payment method';
-  end if;
-
-  if target_fulfillment_method = 'delivery'
-    and target_payment_method = 'cash_on_pickup'
-  then
-    raise exception 'Cash on pickup is not available for delivery';
-  end if;
-
-  if target_fulfillment_method = 'delivery'
-    and char_length(trim(coalesce(target_delivery_address, ''))) not between 8 and 300
-  then
-    raise exception 'A delivery address is required';
   end if;
 
   if char_length(coalesce(target_notes, '')) > 500 then
@@ -493,13 +472,9 @@ begin
     trim(target_customer_name),
     customer_email,
     trim(target_contact_number),
-    target_fulfillment_method,
+    'pickup',
     target_payment_method,
-    case
-      when target_fulfillment_method = 'delivery'
-      then trim(coalesce(target_delivery_address, ''))
-      else ''
-    end,
+    '',
     trim(coalesce(target_notes, '')),
     total_subtotal,
     'pending'

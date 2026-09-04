@@ -4729,6 +4729,10 @@ html.dark .news-detail-footer {
   cursor: pointer;
 }
 
+.merch-collection-note {
+  cursor: default;
+}
+
 .merch-choice-card input,
 .merch-payment-option input {
   position: absolute;
