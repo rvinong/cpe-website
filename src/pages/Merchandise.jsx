@@ -123,7 +123,7 @@ function ProductImage({ product, compact = false }) {
     <img
       src={product.frontImage}
       alt={product.image_alt || `${product.name} front design`}
-      className="size-full object-cover"
+      className="size-full object-contain"
       loading="lazy"
     />
   )
