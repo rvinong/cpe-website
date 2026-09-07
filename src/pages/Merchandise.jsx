@@ -910,7 +910,7 @@ function Merchandise() {
                     </div>
                   )}
                 </div>
-                <div className="p-6 sm:p-8">
+                <div className="merch-product-modal-details p-6 sm:p-8">
                   <div className="flex items-center justify-between gap-3">
                     <span className="merch-batch-label">{selectedProduct.batch}</span>
                     <span className="text-xs font-bold text-slate-400">{selectedProduct.category}</span>
@@ -952,7 +952,7 @@ function Merchandise() {
 
                   {checkoutError && <p className="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">{checkoutError}</p>}
 
-                  <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+                  <div className="merch-product-modal-actions mt-7 flex flex-col gap-3 sm:flex-row">
                     {selectedProduct.status === 'published' && selectedProduct.totalStock > 0 ? (
                       <button type="button" onClick={addToCart} className="primary-button motion-button flex-1 justify-center">
                         <ShoppingBag size={17} aria-hidden="true" /> Add to cart

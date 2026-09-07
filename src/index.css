@@ -4897,29 +4897,124 @@ html.dark .news-detail-footer {
   }
 
   .merch-modal {
-    max-height: 92vh;
-    overflow-y: auto;
+    width: 100%;
+    max-height: 100dvh;
     border-radius: 1.4rem 1.4rem 0 0;
   }
 
-  .merch-product-modal-image,
+  .merch-product-modal {
+    height: min(100dvh, 52rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+
+  .merch-product-modal-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .merch-product-modal-image {
+    min-height: 0;
+  }
+
   .merch-product-gallery-stage {
-    min-height: 15rem;
+    min-height: 0;
+    aspect-ratio: 1 / 1;
+    max-height: min(62dvh, 28rem);
+  }
+
+  .merch-gallery-main-image {
+    object-fit: contain;
   }
 
   .merch-product-gallery-stage {
     padding: 0;
   }
 
+  .merch-product-modal-details {
+    padding: 1.15rem 1rem calc(1.25rem + env(safe-area-inset-bottom));
+  }
+
+  .merch-product-modal-details h2 {
+    margin-top: 0.75rem;
+    font-size: clamp(1.65rem, 7vw, 2.1rem);
+    line-height: 1.08;
+  }
+
+  .merch-product-modal-details > p {
+    margin-top: 0.65rem;
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+
+  .merch-product-modal-details > .mt-6 {
+    margin-top: 1rem;
+    padding-top: 0.85rem;
+    padding-bottom: 0.85rem;
+  }
+
+  .merch-product-modal-details > .mt-6 + .mt-6 {
+    margin-top: 1rem;
+  }
+
+  .merch-product-modal-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 4;
+    margin: 1rem -1rem calc(-1.25rem - env(safe-area-inset-bottom));
+    padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+    border-top: 1px solid var(--merch-line);
+    background: color-mix(in srgb, var(--surface) 94%, transparent);
+    backdrop-filter: blur(14px);
+  }
+
+  .merch-product-modal-actions .primary-button,
+  .merch-product-modal-actions .secondary-button {
+    min-height: 2.9rem;
+  }
+
   .merch-gallery-control {
     width: 2.4rem;
     height: 2.4rem;
+    background: rgba(7, 21, 47, 0.68);
+  }
+
+  .merch-gallery-control-prev {
+    left: 0.75rem;
+  }
+
+  .merch-gallery-control-next {
+    right: 0.75rem;
   }
 
   .merch-gallery-meta {
     right: 0.75rem;
     bottom: 0.75rem;
     left: 0.75rem;
+  }
+
+  .merch-gallery-meta span,
+  .merch-gallery-meta strong {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.62rem;
+  }
+
+  .merch-gallery-thumbnails {
+    gap: 0.5rem;
+    padding: 0.55rem 0.75rem 0.65rem;
+  }
+
+  .merch-gallery-thumbnail {
+    min-width: 7.5rem;
+    border-radius: 0.7rem;
+    padding: 0.25rem 0.55rem 0.25rem 0.25rem;
+    font-size: 0.68rem;
+  }
+
+  .merch-gallery-thumbnail-image {
+    width: 2.75rem;
+    height: 2.9rem;
+    border-radius: 0.5rem;
   }
 
   .merch-checkout-modal {
